@@ -24,7 +24,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_inkomoko }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_inkomoko }}
-          aws-region: us-east-2
+          aws-region: eu-central-1
 
       - id: commit
         uses: pr-mpt/actions-commit-hash@v1
