@@ -1,6 +1,7 @@
 name: Push to ECR Inkomoko
 
 on:
+
   push:
     branches: [ inkomoko ]
 
