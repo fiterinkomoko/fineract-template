@@ -22,7 +22,7 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <changeSet author="frank@fiter.io" id="CI18-62_add_permissions_to_create_update_savings_account_comments">
+    <changeSet author="frank@fiter.io" id="CI18-62_add_permissions_to_create_update_savings_account_comments01">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
                 Select count(1) from m_permission where code = 'CREATE_SAVINGS_ACCOUNT_NOTE';
@@ -32,6 +32,7 @@
             </sqlCheck>
         </preConditions>
         <insert tableName="m_permission">
+            <column name="id" value="10062"/>
             <column name="grouping" value="portfolio" />
             <column name="code" value="CREATE_SAVINGS_ACCOUNT_NOTE" />
             <column name="entity_name" value="SAVINGS_ACCOUNT_NOTE" />
@@ -39,6 +40,7 @@
             <column name="can_maker_checker" valueBoolean="false" />
         </insert>
         <insert tableName="m_permission">
+            <column name="id" value="10063"/>
             <column name="grouping" value="portfolio" />
             <column name="code" value="UPDATE_SAVINGS_ACCOUNT_NOTE" />
             <column name="entity_name" value="SAVINGS_ACCOUNT_NOTE" />
