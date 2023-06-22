@@ -40,3 +40,19 @@ jobs:
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+
+      - name: executing remote ssh commands using ssh key
+        env:
+          IMAGE_TAG: ${{ steps.commit.outputs.short }}
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VM_HOST }}
+          port: ${{ secrets.VM_PORT_DEV }}
+          username: ${{ secrets.VM_USER_DEV }}
+          password: ${{ secrets.VM_KEY_DEV }}
+          script: |
+            export IMAGE_TAG=${{ steps.commit.outputs.short }}
+            ./docker-login.sh
+            cd fineract
+            docker-compose up -d
