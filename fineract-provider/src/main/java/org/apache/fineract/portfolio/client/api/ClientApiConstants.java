@@ -234,4 +234,36 @@ public class ClientApiConstants {
             transactionAmountParamName, paymentDetailDataParamName, reversedParamName, dateParamName, officeIdParamName,
             officeNameParamName, transactionTypeParamName, transactionCurrencyParamName, externalIdParamName, submittedOnDateParamName));
 
+    // Client Business Detail Param
+    public static final String businessType = "businessType";
+    public static final String businessCreationDate = "businessCreationDate";
+    public static final String startingCapital = "startingCapital";
+    public static final String sourceOfCapital = "sourceOfCapital";
+    public static final String totalEmployee = "totalEmployee";
+    public static final String businessRevenue = "businessRevenue";
+    public static final String averageMonthlyRevenue = "averageMonthlyRevenue";
+    public static final String bestMonth = "bestMonth";
+    public static final String reasonForBestMonth = "reasonForBestMonth";
+    public static final String worstMonth = "worstMonth";
+    public static final String reasonForWorstMonth = "reasonForWorstMonth";
+    public static final String numberOfPurchase = "numberOfPurchase";
+    public static final String purchaseFrequency = "purchaseFrequency";
+    public static final String totalPurchaseLastMonth = "totalPurchaseLastMonth";
+    public static final String lastPurchase = "lastPurchase";
+    public static final String lastPurchaseAmount = "lastPurchaseAmount";
+    public static final String businessAsset = "businessAsset";
+    public static final String amountAtCash = "amountAtCash";
+    public static final String amountAtSaving = "amountAtSaving";
+    public static final String amountAtInventory = "amountAtInventory";
+    public static final String fixedAssetCost = "fixedAssetCost";
+    public static final String totalInTax = "totalInTax";
+    public static final String totalInTransport = "totalInTransport";
+    public static final String totalInRent = "totalInRent";
+    public static final String totalInCommunication = "totalInCommunication";
+    public static final String otherExpense = "otherExpense";
+    public static final String otherExpenseAmount = "otherExpenseAmount";
+    public static final String totalUtility = "totalUtility";
+    public static final String totalWorkerSalary = "totalWorkerSalary";
+    public static final String totalWage = "totalWage";
+
 }

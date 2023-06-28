@@ -82,5 +82,12 @@ public class ClientApiCollectionConstants extends ClientApiConstants {
     protected static final Set<String> CLIENT_CHARGES_PAY_CHARGE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(amountParamName,
             transactionDateParamName, dateFormatParamName, localeParamName, paymentTypeIdParamName, transactionAccountNumberParamName,
             checkNumberParamName, routingCodeParamName, receiptNumberParamName, bankNumberParamName));
+    protected static final Set<String> CLIENT_BUSINESS_DETAIL_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList("clientId", "businessType", "businessCreationDate", "startingCapital", "sourceOfCapital", "totalEmployee",
+                    "businessRevenue", "averageMonthlyRevenue", "bestMonth", "reasonForBestMonth", "worstMonth", "reasonForWorstMonth",
+                    "numberOfPurchase", "purchaseFrequency", "totalPurchaseLastMonth", "lastPurchase", "lastPurchaseAmount",
+                    "businessAsset", "amountAtCash", "amountAtSaving", "amountAtInventory", "fixedAssetCost", "totalInTax",
+                    "totalInTransport", "totalInRent", "totalInCommunication", "otherExpense", "otherExpenseAmount", "totalUtility",
+                    "totalWorkerSalary", "totalWage", "externalIdParamName"));
 
 }
