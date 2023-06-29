@@ -3711,8 +3711,8 @@ public class CommandWrapperBuilder {
     }
 
     public CommandWrapperBuilder addBusinessDetail(final long clientId) {
-        this.actionName = "CREATE";
-        this.entityName = "CLIENTBUSINESSDETAIL";
+        this.actionName = "CREATE_CLIENTBUSINESSDETAIL";
+        this.entityName = "CLIENT";
         this.href = "/clients/" + clientId + "/businessDetail";
         this.clientId = clientId;
         return this;

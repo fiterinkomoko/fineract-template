@@ -19,26 +19,31 @@
 package org.apache.fineract.portfolio.client.domain;
 
 import java.math.BigDecimal;
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
+import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_business_detail")
-public class ClientBusinessDetail extends AbstractAuditableWithUTCDateTimeCustom {
+public class ClientBusinessDetail extends AbstractAuditableCustom {
 
     @ManyToOne
     @JoinColumn(name = "client_id")
     private Client client;
     @ManyToOne
-    @JoinColumn(name = "business_type")
+    @JoinColumn(name = "business_type_id")
     private CodeValue businessType;
-    @Column(name = "business_creation_date", nullable = true)
-    @Temporal(TemporalType.DATE)
+    @Column(name = "business_creation_date")
     private LocalDate businessCreationDate;
     @Column(name = "starting_capital")
     private BigDecimal startingCapital;
@@ -47,19 +52,18 @@ public class ClientBusinessDetail extends AbstractAuditableWithUTCDateTimeCustom
     private CodeValue sourceOfCapital;
     @Column(name = "total_employee")
     private Long totalEmployee;
-
     @Column(name = "business_revenue")
     private BigDecimal businessRevenue;
     @Column(name = "average_monthly_revenue")
     private BigDecimal averageMonthlyRevenue;
-    @ManyToOne
-    @JoinColumn(name = "best_month")
-    private CodeValue bestMonth;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "best_month")
+    private MonthEnum bestMonth;
     @Column(name = "reason_for_best_month")
     private String reasonForBestMonth;
-    @ManyToOne
-    @JoinColumn(name = "worst_month")
-    private CodeValue worstMonth;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "worst_month")
+    private MonthEnum worstMonth;
     @Column(name = "reason_for_worst_month")
     private String reasonForWorstMonth;
     @Column(name = "number_of_purchase")
@@ -72,8 +76,8 @@ public class ClientBusinessDetail extends AbstractAuditableWithUTCDateTimeCustom
     private String lastPurchase;
     @Column(name = "last_purchase_amount")
     private BigDecimal lastPurchaseAmount;
-    @Column(name = "business_asset")
-    private BigDecimal businessAsset;
+    @Column(name = "business_asset_amount")
+    private BigDecimal businessAssetAmount;
     @Column(name = "amount_at_cash")
     private BigDecimal amountAtCash;
     @Column(name = "amount_at_saving")
@@ -82,7 +86,6 @@ public class ClientBusinessDetail extends AbstractAuditableWithUTCDateTimeCustom
     private BigDecimal amountAtInventory;
     @Column(name = "fixed_asset_cost")
     private BigDecimal fixedAssetCost;
-
     @Column(name = "total_in_tax")
     private BigDecimal totalInTax;
     @Column(name = "total_in_transport")
@@ -104,6 +107,8 @@ public class ClientBusinessDetail extends AbstractAuditableWithUTCDateTimeCustom
     @Column(name = "external_id")
     private String externalId;
 
+    public ClientBusinessDetail() {}
+
     public static ClientBusinessDetail createNew(final JsonCommand command, final Client client, final CodeValue businessType,
             AppUser currentUser) {
         final String externalId = command.stringValueOfParameterNamed(ClientApiConstants.externalIdParamName);
@@ -113,9 +118,9 @@ public class ClientBusinessDetail extends AbstractAuditableWithUTCDateTimeCustom
 
     public ClientBusinessDetail(Client client, CodeValue businessType, LocalDate businessCreationDate, BigDecimal startingCapital,
             CodeValue sourceOfCapital, Long totalEmployee, BigDecimal businessRevenue, BigDecimal averageMonthlyRevenue,
-            CodeValue bestMonth, String reasonForBestMonth, CodeValue worstMonth, String reasonForWorstMonth, Long numberOfPurchase,
+            MonthEnum bestMonth, String reasonForBestMonth, MonthEnum worstMonth, String reasonForWorstMonth, Long numberOfPurchase,
             String purchaseFrequency, BigDecimal totalPurchaseLastMonth, String lastPurchase, BigDecimal lastPurchaseAmount,
-            BigDecimal businessAsset, BigDecimal amountAtCash, BigDecimal amountAtSaving, BigDecimal amountAtInventory,
+            BigDecimal businessAssetAmount, BigDecimal amountAtCash, BigDecimal amountAtSaving, BigDecimal amountAtInventory,
             BigDecimal fixedAssetCost, BigDecimal totalInTax, BigDecimal totalInTransport, BigDecimal totalInRent,
             BigDecimal totalInCommunication, String otherExpense, BigDecimal otherExpenseAmount, BigDecimal totalUtility,
             BigDecimal totalWorkerSalary, BigDecimal totalWage, String externalId) {
@@ -136,7 +141,7 @@ public class ClientBusinessDetail extends AbstractAuditableWithUTCDateTimeCustom
         this.totalPurchaseLastMonth = totalPurchaseLastMonth;
         this.lastPurchase = lastPurchase;
         this.lastPurchaseAmount = lastPurchaseAmount;
-        this.businessAsset = businessAsset;
+        this.businessAssetAmount = businessAssetAmount;
         this.amountAtCash = amountAtCash;
         this.amountAtSaving = amountAtSaving;
         this.amountAtInventory = amountAtInventory;
