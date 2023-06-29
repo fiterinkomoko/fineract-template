@@ -207,4 +207,23 @@
             </column>
         </createTable>
     </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_enable_client_business_details_configurations" >
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="c_configuration"/>
+
+            <sqlCheck expectedResult="0">
+                select count(1) from c_configuration where name = 'Enable-Client-Business-Detail';
+            </sqlCheck>
+
+        </preConditions>
+        <insert tableName="c_configuration">
+            <column name="name" value="Enable-Client-Business-Detail" />
+            <column name="value" value="null" />
+            <column name="date_value" value="null" />
+            <column name="enabled" valueBoolean="false" />
+            <column name="is_trap_door" valueBoolean="false" />
+            <column name="description" value="This configuration enables client business details if enabled" />
+        </insert>
+    </changeSet>
 </databaseChangeLog>

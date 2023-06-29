@@ -56,7 +56,7 @@ public class BusinessDetailWritePlatformServiceImpl implements BusinessDetailWri
         this.fromApiJsonDeserializer.validateForCreate(clientId, command.json());
 
         final GlobalConfigurationPropertyData businessDetailConfig = this.configurationReadPlatformService
-                .retrieveGlobalConfiguration("Enable-businessDetail");
+                .retrieveGlobalConfiguration("Enable-Client-Business-Detail");
 
         final Boolean isClientBusinessDetailsEnable = businessDetailConfig.isEnabled();
 
