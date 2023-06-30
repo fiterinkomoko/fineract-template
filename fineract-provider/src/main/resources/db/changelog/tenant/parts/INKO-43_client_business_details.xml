@@ -226,4 +226,16 @@
             <column name="description" value="This configuration enables client business details if enabled" />
         </insert>
     </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_society_to_m_client_business_detail">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_business_detail" columnName="society"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_business_detail">
+            <column name="society" type="decimal(19,6)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

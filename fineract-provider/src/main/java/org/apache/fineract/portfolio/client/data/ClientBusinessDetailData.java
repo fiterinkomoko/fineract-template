@@ -57,4 +57,5 @@ public class ClientBusinessDetailData {
     private BigDecimal totalWorkerSalary;
     private BigDecimal totalWage;
     private String externalId;
+    private BigDecimal society;
 }
