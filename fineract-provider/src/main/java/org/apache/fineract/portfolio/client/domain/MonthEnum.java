@@ -20,37 +20,87 @@ package org.apache.fineract.portfolio.client.domain;
 
 public enum MonthEnum {
 
-    JANUARY("JANUARY"),
+    JANUARY(1, "monthEnum.january"),
 
-    FEBRUARY("FEBRUARY"),
+    FEBRUARY(2, "monthEnum.february"),
 
-    MARCH("MARCH"),
+    MARCH(3, "monthEnum.march"),
 
-    APRIL("APRIL"),
+    APRIL(4, "monthEnum.april"),
 
-    MAY("MAY"),
+    MAY(5, "monthEnum.may"),
 
-    JUNE("JUNE"),
+    JUNE(6, "monthEnum.june"),
 
-    JULY("JULY"),
+    JULY(7, "monthEnum.july"),
 
-    AUGUST("AUGUST"),
+    AUGUST(8, "monthEnum.august"),
 
-    SEPTEMBER("SEPTEMBER"),
+    SEPTEMBER(9, "monthEnum.september"),
 
-    OCTOBER("OCTOBER"),
+    OCTOBER(10, "monthEnum.october"),
 
-    NOVEMBER("NOVEMBER"),
+    NOVEMBER(11, "monthEnum.november"),
 
-    DECEMBER("DECEMBER");
+    DECEMBER(12, "monthEnum.december");
 
-    private final String value;
+    private final Integer value;
+    private final String code;
 
-    MonthEnum(final String value) {
+    MonthEnum(final Integer value, final String code) {
         this.value = value;
+        this.code = code;
     }
 
-    public String getValue() {
+    public Integer getValue() {
         return this.value;
+    }
+
+    public String getCode() {
+        return this.code;
+    }
+
+    public static MonthEnum fromInt(final Integer type) {
+
+        MonthEnum monthEnum = null;
+        switch (type) {
+            case 1:
+                monthEnum = MonthEnum.JANUARY;
+            break;
+            case 2:
+                monthEnum = MonthEnum.FEBRUARY;
+            break;
+            case 3:
+                monthEnum = MonthEnum.MARCH;
+            break;
+            case 4:
+                monthEnum = MonthEnum.APRIL;
+            break;
+            case 5:
+                monthEnum = MonthEnum.MAY;
+            break;
+            case 6:
+                monthEnum = MonthEnum.JUNE;
+            break;
+            case 7:
+                monthEnum = MonthEnum.JULY;
+            break;
+            case 8:
+                monthEnum = MonthEnum.AUGUST;
+            break;
+            case 9:
+                monthEnum = MonthEnum.SEPTEMBER;
+            break;
+            case 10:
+                monthEnum = MonthEnum.OCTOBER;
+            break;
+            case 11:
+                monthEnum = MonthEnum.NOVEMBER;
+            break;
+            case 12:
+                monthEnum = MonthEnum.DECEMBER;
+            break;
+        }
+        return monthEnum;
     }
 }

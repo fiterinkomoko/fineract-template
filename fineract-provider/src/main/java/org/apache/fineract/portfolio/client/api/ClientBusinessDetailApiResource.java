@@ -18,19 +18,27 @@
  */
 package org.apache.fineract.portfolio.client.api;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.data.ClientBusinessDetailData;
+import org.apache.fineract.portfolio.client.service.BusinessDetailReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -43,12 +51,37 @@ public class ClientBusinessDetailApiResource {
 
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ToApiJsonSerializer<ClientBusinessDetailData> toApiJsonSerializer;
+    private final PlatformSecurityContext context;
+    private final BusinessDetailReadPlatformService businessDetailReadPlatformService;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
 
     @Autowired
     public ClientBusinessDetailApiResource(PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            ToApiJsonSerializer<ClientBusinessDetailData> toApiJsonSerializer) {
+            ToApiJsonSerializer<ClientBusinessDetailData> toApiJsonSerializer, PlatformSecurityContext context,
+            BusinessDetailReadPlatformService businessDetailReadPlatformService, ApiRequestParameterHelper apiRequestParameterHelper) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
+        this.context = context;
+        this.businessDetailReadPlatformService = businessDetailReadPlatformService;
+        this.apiRequestParameterHelper = apiRequestParameterHelper;
+    }
+
+    @GET
+    @Path("template")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve Client Business Details Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client business details applications. The template data returned consists of any or all of:\n"
+            + "\n" + "Field Defaults\n" + "Allowed Value Lists\n\n" + "Example Request:\n" + "\n" + "clients/template")
+    public String retrieveTemplate(@Context final UriInfo uriInfo, @PathParam("clientId") final long clientId) {
+
+        this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.READ_CLIENTBUSINESSDETAIL);
+
+        ClientBusinessDetailData clientBusinessDetailData = null;
+        clientBusinessDetailData = this.businessDetailReadPlatformService.retrieveTemplate(clientId);
+
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, clientBusinessDetailData,
+                ClientApiConstants.CLIENT_BUSINESS_DETAIL_RESPONSE_REQUEST_DATA_PARAMETERS);
     }
 
     @POST

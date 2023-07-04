@@ -20,7 +20,9 @@ package org.apache.fineract.portfolio.client.data;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.List;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.joda.time.LocalDate;
 
 public class ClientBusinessDetailData {
@@ -33,9 +35,9 @@ public class ClientBusinessDetailData {
     private Long totalEmployee;
     private BigDecimal businessRevenue;
     private BigDecimal averageMonthlyRevenue;
-    private Collection<CodeValueData> bestMonth;
+    private Collection<EnumOptionData> bestMonth;
     private String reasonForBestMonth;
-    private Collection<CodeValueData> worstMonth;
+    private List<EnumOptionData> worstMonth;
     private String reasonForWorstMonth;
     private Long numberOfPurchase;
     private String purchaseFrequency;
@@ -58,4 +60,19 @@ public class ClientBusinessDetailData {
     private BigDecimal totalWage;
     private String externalId;
     private BigDecimal society;
+
+    public ClientBusinessDetailData() {}
+
+    public static ClientBusinessDetailData template(final Collection<CodeValueData> businessType,
+            final Collection<CodeValueData> sourceOfCapital, List<EnumOptionData> bestMonth, List<EnumOptionData> worstMonth) {
+        return new ClientBusinessDetailData(businessType, sourceOfCapital, bestMonth, worstMonth);
+    }
+
+    public ClientBusinessDetailData(Collection<CodeValueData> businessType, Collection<CodeValueData> sourceOfCapital,
+            List<EnumOptionData> bestMonth, List<EnumOptionData> worstMonth) {
+        this.businessType = businessType;
+        this.sourceOfCapital = sourceOfCapital;
+        this.bestMonth = bestMonth;
+        this.worstMonth = worstMonth;
+    }
 }

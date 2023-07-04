@@ -265,5 +265,16 @@ public class ClientApiConstants {
     public static final String totalUtility = "totalUtility";
     public static final String totalWorkerSalary = "totalWorkerSalary";
     public static final String totalWage = "totalWage";
+    public static final String READ_CLIENTBUSINESSDETAIL = "READ_CLIENTBUSINESSDETAIL";
+
+    protected static final Set<String> CLIENT_BUSINESS_DETAIL_RESPONSE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList("clientId", "businessType", "businessCreationDate", "startingCapital", "sourceOfCapital", "totalEmployee",
+                    "businessRevenue", "averageMonthlyRevenue", "bestMonth", "reasonForBestMonth", "worstMonth", "reasonForWorstMonth",
+                    "numberOfPurchase", "purchaseFrequency", "totalPurchaseLastMonth", "lastPurchase", "lastPurchaseAmount",
+                    "businessAsset", "amountAtCash", "amountAtSaving", "amountAtInventory", "fixedAssetCost", "totalInTax",
+                    "totalInTransport", "totalInRent", "totalInCommunication", "otherExpense", "otherExpenseAmount", "totalUtility",
+                    "totalWorkerSalary", "totalWage", "externalIdParamName"));
+    public static final String BUSINESS_TYPE_OPTIONS = "BusinessType";
+    public static final String SOURCE_OF_CAPITAL_OPTIONS = "SourceOfCapital";
 
 }

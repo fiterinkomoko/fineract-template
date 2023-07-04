@@ -115,7 +115,7 @@ public class ClientBusinessDetail extends AbstractAuditableCustom {
             AppUser currentUser) {
         final String externalId = command.stringValueOfParameterNamed(ClientApiConstants.externalIdParamName);
         return new ClientBusinessDetail(client, businessType, null, null, null, null, null, null, null, null, null, null, null, null, null,
-                null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, externalId,null);
+                null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, externalId, null);
     }
 
     public ClientBusinessDetail(Client client, CodeValue businessType, LocalDate businessCreationDate, BigDecimal startingCapital,
@@ -125,7 +125,7 @@ public class ClientBusinessDetail extends AbstractAuditableCustom {
             BigDecimal businessAssetAmount, BigDecimal amountAtCash, BigDecimal amountAtSaving, BigDecimal amountAtInventory,
             BigDecimal fixedAssetCost, BigDecimal totalInTax, BigDecimal totalInTransport, BigDecimal totalInRent,
             BigDecimal totalInCommunication, String otherExpense, BigDecimal otherExpenseAmount, BigDecimal totalUtility,
-            BigDecimal totalWorkerSalary, BigDecimal totalWage, String externalId,BigDecimal society) {
+            BigDecimal totalWorkerSalary, BigDecimal totalWage, String externalId, BigDecimal society) {
         this.client = client;
         this.businessType = businessType;
         this.businessCreationDate = businessCreationDate;
