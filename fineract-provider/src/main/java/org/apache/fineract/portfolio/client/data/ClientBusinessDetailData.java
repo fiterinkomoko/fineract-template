@@ -60,19 +60,22 @@ public class ClientBusinessDetailData {
     private BigDecimal totalWage;
     private String externalId;
     private BigDecimal society;
+    private ClientData clientAccount;
 
     public ClientBusinessDetailData() {}
 
     public static ClientBusinessDetailData template(final Collection<CodeValueData> businessType,
-            final Collection<CodeValueData> sourceOfCapital, List<EnumOptionData> bestMonth, List<EnumOptionData> worstMonth) {
-        return new ClientBusinessDetailData(businessType, sourceOfCapital, bestMonth, worstMonth);
+            final Collection<CodeValueData> sourceOfCapital, List<EnumOptionData> bestMonth, List<EnumOptionData> worstMonth,
+            ClientData clientAccount) {
+        return new ClientBusinessDetailData(businessType, sourceOfCapital, bestMonth, worstMonth, clientAccount);
     }
 
     public ClientBusinessDetailData(Collection<CodeValueData> businessType, Collection<CodeValueData> sourceOfCapital,
-            List<EnumOptionData> bestMonth, List<EnumOptionData> worstMonth) {
+            List<EnumOptionData> bestMonth, List<EnumOptionData> worstMonth, ClientData clientAccount) {
         this.businessType = businessType;
         this.sourceOfCapital = sourceOfCapital;
         this.bestMonth = bestMonth;
         this.worstMonth = worstMonth;
+        this.clientAccount = clientAccount;
     }
 }

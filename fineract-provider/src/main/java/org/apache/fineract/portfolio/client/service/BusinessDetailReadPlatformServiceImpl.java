@@ -36,6 +36,7 @@ import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
 import org.apache.fineract.portfolio.address.service.AddressReadPlatformService;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.data.ClientBusinessDetailData;
+import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
 import org.apache.fineract.portfolio.client.domain.MonthEnum;
 import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagementRepositoryWrapper;
@@ -65,6 +66,7 @@ public class BusinessDetailReadPlatformServiceImpl implements BusinessDetailRead
     private final ColumnValidator columnValidator;
     private final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper;
     private final ClientBusinessOwnerReadPlatformService clientBusinessOwnerReadPlatformService;
+    private final ClientReadPlatformService clientReadPlatformService;
 
     @Override
     public ClientBusinessDetailData retrieveTemplate(Long clientId) {
@@ -75,7 +77,9 @@ public class BusinessDetailReadPlatformServiceImpl implements BusinessDetailRead
         final List<CodeValueData> sourceOfCapitalOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.SOURCE_OF_CAPITAL_OPTIONS));
         final List<EnumOptionData> monthEnumOptions = ClientEnumerations.monthEnum(MonthEnum.values());
-        return ClientBusinessDetailData.template(businessTypeOptions, sourceOfCapitalOptions, monthEnumOptions, monthEnumOptions);
+        final ClientData clientAccount = this.clientReadPlatformService.retrieveOne(clientId);
+        return ClientBusinessDetailData.template(businessTypeOptions, sourceOfCapitalOptions, monthEnumOptions, monthEnumOptions,
+                clientAccount);
 
     }
 
