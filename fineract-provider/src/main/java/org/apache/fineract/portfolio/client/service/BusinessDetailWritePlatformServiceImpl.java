@@ -75,13 +75,20 @@ public class BusinessDetailWritePlatformServiceImpl implements BusinessDetailWri
     private ClientBusinessDetail createBusinessDetail(final JsonCommand command, Client client, AppUser currentUser) {
 
         CodeValue businessType = null;
+        CodeValue sourceOfCapital = null;
+
         final Long businessTypeId = command.longValueOfParameterNamed(ClientApiConstants.businessType);
         if (businessTypeId != null) {
-            businessType = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.businessType,
-                    businessTypeId);
+            businessType = this.codeValueRepository.findOneWithNotFoundDetection(businessTypeId);
         }
 
-        ClientBusinessDetail clientBusinessDetail = ClientBusinessDetail.createNew(command, client, businessType, currentUser);
+        final Long sourceOfCapitalId = command.longValueOfParameterNamed(ClientApiConstants.sourceOfCapital);
+        if (sourceOfCapitalId != null) {
+            sourceOfCapital = this.codeValueRepository.findOneWithNotFoundDetection(sourceOfCapitalId);
+        }
+
+        ClientBusinessDetail clientBusinessDetail = ClientBusinessDetail.createNew(command, client, businessType, sourceOfCapital,
+                currentUser);
         return clientBusinessDetail;
     }
 }

@@ -112,10 +112,11 @@ public class ClientBusinessDetail extends AbstractAuditableCustom {
     public ClientBusinessDetail() {}
 
     public static ClientBusinessDetail createNew(final JsonCommand command, final Client client, final CodeValue businessType,
-            AppUser currentUser) {
+            final CodeValue sourceOfCapital, AppUser currentUser) {
         final String externalId = command.stringValueOfParameterNamed(ClientApiConstants.externalIdParamName);
-        return new ClientBusinessDetail(client, businessType, null, null, null, null, null, null, null, null, null, null, null, null, null,
-                null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, externalId, null);
+        return new ClientBusinessDetail(client, businessType, null, null, sourceOfCapital, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, externalId,
+                null);
     }
 
     public ClientBusinessDetail(Client client, CodeValue businessType, LocalDate businessCreationDate, BigDecimal startingCapital,

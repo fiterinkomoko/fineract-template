@@ -86,8 +86,8 @@ public class ClientApiCollectionConstants extends ClientApiConstants {
             Arrays.asList("clientId", "businessType", "businessCreationDate", "startingCapital", "sourceOfCapital", "totalEmployee",
                     "businessRevenue", "averageMonthlyRevenue", "bestMonth", "reasonForBestMonth", "worstMonth", "reasonForWorstMonth",
                     "numberOfPurchase", "purchaseFrequency", "totalPurchaseLastMonth", "lastPurchase", "lastPurchaseAmount",
-                    "businessAsset", "amountAtCash", "amountAtSaving", "amountAtInventory", "fixedAssetCost", "totalInTax",
+                    "businessAssetAmount", "amountAtCash", "amountAtSaving", "amountAtInventory", "fixedAssetCost", "totalInTax",
                     "totalInTransport", "totalInRent", "totalInCommunication", "otherExpense", "otherExpenseAmount", "totalUtility",
-                    "totalWorkerSalary", "totalWage", "externalIdParamName"));
+                    "totalWorkerSalary", "totalWage", externalIdParamName, "society", localeParamName, dateFormatParamName));
 
 }

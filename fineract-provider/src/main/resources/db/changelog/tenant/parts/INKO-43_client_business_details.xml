@@ -79,9 +79,14 @@
     </changeSet>
 
     <changeSet author="bosco@fiter.io" id="add_permission_CREATE_CLIENTBUSINESSDETAIL">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_permission where code = 'CREATE_CLIENTBUSINESSDETAIL_CLIENT';
+            </sqlCheck>
+        </preConditions>
         <insert tableName="m_permission">
             <column name="grouping" value="portfolio" />
-            <column name="code" value="CREATE_CLIENTBUSINESSDETAIL" />
+            <column name="code" value="CREATE_CLIENTBUSINESSDETAIL_CLIENT" />
             <column name="entity_name" value="CLIENT" />
             <column name="action_name" value="CREATE_CLIENTBUSINESSDETAIL" />
         </insert>
@@ -100,80 +105,83 @@
             <column name="client_id" type="bigint">
                 <constraints nullable="false" foreignKeyName="FK_m_business_detail-m_client_client_id" references="m_client(id)"/>
             </column>
+            <column name="external_id" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
             <column name="business_type_id" type="int">
-                <constraints nullable="true" foreignKeyName="FK_m_business_detail_m_code_value_business_type_id" references="m_code_value(id)"/>
+                <constraints nullable="false" foreignKeyName="FK_m_business_detail_m_code_value_business_type_id" references="m_code_value(id)"/>
             </column>
             <column name="business_creation_date" type="date">
                 <constraints nullable="false"/>
             </column>
             <column name="starting_capital" type="decimal(19,6)">
-                <constraints nullable="true"/>
+                <constraints nullable="false"/>
             </column>
             <column name="source_of_capital" type="decimal(19,6)">
-                <constraints nullable="true"/>
+                <constraints nullable="false"/>
             </column>
             <column name="total_employee" type="bigint">
                 <constraints nullable="false"/>
             </column>
             <column name="business_revenue" type="decimal(19,6)">
-                <constraints nullable="true"/>
+                <constraints nullable="false"/>
             </column>
             <column name="average_monthly_revenue" type="decimal(19,6)">
-                <constraints nullable="true"/>
+                <constraints nullable="false"/>
             </column>
             <column name="best_month" type="varchar(255)">
-                <constraints nullable="true" />
+                <constraints nullable="false" />
             </column>
             <column name="reason_for_best_month" type="varchar(255)">
-                <constraints nullable="true" />
+                <constraints nullable="false" />
             </column>
             <column name="worst_month" type="varchar(255)">
-                <constraints nullable="true" />
+                <constraints nullable="false" />
             </column>
             <column name="reason_for_worst_month" type="varchar(255)">
-                <constraints nullable="true" />
+                <constraints nullable="false" />
             </column>
             <column name="number_of_purchase" type="bigint">
                 <constraints nullable="false"/>
             </column>
             <column name="purchase_frequency" type="varchar(255)">
-                <constraints nullable="true" />
+                <constraints nullable="false" />
             </column>
             <column name="total_purchase_last_month" type="bigint">
                 <constraints nullable="false"/>
             </column>
             <column name="last_purchase" type="varchar(255)">
-                <constraints nullable="true" />
+                <constraints nullable="false" />
             </column>
             <column name="last_purchase_amount" type="decimal(19,6)">
-                <constraints nullable="true"/>
+                <constraints nullable="false"/>
             </column>
             <column name="business_asset_amount" type="decimal(19,6)">
-                <constraints nullable="true"/>
+                <constraints nullable="false"/>
             </column>
             <column name="amount_at_cash" type="decimal(19,6)">
-                <constraints nullable="true"/>
+                <constraints nullable="false"/>
             </column>
             <column name="amount_at_saving" type="decimal(19,6)">
-                <constraints nullable="true"/>
+                <constraints nullable="false"/>
             </column>
             <column name="amount_at_inventory" type="decimal(19,6)">
-                <constraints nullable="true"/>
+                <constraints nullable="false"/>
             </column>
             <column name="fixed_asset_cost" type="decimal(19,6)">
                 <constraints nullable="true"/>
             </column>
             <column name="total_in_tax" type="decimal(19,6)">
-                <constraints nullable="true"/>
+                <constraints nullable="false"/>
             </column>
             <column name="total_in_transport" type="decimal(19,6)">
-                <constraints nullable="true"/>
+                <constraints nullable="false"/>
             </column>
             <column name="total_in_rent" type="decimal(19,6)">
-                <constraints nullable="true"/>
+                <constraints nullable="false"/>
             </column>
             <column name="total_in_communication" type="decimal(19,6)">
-                <constraints nullable="true"/>
+                <constraints nullable="false"/>
             </column>
             <column name="other_expense" type="varchar(255)">
                 <constraints nullable="true" />
@@ -182,7 +190,7 @@
                 <constraints nullable="true"/>
             </column>
             <column name="total_utility" type="decimal(19,6)">
-                <constraints nullable="true"/>
+                <constraints nullable="false"/>
             </column>
             <column name="total_worker_salary" type="decimal(19,6)">
                 <constraints nullable="true"/>
@@ -190,8 +198,9 @@
             <column name="total_wage" type="decimal(19,6)">
                 <constraints nullable="true"/>
             </column>
-            <column name="external_id" type="varchar(255)">
-                <constraints nullable="true" />
+
+            <column name="society" type="decimal(19,6)">
+                <constraints nullable="true"/>
             </column>
             <column name="createdby_id" type="bigint">
                 <constraints nullable="true" foreignKeyName="FK_m_business_detail-created_by" references="m_appuser(id)"/>
@@ -225,17 +234,5 @@
             <column name="is_trap_door" valueBoolean="false" />
             <column name="description" value="This configuration enables client business details if enabled" />
         </insert>
-    </changeSet>
-    <changeSet author="bosco@fiter.io" id="add_society_to_m_client_business_detail">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <columnExists tableName="m_business_detail" columnName="society"/>
-            </not>
-        </preConditions>
-        <addColumn tableName="m_business_detail">
-            <column name="society" type="decimal(19,6)">
-                <constraints nullable="true"/>
-            </column>
-        </addColumn>
     </changeSet>
 </databaseChangeLog>
