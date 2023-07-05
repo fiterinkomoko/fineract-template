@@ -23,6 +23,7 @@ import static org.apache.fineract.portfolio.savings.DepositsApiConstants.FIXED_D
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.FIXED_DEPOSIT_PRODUCT_RESOURCE_NAME;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.RECURRING_DEPOSIT_PRODUCT_REQUEST_DATA_PARAMETERS;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.RECURRING_DEPOSIT_PRODUCT_RESOURCE_NAME;
+import static org.apache.fineract.portfolio.savings.DepositsApiConstants.accountingRuleParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.adjustAdvanceTowardsFuturePaymentsParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.allowFreeWithdrawalParamName;
 import static org.apache.fineract.portfolio.savings.DepositsApiConstants.allowWithdrawalParamName;
@@ -633,24 +634,26 @@ public class DepositProductDataValidator {
                 .ignoreIfNull().integerGreaterThanZero();
 
         // accounting related data validation
-        final Integer accountingRuleType = fromApiJsonHelper.extractIntegerNamed("accountingRule", element, Locale.getDefault());
-        baseDataValidator.reset().parameter("accountingRule").value(accountingRuleType).notNull().inMinMaxRange(1, 3);
+        if (this.fromApiJsonHelper.parameterExists(accountingRuleParamName, element)) {
+            final Integer accountingRuleType = fromApiJsonHelper.extractIntegerNamed(accountingRuleParamName, element, Locale.getDefault());
+            baseDataValidator.reset().parameter(accountingRuleParamName).value(accountingRuleType).notNull().inMinMaxRange(1, 3);
 
-        if (isAccrualAccounting(accountingRuleType)) {
-            final Long receivablePenaltyAccountId = this.fromApiJsonHelper
-                    .extractLongNamed(SavingProductAccountingParams.PENALTIES_RECEIVABLE.getValue(), element);
-            baseDataValidator.reset().parameter(SavingProductAccountingParams.PENALTIES_RECEIVABLE.getValue())
-                    .value(receivablePenaltyAccountId).notNull().integerGreaterThanZero();
+            if (isAccrualAccounting(accountingRuleType)) {
+                final Long receivablePenaltyAccountId = this.fromApiJsonHelper
+                        .extractLongNamed(SavingProductAccountingParams.PENALTIES_RECEIVABLE.getValue(), element);
+                baseDataValidator.reset().parameter(SavingProductAccountingParams.PENALTIES_RECEIVABLE.getValue())
+                        .value(receivablePenaltyAccountId).notNull().integerGreaterThanZero();
 
-            final Long receivableFeeAccountId = this.fromApiJsonHelper
-                    .extractLongNamed(SavingProductAccountingParams.FEES_RECEIVABLE.getValue(), element);
-            baseDataValidator.reset().parameter(SavingProductAccountingParams.FEES_RECEIVABLE.getValue()).value(receivableFeeAccountId)
-                    .notNull().integerGreaterThanZero();
+                final Long receivableFeeAccountId = this.fromApiJsonHelper
+                        .extractLongNamed(SavingProductAccountingParams.FEES_RECEIVABLE.getValue(), element);
+                baseDataValidator.reset().parameter(SavingProductAccountingParams.FEES_RECEIVABLE.getValue()).value(receivableFeeAccountId)
+                        .notNull().integerGreaterThanZero();
 
-            final Long interestPayableAccountId = this.fromApiJsonHelper
-                    .extractLongNamed(SavingProductAccountingParams.INTEREST_PAYABLE.getValue(), element);
-            baseDataValidator.reset().parameter(SavingProductAccountingParams.INTEREST_PAYABLE.getValue()).value(interestPayableAccountId)
-                    .notNull().integerGreaterThanZero();
+                final Long interestPayableAccountId = this.fromApiJsonHelper
+                        .extractLongNamed(SavingProductAccountingParams.INTEREST_PAYABLE.getValue(), element);
+                baseDataValidator.reset().parameter(SavingProductAccountingParams.INTEREST_PAYABLE.getValue())
+                        .value(interestPayableAccountId).notNull().integerGreaterThanZero();
+            }
         }
 
         validatePaymentChannelFundSourceMappings(fromApiJsonHelper, baseDataValidator, element);
