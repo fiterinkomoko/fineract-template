@@ -83,11 +83,11 @@ public class ClientApiCollectionConstants extends ClientApiConstants {
             transactionDateParamName, dateFormatParamName, localeParamName, paymentTypeIdParamName, transactionAccountNumberParamName,
             checkNumberParamName, routingCodeParamName, receiptNumberParamName, bankNumberParamName));
     protected static final Set<String> CLIENT_BUSINESS_DETAIL_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList("clientId", "businessType", "businessCreationDate", "startingCapital", "sourceOfCapital", "totalEmployee",
-                    "businessRevenue", "averageMonthlyRevenue", "bestMonth", "reasonForBestMonth", "worstMonth", "reasonForWorstMonth",
-                    "numberOfPurchase", "purchaseFrequency", "totalPurchaseLastMonth", "lastPurchase", "lastPurchaseAmount",
-                    "businessAssetAmount", "amountAtCash", "amountAtSaving", "amountAtInventory", "fixedAssetCost", "totalInTax",
-                    "totalInTransport", "totalInRent", "totalInCommunication", "otherExpense", "otherExpenseAmount", "totalUtility",
-                    "totalWorkerSalary", "totalWage", externalIdParamName, "society", localeParamName, dateFormatParamName));
+            Arrays.asList(CLIENT_ID, BUSINESS_TYPE, BUSINESS_CREATION_DATE, STARTING_CAPITAL, SOURCE_OF_CAPITAL, TOTAL_EMPLOYEE,
+                    BUSINESS_REVENUE, AVERAGE_MONTHLY_REVENUE, BEST_MONTH, REASON_FOR_BEST_MONTH, WORST_MONTH, REASON_FOR_WORST_MONTH,
+                    NUMBER_OF_PURCHASE, PURCHASE_FREQUENCY, TOTAL_PURCHASE_LAST_MONTH, WHEN_LAST_PURCHASE, LAST_PURCHASE_AMOUNT,
+                    BUSINESS_ASSET_AMOUNT, AMOUNT_AT_CASH, AMOUNT_AT_SAVING, AMOUNT_AT_INVENTORY, FIXED_ASSET_COST, TOTAL_IN_TAX,
+                    TOTAL_IN_TRANSPORT, TOTAL_IN_RENT, TOTAL_IN_COMMUNICATION, OTHER_EXPENSE, OTHER_EXPENSE_AMOUNT, TOTAL_UTILITY,
+                    TOTAL_WORKER_SALARY, TOTAL_WAGE, EXTERNAL_ID, SOCIETY, localeParamName, dateFormatParamName));
 
 }

@@ -19,19 +19,14 @@
 package org.apache.fineract.portfolio.client.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
-import org.apache.fineract.portfolio.client.api.ClientApiConstants;
-import org.apache.fineract.useradministration.domain.AppUser;
-import org.joda.time.LocalDate;
 
 @Entity
 @Table(name = "m_business_detail")
@@ -56,14 +51,14 @@ public class ClientBusinessDetail extends AbstractAuditableCustom {
     private BigDecimal businessRevenue;
     @Column(name = "average_monthly_revenue")
     private BigDecimal averageMonthlyRevenue;
-    @Enumerated(EnumType.STRING)
+
     @Column(name = "best_month")
-    private MonthEnum bestMonth;
+    private Integer bestMonth;
     @Column(name = "reason_for_best_month")
     private String reasonForBestMonth;
-    @Enumerated(EnumType.STRING)
+
     @Column(name = "worst_month")
-    private MonthEnum worstMonth;
+    private Integer worstMonth;
     @Column(name = "reason_for_worst_month")
     private String reasonForWorstMonth;
     @Column(name = "number_of_purchase")
@@ -73,7 +68,7 @@ public class ClientBusinessDetail extends AbstractAuditableCustom {
     @Column(name = "total_purchase_last_month")
     private BigDecimal totalPurchaseLastMonth;
     @Column(name = "last_purchase")
-    private String lastPurchase;
+    private Integer whenLastPurchase;
     @Column(name = "last_purchase_amount")
     private BigDecimal lastPurchaseAmount;
     @Column(name = "business_asset_amount")
@@ -111,22 +106,30 @@ public class ClientBusinessDetail extends AbstractAuditableCustom {
 
     public ClientBusinessDetail() {}
 
-    public static ClientBusinessDetail createNew(final JsonCommand command, final Client client, final CodeValue businessType,
-            final CodeValue sourceOfCapital, AppUser currentUser) {
-        final String externalId = command.stringValueOfParameterNamed(ClientApiConstants.externalIdParamName);
-        return new ClientBusinessDetail(client, businessType, null, null, sourceOfCapital, null, null, null, null, null, null, null, null,
-                null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, externalId,
-                null);
+    public static ClientBusinessDetail createNew(final Client client, final CodeValue businessType, final CodeValue sourceOfCapital,
+            LocalDate businessCreationDate, BigDecimal startingCapital, Long totalEmployee, BigDecimal businessRevenue,
+            BigDecimal averageMonthlyRevenue, Integer bestMonth, String reasonForBestMonth, Integer worstMonth, String reasonForWorstMonth,
+            Long numberOfPurchase, String purchaseFrequency, BigDecimal totalPurchaseLastMonth, Integer lastPurchase,
+            BigDecimal lastPurchaseAmount, BigDecimal businessAssetAmount, BigDecimal amountAtCash, BigDecimal amountAtSaving,
+            BigDecimal amountAtInventory, BigDecimal fixedAssetCost, BigDecimal totalInTax, BigDecimal totalInTransport,
+            BigDecimal totalInRent, BigDecimal totalInCommunication, String otherExpense, BigDecimal otherExpenseAmount,
+            BigDecimal totalUtility, BigDecimal totalWorkerSalary, BigDecimal totalWage, String externalId, BigDecimal society) {
+
+        return new ClientBusinessDetail(client, businessType, businessCreationDate, startingCapital, sourceOfCapital, totalEmployee,
+                businessRevenue, averageMonthlyRevenue, bestMonth, reasonForBestMonth, worstMonth, reasonForWorstMonth, numberOfPurchase,
+                purchaseFrequency, totalPurchaseLastMonth, lastPurchase, lastPurchaseAmount, businessAssetAmount, amountAtCash,
+                amountAtSaving, amountAtInventory, fixedAssetCost, totalInTax, totalInTransport, totalInRent, totalInCommunication,
+                otherExpense, otherExpenseAmount, totalUtility, totalWorkerSalary, totalWage, externalId, society);
     }
 
     public ClientBusinessDetail(Client client, CodeValue businessType, LocalDate businessCreationDate, BigDecimal startingCapital,
-            CodeValue sourceOfCapital, Long totalEmployee, BigDecimal businessRevenue, BigDecimal averageMonthlyRevenue,
-            MonthEnum bestMonth, String reasonForBestMonth, MonthEnum worstMonth, String reasonForWorstMonth, Long numberOfPurchase,
-            String purchaseFrequency, BigDecimal totalPurchaseLastMonth, String lastPurchase, BigDecimal lastPurchaseAmount,
-            BigDecimal businessAssetAmount, BigDecimal amountAtCash, BigDecimal amountAtSaving, BigDecimal amountAtInventory,
-            BigDecimal fixedAssetCost, BigDecimal totalInTax, BigDecimal totalInTransport, BigDecimal totalInRent,
-            BigDecimal totalInCommunication, String otherExpense, BigDecimal otherExpenseAmount, BigDecimal totalUtility,
-            BigDecimal totalWorkerSalary, BigDecimal totalWage, String externalId, BigDecimal society) {
+            CodeValue sourceOfCapital, Long totalEmployee, BigDecimal businessRevenue, BigDecimal averageMonthlyRevenue, Integer bestMonth,
+            String reasonForBestMonth, Integer worstMonth, String reasonForWorstMonth, Long numberOfPurchase, String purchaseFrequency,
+            BigDecimal totalPurchaseLastMonth, Integer lastPurchase, BigDecimal lastPurchaseAmount, BigDecimal businessAssetAmount,
+            BigDecimal amountAtCash, BigDecimal amountAtSaving, BigDecimal amountAtInventory, BigDecimal fixedAssetCost,
+            BigDecimal totalInTax, BigDecimal totalInTransport, BigDecimal totalInRent, BigDecimal totalInCommunication,
+            String otherExpense, BigDecimal otherExpenseAmount, BigDecimal totalUtility, BigDecimal totalWorkerSalary, BigDecimal totalWage,
+            String externalId, BigDecimal society) {
         this.client = client;
         this.businessType = businessType;
         this.businessCreationDate = businessCreationDate;
@@ -142,7 +145,7 @@ public class ClientBusinessDetail extends AbstractAuditableCustom {
         this.numberOfPurchase = numberOfPurchase;
         this.purchaseFrequency = purchaseFrequency;
         this.totalPurchaseLastMonth = totalPurchaseLastMonth;
-        this.lastPurchase = lastPurchase;
+        this.whenLastPurchase = lastPurchase;
         this.lastPurchaseAmount = lastPurchaseAmount;
         this.businessAssetAmount = businessAssetAmount;
         this.amountAtCash = amountAtCash;
