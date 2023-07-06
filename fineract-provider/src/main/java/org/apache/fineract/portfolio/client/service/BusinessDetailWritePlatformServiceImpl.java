@@ -108,10 +108,9 @@ public class BusinessDetailWritePlatformServiceImpl implements BusinessDetailWri
             }
         }
 
-        ClientBusinessDetail businessDetail = createBusinessDetail(command, client);
-        clientBusinessDetailRepository.save(businessDetail);
+        ClientBusinessDetail businessDetail = clientBusinessDetailRepository.saveAndFlush(createBusinessDetail(command, client));
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(businessDetail.getId()).build();
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withResourceIdAsString(businessDetail.getId().toString()).withClientId(clientId).build();
     }
 
     private ClientBusinessDetail createBusinessDetail(final JsonCommand command, Client client) {
