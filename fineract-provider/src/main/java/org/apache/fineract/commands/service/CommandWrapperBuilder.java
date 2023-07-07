@@ -3710,7 +3710,6 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-
     public CommandWrapperBuilder updateHouseholdExpenses(long householdExpenseId) {
         this.actionName = "UPDATE";
         this.entityName = "HOUSEHOLD_EXPENSES";
@@ -3732,7 +3731,7 @@ public class CommandWrapperBuilder {
         this.entityName = "HOUSEHOLD_EXPENSES";
         this.entityId = householdExpenseId;
         this.href = "/householdexpenses/" + clientId;
-      
+
         return this;
     }
 

@@ -298,5 +298,4 @@ public class ClientApiConstants {
     public static final String BUSINESS_TYPE_OPTIONS = "BusinessType";
     public static final String SOURCE_OF_CAPITAL_OPTIONS = "SourceOfCapital";
 
-
 }
