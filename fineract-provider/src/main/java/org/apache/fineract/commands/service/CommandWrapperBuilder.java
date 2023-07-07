@@ -3710,6 +3710,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+
     public CommandWrapperBuilder updateHouseholdExpenses(long householdExpenseId) {
         this.actionName = "UPDATE";
         this.entityName = "HOUSEHOLD_EXPENSES";
@@ -3731,6 +3732,16 @@ public class CommandWrapperBuilder {
         this.entityName = "HOUSEHOLD_EXPENSES";
         this.entityId = householdExpenseId;
         this.href = "/householdexpenses/" + clientId;
+      
+        return this;
+    }
+
+    public CommandWrapperBuilder addBusinessDetail(final long clientId) {
+        this.actionName = "CREATE_CLIENTBUSINESSDETAIL";
+        this.entityName = "CLIENT";
+        this.href = "/clients/" + clientId + "/addbusinessdetail";
+        this.clientId = clientId;
+
         return this;
     }
 }
