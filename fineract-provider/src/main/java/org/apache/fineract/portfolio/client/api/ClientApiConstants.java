@@ -234,4 +234,49 @@ public class ClientApiConstants {
             transactionAmountParamName, paymentDetailDataParamName, reversedParamName, dateParamName, officeIdParamName,
             officeNameParamName, transactionTypeParamName, transactionCurrencyParamName, externalIdParamName, submittedOnDateParamName));
 
+    // Client Business Detail Param
+    public static final String BUSINESS_TYPE = "businessType";
+    public static final String BUSINESS_CREATION_DATE = "businessCreationDate";
+    public static final String STARTING_CAPITAL = "startingCapital";
+    public static final String SOURCE_OF_CAPITAL = "sourceOfCapital";
+    public static final String TOTAL_EMPLOYEE = "totalEmployee";
+    public static final String BUSINESS_REVENUE = "businessRevenue";
+    public static final String AVERAGE_MONTHLY_REVENUE = "averageMonthlyRevenue";
+    public static final String BEST_MONTH = "bestMonth";
+    public static final String REASON_FOR_BEST_MONTH = "reasonForBestMonth";
+    public static final String WORST_MONTH = "worstMonth";
+    public static final String REASON_FOR_WORST_MONTH = "reasonForWorstMonth";
+    public static final String NUMBER_OF_PURCHASE = "numberOfPurchase";
+    public static final String PURCHASE_FREQUENCY = "purchaseFrequency";
+    public static final String TOTAL_PURCHASE_LAST_MONTH = "totalPurchaseLastMonth";
+    public static final String WHEN_LAST_PURCHASE = "whenLastPurchase";
+    public static final String LAST_PURCHASE_AMOUNT = "lastPurchaseAmount";
+    public static final String BUSINESS_ASSET_AMOUNT = "businessAssetAmount";
+    public static final String AMOUNT_AT_CASH = "amountAtCash";
+    public static final String AMOUNT_AT_SAVING = "amountAtSaving";
+    public static final String AMOUNT_AT_INVENTORY = "amountAtInventory";
+    public static final String FIXED_ASSET_COST = "fixedAssetCost";
+    public static final String TOTAL_IN_TAX = "totalInTax";
+    public static final String TOTAL_IN_TRANSPORT = "totalInTransport";
+    public static final String TOTAL_IN_RENT = "totalInRent";
+    public static final String TOTAL_IN_COMMUNICATION = "totalInCommunication";
+    public static final String OTHER_EXPENSE = "otherExpense";
+    public static final String OTHER_EXPENSE_AMOUNT = "otherExpenseAmount";
+    public static final String TOTAL_UTILITY = "totalUtility";
+    public static final String TOTAL_WORKER_SALARY = "totalWorkerSalary";
+    public static final String TOTAL_WAGE = "totalWage";
+    public static final String SOCIETY = "society";
+    public static final String EXTERNAL_ID = "externalId";
+    public static final String CLIENT_ID = "clientId";
+    public static final String READ_CLIENTBUSINESSDETAIL = "READ_CLIENTBUSINESSDETAIL";
+
+    protected static final Set<String> CLIENT_BUSINESS_DETAIL_RESPONSE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(CLIENT_ID,
+            BUSINESS_TYPE, BUSINESS_CREATION_DATE, STARTING_CAPITAL, SOURCE_OF_CAPITAL, TOTAL_EMPLOYEE, BUSINESS_REVENUE,
+            AVERAGE_MONTHLY_REVENUE, BEST_MONTH, REASON_FOR_BEST_MONTH, WORST_MONTH, REASON_FOR_WORST_MONTH, NUMBER_OF_PURCHASE,
+            PURCHASE_FREQUENCY, TOTAL_PURCHASE_LAST_MONTH, WHEN_LAST_PURCHASE, LAST_PURCHASE_AMOUNT, BUSINESS_ASSET_AMOUNT, AMOUNT_AT_CASH,
+            AMOUNT_AT_SAVING, AMOUNT_AT_INVENTORY, FIXED_ASSET_COST, TOTAL_IN_TAX, TOTAL_IN_TRANSPORT, TOTAL_IN_RENT,
+            TOTAL_IN_COMMUNICATION, OTHER_EXPENSE, OTHER_EXPENSE_AMOUNT, TOTAL_UTILITY, TOTAL_WORKER_SALARY, TOTAL_WAGE, EXTERNAL_ID));
+    public static final String BUSINESS_TYPE_OPTIONS = "BusinessType";
+    public static final String SOURCE_OF_CAPITAL_OPTIONS = "SourceOfCapital";
+
 }

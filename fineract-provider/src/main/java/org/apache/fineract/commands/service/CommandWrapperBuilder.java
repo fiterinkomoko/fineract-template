@@ -3709,4 +3709,12 @@ public class CommandWrapperBuilder {
         this.href = "/payoffloans/" + loanId;
         return this;
     }
+
+    public CommandWrapperBuilder addBusinessDetail(final long clientId) {
+        this.actionName = "CREATE_CLIENTBUSINESSDETAIL";
+        this.entityName = "CLIENT";
+        this.href = "/clients/" + clientId + "/addbusinessdetail";
+        this.clientId = clientId;
+        return this;
+    }
 }
