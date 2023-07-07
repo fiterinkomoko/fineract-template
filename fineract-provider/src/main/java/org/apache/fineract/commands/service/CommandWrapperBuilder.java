@@ -3709,4 +3709,28 @@ public class CommandWrapperBuilder {
         this.href = "/payoffloans/" + loanId;
         return this;
     }
+
+    public CommandWrapperBuilder updateHouseholdExpenses(long householdExpenseId) {
+        this.actionName = "UPDATE";
+        this.entityName = "HOUSEHOLD_EXPENSES";
+        this.entityId = householdExpenseId;
+        this.href = "/householdexpenses/" + householdExpenseId;
+        return this;
+    }
+
+    public CommandWrapperBuilder addHouseholdExpenses(long clientId) {
+        this.actionName = "ADD";
+        this.entityName = "HOUSEHOLD_EXPENSES";
+        this.clientId = clientId;
+        this.href = "/householdexpenses/" + clientId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deletHouseholdExpenses(long householdExpenseId) {
+        this.actionName = "DELETE";
+        this.entityName = "HOUSEHOLD_EXPENSES";
+        this.entityId = householdExpenseId;
+        this.href = "/householdexpenses/" + clientId;
+        return this;
+    }
 }
