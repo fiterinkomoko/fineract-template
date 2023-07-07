@@ -74,7 +74,6 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
                     "Enable Client Other Info not for proceeding operation");
         }
 
-
         fromApiJsonDeserializer.validateForCreate(clientId, command.json());
 
         final Client client = clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
@@ -101,10 +100,7 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
         ClientOtherInfo otherInfo = ClientOtherInfo.createNew(command, client, strata, nationality, yearArrivedInHostCountry);
         ClientOtherInfo info = clientOtherInfoRepository.saveAndFlush(otherInfo);
 
-        return new CommandProcessingResultBuilder()
-                .withCommandId(command.commandId())
-                .withClientId(clientId)
-                .withEntityId(info.getId())
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withClientId(clientId).withEntityId(info.getId())
                 .build();
     }
 
