@@ -1,7 +1,7 @@
 {
   "createClientBusinessDetails": {
-  "businessType": 31,
-  "sourceOfCapital": 32,
+  "businessType": "#(businessType)",
+  "sourceOfCapital": "#(sourceOfCapital)",
   "startingCapital": "11111",
   "externalId": "#(faker.number().randomNumber())",
   "totalEmployee": "22222",

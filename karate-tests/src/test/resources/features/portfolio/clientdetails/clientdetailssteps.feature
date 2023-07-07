@@ -17,10 +17,10 @@ Feature: Create client Business
     And header Content-Type = 'application/json'
     And header Authorization = authToken
     And header fineract-platform-tenantid = tenantId
-    And request clientBusinessDetailsData.clientBusinessDetailsData
+    And request clientBusinessDetailsData.createClientBusinessDetails
     When method POST
     Then status 200
-#    Then match $ contains { resourceIdentifier: '#notnull' }
-#    Then match $ contains { clientId: '#notnull' }
-#    Then def clientId = response.clientId
-#    Then def businessId = response.resourceIdentifier
+    Then match $ contains { resourceIdentifier: '#notnull' }
+    Then match $ contains { clientId: '#notnull' }
+    Then def clientId = response.clientId
+    Then def businessId = response.resourceIdentifier
