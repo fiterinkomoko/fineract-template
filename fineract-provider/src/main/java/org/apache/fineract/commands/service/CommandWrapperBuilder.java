@@ -3710,6 +3710,23 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder createClientOtherInfo(final long clientId) {
+        this.actionName = "CREATE";
+        this.entityName = "CLIENTOTHERINFO";
+        this.href = "/clients/" + clientId + "/otherInfo";
+        this.clientId = clientId;
+        return this;
+    }
+
+    public CommandWrapperBuilder updateClientOtherInfo(final Long otherInfoId, final Long clientId) {
+        this.actionName = "UPDATE";
+        this.entityName = "CLIENTOTHERINFO";
+        this.href = "/clients/" + clientId + "/otherInfo";
+        this.clientId = clientId;
+        this.entityId = otherInfoId;
+        return this;
+    }
+
     public CommandWrapperBuilder addBusinessDetail(final long clientId) {
         this.actionName = "CREATE_CLIENTBUSINESSDETAIL";
         this.entityName = "CLIENT";
