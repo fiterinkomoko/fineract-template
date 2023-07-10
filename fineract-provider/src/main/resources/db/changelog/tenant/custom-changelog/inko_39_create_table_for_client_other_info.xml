@@ -20,7 +20,7 @@
 
 -->
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <changeSet id="add_client_other_info" author="deepika@fiter.io">
+    <changeSet id="add_client_other_info_strata_code" author="deepika@fiter.io">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
                 select count(1) from m_code where code_name = 'Strata';
@@ -32,7 +32,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="add_client_other_info_1" author="deepika@fiter.io">
+    <changeSet id="add_client_other_info_YearArrivedInHostCountry_code" author="deepika@fiter.io">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
                 select count(1) from m_code where code_name = 'YearArrivedInHostCountry';
@@ -44,7 +44,7 @@
         </insert>
     </changeSet>
 
-    <changeSet author="deepika@fiter.io" id="add_client_other_info_2">
+    <changeSet author="deepika@fiter.io" id="add_client_other_info_create_table">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="m_client_other_info"/>
@@ -58,16 +58,13 @@
                 <constraints nullable="false" foreignKeyName="client_other_info_Fk_m_client_id" references="m_client(id)"/>
             </column>
             <column name="year_arrived_in_country_cv_id" type="int">
-                <constraints nullable="false" foreignKeyName="client_other_info_Fk_year_arrived_in_country_cv_id"
-                             references="m_code_value(id)"/>
+                <constraints nullable="false"/>
             </column>
             <column name="strata_cv_id" type="int">
-                <constraints nullable="false" foreignKeyName="client_other_info_Fk_strata_id"
-                             references="m_code_value(id)"/>
+                <constraints nullable="false"/>
             </column>
             <column name="nationality_cv_id" type="int">
-                <constraints nullable="false" foreignKeyName="client_other_info_Fk_nationality_cv_id"
-                             references="m_code_value(id)"/>
+                <constraints nullable="false"/>
             </column>
 
             <column name="number_of_children" type="int">
@@ -83,14 +80,29 @@
                 <constraints nullable="true" />
             </column>
         </createTable>
-        <insert tableName="c_configuration">
-            <column name="name" value="Enable-other-client-info" />
-            <column name="value" value="null" />
-            <column name="date_value" value="null" />
-            <column name="enabled" valueBoolean="false" />
-            <column name="is_trap_door" valueBoolean="false" />
-            <column name="description" value="null" />
-        </insert>
+        <addForeignKeyConstraint
+                baseColumnNames="year_arrived_in_country_cv_id" baseTableName="m_client_other_info"
+                constraintName="FK_client_other_info_m_code_value_year_arrived_in_country_cv_id" onDelete="CASCADE"
+                onUpdate="RESTRICT" referencedColumnNames="id"
+                referencedTableName="m_code_value" />
+        <addForeignKeyConstraint
+                baseColumnNames="strata_cv_id" baseTableName="m_client_other_info"
+                constraintName="FK_client_other_info_m_code_value_strata_id" onDelete="CASCADE"
+                onUpdate="RESTRICT" referencedColumnNames="id"
+                referencedTableName="m_code_value" />
+        <addForeignKeyConstraint
+                baseColumnNames="nationality_cv_id" baseTableName="m_client_other_info"
+                constraintName="FK_client_other_info_m_code_value_nationality_cv_id" onDelete="CASCADE"
+                onUpdate="RESTRICT" referencedColumnNames="id"
+                referencedTableName="m_code_value" />
+    </changeSet>
+
+    <changeSet author="deepika@fiter.io" id="add_permission_CREATE_CLIENTOTHERINFO">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_permission where code = 'CREATE_CLIENTOTHERINFO';
+            </sqlCheck>
+        </preConditions>
         <insert tableName="m_permission">
             <column name="grouping" value="portfolio" />
             <column name="code" value="CREATE_CLIENTOTHERINFO" />
@@ -98,6 +110,13 @@
             <column name="action_name" value="CREATE" />
             <column name="can_maker_checker" valueBoolean="false" />
         </insert>
+    </changeSet>
+    <changeSet author="deepika@fiter.io" id="add_permission_CREATE_CLIENTOTHERINFO_CHECKER">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_permission where code = 'CREATE_CLIENTOTHERINFO_CHECKER';
+            </sqlCheck>
+        </preConditions>
         <insert tableName="m_permission">
             <column name="grouping" value="portfolio" />
             <column name="code" value="CREATE_CLIENTOTHERINFO_CHECKER" />
@@ -105,6 +124,14 @@
             <column name="action_name" value="CREATE_CHECKER" />
             <column name="can_maker_checker" valueBoolean="false" />
         </insert>
+
+    </changeSet>
+    <changeSet author="deepika@fiter.io" id="add_permission_UPDATE_CLIENTOTHERINFO">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_permission where code = 'UPDATE_CLIENTOTHERINFO';
+            </sqlCheck>
+        </preConditions>
         <insert tableName="m_permission">
             <column name="grouping" value="portfolio" />
             <column name="code" value="UPDATE_CLIENTOTHERINFO" />
@@ -112,6 +139,13 @@
             <column name="action_name" value="UPDATE" />
             <column name="can_maker_checker" valueBoolean="false" />
         </insert>
+    </changeSet>
+    <changeSet author="deepika@fiter.io" id="add_permission_UPDATE_CLIENTOTHERINFO_CHECKER">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_permission where code = 'UPDATE_CLIENTOTHERINFO_CHECKER';
+            </sqlCheck>
+        </preConditions>
         <insert tableName="m_permission">
             <column name="grouping" value="portfolio" />
             <column name="code" value="UPDATE_CLIENTOTHERINFO_CHECKER" />
@@ -119,12 +153,38 @@
             <column name="action_name" value="UPDATE_CHECKER" />
             <column name="can_maker_checker" valueBoolean="false" />
         </insert>
+    </changeSet>
+    <changeSet author="deepika@fiter.io" id="add_permission_READ_CLIENTOTHERINFO">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_permission where code = 'READ_CLIENTOTHERINFO';
+            </sqlCheck>
+        </preConditions>
         <insert tableName="m_permission">
             <column name="grouping" value="portfolio" />
             <column name="code" value="READ_CLIENTOTHERINFO" />
             <column name="entity_name" value="CLIENTOTHERINFO" />
             <column name="action_name" value="READ" />
             <column name="can_maker_checker" valueBoolean="false" />
+        </insert>
+    </changeSet>
+    <changeSet author="deepika@fiter.io" id="add_enable-other-client-info_configurations" >
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="c_configuration"/>
+
+            <sqlCheck expectedResult="0">
+                select count(1) from c_configuration where name = 'Enable-other-client-info';
+            </sqlCheck>
+
+        </preConditions>
+        <insert tableName="c_configuration">
+            <column name="name" value="Enable-other-client-info" />
+            <column name="value" value="null" />
+            <column name="date_value" value="null" />
+            <column name="enabled" valueBoolean="false" />
+            <column name="is_trap_door" valueBoolean="false" />
+            <column name="description" value="null" />
         </insert>
     </changeSet>
 </databaseChangeLog>
