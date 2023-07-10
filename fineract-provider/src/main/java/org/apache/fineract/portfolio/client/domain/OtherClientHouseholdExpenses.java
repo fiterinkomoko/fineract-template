@@ -36,7 +36,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(exclude = { "id", "clientHouseholdExpenses", "amount" })
 @Table(name = "m_other_client_expenses")
 public class OtherClientHouseholdExpenses extends AbstractPersistableCustom {
 
