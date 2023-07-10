@@ -32,11 +32,11 @@ public class ClientBusinessDetailData implements Serializable {
     private Long id;
     private Long clientId;
     private Collection<CodeValueData> businessType;
-    private Long businessTypeId;
+    private CodeValueData businessTypeId;
     private LocalDate businessCreationDate;
     private BigDecimal startingCapital;
     private Collection<CodeValueData> sourceOfCapital;
-    private Long sourceOfCapitalId;
+    private CodeValueData sourceOfCapitalId;
     private Long totalEmployee;
     private BigDecimal businessRevenue;
     private BigDecimal averageMonthlyRevenue;
@@ -84,15 +84,15 @@ public class ClientBusinessDetailData implements Serializable {
         this.clientAccount = clientAccount;
     }
 
-    public static ClientBusinessDetailData previewClientBusinessDetail(ClientBusinessDetail clientBusinessDetail) {
-        return new ClientBusinessDetailData(clientBusinessDetail.getId(), clientBusinessDetail.getClient().getId(),
-                clientBusinessDetail.getBusinessType().getId(), clientBusinessDetail.getBusinessCreationDate(),
-                clientBusinessDetail.getStartingCapital(), clientBusinessDetail.getSourceOfCapital().getId(),
+    public static ClientBusinessDetailData previewClientBusinessDetail(ClientBusinessDetail clientBusinessDetail,
+            CodeValueData businessType, CodeValueData sourceOfCapital) {
+        return new ClientBusinessDetailData(clientBusinessDetail.getId(), clientBusinessDetail.getClient().getId(), businessType,
+                clientBusinessDetail.getBusinessCreationDate(), clientBusinessDetail.getStartingCapital(), sourceOfCapital,
                 clientBusinessDetail.getTotalEmployee(), clientBusinessDetail.getExternalId());
     }
 
-    public ClientBusinessDetailData(Long id, Long clientId, Long businessTypeId, LocalDate businessCreationDate, BigDecimal startingCapital,
-            Long sourceOfCapitalId, Long totalEmployee, String externalId) {
+    public ClientBusinessDetailData(Long id, Long clientId, CodeValueData businessTypeId, LocalDate businessCreationDate,
+            BigDecimal startingCapital, CodeValueData sourceOfCapitalId, Long totalEmployee, String externalId) {
         this.id = id;
         this.clientId = clientId;
         this.businessTypeId = businessTypeId;

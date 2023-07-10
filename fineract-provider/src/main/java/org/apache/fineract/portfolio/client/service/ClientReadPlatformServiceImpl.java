@@ -72,6 +72,7 @@ import org.apache.fineract.portfolio.client.domain.ClientBusinessDetailRepositor
 import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
 import org.apache.fineract.portfolio.client.domain.ClientStatus;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
+import org.apache.fineract.portfolio.client.domain.MonthEnum;
 import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
 import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement;
 import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagementRepositoryWrapper;
@@ -112,7 +113,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper;
     private final ClientBusinessOwnerReadPlatformService clientBusinessOwnerReadPlatformService;
     private final ClientBusinessDetailRepositoryWrapper clientBusinessDetailRepositoryWrapper;
-    private final BusinessDetailReadPlatformService businessDetailReadPlatformService;
 
     @Override
     public ClientData retrieveTemplate(final Long officeId, final boolean staffInSelectedOfficeOnly) {
@@ -137,6 +137,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         final Boolean isAddressEnabled = configuration.isEnabled();
         final Boolean isbusinessOwnersEnabled = configurationBusinessOwner.isEnabled();
+        final Boolean isClientBusinessDetailEnabled = enableClientBusinessDetail.isEnabled();
         if (isAddressEnabled) {
             address = this.addressReadPlatformService.retrieveTemplate();
         }
@@ -144,8 +145,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             ownerData = this.clientBusinessOwnerReadPlatformService.retrieveTemplate();
         }
 
-        if (enableClientBusinessDetail.isEnabled()) {
-            clientBusinessDetailData = businessDetailReadPlatformService.retrieveTemplate();
+        if (isClientBusinessDetailEnabled) {
+            clientBusinessDetailData = retrieveBusinessDetailTemplate();
         }
 
         final ClientFamilyMembersData familyMemberOptions = this.clientFamilyMembersReadPlatformService.retrieveTemplate();
@@ -356,7 +357,15 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             if (!CollectionUtils.isEmpty(clientBusinessDetails)) {
                 for (ClientBusinessDetail clientBusinessDetail : clientBusinessDetails) {
-                    clientBusinessDetailDataSet.add(ClientBusinessDetailData.previewClientBusinessDetail(clientBusinessDetail));
+
+                    CodeValue businessTypeValue = clientBusinessDetail.getBusinessType();
+                    CodeValueData businessType = CodeValueData.instance(businessTypeValue.getId(), businessTypeValue.label());
+
+                    CodeValue sourceOfCapitalValue = clientBusinessDetail.getSourceOfCapital();
+                    CodeValueData sourceOfCapital = CodeValueData.instance(sourceOfCapitalValue.getId(), sourceOfCapitalValue.label());
+
+                    clientBusinessDetailDataSet
+                            .add(ClientBusinessDetailData.previewClientBusinessDetail(clientBusinessDetail, businessType, sourceOfCapital));
                 }
             }
 
@@ -967,5 +976,16 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     public Collection<Long> retrieveUserClients(Long aUserID) {
         String sql = "SELECT  m.client_id FROM m_selfservice_user_client_mapping m INNER JOIN m_client c ON c.id = m.client_id WHERE m.appuser_id = ?";
         return jdbcTemplate.queryForList(sql, Long.class, aUserID);
+    }
+
+    private ClientBusinessDetailData retrieveBusinessDetailTemplate() {
+        this.context.authenticatedUser();
+
+        final List<CodeValueData> businessTypeOptions = new ArrayList<>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.BUSINESS_TYPE_OPTIONS));
+        final List<CodeValueData> sourceOfCapitalOptions = new ArrayList<>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.SOURCE_OF_CAPITAL_OPTIONS));
+        final List<EnumOptionData> monthEnumOptions = ClientEnumerations.monthEnum(MonthEnum.values());
+        return ClientBusinessDetailData.template(businessTypeOptions, sourceOfCapitalOptions, monthEnumOptions, monthEnumOptions, null);
     }
 }

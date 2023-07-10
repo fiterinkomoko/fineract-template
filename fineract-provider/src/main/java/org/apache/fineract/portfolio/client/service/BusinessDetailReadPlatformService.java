@@ -24,5 +24,4 @@ public interface BusinessDetailReadPlatformService {
 
     ClientBusinessDetailData retrieveTemplate(Long clientId);
 
-    ClientBusinessDetailData retrieveTemplate();
 }
