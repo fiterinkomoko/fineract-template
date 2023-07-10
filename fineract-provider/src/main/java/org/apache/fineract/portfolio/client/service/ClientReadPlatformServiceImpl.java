@@ -60,12 +60,15 @@ import org.apache.fineract.portfolio.address.data.AddressData;
 import org.apache.fineract.portfolio.address.service.AddressReadPlatformService;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.data.ClientAdditionalInfoData;
+import org.apache.fineract.portfolio.client.data.ClientBusinessDetailData;
 import org.apache.fineract.portfolio.client.data.ClientBusinessOwnerData;
 import org.apache.fineract.portfolio.client.data.ClientCollateralManagementData;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.data.ClientFamilyMembersData;
 import org.apache.fineract.portfolio.client.data.ClientNonPersonData;
 import org.apache.fineract.portfolio.client.data.ClientTimelineData;
+import org.apache.fineract.portfolio.client.domain.ClientBusinessDetail;
+import org.apache.fineract.portfolio.client.domain.ClientBusinessDetailRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
 import org.apache.fineract.portfolio.client.domain.ClientStatus;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
@@ -108,6 +111,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private final ColumnValidator columnValidator;
     private final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper;
     private final ClientBusinessOwnerReadPlatformService clientBusinessOwnerReadPlatformService;
+    private final ClientBusinessDetailRepositoryWrapper clientBusinessDetailRepositoryWrapper;
+    private final BusinessDetailReadPlatformService businessDetailReadPlatformService;
 
     @Override
     public ClientData retrieveTemplate(final Long officeId, final boolean staffInSelectedOfficeOnly) {
@@ -116,6 +121,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final Long defaultOfficeId = defaultToUsersOfficeIfNull(officeId);
         AddressData address = null;
         ClientBusinessOwnerData ownerData = null;
+        ClientBusinessDetailData clientBusinessDetailData = null;
 
         final Collection<OfficeData> offices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
 
@@ -126,6 +132,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final GlobalConfigurationPropertyData configurationBusinessOwner = this.configurationReadPlatformService
                 .retrieveGlobalConfiguration("Enable-businessOwners");
 
+        final GlobalConfigurationPropertyData enableClientBusinessDetail = this.configurationReadPlatformService
+                .retrieveGlobalConfiguration("Enable-Client-Business-Detail");
+
         final Boolean isAddressEnabled = configuration.isEnabled();
         final Boolean isbusinessOwnersEnabled = configurationBusinessOwner.isEnabled();
         if (isAddressEnabled) {
@@ -133,6 +142,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
         if (isbusinessOwnersEnabled) {
             ownerData = this.clientBusinessOwnerReadPlatformService.retrieveTemplate();
+        }
+
+        if (enableClientBusinessDetail.isEnabled()) {
+            clientBusinessDetailData = businessDetailReadPlatformService.retrieveTemplate();
         }
 
         final ClientFamilyMembersData familyMemberOptions = this.clientFamilyMembersReadPlatformService.retrieveTemplate();
@@ -172,11 +185,13 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final List<DatatableData> datatableTemplates = this.entityDatatableChecksReadService
                 .retrieveTemplates(StatusEnum.CREATE.getCode().longValue(), EntityTables.CLIENT.getName(), null);
 
-        return ClientData.template(defaultOfficeId, LocalDate.now(DateUtils.getDateTimeZoneOfTenant()), offices, staffOptions, null,
-                genderOptions, savingsProductDatas, clientTypeOptions, clientClassificationOptions, clientNonPersonConstitutionOptions,
-                clientNonPersonMainBusinessLineOptions, clientLegalFormOptions, familyMemberOptions,
+        ClientData clientData = ClientData.template(defaultOfficeId, LocalDate.now(DateUtils.getDateTimeZoneOfTenant()), offices,
+                staffOptions, null, genderOptions, savingsProductDatas, clientTypeOptions, clientClassificationOptions,
+                clientNonPersonConstitutionOptions, clientNonPersonMainBusinessLineOptions, clientLegalFormOptions, familyMemberOptions,
                 new ArrayList<AddressData>(Arrays.asList(address)), isAddressEnabled, datatableTemplates,
                 new ArrayList<ClientBusinessOwnerData>(Arrays.asList(ownerData)), isbusinessOwnersEnabled, titleOptions);
+        clientData.setClientBusinessDetailData(clientBusinessDetailData);
+        return clientData;
     }
 
     @Override
@@ -335,12 +350,23 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
                 clientCollateralManagementDataSet
                         .add(ClientCollateralManagementData.setCollateralValues(clientCollateralManagement, total, totalCollateral));
             }
+            final Collection<ClientBusinessDetail> clientBusinessDetails = this.clientBusinessDetailRepositoryWrapper
+                    .findByClientId(clientId);
+            final Set<ClientBusinessDetailData> clientBusinessDetailDataSet = new HashSet<>();
+
+            if (!CollectionUtils.isEmpty(clientBusinessDetails)) {
+                for (ClientBusinessDetail clientBusinessDetail : clientBusinessDetails) {
+                    clientBusinessDetailDataSet.add(ClientBusinessDetailData.previewClientBusinessDetail(clientBusinessDetail));
+                }
+            }
 
             final String clientGroupsSql = "select " + this.clientGroupsMapper.parentGroupsSchema();
 
             final Collection<GroupGeneralData> parentGroups = this.jdbcTemplate.query(clientGroupsSql, this.clientGroupsMapper, // NOSONAR
                     clientId);
-            return ClientData.setParentGroups(clientData, parentGroups, clientCollateralManagementDataSet);
+            ClientData previewClientData = ClientData.setParentGroups(clientData, parentGroups, clientCollateralManagementDataSet);
+            previewClientData.setClientBusinessDetailDataSet(clientBusinessDetailDataSet);
+            return previewClientData;
 
         } catch (final EmptyResultDataAccessException e) {
             throw new ClientNotFoundException(clientId, e);

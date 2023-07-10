@@ -18,20 +18,25 @@
  */
 package org.apache.fineract.portfolio.client.data;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.joda.time.LocalDate;
+import org.apache.fineract.portfolio.client.domain.ClientBusinessDetail;
 
-public class ClientBusinessDetailData {
+public class ClientBusinessDetailData implements Serializable {
 
+    private Long id;
     private Long clientId;
     private Collection<CodeValueData> businessType;
+    private Long businessTypeId;
     private LocalDate businessCreationDate;
     private BigDecimal startingCapital;
     private Collection<CodeValueData> sourceOfCapital;
+    private Long sourceOfCapitalId;
     private Long totalEmployee;
     private BigDecimal businessRevenue;
     private BigDecimal averageMonthlyRevenue;
@@ -77,5 +82,24 @@ public class ClientBusinessDetailData {
         this.bestMonth = bestMonth;
         this.worstMonth = worstMonth;
         this.clientAccount = clientAccount;
+    }
+
+    public static ClientBusinessDetailData previewClientBusinessDetail(ClientBusinessDetail clientBusinessDetail) {
+        return new ClientBusinessDetailData(clientBusinessDetail.getId(), clientBusinessDetail.getClient().getId(),
+                clientBusinessDetail.getBusinessType().getId(), clientBusinessDetail.getBusinessCreationDate(),
+                clientBusinessDetail.getStartingCapital(), clientBusinessDetail.getSourceOfCapital().getId(),
+                clientBusinessDetail.getTotalEmployee(), clientBusinessDetail.getExternalId());
+    }
+
+    public ClientBusinessDetailData(Long id, Long clientId, Long businessTypeId, LocalDate businessCreationDate, BigDecimal startingCapital,
+            Long sourceOfCapitalId, Long totalEmployee, String externalId) {
+        this.id = id;
+        this.clientId = clientId;
+        this.businessTypeId = businessTypeId;
+        this.businessCreationDate = businessCreationDate;
+        this.startingCapital = startingCapital;
+        this.sourceOfCapitalId = sourceOfCapitalId;
+        this.totalEmployee = totalEmployee;
+        this.externalId = externalId;
     }
 }

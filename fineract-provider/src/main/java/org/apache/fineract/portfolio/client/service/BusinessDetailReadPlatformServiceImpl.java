@@ -83,4 +83,16 @@ public class BusinessDetailReadPlatformServiceImpl implements BusinessDetailRead
 
     }
 
+    @Override
+    public ClientBusinessDetailData retrieveTemplate() {
+        this.context.authenticatedUser();
+
+        final List<CodeValueData> businessTypeOptions = new ArrayList<>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.BUSINESS_TYPE_OPTIONS));
+        final List<CodeValueData> sourceOfCapitalOptions = new ArrayList<>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.SOURCE_OF_CAPITAL_OPTIONS));
+        final List<EnumOptionData> monthEnumOptions = ClientEnumerations.monthEnum(MonthEnum.values());
+        return ClientBusinessDetailData.template(businessTypeOptions, sourceOfCapitalOptions, monthEnumOptions, monthEnumOptions, null);
+    }
+
 }
