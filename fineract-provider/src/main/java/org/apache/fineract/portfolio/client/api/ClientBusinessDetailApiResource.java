@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.client.api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -91,6 +92,38 @@ public class ClientBusinessDetailApiResource {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().addBusinessDetail(clientId).withJson(apiRequestBodyAsJson)
                 .build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
+
+    @GET
+    @Path("{businessDetailId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve Client Business Details by Id", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client business details applications. The data returned consists of any or all of:\n"
+            + "\n" + "Field Defaults\n" + "Allowed Value Lists\n\n" + "Example Request:\n" + "\n" + "clients/template")
+    public String retrieveBusinessDetail(@Context final UriInfo uriInfo, @PathParam("clientId") final long clientId,
+            @PathParam("businessDetailId") final long businessDetailId) {
+
+        this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.READ_CLIENTBUSINESSDETAIL);
+
+        ClientBusinessDetailData clientBusinessDetailData = null;
+        clientBusinessDetailData = this.businessDetailReadPlatformService.retrieveBusinessDetail(clientId, businessDetailId);
+
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, clientBusinessDetailData,
+                ClientApiConstants.CLIENT_BUSINESS_DETAIL_RESPONSE_REQUEST_DATA_PARAMETERS);
+    }
+
+    @DELETE
+    @Path("{businessDetailId}")
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Delete a Client Business Detail", description = "Delete a Client Business Detail")
+    public String deleteCharge(@PathParam("businessDetailId") final Long businessDetailId, @PathParam("clientId") final Long clientId) {
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteBusinessDetail(clientId, businessDetailId).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

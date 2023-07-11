@@ -24,4 +24,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 public interface BusinessDetailWritePlatformService {
 
     CommandProcessingResult addBusinessDetail(Long clientId, JsonCommand command);
+
+    CommandProcessingResult deleteBusinessDetail(Long clientId, Long businessDetailId);
 }

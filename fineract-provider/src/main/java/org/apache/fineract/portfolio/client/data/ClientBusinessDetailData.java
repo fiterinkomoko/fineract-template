@@ -41,13 +41,15 @@ public class ClientBusinessDetailData implements Serializable {
     private BigDecimal businessRevenue;
     private BigDecimal averageMonthlyRevenue;
     private Collection<EnumOptionData> bestMonth;
+    private EnumOptionData bestMonthId;
     private String reasonForBestMonth;
     private List<EnumOptionData> worstMonth;
+    private EnumOptionData worstMonthId;
     private String reasonForWorstMonth;
     private Long numberOfPurchase;
     private String purchaseFrequency;
     private BigDecimal totalPurchaseLastMonth;
-    private String lastPurchase;
+    private EnumOptionData lastPurchase;
     private BigDecimal lastPurchaseAmount;
     private BigDecimal businessAsset;
     private BigDecimal amountAtCash;
@@ -101,5 +103,67 @@ public class ClientBusinessDetailData implements Serializable {
         this.sourceOfCapitalId = sourceOfCapitalId;
         this.totalEmployee = totalEmployee;
         this.externalId = externalId;
+    }
+
+    public static ClientBusinessDetailData instance(Long id, Long clientId, CodeValueData businessTypeId, LocalDate businessCreationDate,
+            BigDecimal startingCapital, CodeValueData sourceOfCapitalId, Long totalEmployee, BigDecimal businessRevenue,
+            BigDecimal averageMonthlyRevenue, EnumOptionData bestMonth, String reasonForBestMonth, EnumOptionData worstMonth,
+            String reasonForWorstMonth, Long numberOfPurchase, String purchaseFrequency, BigDecimal totalPurchaseLastMonth,
+            EnumOptionData lastPurchase, BigDecimal lastPurchaseAmount, BigDecimal businessAsset, BigDecimal amountAtCash,
+            BigDecimal amountAtSaving, BigDecimal amountAtInventory, BigDecimal fixedAssetCost, BigDecimal totalInTax,
+            BigDecimal totalInTransport, BigDecimal totalInRent, BigDecimal totalInCommunication, String otherExpense,
+            BigDecimal otherExpenseAmount, BigDecimal totalUtility, BigDecimal totalWorkerSalary, BigDecimal totalWage, String externalId,
+            BigDecimal society) {
+
+        return new ClientBusinessDetailData(id, clientId, businessTypeId, businessCreationDate, startingCapital, sourceOfCapitalId,
+                totalEmployee, businessRevenue, averageMonthlyRevenue, bestMonth, reasonForBestMonth, worstMonth, reasonForWorstMonth,
+                numberOfPurchase, purchaseFrequency, totalPurchaseLastMonth, lastPurchase, lastPurchaseAmount, businessAsset, amountAtCash,
+                amountAtSaving, amountAtInventory, fixedAssetCost, totalInTax, totalInTransport, totalInRent, totalInCommunication,
+                otherExpense, otherExpenseAmount, totalUtility, totalWorkerSalary, totalWage, externalId, society);
+    }
+
+    public ClientBusinessDetailData(Long id, Long clientId, CodeValueData businessTypeId, LocalDate businessCreationDate,
+            BigDecimal startingCapital, CodeValueData sourceOfCapitalId, Long totalEmployee, BigDecimal businessRevenue,
+            BigDecimal averageMonthlyRevenue, EnumOptionData bestMonth, String reasonForBestMonth, EnumOptionData worstMonth,
+            String reasonForWorstMonth, Long numberOfPurchase, String purchaseFrequency, BigDecimal totalPurchaseLastMonth,
+            EnumOptionData lastPurchase, BigDecimal lastPurchaseAmount, BigDecimal businessAsset, BigDecimal amountAtCash,
+            BigDecimal amountAtSaving, BigDecimal amountAtInventory, BigDecimal fixedAssetCost, BigDecimal totalInTax,
+            BigDecimal totalInTransport, BigDecimal totalInRent, BigDecimal totalInCommunication, String otherExpense,
+            BigDecimal otherExpenseAmount, BigDecimal totalUtility, BigDecimal totalWorkerSalary, BigDecimal totalWage, String externalId,
+            BigDecimal society) {
+        this.id = id;
+        this.clientId = clientId;
+        this.businessTypeId = businessTypeId;
+        this.businessCreationDate = businessCreationDate;
+        this.startingCapital = startingCapital;
+        this.sourceOfCapitalId = sourceOfCapitalId;
+        this.totalEmployee = totalEmployee;
+        this.businessRevenue = businessRevenue;
+        this.averageMonthlyRevenue = averageMonthlyRevenue;
+        this.bestMonthId = bestMonth;
+        this.reasonForBestMonth = reasonForBestMonth;
+        this.worstMonthId = worstMonth;
+        this.reasonForWorstMonth = reasonForWorstMonth;
+        this.numberOfPurchase = numberOfPurchase;
+        this.purchaseFrequency = purchaseFrequency;
+        this.totalPurchaseLastMonth = totalPurchaseLastMonth;
+        this.lastPurchase = lastPurchase;
+        this.lastPurchaseAmount = lastPurchaseAmount;
+        this.businessAsset = businessAsset;
+        this.amountAtCash = amountAtCash;
+        this.amountAtSaving = amountAtSaving;
+        this.amountAtInventory = amountAtInventory;
+        this.fixedAssetCost = fixedAssetCost;
+        this.totalInTax = totalInTax;
+        this.totalInTransport = totalInTransport;
+        this.totalInRent = totalInRent;
+        this.totalInCommunication = totalInCommunication;
+        this.otherExpense = otherExpense;
+        this.otherExpenseAmount = otherExpenseAmount;
+        this.totalUtility = totalUtility;
+        this.totalWorkerSalary = totalWorkerSalary;
+        this.totalWage = totalWage;
+        this.externalId = externalId;
+        this.society = society;
     }
 }

@@ -30,6 +30,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
@@ -39,7 +40,8 @@ import org.apache.fineract.portfolio.client.domain.ClientBusinessDetail;
 import org.apache.fineract.portfolio.client.domain.ClientBusinessDetailRepository;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.MonthEnum;
-import org.apache.fineract.useradministration.domain.AppUser;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,9 +60,7 @@ public class BusinessDetailWritePlatformServiceImpl implements BusinessDetailWri
     @Transactional
     @Override
     public CommandProcessingResult addBusinessDetail(Long clientId, JsonCommand command) {
-
-        final AppUser currentUser = this.context.authenticatedUser();
-
+        this.context.authenticatedUser();
         final Client client = clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
 
         final GlobalConfigurationPropertyData businessDetailConfig = this.configurationReadPlatformService
@@ -112,6 +112,36 @@ public class BusinessDetailWritePlatformServiceImpl implements BusinessDetailWri
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId())
                 .withResourceIdAsString(businessDetail.getId().toString()).withClientId(clientId).build();
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult deleteBusinessDetail(Long clientId, Long businessDetailId) {
+        try {
+            this.context.authenticatedUser();
+            final GlobalConfigurationPropertyData businessDetailConfig = this.configurationReadPlatformService
+                    .retrieveGlobalConfiguration("Enable-Client-Business-Detail");
+            final Boolean isClientBusinessDetailsEnable = businessDetailConfig.isEnabled();
+
+            if (!isClientBusinessDetailsEnable) {
+                throw new GeneralPlatformDomainRuleException("error.msg.Enable-Client-Business-Detail.is.not.set",
+                        "Enable-Client-Business-Detail settings is not set. So this operation is not permitted");
+            }
+
+            final Client client = clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+            final ClientBusinessDetail clientBusinessDetail = clientBusinessDetailRepository.findById(businessDetailId).orElseThrow();
+
+            this.clientBusinessDetailRepository.delete(clientBusinessDetail);
+            this.clientBusinessDetailRepository.flush();
+            return new CommandProcessingResultBuilder() //
+                    .withOfficeId(client.officeId()) //
+                    .withClientId(clientId) //
+                    .withEntityId(clientBusinessDetail.getId()) //
+                    .build();
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            throw new PlatformDataIntegrityException("error.msg.client.business.detail.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource.", dve);
+        }
     }
 
     private ClientBusinessDetail createBusinessDetail(final JsonCommand command, Client client) {

@@ -264,4 +264,18 @@
                 onUpdate="RESTRICT" referencedColumnNames="id"
                 referencedTableName="m_code_value" />
     </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_permission_DELETE_CLIENTBUSINESSDETAIL">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_permission where code = 'DELETE_CLIENTBUSINESSDETAIL_CLIENT';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio" />
+            <column name="code" value="DELETE_CLIENTBUSINESSDETAIL_CLIENT" />
+            <column name="entity_name" value="CLIENT" />
+            <column name="action_name" value="DELETE_CLIENTBUSINESSDETAIL" />
+        </insert>
+    </changeSet>
 </databaseChangeLog>
