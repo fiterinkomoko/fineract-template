@@ -3730,8 +3730,8 @@ public class CommandWrapperBuilder {
         this.actionName = "DELETE";
         this.entityName = "HOUSEHOLD_EXPENSES";
         this.entityId = householdExpenseId;
-        this.href = "/householdexpenses/" + clientId
-         return this;
+        this.href = "/householdexpenses/" + clientId;
+        return this;
     }
 
     public CommandWrapperBuilder createClientOtherInfo(final long clientId) {

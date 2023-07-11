@@ -239,7 +239,6 @@ public class ClientApiConstants {
     public static final String STRATA = "Strata";
     public static final String YEAR_ARRIVED_IN_HOST_COUNTRY = "YearArrivedInHostCountry";
 
-
     /**
      * These parameters will match the class level parameters of {@link ClientData}. Where possible, we try to get
      * response parameters to match those of request parameters.

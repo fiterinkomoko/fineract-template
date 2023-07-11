@@ -118,8 +118,8 @@
             </column>
             <column defaultValueComputed="NULL" name="createdby_id" type="BIGINT"/>
             <column defaultValueComputed="NULL" name="lastmodifiedby_id" type="BIGINT"/>
-            <column defaultValueComputed="NULL" name="created_date" type="datetime"/>
-            <column defaultValueComputed="NULL" name="lastmodified_date" type="datetime"/>
+            <column defaultValueComputed="now()" name="created_date" type="datetime"/>
+            <column defaultValueComputed="now()" name="lastmodified_date" type="datetime"/>
         </createTable>
     </changeSet>
 
@@ -141,8 +141,8 @@
             </column>
             <column defaultValueComputed="NULL" name="createdby_id" type="BIGINT"/>
             <column defaultValueComputed="NULL" name="lastmodifiedby_id" type="BIGINT"/>
-            <column defaultValueComputed="NULL" name="created_date" type="datetime"/>
-            <column defaultValueComputed="NULL" name="lastmodified_date" type="datetime"/>
+            <column defaultValueComputed="now()" name="created_date" type="datetime"/>
+            <column defaultValueComputed="now()"  name="lastmodified_date" type="datetime"/>
         </createTable>
     </changeSet>
 </databaseChangeLog>
