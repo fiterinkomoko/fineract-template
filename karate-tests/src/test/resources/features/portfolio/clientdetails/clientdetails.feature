@@ -34,5 +34,15 @@ Feature:  Create Client Business Details APIs
 
     * def submittedOnDate = df.format(faker.date().past(370, 369, TimeUnit.DAYS))
 
-    * def clientDetailsId = call read('classpath:features/portfolio/clientdetails/clientdetailssteps.feature@createClientBusinessDetailsStep'){clientCreationDate : '#(submittedOnDate)' ,businessType : '#(businessTypeCodeValueId)' ,sourceOfCapital : '#(SourceOfCapitalCodeValueId)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def clientId = result.response.resourceId
 
+    * def clientDetailsResponse = call read('classpath:features/portfolio/clientdetails/clientdetailssteps.feature@createClientBusinessDetailsStep'){clientCreationDate : '#(submittedOnDate)' ,businessType : '#(businessTypeCodeValueId)' ,sourceOfCapital : '#(SourceOfCapitalCodeValueId)' ,clientId : '#(clientId)' }
+    * def businessDetailId = clientDetailsResponse.businessId
+    #- Get Client business Details by clientI and businessIdd
+    * def clientDetail = call read('classpath:features/portfolio/clientdetails/clientdetailssteps.feature@getClientBusinessDetailsStep'){clientId : '#(clientId)' ,businessDetailId : '#(businessDetailId)' }
+    * print clientDetail
+
+        #- Get Templates for Client  business Details by Id
+    * def templateResponse = call read('classpath:features/portfolio/clientdetails/clientdetailssteps.feature@getTemplatesClientDetails'){ clientId : '#(clientId)' }
+    * print templateResponse
