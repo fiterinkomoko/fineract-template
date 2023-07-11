@@ -227,6 +227,19 @@ public class ClientApiConstants {
 
     public static final String OTHER_HOUSEHOLD_EXPENSES = "OtherExpenses";
 
+    // other info
+    public static final String CLIENT_OTHER_INFO_RESOURCE_NAME = "ClientOtherInfo";
+    public static final String numberOfChildren = "numberOfChildren";
+    public static final String numberOfDependents = "numberOfDependents";
+    public static final String yearArrivedInHostCountry = "yearArrivedInHostCountryId";
+    public static final String coSignors = "coSignors";
+    public static final String guarantor = "guarantor";
+    public static final String strataIdParamName = "strataId";
+    public static final String nationalityIdParamName = "nationalityId";
+    public static final String STRATA = "Strata";
+    public static final String YEAR_ARRIVED_IN_HOST_COUNTRY = "YearArrivedInHostCountry";
+
+
     /**
      * These parameters will match the class level parameters of {@link ClientData}. Where possible, we try to get
      * response parameters to match those of request parameters.
