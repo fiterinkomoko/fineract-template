@@ -809,7 +809,7 @@ public final class LoanApplicationTerms {
     private BigDecimal calculatePeriodsInLoanTerm() {
 
         BigDecimal periodsInLoanTerm = BigDecimal.valueOf(this.loanTermFrequency);
-        if (this.actualNumberOfRepayments != null && this.actualNumberOfRepayments > this.loanTermFrequency ){
+        if (this.actualNumberOfRepayments != null && this.actualNumberOfRepayments > this.loanTermFrequency) {
             periodsInLoanTerm = BigDecimal.valueOf(this.actualNumberOfRepayments);
         }
         switch (this.interestCalculationPeriodMethod) {
