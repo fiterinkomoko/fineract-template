@@ -3710,6 +3710,30 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder updateHouseholdExpenses(long householdExpenseId) {
+        this.actionName = "UPDATE";
+        this.entityName = "HOUSEHOLD_EXPENSES";
+        this.entityId = householdExpenseId;
+        this.href = "/householdexpenses/" + householdExpenseId;
+        return this;
+    }
+
+    public CommandWrapperBuilder addHouseholdExpenses(long clientId) {
+        this.actionName = "ADD";
+        this.entityName = "HOUSEHOLD_EXPENSES";
+        this.clientId = clientId;
+        this.href = "/householdexpenses/" + clientId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteHouseholdExpenses(long householdExpenseId) {
+        this.actionName = "DELETE";
+        this.entityName = "HOUSEHOLD_EXPENSES";
+        this.entityId = householdExpenseId;
+        this.href = "/householdexpenses/" + householdExpenseId;
+        return this;
+    }
+
     public CommandWrapperBuilder createClientOtherInfo(final long clientId) {
         this.actionName = "CREATE";
         this.entityName = "CLIENTOTHERINFO";
@@ -3732,6 +3756,7 @@ public class CommandWrapperBuilder {
         this.entityName = "CLIENTBUSINESSDETAIL";
         this.href = "/clients/" + clientId + "/businessDetail";
         this.clientId = clientId;
+
         return this;
     }
 
