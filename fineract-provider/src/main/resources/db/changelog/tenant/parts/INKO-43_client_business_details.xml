@@ -242,12 +242,12 @@
         </insert>
     </changeSet>
 
-    <changeSet id="modify-m_business_detail-business_type_id-data-type-to-bigint" author="bosco@fiter.io">
-        <modifyDataType tableName="m_business_detail" columnName="business_type_id" newDataType="bigint"/>
+    <changeSet id="modify-m_business_detail-business_type_id-data-type-to-int" author="bosco@fiter.io">
+        <modifyDataType tableName="m_business_detail" columnName="business_type_id" newDataType="int"/>
     </changeSet>
 
-    <changeSet id="modify-m_business_detail-source_of_capital-data-type-to-bigint" author="bosco@fiter.io">
-        <modifyDataType tableName="m_business_detail" columnName="source_of_capital" newDataType="bigint"/>
+    <changeSet id="modify-m_business_detail-source_of_capital-data-type-to-int" author="bosco@fiter.io">
+        <modifyDataType tableName="m_business_detail" columnName="source_of_capital" newDataType="int"/>
     </changeSet>
 
     <changeSet id="drop.modify.FK_m_business_detail_m_code_value_business_type_id.business_type_id" author="bosco@fiter.io">
