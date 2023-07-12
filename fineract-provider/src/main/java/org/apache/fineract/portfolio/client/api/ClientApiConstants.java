@@ -232,12 +232,18 @@ public class ClientApiConstants {
     public static final String numberOfChildren = "numberOfChildren";
     public static final String numberOfDependents = "numberOfDependents";
     public static final String yearArrivedInHostCountry = "yearArrivedInHostCountryId";
-    public static final String coSignors = "coSignors";
     public static final String guarantor = "guarantor";
     public static final String strataIdParamName = "strataId";
     public static final String nationalityIdParamName = "nationalityId";
     public static final String STRATA = "Strata";
     public static final String YEAR_ARRIVED_IN_HOST_COUNTRY = "YearArrivedInHostCountry";
+    public static final String coSignors = "coSignorsName";
+    public static String businessLocationParamName = "businessLocation";
+    public static String taxIdentificationNumberParamName = "taxIdentificationNumber";
+    public static String incomeGeneratingActivityParamName = "incomeGeneratingActivity";
+    public static String incomeGeneratingActivityMonthlyAmountParamName = "incomeGeneratingActivityMonthlyAmount";
+    public static String telephoneNoParamName = "telephoneNo";
+
 
     /**
      * These parameters will match the class level parameters of {@link ClientData}. Where possible, we try to get

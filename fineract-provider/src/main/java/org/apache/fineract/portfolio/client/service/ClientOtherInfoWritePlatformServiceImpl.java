@@ -36,7 +36,9 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientOtherInfo;
 import org.apache.fineract.portfolio.client.domain.ClientOtherInfoRepository;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
+import org.apache.fineract.portfolio.client.exception.ClientOtherInfoAlreadyPresentException;
 import org.apache.fineract.portfolio.client.exception.ClientOtherInfoNotFoundException;
+import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.apache.fineract.portfolio.client.serialization.ClientOtherInfoCommandFromApiJsonDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +64,7 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
 
         final ClientOtherInfo clientOtherInfo = this.clientOtherInfoRepository.getByClientId(clientId);
         if (clientOtherInfo != null) {
-            throw new ClientOtherInfoNotFoundException(clientId);
+            throw new ClientOtherInfoAlreadyPresentException(clientId);
         }
 
         final GlobalConfigurationPropertyData otherInfoConfig = this.configurationReadPlatformService
@@ -73,10 +75,10 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
             throw new GeneralPlatformDomainRuleException("error.msg.enable.client.other.info",
                     "Enable Client Other Info not for proceeding operation");
         }
-
-        fromApiJsonDeserializer.validateForCreate(clientId, command.json());
-
         final Client client = clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+        fromApiJsonDeserializer.validateForCreate(client.getLegalForm().intValue(), command.json());
+
+        ClientOtherInfo otherInfo = null;
 
         CodeValue strata = null;
         final Long strataId = command.longValueOfParameterNamed(ClientApiConstants.strataIdParamName);
@@ -84,20 +86,24 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
             strata = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.STRATA, strataId);
         }
 
-        CodeValue nationality = null;
-        final Long nationalityId = command.longValueOfParameterNamed(ClientApiConstants.nationalityIdParamName);
-        if (nationalityId != null) {
-            nationality = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection("COUNTRY", nationalityId);
+        if (LegalForm.fromInt(client.getLegalForm().intValue()).isPerson()) {
+            CodeValue nationality = null;
+            final Long nationalityId = command.longValueOfParameterNamed(ClientApiConstants.nationalityIdParamName);
+            if (nationalityId != null) {
+                nationality = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection("COUNTRY", nationalityId);
+            }
+
+            CodeValue yearArrivedInHostCountry = null;
+            final Long yearArrivedInHostCountryId = command.longValueOfParameterNamed(ClientApiConstants.yearArrivedInHostCountry);
+            if (yearArrivedInHostCountryId != null) {
+                yearArrivedInHostCountry = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
+                        ClientApiConstants.YEAR_ARRIVED_IN_HOST_COUNTRY, yearArrivedInHostCountryId);
+            }
+            otherInfo = ClientOtherInfo.createNew(command, client, strata, nationality, yearArrivedInHostCountry);
+        } else if (LegalForm.fromInt(client.getLegalForm().intValue()).isEntity()) {
+            otherInfo = ClientOtherInfo.createNewForEntity(command, client, strata);
         }
 
-        CodeValue yearArrivedInHostCountry = null;
-        final Long yearArrivedInHostCountryId = command.longValueOfParameterNamed(ClientApiConstants.yearArrivedInHostCountry);
-        if (yearArrivedInHostCountryId != null) {
-            yearArrivedInHostCountry = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
-                    ClientApiConstants.YEAR_ARRIVED_IN_HOST_COUNTRY, yearArrivedInHostCountryId);
-        }
-
-        ClientOtherInfo otherInfo = ClientOtherInfo.createNew(command, client, strata, nationality, yearArrivedInHostCountry);
         ClientOtherInfo info = clientOtherInfoRepository.saveAndFlush(otherInfo);
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withClientId(clientId).withEntityId(info.getId())
@@ -116,10 +122,11 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
                 throw new GeneralPlatformDomainRuleException("error.msg.enable.client.other.info",
                         "Enable Client Other Info not for proceeding operation");
             }
-            this.fromApiJsonDeserializer.validateForUpdate(command.json());
+
             final ClientOtherInfo clientOtherInfo = this.clientOtherInfoRepository.findById(otherInfoId)
                     .orElseThrow(() -> new ClientOtherInfoNotFoundException(otherInfoId));
-            final Map<String, Object> changes = clientOtherInfo.update(command);
+            this.fromApiJsonDeserializer.validateForUpdate(command.json(), clientOtherInfo.getClient().getLegalForm().intValue());
+            final Map<String, Object> changes = clientOtherInfo.update(command, clientOtherInfo.getClient().getLegalForm().intValue());
 
             if (changes.containsKey(ClientApiConstants.strataIdParamName)) {
                 final Long strataId = command.longValueOfParameterNamed(ClientApiConstants.strataIdParamName);
@@ -131,27 +138,29 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
                 }
                 clientOtherInfo.setStrata(strataCodeValue);
             }
-            if (changes.containsKey(ClientApiConstants.nationalityIdParamName)) {
-                final Long nationalityId = command.longValueOfParameterNamed(ClientApiConstants.nationalityIdParamName);
-                CodeValue nationalityCodeValue = null;
-                if (nationalityId != null) {
+            if (LegalForm.fromInt(clientOtherInfo.getClient().getLegalForm().intValue()).isPerson()) {
+                if (changes.containsKey(ClientApiConstants.nationalityIdParamName)) {
+                    final Long nationalityId = command.longValueOfParameterNamed(ClientApiConstants.nationalityIdParamName);
+                    CodeValue nationalityCodeValue = null;
+                    if (nationalityId != null) {
 
-                    nationalityCodeValue = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection("COUNTRY", nationalityId);
+                        nationalityCodeValue = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection("COUNTRY",
+                                nationalityId);
+                    }
+                    clientOtherInfo.setNationality(nationalityCodeValue);
                 }
-                clientOtherInfo.setNationality(nationalityCodeValue);
-            }
 
-            if (changes.containsKey(ClientApiConstants.yearArrivedInHostCountry)) {
-                final Long yearArrivedInHostCountryId = command.longValueOfParameterNamed(ClientApiConstants.yearArrivedInHostCountry);
-                CodeValue yearArrivedInHostCountryCodeValue = null;
-                if (yearArrivedInHostCountryId != null) {
+                if (changes.containsKey(ClientApiConstants.yearArrivedInHostCountry)) {
+                    final Long yearArrivedInHostCountryId = command.longValueOfParameterNamed(ClientApiConstants.yearArrivedInHostCountry);
+                    CodeValue yearArrivedInHostCountryCodeValue = null;
+                    if (yearArrivedInHostCountryId != null) {
 
-                    yearArrivedInHostCountryCodeValue = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
-                            ClientApiConstants.yearArrivedInHostCountry, yearArrivedInHostCountryId);
+                        yearArrivedInHostCountryCodeValue = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
+                                ClientApiConstants.yearArrivedInHostCountry, yearArrivedInHostCountryId);
+                    }
+                    clientOtherInfo.setYearArrivedInHostCountry(yearArrivedInHostCountryCodeValue);
                 }
-                clientOtherInfo.setYearArrivedInHostCountry(yearArrivedInHostCountryCodeValue);
             }
-
             if (!changes.isEmpty()) {
                 this.clientOtherInfoRepository.saveAndFlush(clientOtherInfo);
                 LOG.info("Update successfully");
