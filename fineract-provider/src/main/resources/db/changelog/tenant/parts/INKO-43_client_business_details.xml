@@ -270,21 +270,21 @@
                 onUpdate="RESTRICT" referencedColumnNames="id"
                 referencedTableName="m_code_value" />
     </changeSet>
-    <changeSet id="DELETE_CLIENTBUSINESSDETAIL_CLIENT" author="bosco@fiter.io">
+    <changeSet id="DELETE_CLIENTBUSINESSDETAIL_3" author="bosco@fiter.io">
         <sql>
-            DELETE FROM m_permission WHERE m_permission.code = 'DELETE_CLIENTBUSINESSDETAIL_CLIENT';
+            DELETE FROM m_permission WHERE m_permission.code = 'DELETE_CLIENTBUSINESSDETAIL';
         </sql>
     </changeSet>
 
-    <changeSet author="bosco@fiter.io" id="add_permission_DELETE_CLIENTBUSINESSDETAIL_2">
+    <changeSet author="bosco@fiter.io" id="add_permission_DELETE_CLIENTBUSINESSDETAIL_3">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
-                select count(1) from m_permission where code = 'DELETE_CLIENTBUSINESSDETAIL_CLIENT';
+                select count(1) from m_permission where code = 'DELETE_CLIENTBUSINESSDETAIL';
             </sqlCheck>
         </preConditions>
         <insert tableName="m_permission">
             <column name="grouping" value="portfolio" />
-            <column name="code" value="DELETE_CLIENTBUSINESSDETAIL_CLIENT" />
+            <column name="code" value="DELETE_CLIENTBUSINESSDETAIL" />
             <column name="entity_name" value="CLIENTBUSINESSDETAIL" />
             <column name="action_name" value="DELETE" />
         </insert>
