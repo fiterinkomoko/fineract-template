@@ -122,7 +122,8 @@ public class ClientBusinessDetailApiResource {
     @Path("{businessDetailId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Client Business Detail", description = "Delete a Client Business Detail")
-    public String deleteCharge(@PathParam("businessDetailId") final Long businessDetailId, @PathParam("clientId") final Long clientId) {
+    public String deleteBusinessDetail(@PathParam("businessDetailId") final Long businessDetailId,
+            @PathParam("clientId") final Long clientId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteBusinessDetail(clientId, businessDetailId).build();
 

@@ -23,25 +23,25 @@ import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.portfolio.client.service.BusinessDetailWritePlatformService;
+import org.apache.fineract.portfolio.client.service.ClientOtherInfoWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-@CommandType(entity = "CLIENTBUSINESSDETAIL", action = "DELETE")
-public class DeleteClientBusinessDetailCommandHandler implements NewCommandSourceHandler {
+@CommandType(entity = "CLIENTOTHERINFO", action = "UPDATE")
+public class UpdateClientOtherInfoCommandHandler implements NewCommandSourceHandler {
 
-    private final BusinessDetailWritePlatformService businessDetailWritePlatformService;
+    private final ClientOtherInfoWritePlatformService clientOtherInfoWritePlatformService;
 
     @Autowired
-    public DeleteClientBusinessDetailCommandHandler(final BusinessDetailWritePlatformService businessDetailWritePlatformService) {
-        this.businessDetailWritePlatformService = businessDetailWritePlatformService;
+    public UpdateClientOtherInfoCommandHandler(final ClientOtherInfoWritePlatformService clientOtherInfoWritePlatformService) {
+        this.clientOtherInfoWritePlatformService = clientOtherInfoWritePlatformService;
     }
 
     @Override
     public CommandProcessingResult processCommand(JsonCommand command) {
 
-        return this.businessDetailWritePlatformService.deleteBusinessDetail(command.getClientId(), command.entityId());
+        return this.clientOtherInfoWritePlatformService.update(command.entityId(), command);
     }
 
 }
