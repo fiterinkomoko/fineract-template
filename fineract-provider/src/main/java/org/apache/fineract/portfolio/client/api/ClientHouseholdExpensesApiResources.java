@@ -114,7 +114,7 @@ public class ClientHouseholdExpensesApiResources {
     public String deleteClientHouseholdExpenses(@PathParam("householdExpenseId") final long householdExpenseId,
             final String apiRequestBodyAsJson, @PathParam("clientId") @Parameter(description = "clientId") final Long clientId) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deletHouseholdExpenses(householdExpenseId)
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteHouseholdExpenses(householdExpenseId)
                 .withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);

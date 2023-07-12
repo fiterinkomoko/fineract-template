@@ -8,9 +8,15 @@ Feature: Manage Client Household Expenses Lifecycle
     * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(clientCreationDate)' }
     * def clientId = result.response.resourceId
     * def otherExpensesTypeId = 24
-    * def codeValueRes = call read('classpath:features/system/codes/codeValuesStep.feature@fetchCodeValuesStep'){ codeId : '#(otherExpensesTypeId)'}
-    * def res = if(karate.sizeOf(codeValueRes.listOfCodeValues) < 1) karate.call('classpath:features/system/codes/codeValuesStep.feature@createCodeValueStep', { codeId : constitutionCodeId, name : 'Test'});
-    * def otherExpensesId== (res != null ? res.codeValueId : codeValueRes.listOfCodeValues[0].id)
+
+      #- Fetch codeValue for otherExpenses
+    * def otherExpensesName = 'OtherExpenses'
+    * def otherExpensesCode = call read('classpath:features/system/codes/codesStep.feature@fetchCodeByNameStep') { codeName : '#(otherExpensesName)' }
+    * def otherExpensesCodeId = otherExpensesCode.codeName.id
+    * def codeValueRes = call read('classpath:features/system/codes/codeValuesStep.feature@fetchCodeValuesStep'){ codeId : '#(otherExpensesCodeId)'}
+    * def res = if(karate.sizeOf(codeValueRes.listOfCodeValues) < 1) karate.call('classpath:features/system/codes/codeValuesStep.feature@createCodeValueStep', { codeId : otherExpensesCodeId, name : 'Test1'});
+    * def otherExpensesId = (res != null ? res.codeValueId : codeValueRes.listOfCodeValues[0].id)
+    * print otherExpensesId
 
   @updatehouseholdexpenses
   Scenario: Update Client Household Expenses

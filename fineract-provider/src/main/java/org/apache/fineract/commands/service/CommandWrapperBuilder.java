@@ -3726,11 +3726,11 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder deletHouseholdExpenses(long householdExpenseId) {
+    public CommandWrapperBuilder deleteHouseholdExpenses(long householdExpenseId) {
         this.actionName = "DELETE";
         this.entityName = "HOUSEHOLD_EXPENSES";
         this.entityId = householdExpenseId;
-        this.href = "/householdexpenses/" + clientId;
+        this.href = "/householdexpenses/" + householdExpenseId;
         return this;
     }
 
