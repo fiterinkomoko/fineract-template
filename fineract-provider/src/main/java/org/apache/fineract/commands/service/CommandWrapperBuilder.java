@@ -3726,4 +3726,13 @@ public class CommandWrapperBuilder {
         this.entityId = businessDetailId;
         return this;
     }
+
+    public CommandWrapperBuilder updateBusinessDetail(final long clientId, final long businessDetailId) {
+        this.actionName = "UPDATE_CLIENTBUSINESSDETAIL";
+        this.entityName = "BUSINESS_DETAIL";
+        this.entityId = businessDetailId;
+        this.clientId = clientId;
+        this.href = "/clients/" + clientId+"/businessdetails/"+businessDetailId;
+        return this;
+    }
 }

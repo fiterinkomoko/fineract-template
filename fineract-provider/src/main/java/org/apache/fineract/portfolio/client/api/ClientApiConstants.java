@@ -268,6 +268,7 @@ public class ClientApiConstants {
     public static final String SOCIETY = "society";
     public static final String EXTERNAL_ID = "externalId";
     public static final String CLIENT_ID = "clientId";
+    public static final String ID = "id";
     public static final String READ_CLIENTBUSINESSDETAIL = "READ_CLIENTBUSINESSDETAIL";
 
     protected static final Set<String> CLIENT_BUSINESS_DETAIL_RESPONSE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(CLIENT_ID,

@@ -143,6 +143,24 @@ public class BusinessDetailWritePlatformServiceImpl implements BusinessDetailWri
                     "Unknown data integrity issue with resource.", dve);
         }
     }
+    @Transactional
+    @Override
+    public CommandProcessingResult updateBusinessDetail(Long clientId, JsonCommand command) {
+        this.context.authenticatedUser();
+        final GlobalConfigurationPropertyData businessDetailConfig = this.configurationReadPlatformService
+                .retrieveGlobalConfiguration("Enable-Client-Business-Detail");
+        final Boolean isClientBusinessDetailsEnable = businessDetailConfig.isEnabled();
+
+        if (!isClientBusinessDetailsEnable) {
+            throw new GeneralPlatformDomainRuleException("error.msg.Enable-Client-Business-Detail.is.not.set",
+                    "Enable-Client-Business-Detail settings is not set. So this operation is not permitted");
+        }
+
+        this.fromApiJsonDeserializer.validateForUpdate(command.json());
+
+        final Client client = clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+        return null;
+    }
 
     private ClientBusinessDetail createBusinessDetail(final JsonCommand command, Client client) {
 

@@ -190,4 +190,144 @@ public final class ClientBusinessDetailDataValidator {
         }
     }
 
+    public void validateForUpdate(String json) {
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
+                ClientApiCollectionConstants.CLIENT_BUSINESS_DETAIL_UPDATE_REQUEST_DATA_PARAMETERS);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        boolean atLeastOneParameterPassedForUpdate = false;
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(ClientApiCollectionConstants.CLIENT_RESOURCE_NAME);
+
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.BUSINESS_TYPE, element)) {
+            atLeastOneParameterPassedForUpdate = true;
+            final Long businessType = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.BUSINESS_TYPE, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.BUSINESS_TYPE).value(businessType).notNull().integerGreaterThanZero();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.externalIdParamName, element)) {
+            final String externalId = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.externalIdParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.externalIdParamName).value(externalId).ignoreIfNull()
+                    .notExceedingLengthOf(100);
+        }
+
+        LocalDate businessCreationDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.BUSINESS_CREATION_DATE, element);
+        baseDataValidator.reset().parameter(ClientApiConstants.BUSINESS_CREATION_DATE).value(businessCreationDate).notNull();
+
+        final String sourceOfCapitalParameterName = "sourceOfCapital";
+        final Long sourceOfCapital = this.fromApiJsonHelper.extractLongNamed(sourceOfCapitalParameterName, element);
+        baseDataValidator.reset().parameter(sourceOfCapitalParameterName).value(sourceOfCapital).notNull().integerGreaterThanZero();
+
+        final BigDecimal startingCapital = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("startingCapital", element);
+        baseDataValidator.reset().parameter("startingCapital").value(startingCapital).notNull().positiveAmount();
+
+        final Long totalEmployee = this.fromApiJsonHelper.extractLongNamed("totalEmployee", element);
+        baseDataValidator.reset().parameter("totalEmployee").value(totalEmployee).notNull().integerGreaterThanZero();
+
+        final BigDecimal businessRevenue = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("businessRevenue", element);
+        baseDataValidator.reset().parameter("businessRevenue").value(businessRevenue).notNull().positiveAmount();
+
+        final BigDecimal averageMonthlyRevenue = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("averageMonthlyRevenue", element);
+        baseDataValidator.reset().parameter("averageMonthlyRevenue").value(averageMonthlyRevenue).notNull().positiveAmount();
+
+        final String reasonForBestMonthParameterName = "reasonForBestMonth";
+        final String reasonForBestMonth = this.fromApiJsonHelper.extractStringNamed(reasonForBestMonthParameterName, element);
+        baseDataValidator.reset().parameter(reasonForBestMonthParameterName).value(reasonForBestMonth).notNull().notExceedingLengthOf(500);
+
+        final String bestMonthParameterName = "bestMonth";
+        final String bestMonth = this.fromApiJsonHelper.extractStringNamed(bestMonthParameterName, element);
+        baseDataValidator.reset().parameter(bestMonthParameterName).value(bestMonth).notNull().notExceedingLengthOf(12);
+
+        final String reasonForWorstMonthParameterName = "reasonForWorstMonth";
+        final String reasonForWorstMonth = this.fromApiJsonHelper.extractStringNamed(reasonForWorstMonthParameterName, element);
+        baseDataValidator.reset().parameter(reasonForWorstMonthParameterName).value(reasonForWorstMonth).notNull()
+                .notExceedingLengthOf(500);
+
+        final String worstMonthParameterName = "worstMonth";
+        final String worstMonth = this.fromApiJsonHelper.extractStringNamed(worstMonthParameterName, element);
+        baseDataValidator.reset().parameter(worstMonthParameterName).value(worstMonth).notNull().notExceedingLengthOf(12);
+
+        final Long numberOfPurchase = this.fromApiJsonHelper.extractLongNamed("numberOfPurchase", element);
+        baseDataValidator.reset().parameter("numberOfPurchase").value(numberOfPurchase).notNull().integerGreaterThanZero();
+
+        final String purchaseFrequencyParameterName = "purchaseFrequency";
+        final String purchaseFrequency = this.fromApiJsonHelper.extractStringNamed(purchaseFrequencyParameterName, element);
+        baseDataValidator.reset().parameter(purchaseFrequencyParameterName).value(purchaseFrequency).notNull().notExceedingLengthOf(500);
+
+        final BigDecimal lastPurchaseAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("lastPurchaseAmount", element);
+        baseDataValidator.reset().parameter("lastPurchaseAmount").value(lastPurchaseAmount).notNull().positiveAmount();
+
+        final BigDecimal businessAssetAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("businessAssetAmount", element);
+        baseDataValidator.reset().parameter("businessAssetAmount").value(businessAssetAmount).notNull().positiveAmount();
+
+        final BigDecimal amountAtCash = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("amountAtCash", element);
+        baseDataValidator.reset().parameter("amountAtCash").value(amountAtCash).notNull().positiveAmount();
+
+        final BigDecimal amountAtSaving = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("amountAtSaving", element);
+        baseDataValidator.reset().parameter("amountAtSaving").value(amountAtSaving).notNull().positiveAmount();
+
+        final BigDecimal amountAtInventory = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("amountAtInventory", element);
+        baseDataValidator.reset().parameter("amountAtInventory").value(amountAtInventory).notNull().positiveAmount();
+
+        final BigDecimal fixedAssetCost = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("fixedAssetCost", element);
+        baseDataValidator.reset().parameter("fixedAssetCost").value(fixedAssetCost).notNull().positiveAmount();
+
+        final BigDecimal totalInTax = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("totalInTax", element);
+        baseDataValidator.reset().parameter("totalInTax").value(totalInTax).notNull().positiveAmount();
+
+        final BigDecimal totalInTransport = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("totalInTransport", element);
+        baseDataValidator.reset().parameter("totalInTransport").value(totalInTransport).notNull().positiveAmount();
+
+        final BigDecimal totalInRent = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("totalInRent", element);
+        baseDataValidator.reset().parameter("totalInRent").value(totalInRent).notNull().positiveAmount();
+
+        final BigDecimal totalInCommunication = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("totalInCommunication", element);
+        baseDataValidator.reset().parameter("totalInCommunication").value(totalInCommunication).notNull().positiveAmount();
+
+        final String otherExpenseParameterName = "otherExpense";
+        if (this.fromApiJsonHelper.parameterExists(otherExpenseParameterName, element)) {
+            final String otherExpense = this.fromApiJsonHelper.extractStringNamed(otherExpenseParameterName, element);
+            baseDataValidator.reset().parameter(otherExpenseParameterName).value(otherExpense).ignoreIfNull().notExceedingLengthOf(500);
+        }
+
+        final String otherExpenseAmountParameterName = "otherExpenseAmount";
+        if (this.fromApiJsonHelper.parameterExists(otherExpenseAmountParameterName, element)) {
+            final BigDecimal otherExpenseAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(otherExpenseAmountParameterName,
+                    element);
+            baseDataValidator.reset().parameter(otherExpenseAmountParameterName).value(otherExpenseAmount).ignoreIfNull().positiveAmount();
+        }
+
+        final BigDecimal totalUtility = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("totalUtility", element);
+        baseDataValidator.reset().parameter("totalUtility").value(totalUtility).notNull().positiveAmount();
+
+        final String totalWorkerSalaryParameterName = "totalWorkerSalary";
+        if (this.fromApiJsonHelper.parameterExists(totalWorkerSalaryParameterName, element)) {
+            final BigDecimal totalWorkerSalary = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(totalWorkerSalaryParameterName,
+                    element);
+            baseDataValidator.reset().parameter(totalWorkerSalaryParameterName).value(totalWorkerSalary).ignoreIfNull().positiveAmount();
+        }
+        final String totalWageParameterName = "totalWage";
+        if (this.fromApiJsonHelper.parameterExists(totalWageParameterName, element)) {
+            final BigDecimal totalWage = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(totalWageParameterName, element);
+            baseDataValidator.reset().parameter(totalWageParameterName).value(totalWage).ignoreIfNull().positiveAmount();
+        }
+
+        final String societyName = "society";
+        if (this.fromApiJsonHelper.parameterExists(societyName, element)) {
+            final BigDecimal society = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(societyName, element);
+            baseDataValidator.reset().parameter(societyName).value(society).ignoreIfNull().positiveAmount();
+        }
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
 }
