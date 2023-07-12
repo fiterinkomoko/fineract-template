@@ -211,6 +211,22 @@ public class ClientApiConstants {
 
     private static final String clientAdditionalInfoData = "clientAdditionalInfoData";
 
+    public static final String otherExpensesAmountParamName = "otherExpensesAmount";
+
+    public static final String otherExpensesIdParamName = "otherExpensesId";
+
+    public static final String otherExpensesListParamName = "otherExpensesList";
+
+    public static final String utilitiesAmountParamName = "utilitiesAmount";
+    public static final String rentAmountParamName = "rentAmount";
+    public static final String schoolFessAmountParamName = "schoolFessAmount";
+
+    public static final String foodExpensesAmountParamName = "foodExpensesAmount";
+
+    public static final String CLIENT_HOUSEHOLD_EXPENSES_RESOURCE_NAME = "HouseholdExpenses";
+
+    public static final String OTHER_HOUSEHOLD_EXPENSES = "OtherExpenses";
+
     // other info
     public static final String CLIENT_OTHER_INFO_RESOURCE_NAME = "ClientOtherInfo";
     public static final String numberOfChildren = "numberOfChildren";
@@ -245,6 +261,9 @@ public class ClientApiConstants {
     protected static final Set<String> CLIENT_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName,
             transactionAmountParamName, paymentDetailDataParamName, reversedParamName, dateParamName, officeIdParamName,
             officeNameParamName, transactionTypeParamName, transactionCurrencyParamName, externalIdParamName, submittedOnDateParamName));
+
+    public static final Set<String> CLIENT_HOUSEHOLD_EXPENSES_DATA_PARAMETERS = new HashSet<>(Arrays.asList(foodExpensesAmountParamName,
+            schoolFessAmountParamName, rentAmountParamName, utilitiesAmountParamName, otherExpensesListParamName));
 
     // Client Business Detail Param
     public static final String BUSINESS_TYPE = "businessType";
