@@ -122,8 +122,7 @@ public class ClientOtherInfoReadPlatformServiceImpl implements ClientOtherInfoRe
             return "co.id AS id, co.client_id AS clientId, co.strata_cv_id AS strataId, co.co_signors AS coSignorsName, cv.code_value as strataName, "
                     + " co.guarantor AS guarantor, co.tax_identification_number as taxIdentificationNumber, co.business_location as businessLocation,"
                     + " co.income_generating_activity AS incomeGeneratingActivity, co.income_generating_activity_monthly_amount as incomeGeneratingActivityMonthlyAmount,"
-                    + " co.telephone_no as telephoneNo"
-                    + " FROM m_client_other_info co"
+                    + " co.telephone_no as telephoneNo" + " FROM m_client_other_info co"
                     + " left join m_code_value cv on co.strata_cv_id=cv.id";
         }
 
@@ -144,7 +143,7 @@ public class ClientOtherInfoReadPlatformServiceImpl implements ClientOtherInfoRe
             final BigDecimal incomeGeneratingActivityMonthlyAmount = rs.getBigDecimal("incomeGeneratingActivityMonthlyAmount");
             final String telephoneNo = rs.getString("telephoneNo");
 
-            return ClientOtherInfoData.instanceEntity(id, clientId, coSignors, guarantor,strata, businessLocation, taxIdentificationNumber,
+            return ClientOtherInfoData.instanceEntity(id, clientId, coSignors, guarantor, strata, businessLocation, taxIdentificationNumber,
                     incomeGeneratingActivity, incomeGeneratingActivityMonthlyAmount, telephoneNo);
 
         }

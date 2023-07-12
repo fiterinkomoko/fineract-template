@@ -166,7 +166,7 @@ public class ClientOtherInfoApiResources {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveClientOtherInfoEntity(@Context final UriInfo uriInfo, @PathParam("otherInfoId") final Long otherInfoId,
-                                          @PathParam("clientId") final Long clientId) {
+            @PathParam("clientId") final Long clientId) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 

@@ -48,7 +48,7 @@ public final class ClientOtherInfoData implements Serializable {
 
     private Collection<CodeValueData> yearArrivedInHostCountryOptions;
 
-    //company
+    // company
     private String businessLocation;
     private Long taxIdentificationNumber;
     private Long incomeGeneratingActivity;
@@ -56,9 +56,8 @@ public final class ClientOtherInfoData implements Serializable {
     private String telephoneNumber;
 
     public ClientOtherInfoData(Long id, Long clientId, CodeValueData strata, CodeValueData yearArrivedInHostCountry,
-            CodeValueData nationality, Integer numberOfChildren, Integer numberOfDependents,
-            Collection<CodeValueData> nationalityOptions, Collection<CodeValueData> strataOptions,
-            Collection<CodeValueData> yearArrivedInHostCountryOptions) {
+            CodeValueData nationality, Integer numberOfChildren, Integer numberOfDependents, Collection<CodeValueData> nationalityOptions,
+            Collection<CodeValueData> strataOptions, Collection<CodeValueData> yearArrivedInHostCountryOptions) {
 
         this.id = id;
         this.clientId = clientId;
@@ -72,7 +71,9 @@ public final class ClientOtherInfoData implements Serializable {
         this.yearArrivedInHostCountryOptions = yearArrivedInHostCountryOptions;
     }
 
-    public ClientOtherInfoData(Long id, Long clientId, String coSignors, String guarantor, CodeValueData strata, String businessLocation, Long taxIdentificationNumber, Long incomeGeneratingActivity, BigDecimal incomeGeneratingActivityMonthlyAmount, String telephoneNumber) {
+    public ClientOtherInfoData(Long id, Long clientId, String coSignors, String guarantor, CodeValueData strata, String businessLocation,
+            Long taxIdentificationNumber, Long incomeGeneratingActivity, BigDecimal incomeGeneratingActivityMonthlyAmount,
+            String telephoneNumber) {
         this.id = id;
         this.clientId = clientId;
         this.coSignors = coSignors;
@@ -86,7 +87,7 @@ public final class ClientOtherInfoData implements Serializable {
     }
 
     public static ClientOtherInfoData template(final Collection<CodeValueData> nationalityOptions,
-                                               final Collection<CodeValueData> strataOptions, final Collection<CodeValueData> yearArrivedInHostCountryOptions) {
+            final Collection<CodeValueData> strataOptions, final Collection<CodeValueData> yearArrivedInHostCountryOptions) {
         Long id = null;
         Long clientId = null;
         CodeValueData strata = null;
@@ -102,12 +103,15 @@ public final class ClientOtherInfoData implements Serializable {
     public static ClientOtherInfoData instance(final Long id, final Long clientId, final CodeValueData strata,
             final CodeValueData yearArrivedInHostCountry, final CodeValueData nationality, final Integer numberOfChildren,
             final Integer numberOfDependents) {
-        return new ClientOtherInfoData(id, clientId, strata, yearArrivedInHostCountry, nationality, numberOfChildren, numberOfDependents,null, null, null);
+        return new ClientOtherInfoData(id, clientId, strata, yearArrivedInHostCountry, nationality, numberOfChildren, numberOfDependents,
+                null, null, null);
     }
 
-    public static ClientOtherInfoData instanceEntity(final Long id, final Long clientId, String coSignors, String guarantor, CodeValueData strata, String businessLocation, Long taxIdentificationNumber, Long incomeGeneratingActivity, BigDecimal incomeGeneratingActivityMonthlyAmount, String telephoneNumber)
-    {
-        return new ClientOtherInfoData(id, clientId, coSignors,  guarantor, strata, businessLocation, taxIdentificationNumber, incomeGeneratingActivity, incomeGeneratingActivityMonthlyAmount, telephoneNumber);
+    public static ClientOtherInfoData instanceEntity(final Long id, final Long clientId, String coSignors, String guarantor,
+            CodeValueData strata, String businessLocation, Long taxIdentificationNumber, Long incomeGeneratingActivity,
+            BigDecimal incomeGeneratingActivityMonthlyAmount, String telephoneNumber) {
+        return new ClientOtherInfoData(id, clientId, coSignors, guarantor, strata, businessLocation, taxIdentificationNumber,
+                incomeGeneratingActivity, incomeGeneratingActivityMonthlyAmount, telephoneNumber);
     }
 
 }

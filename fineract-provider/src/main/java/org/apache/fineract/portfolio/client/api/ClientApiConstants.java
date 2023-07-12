@@ -244,7 +244,6 @@ public class ClientApiConstants {
     public static String incomeGeneratingActivityMonthlyAmountParamName = "incomeGeneratingActivityMonthlyAmount";
     public static String telephoneNoParamName = "telephoneNo";
 
-
     /**
      * These parameters will match the class level parameters of {@link ClientData}. Where possible, we try to get
      * response parameters to match those of request parameters.
