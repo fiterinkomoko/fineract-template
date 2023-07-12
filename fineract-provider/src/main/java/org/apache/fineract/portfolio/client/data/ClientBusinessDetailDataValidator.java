@@ -201,24 +201,18 @@ public final class ClientBusinessDetailDataValidator {
                 ClientApiCollectionConstants.CLIENT_BUSINESS_DETAIL_UPDATE_REQUEST_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        boolean atLeastOneParameterPassedForUpdate = false;
-
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(ClientApiCollectionConstants.CLIENT_RESOURCE_NAME);
 
-        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.BUSINESS_TYPE, element)) {
-            atLeastOneParameterPassedForUpdate = true;
-            final Long businessType = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.BUSINESS_TYPE, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.BUSINESS_TYPE).value(businessType).notNull().integerGreaterThanZero();
-        }
+        final Long businessType = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.BUSINESS_TYPE, element);
+        baseDataValidator.reset().parameter(ClientApiConstants.BUSINESS_TYPE).value(businessType).notNull().integerGreaterThanZero();
 
-        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.externalIdParamName, element)) {
-            final String externalId = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.externalIdParamName, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.externalIdParamName).value(externalId).ignoreIfNull()
-                    .notExceedingLengthOf(100);
-        }
+
+        final String externalId = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.externalIdParamName, element);
+        baseDataValidator.reset().parameter(ClientApiConstants.externalIdParamName).value(externalId).ignoreIfNull()
+                .notExceedingLengthOf(100);
 
         LocalDate businessCreationDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.BUSINESS_CREATION_DATE, element);
         baseDataValidator.reset().parameter(ClientApiConstants.BUSINESS_CREATION_DATE).value(businessCreationDate).notNull();
