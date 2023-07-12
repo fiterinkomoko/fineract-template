@@ -49,3 +49,17 @@ Feature: Create client Business
     When method GET
     Then status 200
     Then def detailResponse = response
+
+
+  @ignore
+  @deleteClientBusinessDetailsStep
+  Scenario: Get client Business Details Step
+    Given configure ssl = true
+    Given path 'clients',clientId,'businessDetail',businessDetailId
+    And header Accept = 'application/json'
+    And header Content-Type = 'application/json'
+    And header Authorization = authToken
+    And header fineract-platform-tenantid = tenantId
+    When method DELETE
+    Then status 200
+    Then def detail = response
