@@ -9,8 +9,6 @@ Feature: Create client Business
   @createClientBusinessDetailsStep
   Scenario: Create client Business Details Step
     Given configure ssl = true
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(clientCreationDate)' }
-    * def clientId = result.response.resourceId
     * def clientBusinessDetailsData = read('classpath:templates/clientBusinessDetails.json')
     Given path 'clients',clientId,'businessDetail'
     And header Accept = 'application/json'
@@ -24,3 +22,44 @@ Feature: Create client Business
     Then match $ contains { clientId: '#notnull' }
     Then def clientId = response.clientId
     Then def businessId = response.resourceIdentifier
+
+
+  @ignore
+  @getClientBusinessDetailsStep
+  Scenario: Get client Business Details Step
+    Given configure ssl = true
+    Given path 'clients',clientId,'businessDetail',businessDetailId
+    And header Accept = 'application/json'
+    And header Content-Type = 'application/json'
+    And header Authorization = authToken
+    And header fineract-platform-tenantid = tenantId
+    When method GET
+    Then status 200
+    Then def detail = response
+
+  @ignore
+  @getTemplatesClientDetails
+  Scenario: Get client Business Details Step
+    Given configure ssl = true
+    Given path 'clients',clientId,'businessDetail','template'
+    And header Accept = 'application/json'
+    And header Content-Type = 'application/json'
+    And header Authorization = authToken
+    And header fineract-platform-tenantid = tenantId
+    When method GET
+    Then status 200
+    Then def detailResponse = response
+
+
+  @ignore
+  @deleteClientBusinessDetailsStep
+  Scenario: Get client Business Details Step
+    Given configure ssl = true
+    Given path 'clients',clientId,'businessDetail',businessDetailId
+    And header Accept = 'application/json'
+    And header Content-Type = 'application/json'
+    And header Authorization = authToken
+    And header fineract-platform-tenantid = tenantId
+    When method DELETE
+    Then status 200
+    Then def detail = response

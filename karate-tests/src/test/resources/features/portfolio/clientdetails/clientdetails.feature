@@ -34,5 +34,32 @@ Feature:  Create Client Business Details APIs
 
     * def submittedOnDate = df.format(faker.date().past(370, 369, TimeUnit.DAYS))
 
-    * def clientDetailsId = call read('classpath:features/portfolio/clientdetails/clientdetailssteps.feature@createClientBusinessDetailsStep'){clientCreationDate : '#(submittedOnDate)' ,businessType : '#(businessTypeCodeValueId)' ,sourceOfCapital : '#(SourceOfCapitalCodeValueId)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def clientId = result.response.resourceId
 
+    * def clientDetailsResponse = call read('classpath:features/portfolio/clientdetails/clientdetailssteps.feature@createClientBusinessDetailsStep'){clientCreationDate : '#(submittedOnDate)' ,businessType : '#(businessTypeCodeValueId)' ,sourceOfCapital : '#(SourceOfCapitalCodeValueId)' ,clientId : '#(clientId)' }
+    * def businessDetailId = clientDetailsResponse.businessId
+    #- Get Client business Details by clientI and businessIdd
+    * def clientDetail = call read('classpath:features/portfolio/clientdetails/clientdetailssteps.feature@getClientBusinessDetailsStep'){clientId : '#(clientId)' ,businessDetailId : '#(businessDetailId)' }
+    * print clientDetail
+    * assert clientId == clientDetail.detail.clientId
+    * assert businessDetailId == clientDetail.detail.id
+
+        #- Get Templates for Client  business Details by Id
+    * def templateResponse = call read('classpath:features/portfolio/clientdetails/clientdetailssteps.feature@getTemplatesClientDetails'){ clientId : '#(clientId)' }
+    * print templateResponse
+
+           #- Get Client Account details. This has all business-details
+    * def clientBusinessDetailsReponse = call read('classpath:features/portfolio/clients/clientsteps.feature@findbyclientid'){ clientId : '#(clientId)' }
+    * print clientBusinessDetailsReponse
+    * assert karate.sizeOf(clientBusinessDetailsReponse.client.clientBusinessDetailDataSet) == 1
+
+        #- Delete Client business Details by clientI and businessId
+    * def deletedClientDetails = call read('classpath:features/portfolio/clientdetails/clientdetailssteps.feature@deleteClientBusinessDetailsStep'){clientId : '#(clientId)' ,businessDetailId : '#(businessDetailId)' }
+    * print deletedClientDetails
+
+      #- Get Client Account details. This has all business-details
+    * def clientBusinessDetailsReponse = call read('classpath:features/portfolio/clients/clientsteps.feature@findbyclientid'){ clientId : '#(clientId)' }
+    * print clientBusinessDetailsReponse
+    #- Should not find client details since service above deleted it
+    * assert karate.sizeOf(clientBusinessDetailsReponse.client.clientBusinessDetailDataSet) == 0

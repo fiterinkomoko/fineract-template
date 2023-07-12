@@ -23,4 +23,7 @@ import org.apache.fineract.portfolio.client.data.ClientBusinessDetailData;
 public interface BusinessDetailReadPlatformService {
 
     ClientBusinessDetailData retrieveTemplate(Long clientId);
+
+    ClientBusinessDetailData retrieveBusinessDetail(Long clientId, Long businessDetailId);
+
 }

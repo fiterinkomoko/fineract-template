@@ -28,20 +28,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-@CommandType(entity = "CLIENTBUSINESSDETAIL", action = "CREATE")
-public class AddClientBusinessDetailCommandHandler implements NewCommandSourceHandler {
+@CommandType(entity = "CLIENTBUSINESSDETAIL", action = "DELETE")
+public class DeleteClientBusinessDetailCommandHandler implements NewCommandSourceHandler {
 
     private final BusinessDetailWritePlatformService businessDetailWritePlatformService;
 
     @Autowired
-    public AddClientBusinessDetailCommandHandler(final BusinessDetailWritePlatformService businessDetailWritePlatformService) {
+    public DeleteClientBusinessDetailCommandHandler(final BusinessDetailWritePlatformService businessDetailWritePlatformService) {
         this.businessDetailWritePlatformService = businessDetailWritePlatformService;
     }
 
     @Override
     public CommandProcessingResult processCommand(JsonCommand command) {
 
-        return this.businessDetailWritePlatformService.addBusinessDetail(command.getClientId(), command);
+        return this.businessDetailWritePlatformService.deleteBusinessDetail(command.getClientId(), command.entityId());
     }
 
 }

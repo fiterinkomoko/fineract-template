@@ -164,4 +164,32 @@ public class ClientBusinessDetail extends AbstractAuditableCustom {
         this.externalId = externalId;
         this.society = society;
     }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public CodeValue getBusinessType() {
+        return businessType;
+    }
+
+    public LocalDate getBusinessCreationDate() {
+        return businessCreationDate;
+    }
+
+    public BigDecimal getStartingCapital() {
+        return startingCapital;
+    }
+
+    public CodeValue getSourceOfCapital() {
+        return sourceOfCapital;
+    }
+
+    public Long getTotalEmployee() {
+        return totalEmployee;
+    }
+
+    public String getExternalId() {
+        return externalId;
+    }
 }

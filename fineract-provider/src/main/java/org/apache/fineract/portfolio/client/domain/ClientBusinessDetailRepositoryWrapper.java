@@ -19,16 +19,22 @@
 package org.apache.fineract.portfolio.client.domain;
 
 import java.util.List;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Service;
 
-public interface ClientBusinessDetailRepository
-        extends JpaRepository<ClientBusinessDetail, Long>, JpaSpecificationExecutor<ClientBusinessDetail> {
+@Service
+public class ClientBusinessDetailRepositoryWrapper {
 
-    boolean existsByExternalId(@Param("externalId") String externalId);
+    private final ClientBusinessDetailRepository clientBusinessDetailRepository;
+    private final ClientRepositoryWrapper clientRepositoryWrapper;
 
-    @Query("select det from ClientBusinessDetail det where det.client=:client")
-    List<ClientBusinessDetail> findByClientId(@Param("client") Client client);
+    public ClientBusinessDetailRepositoryWrapper(ClientBusinessDetailRepository clientBusinessDetailRepository,
+            ClientRepositoryWrapper clientRepositoryWrapper) {
+        this.clientBusinessDetailRepository = clientBusinessDetailRepository;
+        this.clientRepositoryWrapper = clientRepositoryWrapper;
+    }
+
+    public List<ClientBusinessDetail> findByClientId(final Long clientId) {
+        final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+        return this.clientBusinessDetailRepository.findByClientId(client);
+    }
 }
