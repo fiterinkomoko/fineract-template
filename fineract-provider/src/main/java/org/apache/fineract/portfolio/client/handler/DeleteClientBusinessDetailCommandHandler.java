@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-@CommandType(entity = "CLIENT", action = "DELETE_CLIENTBUSINESSDETAIL")
+@CommandType(entity = "CLIENTBUSINESSDETAIL", action = "DELETE")
 public class DeleteClientBusinessDetailCommandHandler implements NewCommandSourceHandler {
 
     private final BusinessDetailWritePlatformService businessDetailWritePlatformService;

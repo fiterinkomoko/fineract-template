@@ -3711,17 +3711,17 @@ public class CommandWrapperBuilder {
     }
 
     public CommandWrapperBuilder addBusinessDetail(final long clientId) {
-        this.actionName = "CREATE_CLIENTBUSINESSDETAIL";
-        this.entityName = "CLIENT";
+        this.actionName = "CREATE";
+        this.entityName = "CLIENTBUSINESSDETAIL";
         this.href = "/clients/" + clientId + "/businessDetail";
         this.clientId = clientId;
         return this;
     }
 
     public CommandWrapperBuilder deleteBusinessDetail(final long clientId, final long businessDetailId) {
-        this.actionName = "DELETE_CLIENTBUSINESSDETAIL";
-        this.entityName = "CLIENT";
-        this.href = "/clients/" + clientId + "/businessDetail/"+businessDetailId;
+        this.actionName = "DELETE";
+        this.entityName = "CLIENTBUSINESSDETAIL";
+        this.href = "/clients/" + clientId + "/businessDetail/" + businessDetailId;
         this.clientId = clientId;
         this.entityId = businessDetailId;
         return this;
