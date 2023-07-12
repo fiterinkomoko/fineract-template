@@ -22,7 +22,7 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <changeSet author="judiao@fiter.io" id="CI18-117_add_loan_redraw_account_and_permissions01">
+    <changeSet author="judiao@fiter.io" id="CI18-117_add_loan_redraw_account_and_permissions001">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="m_loan_redraw_account"/>
@@ -59,21 +59,20 @@
 
         </createTable>
     </changeSet>
-    <changeSet author="judiao@fiter.io" id="CI18-117_add_loan_redraw_account_and_permissions02">
+    <changeSet author="judiao@fiter.io" id="CI18-117_add_loan_redraw_account_and_permissions002">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
                 SELECT COUNT(1) FROM m_permission WHERE code = 'WITHDRAWAL_REDRAW_LOAN'
             </sqlCheck>
         </preConditions>
         <insert tableName="m_permission">
-            <column name="id" value="10117"/>
             <column name="code" value="WITHDRAWAL_REDRAW_LOAN"/>
             <column name="entity_name" value="LOAN"/>
             <column name="action_name" value="WITHDRAWAL_REDRAW"/>
             <column name="can_maker_checker" valueBoolean="false"/>
         </insert>
     </changeSet>
-    <changeSet author="judiao@fiter.io" id="CI18-117_add_loan_redraw_account_and_permissions03">
+    <changeSet author="judiao@fiter.io" id="CI18-117_add_loan_redraw_account_and_permissions003">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
                 SELECT COUNT(1) FROM m_permission WHERE code = 'APPLY_REDRAW_PAYMENT_LOAN'
@@ -81,7 +80,6 @@
         </preConditions>
         <insert tableName="m_permission">
             <column name="grouping" value="transaction_loan"/>
-            <column name="id" value="10118"/>
             <column name="code" value="APPLY_REDRAW_PAYMENT_LOAN"/>
             <column name="entity_name" value="LOAN"/>
             <column name="action_name" value="APPLY_REDRAW_PAYMENT"/>
