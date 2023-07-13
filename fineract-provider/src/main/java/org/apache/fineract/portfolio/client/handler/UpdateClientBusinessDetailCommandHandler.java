@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-@CommandType(entity = "CLIENT", action = "UPDATE_CLIENTBUSINESSDETAIL")
+@CommandType(entity = "CLIENTBUSINESSDETAIL", action = "UPDATE")
 public class UpdateClientBusinessDetailCommandHandler implements NewCommandSourceHandler {
 
     private final BusinessDetailWritePlatformService businessDetailWritePlatformService;

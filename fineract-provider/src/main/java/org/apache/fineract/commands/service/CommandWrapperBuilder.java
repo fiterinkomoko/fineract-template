@@ -3770,11 +3770,11 @@ public class CommandWrapperBuilder {
     }
 
     public CommandWrapperBuilder updateBusinessDetail(final long clientId, final long businessDetailId) {
-        this.actionName = "UPDATE_CLIENTBUSINESSDETAIL";
-        this.entityName = "BUSINESS_DETAIL";
+        this.actionName = "UPDATE";
+        this.entityName = "CLIENTBUSINESSDETAIL";
         this.entityId = businessDetailId;
         this.clientId = clientId;
-        this.href = "/clients/" + clientId+"/businessdetails/"+businessDetailId;
+        this.href = "/clients/" + clientId + "/businessDetail/" + businessDetailId;
         return this;
     }
 }

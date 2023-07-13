@@ -27,6 +27,7 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 public class ClientApiConstants {
 
     public static final String CLIENT_RESOURCE_NAME = "client";
+    public static final String CLIENT_BUSINESS_DETAIL_RESOURCE_NAME = "businessDetail";
 
     public static final String CLIENT_LEVELS = "clientLevels";
     public static final String CLIENT_CHARGES_RESOURCE_NAME = "CLIENTCHARGE";
