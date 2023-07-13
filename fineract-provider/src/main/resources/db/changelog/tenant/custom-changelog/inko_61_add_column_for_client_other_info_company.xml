@@ -57,6 +57,10 @@
                 tableName="m_client_other_info"/>
     </changeSet>
     <changeSet  author="deepika@fiter.io"  id="dropNotNullConstraint">
+        <preConditions>
+            <columnExists tableName="m_client_other_info" columnName="nationality_cv_id"></columnExists>
+            <columnExists tableName="m_client_other_info" columnName="year_arrived_in_country_cv_id"></columnExists>
+        </preConditions>
         <dropNotNullConstraint
                                 columnDataType="int"
                                 columnName="nationality_cv_id"
