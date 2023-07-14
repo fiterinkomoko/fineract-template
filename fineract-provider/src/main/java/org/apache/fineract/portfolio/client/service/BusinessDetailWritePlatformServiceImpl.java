@@ -163,7 +163,7 @@ public class BusinessDetailWritePlatformServiceImpl implements BusinessDetailWri
 
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
-            final Client client = clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+            clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
 
             ClientBusinessDetail businessDetail = this.clientBusinessDetailRepository.findById(businessDetailId).orElseThrow();
 
@@ -173,8 +173,8 @@ public class BusinessDetailWritePlatformServiceImpl implements BusinessDetailWri
                 final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.BUSINESS_TYPE);
                 CodeValue businessType = null;
                 if (newValue != null) {
-                    businessType = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.BUSINESS_TYPE,
-                            newValue);
+                    businessType = this.codeValueRepository
+                            .findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.BUSINESS_TYPE_CODE, newValue);
                 }
                 businessDetail.updateBusinessType(businessType);
             }
@@ -184,7 +184,7 @@ public class BusinessDetailWritePlatformServiceImpl implements BusinessDetailWri
                 CodeValue sourceOfCapital = null;
                 if (newValue != null) {
                     sourceOfCapital = this.codeValueRepository
-                            .findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.SOURCE_OF_CAPITAL, newValue);
+                            .findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.SOURCE_OF_CAPITAL_CODE, newValue);
                 }
                 businessDetail.updateSourceOfCapital(sourceOfCapital);
             }

@@ -268,9 +268,11 @@ public class ClientApiConstants {
 
     // Client Business Detail Param
     public static final String BUSINESS_TYPE = "businessType";
+    public static final String BUSINESS_TYPE_CODE = "BusinessType";
     public static final String BUSINESS_CREATION_DATE = "businessCreationDate";
     public static final String STARTING_CAPITAL = "startingCapital";
     public static final String SOURCE_OF_CAPITAL = "sourceOfCapital";
+    public static final String SOURCE_OF_CAPITAL_CODE = "SourceOfCapital";
     public static final String TOTAL_EMPLOYEE = "totalEmployee";
     public static final String BUSINESS_REVENUE = "businessRevenue";
     public static final String AVERAGE_MONTHLY_REVENUE = "averageMonthlyRevenue";
