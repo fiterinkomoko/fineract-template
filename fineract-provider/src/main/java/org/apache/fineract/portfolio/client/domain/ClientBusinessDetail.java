@@ -293,6 +293,11 @@ public class ClientBusinessDetail extends AbstractAuditableCustom {
             actualChanges.put(ClientApiConstants.WORST_MONTH, newValue);
             this.worstMonth = newValue;
         }
+        if (command.isChangeInIntegerParameterNamed(ClientApiConstants.WHEN_LAST_PURCHASE, this.whenLastPurchase)) {
+            final Integer newValue = command.integerValueOfParameterNamed(ClientApiConstants.WHEN_LAST_PURCHASE);
+            actualChanges.put(ClientApiConstants.WHEN_LAST_PURCHASE, newValue);
+            this.whenLastPurchase = newValue;
+        }
 
         if (command.isChangeInStringParameterNamed(ClientApiConstants.REASON_FOR_WORST_MONTH, this.reasonForWorstMonth)) {
             final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.REASON_FOR_WORST_MONTH);
@@ -406,6 +411,12 @@ public class ClientBusinessDetail extends AbstractAuditableCustom {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(ClientApiConstants.SOCIETY);
             actualChanges.put(ClientApiConstants.SOCIETY, newValue);
             this.society = newValue;
+        }
+
+        if (command.isChangeInBigDecimalParameterNamed(ClientApiConstants.TOTAL_PURCHASE_LAST_MONTH, this.totalPurchaseLastMonth)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(ClientApiConstants.TOTAL_PURCHASE_LAST_MONTH);
+            actualChanges.put(ClientApiConstants.TOTAL_PURCHASE_LAST_MONTH, newValue);
+            this.totalPurchaseLastMonth = newValue;
         }
 
         return actualChanges;
