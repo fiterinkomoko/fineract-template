@@ -63,3 +63,16 @@ Feature:  Create Client Business Details APIs
     * print clientBusinessDetailsReponse
     #- Should not find client details since service above deleted it
     * assert karate.sizeOf(clientBusinessDetailsReponse.client.clientBusinessDetailDataSet) == 0
+
+    #- Update client business details
+    * def clientDetailsResponse = call read('classpath:features/portfolio/clientdetails/clientdetailssteps.feature@createClientBusinessDetailsStep'){clientCreationDate : '#(submittedOnDate)' ,businessType : '#(businessTypeCodeValueId)' ,sourceOfCapital : '#(SourceOfCapitalCodeValueId)' ,clientId : '#(clientId)' }
+    * def businessDetailId = clientDetailsResponse.businessId
+    #- Get Client business Details by clientI and businessIdd
+    * def clientDetail = call read('classpath:features/portfolio/clientdetails/clientdetailssteps.feature@getClientBusinessDetailsStep'){clientId : '#(clientId)' ,businessDetailId : '#(businessDetailId)' }
+    * print clientDetail
+    * assert clientId == clientDetail.detail.clientId
+    * assert businessDetailId == clientDetail.detail.id
+    #- Update business details
+    * def updateDetailsResponse = call read('classpath:features/portfolio/clientdetails/clientdetailssteps.feature@updateClientBusinessDetailsStep'){clientCreationDate : '#(submittedOnDate)' ,businessType : '#(businessTypeCodeValueId)' ,sourceOfCapital : '#(SourceOfCapitalCodeValueId)' ,clientId : '#(clientId)',businessDetailId : '#(businessDetailId)' }
+    * def businessDetailId = updateDetailsResponse.businessId
+    * print updateDetailsResponse

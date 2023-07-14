@@ -27,5 +27,5 @@ public interface BusinessDetailWritePlatformService {
 
     CommandProcessingResult deleteBusinessDetail(Long clientId, Long businessDetailId);
 
-    CommandProcessingResult updateBusinessDetail(Long clientId, JsonCommand command);
+    CommandProcessingResult updateBusinessDetail(Long clientId, Long businessDetailId, JsonCommand command);
 }

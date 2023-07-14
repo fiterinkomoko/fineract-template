@@ -110,8 +110,8 @@ public class ClientBusinessDetailApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.READ_CLIENTBUSINESSDETAIL);
 
-        ClientBusinessDetailData clientBusinessDetailData = null;
-        clientBusinessDetailData = this.businessDetailReadPlatformService.retrieveBusinessDetail(clientId, businessDetailId);
+        ClientBusinessDetailData clientBusinessDetailData = this.businessDetailReadPlatformService.retrieveBusinessDetail(clientId,
+                businessDetailId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, clientBusinessDetailData,

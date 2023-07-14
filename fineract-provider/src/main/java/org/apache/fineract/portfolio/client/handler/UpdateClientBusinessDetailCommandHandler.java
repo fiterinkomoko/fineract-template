@@ -41,7 +41,7 @@ public class UpdateClientBusinessDetailCommandHandler implements NewCommandSourc
     @Override
     public CommandProcessingResult processCommand(JsonCommand command) {
 
-        return this.businessDetailWritePlatformService.updateBusinessDetail(command.getClientId(), command);
+        return this.businessDetailWritePlatformService.updateBusinessDetail(command.getClientId(), command.entityId(), command);
     }
 
 }

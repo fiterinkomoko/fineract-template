@@ -63,3 +63,22 @@ Feature: Create client Business
     When method DELETE
     Then status 200
     Then def detail = response
+
+  @ignore
+  @updateClientBusinessDetailsStep
+  Scenario: Update client Business Details Step
+    Given configure ssl = true
+    * def clientBusinessDetailsData = read('classpath:templates/clientBusinessDetails.json')
+    Given path 'clients',clientId,'businessDetail',businessDetailId
+    And header Accept = 'application/json'
+    And header Content-Type = 'application/json'
+    And header Authorization = authToken
+    And header fineract-platform-tenantid = tenantId
+    And request clientBusinessDetailsData.updateClientBusinessDetails
+    When method PUT
+    Then status 200
+    Then match $ contains { resourceId: '#notnull' }
+    Then match $ contains { clientId: '#notnull' }
+    Then match $ contains { changes: '#notnull' }
+    Then def clientId = response.clientId
+    Then def businessId = response.resourceId

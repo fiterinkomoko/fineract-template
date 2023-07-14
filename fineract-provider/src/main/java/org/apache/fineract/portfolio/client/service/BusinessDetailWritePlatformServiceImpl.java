@@ -148,7 +148,7 @@ public class BusinessDetailWritePlatformServiceImpl implements BusinessDetailWri
 
     @Transactional
     @Override
-    public CommandProcessingResult updateBusinessDetail(Long clientId, JsonCommand command) {
+    public CommandProcessingResult updateBusinessDetail(Long clientId, Long businessDetailId, JsonCommand command) {
         try {
             this.context.authenticatedUser();
 
@@ -165,8 +165,7 @@ public class BusinessDetailWritePlatformServiceImpl implements BusinessDetailWri
 
             final Client client = clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
 
-            ClientBusinessDetail businessDetail = this.clientBusinessDetailRepository.findById(command.longValueOfParameterNamed("id"))
-                    .orElseThrow();
+            ClientBusinessDetail businessDetail = this.clientBusinessDetailRepository.findById(businessDetailId).orElseThrow();
 
             final Map<String, Object> changes = businessDetail.update(command);
 
