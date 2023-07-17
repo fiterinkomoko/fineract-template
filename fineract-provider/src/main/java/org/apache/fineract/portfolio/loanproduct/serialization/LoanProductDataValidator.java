@@ -1602,6 +1602,10 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(LoanProductConstants.equityContributionLoanPercentageParamName)
                     .value(equityContributionLoanPercentage).ignoreIfNull().zeroOrPositiveAmount();
         }
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.IS_ISLAMIC, element)) {
+            final Boolean isIslamic = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.IS_ISLAMIC, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.IS_ISLAMIC).value(isIslamic).ignoreIfNull().validateForBooleanValue();
+        }
         // set with persisted value if not coming from API call
         isBnplLoanProduct = isBnplLoanProduct == null ? loanProduct.getBnplLoanProduct() : isBnplLoanProduct;
         requiresEquityContribution = requiresEquityContribution == null ? loanProduct.isRequiresEquityContribution()

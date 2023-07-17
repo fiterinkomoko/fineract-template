@@ -1307,6 +1307,11 @@ public class LoanProduct extends AbstractPersistableCustom {
             actualChanges.put(LoanProductConstants.equityContributionLoanPercentageParamName, newValue);
             this.equityContributionLoanPercentage = newValue;
         }
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.IS_ISLAMIC, this.isIslamic)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.IS_ISLAMIC);
+            actualChanges.put(LoanProductConstants.IS_ISLAMIC, newValue);
+            this.isIslamic = newValue;
+        }
 
         return actualChanges;
     }
