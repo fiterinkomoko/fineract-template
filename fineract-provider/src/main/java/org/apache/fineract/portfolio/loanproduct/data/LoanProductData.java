@@ -996,6 +996,7 @@ public class LoanProductData implements Serializable {
         this.maxNumberOfLoanExtensionsAllowed = productData.maxNumberOfLoanExtensionsAllowed;
         this.loanTermIncludesToppedUpLoanTerm = productData.loanTermIncludesToppedUpLoanTerm;
         this.isAccountLevelArrearsToleranceEnable = productData.isAccountLevelArrearsToleranceEnable;
+        this.isIslamic = productData.isIslamic;
     }
 
     private Collection<ChargeData> nullIfEmpty(final Collection<ChargeData> charges) {
