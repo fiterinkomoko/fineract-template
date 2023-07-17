@@ -28,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
+import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -88,8 +89,15 @@ public class BusinessDetailReadPlatformServiceImpl implements BusinessDetailRead
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.SOURCE_OF_CAPITAL_OPTIONS));
         final List<EnumOptionData> monthEnumOptions = ClientEnumerations.monthEnum(MonthEnum.values());
         final ClientData clientAccount = this.clientReadPlatformService.retrieveOne(clientId);
-        return ClientBusinessDetailData.template(businessTypeOptions, sourceOfCapitalOptions, monthEnumOptions, monthEnumOptions,
-                clientAccount);
+
+        final GlobalConfigurationPropertyData enableClientBusinessDetail = this.configurationReadPlatformService
+                .retrieveGlobalConfiguration("Enable-Client-Business-Detail");
+        final Boolean isClientBusinessDetailEnabled = enableClientBusinessDetail.isEnabled();
+
+        ClientBusinessDetailData clientBusinessDetailData = ClientBusinessDetailData.template(businessTypeOptions, sourceOfCapitalOptions,
+                monthEnumOptions, monthEnumOptions, clientAccount);
+        clientBusinessDetailData.setClientBusinessDetailEnabled(isClientBusinessDetailEnabled);
+        return clientBusinessDetailData;
 
     }
 
