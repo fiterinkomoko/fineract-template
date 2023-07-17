@@ -84,15 +84,15 @@
         </sql>
     </changeSet>
 
-    <changeSet author="bosco@fiter.io" id="add_permission_CREATE_CLIENTBUSINESSDETAIL_2">
+    <changeSet author="bosco@fiter.io" id="add_permission_CREATE_CLIENTBUSINESSDETAIL_3">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
-                select count(1) from m_permission where code = 'CREATE_CLIENTBUSINESSDETAIL_CLIENT';
+                select count(1) from m_permission where code = 'CREATE_CLIENTBUSINESSDETAIL';
             </sqlCheck>
         </preConditions>
         <insert tableName="m_permission">
             <column name="grouping" value="portfolio" />
-            <column name="code" value="CREATE_CLIENTBUSINESSDETAIL_CLIENT" />
+            <column name="code" value="CREATE_CLIENTBUSINESSDETAIL" />
             <column name="entity_name" value="CLIENTBUSINESSDETAIL" />
             <column name="action_name" value="CREATE" />
         </insert>
@@ -287,6 +287,20 @@
             <column name="code" value="DELETE_CLIENTBUSINESSDETAIL" />
             <column name="entity_name" value="CLIENTBUSINESSDETAIL" />
             <column name="action_name" value="DELETE" />
+        </insert>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_permission_UPDATE_CLIENTBUSINESSDETAIL">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_permission where code = 'UPDATE_CLIENTBUSINESSDETAIL';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio" />
+            <column name="code" value="UPDATE_CLIENTBUSINESSDETAIL" />
+            <column name="entity_name" value="CLIENTBUSINESSDETAIL" />
+            <column name="action_name" value="UPDATE" />
         </insert>
     </changeSet>
 </databaseChangeLog>

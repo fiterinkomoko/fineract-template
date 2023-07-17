@@ -192,6 +192,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
                 new ArrayList<AddressData>(Arrays.asList(address)), isAddressEnabled, datatableTemplates,
                 new ArrayList<ClientBusinessOwnerData>(Arrays.asList(ownerData)), isbusinessOwnersEnabled, titleOptions);
         clientData.setClientBusinessDetailData(clientBusinessDetailData);
+        clientData.setClientBusinessDetailEnabled(isClientBusinessDetailEnabled);
         return clientData;
     }
 

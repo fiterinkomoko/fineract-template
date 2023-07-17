@@ -137,6 +137,7 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
     private final LocalDateTime createdDate;
     private Set<ClientBusinessDetailData> clientBusinessDetailDataSet;
     private ClientBusinessDetailData clientBusinessDetailData;
+    private Boolean isClientBusinessDetailEnabled;
 
     public static ClientData importClientEntityInstance(Long legalFormId, Integer rowIndex, String fullname, Long officeId,
             Long clientTypeId, Long clientClassificationId, Long staffId, Boolean active, LocalDate activationDate,
@@ -777,5 +778,9 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
 
     public void setClientBusinessDetailData(ClientBusinessDetailData clientBusinessDetailData) {
         this.clientBusinessDetailData = clientBusinessDetailData;
+    }
+
+    public void setClientBusinessDetailEnabled(Boolean clientBusinessDetailEnabled) {
+        isClientBusinessDetailEnabled = clientBusinessDetailEnabled;
     }
 }

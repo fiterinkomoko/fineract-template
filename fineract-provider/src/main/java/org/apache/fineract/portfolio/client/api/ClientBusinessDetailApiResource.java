@@ -24,6 +24,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -109,8 +110,8 @@ public class ClientBusinessDetailApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(ClientApiConstants.READ_CLIENTBUSINESSDETAIL);
 
-        ClientBusinessDetailData clientBusinessDetailData = null;
-        clientBusinessDetailData = this.businessDetailReadPlatformService.retrieveBusinessDetail(clientId, businessDetailId);
+        ClientBusinessDetailData clientBusinessDetailData = this.businessDetailReadPlatformService.retrieveBusinessDetail(clientId,
+                businessDetailId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, clientBusinessDetailData,
@@ -125,6 +126,24 @@ public class ClientBusinessDetailApiResource {
             @PathParam("clientId") final Long clientId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteBusinessDetail(clientId, businessDetailId).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
+
+    @PUT
+    @Path("{businessDetailId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Update a Client Business Detail", description = "Update a Client Business Detail")
+    public String update(@PathParam("clientId") final Long clientId, @PathParam("businessDetailId") final Long businessDetailId,
+            final String apiRequestBodyAsJson) {
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
+                .updateBusinessDetail(clientId, businessDetailId) //
+                .withJson(apiRequestBodyAsJson) //
+                .build(); //
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

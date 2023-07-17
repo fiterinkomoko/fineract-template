@@ -22,6 +22,7 @@ package org.apache.fineract.portfolio.client.serialization;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -35,6 +36,7 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
+import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,15 +44,17 @@ import org.springframework.stereotype.Component;
 public final class ClientOtherInfoCommandFromApiJsonDeserializer {
 
     private final FromJsonHelper fromApiJsonHelper;
-    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "clientId", "strataId", "nationalityId",
-            "numberOfChildren", "numberOfDependents", "yearArrivedInHostCountryId", "co_signors", "guarantor", "locale", "dateFormat"));
+    private final Set<String> supportedParameters = new HashSet<>(
+            Arrays.asList("id", "clientId", "strataId", "nationalityId", "numberOfChildren", "numberOfDependents",
+                    "yearArrivedInHostCountryId", "coSignorsName", "guarantor", "locale", "dateFormat", "businessLocation",
+                    "taxIdentificationNumber", "incomeGeneratingActivity", "incomeGeneratingActivityMonthlyAmount", "telephoneNo"));
 
     @Autowired
     public ClientOtherInfoCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
-    public void validateForCreate(final long clientId, String json) {
+    public void validateForCreate(final int legalFormId, String json) {
 
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
@@ -65,48 +69,78 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        baseDataValidator.reset().value(clientId).notBlank().integerGreaterThanZero();
+        baseDataValidator.reset().parameter(ClientApiConstants.legalFormIdParamName).value(legalFormId).notNull().inMinMaxRange(1, 2);
 
         final Integer strataId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.strataIdParamName, element);
         baseDataValidator.reset().parameter(ClientApiConstants.staffIdParamName).value(strataId).integerGreaterThanZero();
 
-        final Integer nationalityId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.nationalityIdParamName,
-                element);
-        baseDataValidator.reset().parameter(ClientApiConstants.nationalityIdParamName).value(nationalityId).integerGreaterThanZero();
+        if (LegalForm.fromInt(legalFormId).isPerson()) {
+            final Integer nationalityId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.nationalityIdParamName,
+                    element);
+            baseDataValidator.reset().parameter(ClientApiConstants.nationalityIdParamName).value(nationalityId).integerGreaterThanZero();
 
-        if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.numberOfChildren, element) != null) {
-            final Long numberOfChildren = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.numberOfChildren, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.numberOfChildren).value(numberOfChildren).notNull()
+            if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.numberOfChildren, element) != null) {
+                final Long numberOfChildren = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.numberOfChildren, element);
+                baseDataValidator.reset().parameter(ClientApiConstants.numberOfChildren).value(numberOfChildren).notNull()
+                        .integerGreaterThanZero();
+            }
+
+            if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.numberOfDependents, element) != null) {
+                final Long numberOfDependents = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.numberOfDependents, element);
+                baseDataValidator.reset().parameter(ClientApiConstants.numberOfChildren).value(numberOfDependents).notNull()
+                        .integerGreaterThanZero();
+            }
+            final Integer yearArrivedInHostCountryId = this.fromApiJsonHelper
+                    .extractIntegerSansLocaleNamed(ClientApiConstants.yearArrivedInHostCountry, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountry).value(yearArrivedInHostCountryId)
                     .integerGreaterThanZero();
-        }
+        } else if (LegalForm.fromInt(legalFormId).isEntity()) {
 
-        if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.numberOfDependents, element) != null) {
-            final Long numberOfDependents = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.numberOfDependents, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.numberOfChildren).value(numberOfDependents).notNull()
-                    .integerGreaterThanZero();
-        }
-        final Integer yearArrivedInHostCountryId = this.fromApiJsonHelper
-                .extractIntegerSansLocaleNamed(ClientApiConstants.yearArrivedInHostCountry, element);
-        baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountry).value(yearArrivedInHostCountryId)
-                .integerGreaterThanZero();
-
-        if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.coSignors, element) != null) {
-            final String coSignors = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.coSignors, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.coSignors).value(coSignors).notNull().notBlank()
+            final String businessLocation = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.businessLocationParamName,
+                    element);
+            baseDataValidator.reset().parameter(ClientApiConstants.businessLocationParamName).value(businessLocation).notNull().notBlank()
                     .notExceedingLengthOf(100);
-        }
 
-        if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.guarantor, element) != null) {
-            final String guarantor = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.guarantor, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.guarantor).value(guarantor).notNull().notBlank()
-                    .notExceedingLengthOf(100);
-        }
+            final Long taxIdentificationNumber = this.fromApiJsonHelper
+                    .extractLongNamed(ClientApiConstants.taxIdentificationNumberParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.taxIdentificationNumberParamName).value(taxIdentificationNumber)
+                    .notNull().notBlank().integerGreaterThanZero();
 
+            if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.coSignors, element) != null) {
+                final String coSignors = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.coSignors, element);
+                baseDataValidator.reset().parameter(ClientApiConstants.coSignors).value(coSignors).notNull().notBlank()
+                        .notExceedingLengthOf(100);
+            }
+
+            if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.guarantor, element) != null) {
+                final String guarantor = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.guarantor, element);
+                baseDataValidator.reset().parameter(ClientApiConstants.guarantor).value(guarantor).notNull().notBlank()
+                        .notExceedingLengthOf(100);
+            }
+
+            if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.incomeGeneratingActivityParamName, element) != null) {
+                final Long incomeGeneratingActivity = this.fromApiJsonHelper
+                        .extractLongNamed(ClientApiConstants.incomeGeneratingActivityParamName, element);
+                baseDataValidator.reset().parameter(ClientApiConstants.incomeGeneratingActivityParamName).value(incomeGeneratingActivity)
+                        .notNull().integerGreaterThanZero();
+            }
+            if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.incomeGeneratingActivityMonthlyAmountParamName,
+                    element) != null) {
+                final BigDecimal incomeGeneratingActivityMonthlyAmount = this.fromApiJsonHelper
+                        .extractBigDecimalWithLocaleNamed(ClientApiConstants.incomeGeneratingActivityMonthlyAmountParamName, element);
+                baseDataValidator.reset().parameter(ClientApiConstants.incomeGeneratingActivityMonthlyAmountParamName)
+                        .value(incomeGeneratingActivityMonthlyAmount).notNull().zeroOrPositiveAmount();
+            }
+
+            final String telephoneNo = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.telephoneNoParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.telephoneNoParamName).value(telephoneNo).notNull().notBlank()
+                    .notExceedingLengthOf(20);
+        }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
     }
 
-    public void validateForUpdate(final String json) {
+    public void validateForUpdate(final String json, Integer legalFormId) {
 
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
@@ -129,43 +163,81 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
             baseDataValidator.reset().parameter(ClientApiConstants.staffIdParamName).value(strataId).integerGreaterThanZero();
         }
 
-        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.nationalityIdParamName, element)) {
-            atLeastOneParameterPassedForUpdate = true;
-            final Integer nationalityId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.nationalityIdParamName,
-                    element);
-            baseDataValidator.reset().parameter(ClientApiConstants.nationalityIdParamName).value(nationalityId).integerGreaterThanZero();
-        }
+        if (LegalForm.fromInt(legalFormId).isPerson()) {
+            if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.nationalityIdParamName, element)) {
+                atLeastOneParameterPassedForUpdate = true;
+                final Integer nationalityId = this.fromApiJsonHelper
+                        .extractIntegerSansLocaleNamed(ClientApiConstants.nationalityIdParamName, element);
+                baseDataValidator.reset().parameter(ClientApiConstants.nationalityIdParamName).value(nationalityId)
+                        .integerGreaterThanZero();
+            }
 
-        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.numberOfChildren, element)) {
-            atLeastOneParameterPassedForUpdate = true;
-            final Integer numberOfChildren = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.numberOfChildren,
-                    element);
-            baseDataValidator.reset().parameter(ClientApiConstants.numberOfChildren).value(numberOfChildren).ignoreIfNull()
-                    .integerGreaterThanZero();
-        }
+            if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.numberOfChildren, element)) {
+                atLeastOneParameterPassedForUpdate = true;
+                final Integer numberOfChildren = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.numberOfChildren,
+                        element);
+                baseDataValidator.reset().parameter(ClientApiConstants.numberOfChildren).value(numberOfChildren).ignoreIfNull()
+                        .integerGreaterThanZero();
+            }
 
-        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.numberOfDependents, element)) {
-            atLeastOneParameterPassedForUpdate = true;
-            final Integer numberOfDependents = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.numberOfDependents,
-                    element);
-            baseDataValidator.reset().parameter(ClientApiConstants.numberOfDependents).value(numberOfDependents).ignoreIfNull()
-                    .integerGreaterThanZero();
-        }
+            if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.numberOfDependents, element)) {
+                atLeastOneParameterPassedForUpdate = true;
+                final Integer numberOfDependents = this.fromApiJsonHelper
+                        .extractIntegerSansLocaleNamed(ClientApiConstants.numberOfDependents, element);
+                baseDataValidator.reset().parameter(ClientApiConstants.numberOfDependents).value(numberOfDependents).ignoreIfNull()
+                        .integerGreaterThanZero();
+            }
 
-        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.yearArrivedInHostCountry, element)) {
-            atLeastOneParameterPassedForUpdate = true;
-            final Integer yearArrivedInHostCountryId = this.fromApiJsonHelper
-                    .extractIntegerSansLocaleNamed(ClientApiConstants.yearArrivedInHostCountry, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountry).value(yearArrivedInHostCountryId)
-                    .integerGreaterThanZero();
-        }
+            if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.yearArrivedInHostCountry, element)) {
+                atLeastOneParameterPassedForUpdate = true;
+                final Integer yearArrivedInHostCountryId = this.fromApiJsonHelper
+                        .extractIntegerSansLocaleNamed(ClientApiConstants.yearArrivedInHostCountry, element);
+                baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountry).value(yearArrivedInHostCountryId)
+                        .integerGreaterThanZero();
+            }
+        } else if (LegalForm.fromInt(legalFormId).isEntity()) {
 
-        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.coSignors, element)) {
-            atLeastOneParameterPassedForUpdate = true;
-        }
+            if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.businessLocationParamName, element)) {
+                atLeastOneParameterPassedForUpdate = true;
+                final String businessLocation = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.businessLocationParamName,
+                        element);
+                baseDataValidator.reset().parameter(ClientApiConstants.businessLocationParamName).value(businessLocation).notNull()
+                        .notBlank().notExceedingLengthOf(100);
+            }
 
-        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.guarantor, element)) {
-            atLeastOneParameterPassedForUpdate = true;
+            if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.coSignors, element)) {
+                atLeastOneParameterPassedForUpdate = true;
+                final String coSignors = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.coSignors, element);
+                baseDataValidator.reset().parameter(ClientApiConstants.coSignors).value(coSignors).notNull().notBlank()
+                        .notExceedingLengthOf(100);
+            }
+
+            if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.guarantor, element)) {
+                atLeastOneParameterPassedForUpdate = true;
+                final String guarantor = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.guarantor, element);
+                baseDataValidator.reset().parameter(ClientApiConstants.guarantor).value(guarantor).notNull().notBlank()
+                        .notExceedingLengthOf(100);
+            }
+            if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.incomeGeneratingActivityParamName, element)) {
+                atLeastOneParameterPassedForUpdate = true;
+                final Long incomeGeneratingActivity = this.fromApiJsonHelper
+                        .extractLongNamed(ClientApiConstants.incomeGeneratingActivityParamName, element);
+                baseDataValidator.reset().parameter(ClientApiConstants.incomeGeneratingActivityParamName).value(incomeGeneratingActivity)
+                        .notNull().integerGreaterThanZero();
+            }
+            if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.incomeGeneratingActivityMonthlyAmountParamName, element)) {
+                atLeastOneParameterPassedForUpdate = true;
+                final BigDecimal incomeGeneratingActivityMonthlyAmount = this.fromApiJsonHelper
+                        .extractBigDecimalWithLocaleNamed(ClientApiConstants.incomeGeneratingActivityMonthlyAmountParamName, element);
+                baseDataValidator.reset().parameter(ClientApiConstants.incomeGeneratingActivityMonthlyAmountParamName)
+                        .value(incomeGeneratingActivityMonthlyAmount).notNull().zeroOrPositiveAmount();
+            }
+            if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.telephoneNoParamName, element)) {
+                atLeastOneParameterPassedForUpdate = true;
+                final String telephoneNo = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.telephoneNoParamName, element);
+                baseDataValidator.reset().parameter(ClientApiConstants.telephoneNoParamName).value(telephoneNo).notNull().notBlank()
+                        .notExceedingLengthOf(20);
+            }
         }
 
         if (!atLeastOneParameterPassedForUpdate) {
