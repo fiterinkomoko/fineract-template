@@ -68,6 +68,7 @@ public class ClientBusinessDetailData implements Serializable {
     private String externalId;
     private BigDecimal society;
     private ClientData clientAccount;
+    private Boolean isClientBusinessDetailEnabled;
 
     public ClientBusinessDetailData() {}
 
@@ -165,5 +166,9 @@ public class ClientBusinessDetailData implements Serializable {
         this.totalWage = totalWage;
         this.externalId = externalId;
         this.society = society;
+    }
+
+    public void setClientBusinessDetailEnabled(Boolean clientBusinessDetailEnabled) {
+        isClientBusinessDetailEnabled = clientBusinessDetailEnabled;
     }
 }

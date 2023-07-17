@@ -20,6 +20,7 @@
 package org.apache.fineract.portfolio.client.data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 
@@ -47,10 +48,16 @@ public final class ClientOtherInfoData implements Serializable {
 
     private Collection<CodeValueData> yearArrivedInHostCountryOptions;
 
+    // company
+    private String businessLocation;
+    private Long taxIdentificationNumber;
+    private Long incomeGeneratingActivity;
+    private BigDecimal incomeGeneratingActivityMonthlyAmount;
+    private String telephoneNumber;
+
     public ClientOtherInfoData(Long id, Long clientId, CodeValueData strata, CodeValueData yearArrivedInHostCountry,
-            CodeValueData nationality, Integer numberOfChildren, Integer numberOfDependents, String coSignors, String guarantor,
-            Collection<CodeValueData> nationalityOptions, Collection<CodeValueData> strataOptions,
-            Collection<CodeValueData> yearArrivedInHostCountryOptions) {
+            CodeValueData nationality, Integer numberOfChildren, Integer numberOfDependents, Collection<CodeValueData> nationalityOptions,
+            Collection<CodeValueData> strataOptions, Collection<CodeValueData> yearArrivedInHostCountryOptions) {
 
         this.id = id;
         this.clientId = clientId;
@@ -59,11 +66,24 @@ public final class ClientOtherInfoData implements Serializable {
         this.nationality = nationality;
         this.numberOfChildren = numberOfChildren;
         this.numberOfDependents = numberOfDependents;
-        this.coSignors = coSignors;
-        this.guarantor = guarantor;
         this.nationalityOptions = nationalityOptions;
         this.strataOptions = strataOptions;
         this.yearArrivedInHostCountryOptions = yearArrivedInHostCountryOptions;
+    }
+
+    public ClientOtherInfoData(Long id, Long clientId, String coSignors, String guarantor, CodeValueData strata, String businessLocation,
+            Long taxIdentificationNumber, Long incomeGeneratingActivity, BigDecimal incomeGeneratingActivityMonthlyAmount,
+            String telephoneNumber) {
+        this.id = id;
+        this.clientId = clientId;
+        this.coSignors = coSignors;
+        this.guarantor = guarantor;
+        this.strata = strata;
+        this.businessLocation = businessLocation;
+        this.taxIdentificationNumber = taxIdentificationNumber;
+        this.incomeGeneratingActivity = incomeGeneratingActivity;
+        this.incomeGeneratingActivityMonthlyAmount = incomeGeneratingActivityMonthlyAmount;
+        this.telephoneNumber = telephoneNumber;
     }
 
     public static ClientOtherInfoData template(final Collection<CodeValueData> nationalityOptions,
@@ -75,18 +95,23 @@ public final class ClientOtherInfoData implements Serializable {
         CodeValueData nationality = null;
         Integer numberOfChildren = null;
         Integer numberOfDependents = null;
-        String coSignors = null;
-        String guarantor = null;
 
         return new ClientOtherInfoData(id, clientId, strata, yearArrivedInHostCountry, nationality, numberOfChildren, numberOfDependents,
-                coSignors, guarantor, nationalityOptions, strataOptions, yearArrivedInHostCountryOptions);
+                nationalityOptions, strataOptions, yearArrivedInHostCountryOptions);
     }
 
     public static ClientOtherInfoData instance(final Long id, final Long clientId, final CodeValueData strata,
             final CodeValueData yearArrivedInHostCountry, final CodeValueData nationality, final Integer numberOfChildren,
-            final Integer numberOfDependents, final String coSignors, final String guarantor) {
+            final Integer numberOfDependents) {
         return new ClientOtherInfoData(id, clientId, strata, yearArrivedInHostCountry, nationality, numberOfChildren, numberOfDependents,
-                coSignors, guarantor, null, null, null);
+                null, null, null);
+    }
+
+    public static ClientOtherInfoData instanceEntity(final Long id, final Long clientId, String coSignors, String guarantor,
+            CodeValueData strata, String businessLocation, Long taxIdentificationNumber, Long incomeGeneratingActivity,
+            BigDecimal incomeGeneratingActivityMonthlyAmount, String telephoneNumber) {
+        return new ClientOtherInfoData(id, clientId, coSignors, guarantor, strata, businessLocation, taxIdentificationNumber,
+                incomeGeneratingActivity, incomeGeneratingActivityMonthlyAmount, telephoneNumber);
     }
 
 }

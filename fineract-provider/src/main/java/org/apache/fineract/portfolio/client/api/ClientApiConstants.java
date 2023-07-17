@@ -27,6 +27,7 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 public class ClientApiConstants {
 
     public static final String CLIENT_RESOURCE_NAME = "client";
+    public static final String CLIENT_BUSINESS_DETAIL_RESOURCE_NAME = "businessDetail";
 
     public static final String CLIENT_LEVELS = "clientLevels";
     public static final String CLIENT_CHARGES_RESOURCE_NAME = "CLIENTCHARGE";
@@ -232,12 +233,17 @@ public class ClientApiConstants {
     public static final String numberOfChildren = "numberOfChildren";
     public static final String numberOfDependents = "numberOfDependents";
     public static final String yearArrivedInHostCountry = "yearArrivedInHostCountryId";
-    public static final String coSignors = "coSignors";
     public static final String guarantor = "guarantor";
     public static final String strataIdParamName = "strataId";
     public static final String nationalityIdParamName = "nationalityId";
     public static final String STRATA = "Strata";
     public static final String YEAR_ARRIVED_IN_HOST_COUNTRY = "YearArrivedInHostCountry";
+    public static final String coSignors = "coSignorsName";
+    public static String businessLocationParamName = "businessLocation";
+    public static String taxIdentificationNumberParamName = "taxIdentificationNumber";
+    public static String incomeGeneratingActivityParamName = "incomeGeneratingActivity";
+    public static String incomeGeneratingActivityMonthlyAmountParamName = "incomeGeneratingActivityMonthlyAmount";
+    public static String telephoneNoParamName = "telephoneNo";
 
     /**
      * These parameters will match the class level parameters of {@link ClientData}. Where possible, we try to get
@@ -267,9 +273,11 @@ public class ClientApiConstants {
 
     // Client Business Detail Param
     public static final String BUSINESS_TYPE = "businessType";
+    public static final String BUSINESS_TYPE_CODE = "BusinessType";
     public static final String BUSINESS_CREATION_DATE = "businessCreationDate";
     public static final String STARTING_CAPITAL = "startingCapital";
     public static final String SOURCE_OF_CAPITAL = "sourceOfCapital";
+    public static final String SOURCE_OF_CAPITAL_CODE = "SourceOfCapital";
     public static final String TOTAL_EMPLOYEE = "totalEmployee";
     public static final String BUSINESS_REVENUE = "businessRevenue";
     public static final String AVERAGE_MONTHLY_REVENUE = "averageMonthlyRevenue";
@@ -299,6 +307,7 @@ public class ClientApiConstants {
     public static final String SOCIETY = "society";
     public static final String EXTERNAL_ID = "externalId";
     public static final String CLIENT_ID = "clientId";
+    public static final String ID = "id";
     public static final String READ_CLIENTBUSINESSDETAIL = "READ_CLIENTBUSINESSDETAIL";
 
     protected static final Set<String> CLIENT_BUSINESS_DETAIL_RESPONSE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(CLIENT_ID,

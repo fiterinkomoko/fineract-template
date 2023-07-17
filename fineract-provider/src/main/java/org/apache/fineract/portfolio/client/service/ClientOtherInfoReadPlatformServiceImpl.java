@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.client.service;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -62,8 +63,6 @@ public class ClientOtherInfoReadPlatformServiceImpl implements ClientOtherInfoRe
         public ClientOtherInfoData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             final long id = rs.getLong("id");
             final long clientId = rs.getLong("clientId");
-            final String coSignors = rs.getString("coSignors");
-            final String guarantor = rs.getString("guarantor");
 
             final long nationalityId = rs.getLong("nationalityId");
             final String nationalityName = rs.getString("nationalityName");
@@ -78,7 +77,7 @@ public class ClientOtherInfoReadPlatformServiceImpl implements ClientOtherInfoRe
             final CodeValueData yearArrivedInHostCountry = CodeValueData.instance(yearArrivedInHostCountryId, yearArrivedInHostCountryName);
 
             return ClientOtherInfoData.instance(id, clientId, strata, yearArrivedInHostCountry, nationality, numberOfChildren,
-                    numberOfDependents, coSignors, guarantor);
+                    numberOfDependents);
 
         }
     }
@@ -115,6 +114,61 @@ public class ClientOtherInfoReadPlatformServiceImpl implements ClientOtherInfoRe
         final List<CodeValueData> yearArrivedInHostCountryOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.YEAR_ARRIVED_IN_HOST_COUNTRY));
         return ClientOtherInfoData.template(nationalityOptions, strataOptions, yearArrivedInHostCountryOptions);
+    }
+
+    private static final class ClientOtherInfoEntityMapper implements RowMapper<ClientOtherInfoData> {
+
+        public String schema() {
+            return "co.id AS id, co.client_id AS clientId, co.strata_cv_id AS strataId, co.co_signors AS coSignorsName, cv.code_value as strataName, "
+                    + " co.guarantor AS guarantor, co.tax_identification_number as taxIdentificationNumber, co.business_location as businessLocation,"
+                    + " co.income_generating_activity AS incomeGeneratingActivity, co.income_generating_activity_monthly_amount as incomeGeneratingActivityMonthlyAmount,"
+                    + " co.telephone_no as telephoneNo" + " FROM m_client_other_info co"
+                    + " left join m_code_value cv on co.strata_cv_id=cv.id";
+        }
+
+        @Override
+        public ClientOtherInfoData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+            final long id = rs.getLong("id");
+            final long clientId = rs.getLong("clientId");
+
+            final long strataId = rs.getLong("strataId");
+            final String strataName = rs.getString("strataName");
+            final CodeValueData strata = CodeValueData.instance(strataId, strataName);
+
+            final String coSignors = rs.getString("coSignorsName");
+            final String guarantor = rs.getString("guarantor");
+            final Long taxIdentificationNumber = rs.getLong("taxIdentificationNumber");
+            final String businessLocation = rs.getString("businessLocation");
+            final Long incomeGeneratingActivity = rs.getLong("incomeGeneratingActivity");
+            final BigDecimal incomeGeneratingActivityMonthlyAmount = rs.getBigDecimal("incomeGeneratingActivityMonthlyAmount");
+            final String telephoneNo = rs.getString("telephoneNo");
+
+            return ClientOtherInfoData.instanceEntity(id, clientId, coSignors, guarantor, strata, businessLocation, taxIdentificationNumber,
+                    incomeGeneratingActivity, incomeGeneratingActivityMonthlyAmount, telephoneNo);
+
+        }
+    }
+
+    @Override
+    public Collection<ClientOtherInfoData> retrieveEntityAll(long clientId) {
+
+        this.context.authenticatedUser();
+
+        final ClientOtherInfoEntityMapper rm = new ClientOtherInfoEntityMapper();
+        final String sql = "select " + rm.schema() + " where co.client_id=?";
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] { clientId }); // NOSONAR
+    }
+
+    @Override
+    public ClientOtherInfoData retrieveEntityOne(Long id) {
+
+        this.context.authenticatedUser();
+
+        final ClientOtherInfoEntityMapper rm = new ClientOtherInfoEntityMapper();
+        final String sql = "select " + rm.schema() + " where co.id=? ";
+
+        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { id }); // NOSONAR
     }
 
 }

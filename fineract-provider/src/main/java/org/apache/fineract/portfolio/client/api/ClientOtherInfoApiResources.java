@@ -145,4 +145,35 @@ public class ClientOtherInfoApiResources {
 
         return this.toApiJsonSerializer.serialize(result);
     }
+
+    @GET
+    @Path("/entity")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveAllClientOtherInfoEntity(@Context final UriInfo uriInfo, @PathParam("clientId") final long clientId) {
+
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+
+        final Collection<ClientOtherInfoData> otherInfoData = this.readPlatformService.retrieveEntityAll(clientId);
+
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, otherInfoData, this.responseDataParameters);
+
+    }
+
+    @GET
+    @Path("/entity/{otherInfoId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveClientOtherInfoEntity(@Context final UriInfo uriInfo, @PathParam("otherInfoId") final Long otherInfoId,
+            @PathParam("clientId") final Long clientId) {
+
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+
+        final ClientOtherInfoData otherInfo = this.readPlatformService.retrieveEntityOne(otherInfoId);
+
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, otherInfo, this.responseDataParameters);
+
+    }
 }
