@@ -20,6 +20,8 @@ package org.apache.fineract.portfolio.client.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Map;
+import javax.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
@@ -141,6 +143,66 @@ public class BusinessDetailWritePlatformServiceImpl implements BusinessDetailWri
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             throw new PlatformDataIntegrityException("error.msg.client.business.detail.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.", dve);
+        }
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult updateBusinessDetail(Long clientId, Long businessDetailId, JsonCommand command) {
+        try {
+            this.context.authenticatedUser();
+
+            final GlobalConfigurationPropertyData businessDetailConfig = this.configurationReadPlatformService
+                    .retrieveGlobalConfiguration("Enable-Client-Business-Detail");
+            final Boolean isClientBusinessDetailsEnable = businessDetailConfig.isEnabled();
+
+            if (!isClientBusinessDetailsEnable) {
+                throw new GeneralPlatformDomainRuleException("error.msg.Enable-Client-Business-Detail.is.not.set",
+                        "Enable-Client-Business-Detail settings is not set. So this operation is not permitted");
+            }
+
+            this.fromApiJsonDeserializer.validateForUpdate(command.json());
+
+            clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+
+            ClientBusinessDetail businessDetail = this.clientBusinessDetailRepository.findById(businessDetailId).orElseThrow();
+
+            final Map<String, Object> changes = businessDetail.update(command);
+
+            if (changes.containsKey(ClientApiConstants.BUSINESS_TYPE)) {
+                final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.BUSINESS_TYPE);
+                CodeValue businessType = null;
+                if (newValue != null) {
+                    businessType = this.codeValueRepository
+                            .findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.BUSINESS_TYPE_CODE, newValue);
+                }
+                businessDetail.updateBusinessType(businessType);
+            }
+
+            if (changes.containsKey(ClientApiConstants.SOURCE_OF_CAPITAL)) {
+                final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.SOURCE_OF_CAPITAL);
+                CodeValue sourceOfCapital = null;
+                if (newValue != null) {
+                    sourceOfCapital = this.codeValueRepository
+                            .findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.SOURCE_OF_CAPITAL_CODE, newValue);
+                }
+                businessDetail.updateSourceOfCapital(sourceOfCapital);
+            }
+
+            if (!changes.isEmpty()) {
+                this.clientBusinessDetailRepository.saveAndFlush(businessDetail);
+            }
+
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withClientId(clientId) //
+                    .withEntityId(businessDetail.getId()) //
+                    .with(changes) //
+                    .build();
+        } catch (final JpaSystemException ex) {
+            return CommandProcessingResult.empty();
+        } catch (final PersistenceException dve) {
+            return CommandProcessingResult.empty();
         }
     }
 

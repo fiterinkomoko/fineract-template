@@ -27,6 +27,7 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 public class ClientApiConstants {
 
     public static final String CLIENT_RESOURCE_NAME = "client";
+    public static final String CLIENT_BUSINESS_DETAIL_RESOURCE_NAME = "businessDetail";
 
     public static final String CLIENT_LEVELS = "clientLevels";
     public static final String CLIENT_CHARGES_RESOURCE_NAME = "CLIENTCHARGE";
@@ -272,9 +273,11 @@ public class ClientApiConstants {
 
     // Client Business Detail Param
     public static final String BUSINESS_TYPE = "businessType";
+    public static final String BUSINESS_TYPE_CODE = "BusinessType";
     public static final String BUSINESS_CREATION_DATE = "businessCreationDate";
     public static final String STARTING_CAPITAL = "startingCapital";
     public static final String SOURCE_OF_CAPITAL = "sourceOfCapital";
+    public static final String SOURCE_OF_CAPITAL_CODE = "SourceOfCapital";
     public static final String TOTAL_EMPLOYEE = "totalEmployee";
     public static final String BUSINESS_REVENUE = "businessRevenue";
     public static final String AVERAGE_MONTHLY_REVENUE = "averageMonthlyRevenue";
@@ -304,6 +307,7 @@ public class ClientApiConstants {
     public static final String SOCIETY = "society";
     public static final String EXTERNAL_ID = "externalId";
     public static final String CLIENT_ID = "clientId";
+    public static final String ID = "id";
     public static final String READ_CLIENTBUSINESSDETAIL = "READ_CLIENTBUSINESSDETAIL";
 
     protected static final Set<String> CLIENT_BUSINESS_DETAIL_RESPONSE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(CLIENT_ID,
