@@ -251,6 +251,7 @@ public final class LoanAccountData {
     private Boolean requiresEquityContribution;
     private BigDecimal equityContributionLoanPercentage;
     private PortfolioAccountData linkedVendorAccount;
+    private CodeValueData department;
 
     public static LoanAccountData importInstanceIndividual(EnumOptionData loanTypeEnumOption, Long clientId, Long productId,
             Long loanOfficerId, LocalDate submittedOnDate, Long fundId, BigDecimal principal, Integer numberOfRepayments,
@@ -1372,6 +1373,7 @@ public final class LoanAccountData {
         loanAccountData.setBnplLoan(acc.isBnplLoan);
         loanAccountData.setRequiresEquityContribution(acc.requiresEquityContribution);
         loanAccountData.setEquityContributionLoanPercentage(acc.equityContributionLoanPercentage);
+        loanAccountData.setDepartment(acc.department);
         return loanAccountData;
     }
 
@@ -2062,5 +2064,9 @@ public final class LoanAccountData {
 
     public void setLinkedVendorAccount(PortfolioAccountData linkedVendorAccount) {
         this.linkedVendorAccount = linkedVendorAccount;
+    }
+
+    public void setDepartment(CodeValueData department) {
+        this.department = department;
     }
 }
