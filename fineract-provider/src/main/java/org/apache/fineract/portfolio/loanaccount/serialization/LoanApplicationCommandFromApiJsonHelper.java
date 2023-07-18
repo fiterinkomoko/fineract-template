@@ -1134,6 +1134,11 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         validateBnplValues(baseDataValidator, isBnplLoan == null ? false : isBnplLoan,
                 requiresEquityContribution == null ? false : requiresEquityContribution, equityContributionLoanPercentage);
 
+        if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.DEPARTMENT_PARAM, element)) {
+            final Integer departmentId = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(LoanApiConstants.DEPARTMENT_PARAM, element);
+            baseDataValidator.reset().parameter(LoanApiConstants.DEPARTMENT_PARAM).value(departmentId).zeroOrPositiveAmount();
+        }
+
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
                     dataValidationErrors);

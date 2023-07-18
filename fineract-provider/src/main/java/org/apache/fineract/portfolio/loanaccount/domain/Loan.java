@@ -1150,6 +1150,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         this.loanPurpose = loanPurpose;
     }
 
+    public void updateDepartment(final CodeValue department) {
+        this.department = department;
+    }
+
     public void updateLoanOfficerOnLoanApplication(final Staff newLoanOfficer) {
         if (!isSubmittedAndPendingApproval()) {
             Long loanOfficerId = null;
@@ -1701,6 +1705,16 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(LoanApiConstants.equityContributionLoanPercentageParamName);
             actualChanges.put(LoanApiConstants.equityContributionLoanPercentageParamName, newValue);
             this.equityContributionLoanPercentage = newValue;
+        }
+
+        Long departmentId = null;
+        if (this.department != null) {
+            departmentId = this.department.getId();
+        }
+
+        if (command.isChangeInLongParameterNamed(LoanApiConstants.DEPARTMENT_PARAM, departmentId)) {
+            final Long newValue = command.longValueOfParameterNamed(LoanApiConstants.DEPARTMENT_PARAM);
+            actualChanges.put(LoanApiConstants.DEPARTMENT_PARAM, newValue);
         }
 
         return actualChanges;
