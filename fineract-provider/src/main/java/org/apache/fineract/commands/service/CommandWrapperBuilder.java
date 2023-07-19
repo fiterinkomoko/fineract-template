@@ -3794,4 +3794,13 @@ public class CommandWrapperBuilder {
         this.entityId = surveyId;
         return this;
     }
+
+    public CommandWrapperBuilder acceptLoanApplicationReview(final long loanId) {
+        this.actionName = "ACCEPT";
+        this.entityName = "LOANAPPLICATIONREVIEW";
+        this.href = "/loans/decision/" + loanId;
+        this.loanId = loanId;
+
+        return this;
+    }
 }
