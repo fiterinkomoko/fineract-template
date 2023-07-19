@@ -3789,7 +3789,7 @@ public class CommandWrapperBuilder {
     public CommandWrapperBuilder updateClientRecruitmentSurvey(final Long surveyId, final Long clientId) {
         this.actionName = "UPDATE";
         this.entityName = "CLIENTRECRUITMENTSURVEY";
-        this.href = "/clients/" + clientId + "/recruitmentSurvey"+ surveyId;
+        this.href = "/clients/" + clientId + "/recruitmentSurvey" + surveyId;
         this.clientId = clientId;
         this.entityId = surveyId;
         return this;

@@ -21,6 +21,17 @@ package org.apache.fineract.portfolio.client.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.Collection;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -36,24 +47,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
-import java.util.Collection;
-
-
 @Path("/clients/{clientId}/recruitmentSurvey")
 @Component
 @Scope("singleton")
 @Tag(name = "Client Recruitment Survey", description = "")
 public class ClientRecruitmentSurveyApiResources {
+
     private final String resourceNameForPermissions = "ClientRecruitmentSurvey";
     private final PlatformSecurityContext context;
     private final ClientRecruitmentSurveyReadPlatformService readPlatformService;
@@ -63,10 +62,12 @@ public class ClientRecruitmentSurveyApiResources {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
-    public ClientRecruitmentSurveyApiResources(final PlatformSecurityContext context, final ClientRecruitmentSurveyReadPlatformService readPlatformService,
-                                               final ToApiJsonSerializer<ClientRecruitmentSurveyData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
-                                               final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-                                               final ClientRecruitmentSurveyWritePlatformService writePlatformService) {
+    public ClientRecruitmentSurveyApiResources(final PlatformSecurityContext context,
+            final ClientRecruitmentSurveyReadPlatformService readPlatformService,
+            final ToApiJsonSerializer<ClientRecruitmentSurveyData> toApiJsonSerializer,
+            final ApiRequestParameterHelper apiRequestParameterHelper,
+            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+            final ClientRecruitmentSurveyWritePlatformService writePlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
@@ -81,14 +82,16 @@ public class ClientRecruitmentSurveyApiResources {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve Client Recruitment Survey Template", description = "This is a convenience resource. It can be useful when building maintenance user interface screens for client recruitment survey applications. The template data returned consists of any or all of:\n"
-            + "\n" + "Field Defaults\n" + "Allowed Value Lists\n\n" + "Example Request:\n" + "\n" + "clients/{clientId}/recruitmentSurvey/template")
+            + "\n" + "Field Defaults\n" + "Allowed Value Lists\n\n" + "Example Request:\n" + "\n"
+            + "clients/{clientId}/recruitmentSurvey/template")
     public String template(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         ClientRecruitmentSurveyData templateData = this.readPlatformService.retrieveTemplate();
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, templateData, ClientApiConstants.CLIENT_RECRUITMENT_SURVEY_RESPONSE_REQUEST_PARAMETER);
+        return this.toApiJsonSerializer.serialize(settings, templateData,
+                ClientApiConstants.CLIENT_RECRUITMENT_SURVEY_RESPONSE_REQUEST_PARAMETER);
     }
 
     @GET
@@ -101,7 +104,8 @@ public class ClientRecruitmentSurveyApiResources {
         final Collection<ClientRecruitmentSurveyData> surveyData = this.readPlatformService.retrieveAll(clientId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, surveyData, ClientApiConstants.CLIENT_RECRUITMENT_SURVEY_RESPONSE_REQUEST_PARAMETER);
+        return this.toApiJsonSerializer.serialize(settings, surveyData,
+                ClientApiConstants.CLIENT_RECRUITMENT_SURVEY_RESPONSE_REQUEST_PARAMETER);
 
     }
 
@@ -110,19 +114,20 @@ public class ClientRecruitmentSurveyApiResources {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveClientRecruitmentSurvey(@Context final UriInfo uriInfo, @PathParam("surveyId") final Long surveyId,
-                                          @PathParam("clientId") final Long clientId) {
+            @PathParam("clientId") final Long clientId) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         ClientRecruitmentSurveyData surveyData = this.readPlatformService.retrieveOne(surveyId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        if(settings.isTemplate()){
+        if (settings.isTemplate()) {
             ClientRecruitmentSurveyData templateData = this.readPlatformService.retrieveTemplate();
             surveyData = ClientRecruitmentSurveyData.templateWithData(surveyData, templateData);
         }
 
-        return this.toApiJsonSerializer.serialize(settings, surveyData, ClientApiConstants.CLIENT_RECRUITMENT_SURVEY_RESPONSE_REQUEST_PARAMETER);
+        return this.toApiJsonSerializer.serialize(settings, surveyData,
+                ClientApiConstants.CLIENT_RECRUITMENT_SURVEY_RESPONSE_REQUEST_PARAMETER);
 
     }
 
@@ -131,8 +136,8 @@ public class ClientRecruitmentSurveyApiResources {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createClientRecruitmentSurvey(@PathParam("clientId") final long clientId, final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createClientRecruitmentSurvey(clientId).withJson(apiRequestBodyAsJson)
-                .build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createClientRecruitmentSurvey(clientId)
+                .withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -144,7 +149,7 @@ public class ClientRecruitmentSurveyApiResources {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateClientOtherInfo(@PathParam("surveyId") final long surveyId, final String apiRequestBodyAsJson,
-                                        @PathParam("clientId") final Long clientId) {
+            @PathParam("clientId") final Long clientId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateClientRecruitmentSurvey(surveyId, clientId)
                 .withJson(apiRequestBodyAsJson).build();
