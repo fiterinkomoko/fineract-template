@@ -3777,4 +3777,13 @@ public class CommandWrapperBuilder {
         this.href = "/clients/" + clientId + "/businessDetail/" + businessDetailId;
         return this;
     }
+
+    public CommandWrapperBuilder acceptLoanApplicationReview(final long loanId) {
+        this.actionName = "ACCEPT";
+        this.entityName = "LOANAPPLICATIONREVIEW";
+        this.href = "/loans/decision/" + loanId;
+        this.loanId = loanId;
+
+        return this;
+    }
 }
