@@ -1483,6 +1483,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final Collection<CodeValueData> loanPurposeOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("LoanPurpose");
         final Collection<CodeValueData> loanCollateralOptions = this.codeValueReadPlatformService
                 .retrieveCodeValuesByCode("LoanCollateral");
+        final Collection<CodeValueData> departmentOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("Department");
         Collection<ChargeData> chargeOptions = null;
         if (loanProduct.getMultiDisburseLoan()) {
             chargeOptions = this.chargeReadPlatformService.retrieveLoanProductApplicableCharges(productId,
@@ -1516,6 +1517,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         loanAccountData.setBnplLoan(loanProduct.getBnplLoanProduct());
         loanAccountData.setEquityContributionLoanPercentage(loanProduct.getEquityContributionLoanPercentage());
         loanAccountData.setRequiresEquityContribution(loanProduct.getRequiresEquityContribution());
+        loanAccountData.setDepartmentOptions(departmentOptions);
         return loanAccountData;
     }
 

@@ -324,7 +324,7 @@ public class LoanAssembler {
             loanApplication = Loan.newIndividualLoanApplication(accountNo, client, loanType.getId().intValue(), loanProduct, fund,
                     loanOfficer, loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, collateral,
                     fixedEmiAmount, disbursementDetails, maxOutstandingLoanBalance, createStandingInstructionAtDisbursement,
-                    isFloatingInterestRate, interestRateDifferential, rates, fixedPrincipalPercentagePerInstallment);
+                    isFloatingInterestRate, interestRateDifferential, rates, fixedPrincipalPercentagePerInstallment, departmentCv);
 
         }
 

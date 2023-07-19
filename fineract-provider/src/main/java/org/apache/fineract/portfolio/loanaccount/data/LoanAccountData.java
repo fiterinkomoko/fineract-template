@@ -252,6 +252,7 @@ public final class LoanAccountData {
     private BigDecimal equityContributionLoanPercentage;
     private PortfolioAccountData linkedVendorAccount;
     private CodeValueData department;
+    private Collection<CodeValueData> departmentOptions;
 
     public static LoanAccountData importInstanceIndividual(EnumOptionData loanTypeEnumOption, Long clientId, Long productId,
             Long loanOfficerId, LocalDate submittedOnDate, Long fundId, BigDecimal principal, Integer numberOfRepayments,
@@ -808,6 +809,7 @@ public final class LoanAccountData {
         loanAccountData.setRequiresEquityContribution(acc.requiresEquityContribution);
         loanAccountData.setEquityContributionLoanPercentage(acc.equityContributionLoanPercentage);
         loanAccountData.setVendorClientOptions(clientAcc.vendorClientOptions);
+        loanAccountData.setDepartmentOptions(acc.departmentOptions);
         return loanAccountData;
     }
 
@@ -1374,6 +1376,7 @@ public final class LoanAccountData {
         loanAccountData.setRequiresEquityContribution(acc.requiresEquityContribution);
         loanAccountData.setEquityContributionLoanPercentage(acc.equityContributionLoanPercentage);
         loanAccountData.setDepartment(acc.department);
+        loanAccountData.setDepartmentOptions(acc.departmentOptions);
         return loanAccountData;
     }
 
@@ -1393,6 +1396,7 @@ public final class LoanAccountData {
         loanAccountData.setEquityContributionLoanPercentage(acc.equityContributionLoanPercentage);
         loanAccountData.setVendorClientOptions(acc.vendorClientOptions);
         loanAccountData.setVendorSavingsAccountOptions(acc.vendorSavingsAccountOptions);
+        loanAccountData.setDepartmentOptions(acc.departmentOptions);
         return loanAccountData;
     }
 
@@ -2068,5 +2072,9 @@ public final class LoanAccountData {
 
     public void setDepartment(CodeValueData department) {
         this.department = department;
+    }
+
+    public void setDepartmentOptions(Collection<CodeValueData> departmentOptions) {
+        this.departmentOptions = departmentOptions;
     }
 }
