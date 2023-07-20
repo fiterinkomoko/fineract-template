@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.client.service;
 
+import java.util.Map;
+import javax.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
@@ -32,9 +34,9 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.data.ClientRecruitmentSurveyDataValidator;
 import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.portfolio.client.domain.ClientRecruitmentSurvey;
 import org.apache.fineract.portfolio.client.domain.ClientRecruitmentSurveyRepository;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
-import org.apache.fineract.portfolio.client.domain.ClientRecruitmentSurvey;
 import org.apache.fineract.portfolio.client.exception.ClientRecruitmentSurveyAlreadyHadDoneException;
 import org.apache.fineract.portfolio.client.exception.ClientRecruitmentSurveyNotFoundException;
 import org.slf4j.Logger;
@@ -42,9 +44,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
-
-import javax.persistence.PersistenceException;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -93,15 +92,14 @@ public class ClientRecruitmentSurveyWritePlatformServiceImpl implements ClientRe
         CodeValue program = null;
         final Long programId = command.longValueOfParameterNamed(ClientApiConstants.programIdParamName);
         if (programId != null) {
-            program = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
-                        ClientApiConstants.PROGRAM, programId);
+            program = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.PROGRAM, programId);
         }
         ClientRecruitmentSurvey survey = ClientRecruitmentSurvey.createNew(command, client, country, cohort, program);
 
         ClientRecruitmentSurvey newRecruitmentSurvey = clientRecruitmentSurveyRepository.saveAndFlush(survey);
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withClientId(clientId).withEntityId(newRecruitmentSurvey.getId())
-                .build();
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withClientId(clientId)
+                .withEntityId(newRecruitmentSurvey.getId()).build();
     }
 
     @Override
@@ -132,7 +130,7 @@ public class ClientRecruitmentSurveyWritePlatformServiceImpl implements ClientRe
                 }
                 survey.setCountry(countryCodeValue);
             }
-            if(changes.containsKey(ClientApiConstants.cohortIdParamName)){
+            if (changes.containsKey(ClientApiConstants.cohortIdParamName)) {
                 final Long cohortId = command.longValueOfParameterNamed(ClientApiConstants.cohortIdParamName);
                 CodeValue cohortCodeValue = null;
                 if (cohortId != null) {
@@ -143,7 +141,7 @@ public class ClientRecruitmentSurveyWritePlatformServiceImpl implements ClientRe
                 survey.setCohort(cohortCodeValue);
             }
 
-            if(changes.containsKey(ClientApiConstants.programIdParamName)){
+            if (changes.containsKey(ClientApiConstants.programIdParamName)) {
                 final Long programId = command.longValueOfParameterNamed(ClientApiConstants.programIdParamName);
                 CodeValue programCodeValue = null;
                 if (programId != null) {

@@ -18,20 +18,19 @@
  */
 package org.apache.fineract.portfolio.client.domain;
 
-import org.apache.fineract.infrastructure.codes.domain.CodeValue;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.portfolio.client.api.ClientApiConstants;
-
+import java.time.LocalDate;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import java.time.LocalDate;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
+import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 
 @Entity
 @Table(name = "m_client_recruitment_survey")
@@ -67,8 +66,8 @@ public class ClientRecruitmentSurvey extends AbstractPersistableCustom {
 
     public ClientRecruitmentSurvey() {}
 
-    public ClientRecruitmentSurvey(Client client, CodeValue country, CodeValue cohort, CodeValue program,
-                                   String surveyName, String surveyLocation, LocalDate startDate, LocalDate endDate) {
+    public ClientRecruitmentSurvey(Client client, CodeValue country, CodeValue cohort, CodeValue program, String surveyName,
+            String surveyLocation, LocalDate startDate, LocalDate endDate) {
         this.client = client;
         this.country = country;
         this.cohort = cohort;
@@ -80,7 +79,7 @@ public class ClientRecruitmentSurvey extends AbstractPersistableCustom {
     }
 
     public static ClientRecruitmentSurvey createNew(JsonCommand command, Client client, final CodeValue country, final CodeValue cohort,
-                                                    final CodeValue program) {
+            final CodeValue program) {
 
         final String surveyName = command.stringValueOfParameterNamed(ClientApiConstants.surveyNameParamName);
         final String surveyLocation = command.stringValueOfParameterNamed(ClientApiConstants.surveyLocationParamName);
@@ -93,38 +92,38 @@ public class ClientRecruitmentSurvey extends AbstractPersistableCustom {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
 
-        if(command.isChangeInStringParameterNamed(ClientApiConstants.surveyNameParamName, this.surveyName)) {
+        if (command.isChangeInStringParameterNamed(ClientApiConstants.surveyNameParamName, this.surveyName)) {
             final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.surveyNameParamName);
             actualChanges.put(ClientApiConstants.surveyNameParamName, newValue);
             this.surveyName = newValue;
         }
 
-        if(command.isChangeInStringParameterNamed(ClientApiConstants.surveyLocationParamName, this.surveyLocation)) {
+        if (command.isChangeInStringParameterNamed(ClientApiConstants.surveyLocationParamName, this.surveyLocation)) {
             final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.surveyLocationParamName);
             actualChanges.put(ClientApiConstants.surveyLocationParamName, newValue);
             this.surveyLocation = newValue;
         }
 
-        if(command.isChangeInLocalDateParameterNamed(ClientApiConstants.startDateParamName, this.startDate)) {
+        if (command.isChangeInLocalDateParameterNamed(ClientApiConstants.startDateParamName, this.startDate)) {
             final LocalDate newValue = command.localDateValueOfParameterNamed(ClientApiConstants.startDateParamName);
             actualChanges.put(ClientApiConstants.startDateParamName, newValue);
             this.startDate = newValue;
         }
 
-        if(command.isChangeInLocalDateParameterNamed(ClientApiConstants.endDateParamName, this.endDate)) {
+        if (command.isChangeInLocalDateParameterNamed(ClientApiConstants.endDateParamName, this.endDate)) {
             final LocalDate newValue = command.localDateValueOfParameterNamed(ClientApiConstants.endDateParamName);
             actualChanges.put(ClientApiConstants.endDateParamName, newValue);
             this.endDate = newValue;
         }
-        if(command.isChangeInLongParameterNamed(ClientApiConstants.countryIdParamName, countryId())) {
+        if (command.isChangeInLongParameterNamed(ClientApiConstants.countryIdParamName, countryId())) {
             final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.countryIdParamName);
             actualChanges.put(ClientApiConstants.countryIdParamName, newValue);
         }
-        if(command.isChangeInLongParameterNamed(ClientApiConstants.cohortIdParamName, cohortId())) {
+        if (command.isChangeInLongParameterNamed(ClientApiConstants.cohortIdParamName, cohortId())) {
             final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.cohortIdParamName);
             actualChanges.put(ClientApiConstants.cohortIdParamName, newValue);
         }
-        if(command.isChangeInLongParameterNamed(ClientApiConstants.programIdParamName, programId())) {
+        if (command.isChangeInLongParameterNamed(ClientApiConstants.programIdParamName, programId())) {
             final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.programIdParamName);
             actualChanges.put(ClientApiConstants.programIdParamName, newValue);
         }
@@ -143,6 +142,7 @@ public class ClientRecruitmentSurvey extends AbstractPersistableCustom {
         }
         return cohort;
     }
+
     private Long programId() {
         Long program = null;
         if (this.program != null) {
@@ -170,7 +170,5 @@ public class ClientRecruitmentSurvey extends AbstractPersistableCustom {
     public void setProgram(CodeValue program) {
         this.program = program;
     }
-
-
 
 }

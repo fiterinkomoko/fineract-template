@@ -26,6 +26,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 public class ClientRecruitmentSurveyAlreadyHadDoneException extends AbstractPlatformResourceNotFoundException {
 
     public ClientRecruitmentSurveyAlreadyHadDoneException(final Long clientId) {
-        super("error.msg.client.recruitment.survey.already.had.done", "Client Recruitment Survey Already Had Done for client :" + clientId, clientId);
+        super("error.msg.client.recruitment.survey.already.had.done", "Client Recruitment Survey Already Had Done for client :" + clientId,
+                clientId);
     }
 }

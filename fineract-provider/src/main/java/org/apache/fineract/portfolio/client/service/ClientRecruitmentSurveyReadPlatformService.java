@@ -18,9 +18,8 @@
  */
 package org.apache.fineract.portfolio.client.service;
 
-import org.apache.fineract.portfolio.client.data.ClientRecruitmentSurveyData;
-
 import java.util.Collection;
+import org.apache.fineract.portfolio.client.data.ClientRecruitmentSurveyData;
 
 public interface ClientRecruitmentSurveyReadPlatformService {
 

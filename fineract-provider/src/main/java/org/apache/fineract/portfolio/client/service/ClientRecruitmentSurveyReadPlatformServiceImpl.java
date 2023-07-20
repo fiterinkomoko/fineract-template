@@ -18,6 +18,12 @@
  */
 package org.apache.fineract.portfolio.client.service;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
@@ -29,13 +35,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 @Service
 public class ClientRecruitmentSurveyReadPlatformServiceImpl implements ClientRecruitmentSurveyReadPlatformService {
 
@@ -45,7 +44,7 @@ public class ClientRecruitmentSurveyReadPlatformServiceImpl implements ClientRec
 
     @Autowired
     public ClientRecruitmentSurveyReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
-                                                          final CodeValueReadPlatformService codeValueReadPlatformService) {
+            final CodeValueReadPlatformService codeValueReadPlatformService) {
         this.context = context;
         this.jdbcTemplate = jdbcTemplate;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
@@ -82,7 +81,8 @@ public class ClientRecruitmentSurveyReadPlatformServiceImpl implements ClientRec
             final String surveyLocation = rs.getString("surveyLocation");
             final LocalDate startDate = JdbcSupport.getLocalDate(rs, "startDate");
             final LocalDate endDate = JdbcSupport.getLocalDate(rs, "endDate");
-            return ClientRecruitmentSurveyData.instance(id, clientId, surveyName, surveyLocation, country, cohort, program, startDate, endDate);
+            return ClientRecruitmentSurveyData.instance(id, clientId, surveyName, surveyLocation, country, cohort, program, startDate,
+                    endDate);
         }
     }
 

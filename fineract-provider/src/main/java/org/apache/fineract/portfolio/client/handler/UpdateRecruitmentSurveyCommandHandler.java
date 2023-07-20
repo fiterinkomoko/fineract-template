@@ -34,7 +34,8 @@ public class UpdateRecruitmentSurveyCommandHandler implements NewCommandSourceHa
     private final ClientRecruitmentSurveyWritePlatformService clientRecruitmentSurveyWritePlatformService;
 
     @Autowired
-    public UpdateRecruitmentSurveyCommandHandler(final ClientRecruitmentSurveyWritePlatformService clientRecruitmentSurveyWritePlatformService) {
+    public UpdateRecruitmentSurveyCommandHandler(
+            final ClientRecruitmentSurveyWritePlatformService clientRecruitmentSurveyWritePlatformService) {
         this.clientRecruitmentSurveyWritePlatformService = clientRecruitmentSurveyWritePlatformService;
     }
 

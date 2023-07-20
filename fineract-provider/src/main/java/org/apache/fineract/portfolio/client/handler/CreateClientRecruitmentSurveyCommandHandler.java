@@ -34,7 +34,8 @@ public class CreateClientRecruitmentSurveyCommandHandler implements NewCommandSo
     private final ClientRecruitmentSurveyWritePlatformService clientRecruitmentSurveyWritePlatformService;
 
     @Autowired
-    public CreateClientRecruitmentSurveyCommandHandler(final ClientRecruitmentSurveyWritePlatformService clientRecruitmentSurveyWritePlatformService) {
+    public CreateClientRecruitmentSurveyCommandHandler(
+            final ClientRecruitmentSurveyWritePlatformService clientRecruitmentSurveyWritePlatformService) {
         this.clientRecruitmentSurveyWritePlatformService = clientRecruitmentSurveyWritePlatformService;
     }
 
