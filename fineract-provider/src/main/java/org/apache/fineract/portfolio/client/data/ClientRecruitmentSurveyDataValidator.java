@@ -20,6 +20,11 @@ package org.apache.fineract.portfolio.client.data;
 
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
@@ -31,13 +36,6 @@ import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Type;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-
 @Component
 public final class ClientRecruitmentSurveyDataValidator {
 
@@ -46,7 +44,7 @@ public final class ClientRecruitmentSurveyDataValidator {
 
     @Autowired
     public ClientRecruitmentSurveyDataValidator(final FromJsonHelper fromApiJsonHelper,
-                                                final ConfigurationReadPlatformService configurationReadPlatformService) {
+            final ConfigurationReadPlatformService configurationReadPlatformService) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.configurationReadPlatformService = configurationReadPlatformService;
     }
@@ -58,7 +56,8 @@ public final class ClientRecruitmentSurveyDataValidator {
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiConstants.CLIENT_RECRUITMENT_SURVEY_RESPONSE_REQUEST_PARAMETER);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
+                ClientApiConstants.CLIENT_RECRUITMENT_SURVEY_RESPONSE_REQUEST_PARAMETER);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -100,7 +99,8 @@ public final class ClientRecruitmentSurveyDataValidator {
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiConstants.CLIENT_RECRUITMENT_SURVEY_RESPONSE_REQUEST_PARAMETER);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
+                ClientApiConstants.CLIENT_RECRUITMENT_SURVEY_RESPONSE_REQUEST_PARAMETER);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
@@ -110,37 +110,37 @@ public final class ClientRecruitmentSurveyDataValidator {
 
         boolean atLeastOneParameterPassedForUpdate = false;
 
-        if(this.fromApiJsonHelper.parameterExists(ClientApiConstants.countryIdParamName, element)) {
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.countryIdParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
             final Integer countryId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.countryIdParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.countryIdParamName).value(countryId).integerGreaterThanZero();
         }
-        if(this.fromApiJsonHelper.parameterExists(ClientApiConstants.cohortIdParamName, element)) {
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.cohortIdParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
             final Integer cohortId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.cohortIdParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.cohortIdParamName).value(cohortId).integerGreaterThanZero();
         }
-        if(this.fromApiJsonHelper.parameterExists(ClientApiConstants.programIdParamName, element)) {
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.programIdParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
             final Integer programId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.programIdParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.programIdParamName).value(programId).integerGreaterThanZero();
         }
-        if(this.fromApiJsonHelper.parameterExists(ClientApiConstants.surveyNameParamName, element)) {
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.surveyNameParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
             final String surveyName = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.surveyNameParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.surveyNameParamName).value(surveyName).notBlank();
         }
-        if(this.fromApiJsonHelper.parameterExists(ClientApiConstants.surveyLocationParamName, element)) {
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.surveyLocationParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
             final String surveyLocation = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.surveyLocationParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.surveyLocationParamName).value(surveyLocation).notBlank();
         }
-        if(this.fromApiJsonHelper.parameterExists(ClientApiConstants.startDateParamName, element)) {
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.startDateParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
             final LocalDate startDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.startDateParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.startDateParamName).value(startDate).notNull();
         }
-        if(this.fromApiJsonHelper.parameterExists(ClientApiConstants.endDateParamName, element)) {
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.endDateParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
             final LocalDate endDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.endDateParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.endDateParamName).value(endDate).notNull();
@@ -153,6 +153,7 @@ public final class ClientRecruitmentSurveyDataValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
     }
+
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
