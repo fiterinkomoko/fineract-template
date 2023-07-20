@@ -107,4 +107,47 @@
         </insert>
     </changeSet>
 
+    <changeSet id="create-m_loan_decision" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_loan_decision"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_loan_decision">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="loan_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_m_loan_decision-m_loan_loan_id" references="m_loan(id)"/>
+            </column>
+            <column name="review_application_note" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="is_review_application_signed" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_reject_review_application" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="review_application_on" type="date">
+                <constraints nullable="true" />
+            </column>
+            <column name="review_application_by" type="bigint">
+                <constraints nullable="true" foreignKeyName="FK_m_loan_decision-m_appuser-review_application_by" references="m_appuser(id)"/>
+            </column>
+            <column name="createdby_id" type="bigint">
+                <constraints nullable="true" foreignKeyName="FK_m_loan_decision-created_by" references="m_appuser(id)"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValueComputed="now()">
+                <constraints nullable="false" />
+            </column>
+            <column name="lastmodifiedby_id" type="bigint">
+                <constraints nullable="true" foreignKeyName="FK_m_loan_decision-lastmodifiedby_id" references="m_appuser(id)"/>
+            </column>
+            <column name="lastmodified_date" type="timestamp" defaultValueComputed="now()">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>
