@@ -149,5 +149,8 @@
             </column>
         </createTable>
     </changeSet>
+    <changeSet id="create.uk.m_loan_decision.loan_id" author="bosco@fiter.io">
+        <addUniqueConstraint tableName="m_loan_decision" columnNames="loan_id"/>
+    </changeSet>
 
 </databaseChangeLog>

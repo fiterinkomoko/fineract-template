@@ -19,12 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.time.LocalDate;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.useradministration.domain.AppUser;
 
@@ -32,7 +27,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 @Table(name = "m_loan_decision")
 public class LoanDecision extends AbstractAuditableWithUTCDateTimeCustom {
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "loan_id")
     private Loan loan;
     @Column(name = "loan_decision_state")
@@ -48,4 +43,22 @@ public class LoanDecision extends AbstractAuditableWithUTCDateTimeCustom {
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "review_application_by")
     private AppUser reviewApplicationBy;
+
+    public static LoanDecision reviewApplication(Loan loan, Integer loanDecisionState, String reviewApplicationNote,
+            Boolean reviewApplicationSigned, Boolean rejectReviewApplicationSigned, LocalDate reviewApplicationOn,
+            AppUser reviewApplicationBy) {
+        return new LoanDecision(loan, loanDecisionState, reviewApplicationNote, reviewApplicationSigned, rejectReviewApplicationSigned,
+                reviewApplicationOn, reviewApplicationBy);
+    }
+
+    public LoanDecision(Loan loan, Integer loanDecisionState, String reviewApplicationNote, Boolean reviewApplicationSigned,
+            Boolean rejectReviewApplicationSigned, LocalDate reviewApplicationOn, AppUser reviewApplicationBy) {
+        this.loan = loan;
+        this.loanDecisionState = loanDecisionState;
+        this.reviewApplicationNote = reviewApplicationNote;
+        this.reviewApplicationSigned = reviewApplicationSigned;
+        this.rejectReviewApplicationSigned = rejectReviewApplicationSigned;
+        this.reviewApplicationOn = reviewApplicationOn;
+        this.reviewApplicationBy = reviewApplicationBy;
+    }
 }
