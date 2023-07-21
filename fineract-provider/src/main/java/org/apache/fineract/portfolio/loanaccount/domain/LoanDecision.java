@@ -19,7 +19,13 @@
 package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.time.LocalDate;
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.useradministration.domain.AppUser;
 
@@ -60,5 +66,33 @@ public class LoanDecision extends AbstractAuditableWithUTCDateTimeCustom {
         this.rejectReviewApplicationSigned = rejectReviewApplicationSigned;
         this.reviewApplicationOn = reviewApplicationOn;
         this.reviewApplicationBy = reviewApplicationBy;
+    }
+
+    public Loan getLoan() {
+        return loan;
+    }
+
+    public Integer getLoanDecisionState() {
+        return loanDecisionState;
+    }
+
+    public String getReviewApplicationNote() {
+        return reviewApplicationNote;
+    }
+
+    public Boolean getReviewApplicationSigned() {
+        return reviewApplicationSigned;
+    }
+
+    public Boolean getRejectReviewApplicationSigned() {
+        return rejectReviewApplicationSigned;
+    }
+
+    public LocalDate getReviewApplicationOn() {
+        return reviewApplicationOn;
+    }
+
+    public AppUser getReviewApplicationBy() {
+        return reviewApplicationBy;
     }
 }

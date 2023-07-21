@@ -152,5 +152,17 @@
     <changeSet id="create.uk.m_loan_decision.loan_id" author="bosco@fiter.io">
         <addUniqueConstraint tableName="m_loan_decision" columnNames="loan_id"/>
     </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_loan_decision_state_column_to_m_loan_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan" columnName="loan_decision_state"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan">
+            <column name="loan_decision_state" type="int" >
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>
