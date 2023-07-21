@@ -50,9 +50,12 @@ public class LoanDecision extends AbstractAuditableWithUTCDateTimeCustom {
     @JoinColumn(name = "review_application_by")
     private AppUser reviewApplicationBy;
 
+    public LoanDecision() {
+    }
+
     public static LoanDecision reviewApplication(Loan loan, Integer loanDecisionState, String reviewApplicationNote,
-            Boolean reviewApplicationSigned, Boolean rejectReviewApplicationSigned, LocalDate reviewApplicationOn,
-            AppUser reviewApplicationBy) {
+                                                 Boolean reviewApplicationSigned, Boolean rejectReviewApplicationSigned, LocalDate reviewApplicationOn,
+                                                 AppUser reviewApplicationBy) {
         return new LoanDecision(loan, loanDecisionState, reviewApplicationNote, reviewApplicationSigned, rejectReviewApplicationSigned,
                 reviewApplicationOn, reviewApplicationBy);
     }
