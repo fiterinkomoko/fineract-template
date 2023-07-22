@@ -164,5 +164,17 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_loan_decision_state_column_to_m_loan_decision_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan_decision" columnName="loan_decision_state"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan_decision">
+            <column name="loan_decision_state" type="int" >
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>

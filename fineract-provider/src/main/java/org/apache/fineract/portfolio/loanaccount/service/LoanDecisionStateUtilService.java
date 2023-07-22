@@ -38,7 +38,7 @@ public class LoanDecisionStateUtilService {
     public void validateLoanReviewApplicationStateIsFiredBeforeApproval(Loan loan) {
         final Boolean isExtendLoanLifeCycleConfig = isExtendLoanLifeCycleConfig();
 
-        final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan);
+        final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
         if (isExtendLoanLifeCycleConfig && loanDecision == null) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.account.should.extend.decision.engine.to.review.Loan.application",
                     "Loan Account is not permitted for Approval since new workflow [Add-More-Stages-To-A-Loan-Life-Cycle] is activated and next status is [Review Application]");
@@ -53,7 +53,7 @@ public class LoanDecisionStateUtilService {
     public void validateLoanReviewApplicationStateIsFiredBeforeDisbursal(Loan loan) {
         final Boolean isExtendLoanLifeCycleConfig = isExtendLoanLifeCycleConfig();
 
-        final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan);
+        final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
         if (isExtendLoanLifeCycleConfig && loanDecision == null) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.account.should.extend.decision.engine.to.review.Loan.application",
                     "Loan Account is not permitted for Disbursement since new workflow [Add-More-Stages-To-A-Loan-Life-Cycle] is activated and next stage is [Review Application]");

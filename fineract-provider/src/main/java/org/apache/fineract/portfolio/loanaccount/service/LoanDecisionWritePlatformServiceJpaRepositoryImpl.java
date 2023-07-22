@@ -86,7 +86,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                     "Add-More-Stages-To-A-Loan-Life-Cycle settings is not set. So this operation is not permitted");
         }
 
-        final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan);
+        final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
         if (loanDecision != null) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.account.should.not.exist.in.decision.engine",
                     "Loan Account found in decision engine. Operation [Review Application] is not allowed");
