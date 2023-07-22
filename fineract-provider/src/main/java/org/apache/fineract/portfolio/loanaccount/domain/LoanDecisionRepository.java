@@ -25,7 +25,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface LoanDecisionRepository extends JpaRepository<LoanDecision, Long>, JpaSpecificationExecutor<LoanDecision> {
 
-    @Query("select dec from LoanDecision dec where dec.loan =:loan")
-    LoanDecision findLoanDecisionByLoanId(@Param("loan") Loan loan);
+    @Query("select dec from LoanDecision dec where dec.loan.id =:loanId")
+    LoanDecision findLoanDecisionByLoanId(@Param("loanId") Long loanId);
 
 }

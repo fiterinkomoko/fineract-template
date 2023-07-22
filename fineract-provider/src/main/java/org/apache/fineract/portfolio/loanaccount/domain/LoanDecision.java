@@ -26,12 +26,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
+import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "m_loan_decision")
-public class LoanDecision extends AbstractAuditableWithUTCDateTimeCustom {
+public class LoanDecision extends AbstractAuditableCustom {
 
     @OneToOne
     @JoinColumn(name = "loan_id")
@@ -50,12 +50,11 @@ public class LoanDecision extends AbstractAuditableWithUTCDateTimeCustom {
     @JoinColumn(name = "review_application_by")
     private AppUser reviewApplicationBy;
 
-    public LoanDecision() {
-    }
+    public LoanDecision() {}
 
     public static LoanDecision reviewApplication(Loan loan, Integer loanDecisionState, String reviewApplicationNote,
-                                                 Boolean reviewApplicationSigned, Boolean rejectReviewApplicationSigned, LocalDate reviewApplicationOn,
-                                                 AppUser reviewApplicationBy) {
+            Boolean reviewApplicationSigned, Boolean rejectReviewApplicationSigned, LocalDate reviewApplicationOn,
+            AppUser reviewApplicationBy) {
         return new LoanDecision(loan, loanDecisionState, reviewApplicationNote, reviewApplicationSigned, rejectReviewApplicationSigned,
                 reviewApplicationOn, reviewApplicationBy);
     }
