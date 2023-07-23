@@ -51,7 +51,7 @@ public class LoanDecisionApiResource {
     }
 
     @POST
-    @Path("{loanId}")
+    @Path("reviewApplication/{loanId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String acceptLoanApplicationReview(@PathParam("loanId") final long loanId, final String apiRequestBodyAsJson) {
