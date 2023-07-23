@@ -38,6 +38,6 @@ public class LoanApplicationReviewCommandHandler implements NewCommandSourceHand
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.loanApplicationDecisionWritePlatformService.acceptLoanApplicationReview(command.entityId(), command);
+        return this.loanApplicationDecisionWritePlatformService.acceptLoanApplicationReview(command.getLoanId(), command);
     }
 }
