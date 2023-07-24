@@ -1039,7 +1039,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final Boolean requiresEquityContribution = rs.getBoolean("requiresEquityContribution");
             final BigDecimal equityContributionLoanPercentage = rs.getBigDecimal("equityContributionLoanPercentage");
             final Long loanDecisionStateId = JdbcSupport.getLong(rs, "loanDecisionState");
-            final EnumOptionData loanDecisionStateEnumData = LoanEnumerations.loanDecisionState(loanDecisionStateId.intValue());
+            EnumOptionData loanDecisionStateEnumData = null;
+            if (loanDecisionStateId != null) {
+                loanDecisionStateEnumData = LoanEnumerations.loanDecisionState(loanDecisionStateId.intValue());
+            }
 
             LoanAccountData loanAccountData = LoanAccountData.basicLoanDetails(id, accountNo, status, externalId, clientId, clientAccountNo,
                     clientName, clientOfficeId, groupData, loanType, loanProductId, loanProductName, loanProductDescription,
