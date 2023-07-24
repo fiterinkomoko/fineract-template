@@ -144,6 +144,10 @@ Feature: Test loan account apis
       #Review Loan Application Stage With Decision Stage
     * call read('classpath:features/portfolio/loans/loanDecisionSteps.feature@reviewLoanApplicationStage') { loanReviewOnDate : '#(submittedOnDate)', loanId : '#(loanId)' }
 
+    * def loanResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findloanbyidWithAllAssociationStep') { loanId : '#(loanId)' }
+    #     Assert that Loan Account has passed REVIEW_APPLICATION Stage
+    * assert loanResponse.loanAccount.loanDecisionState.id == 1000
+    * assert loanResponse.loanAccount.loanDecisionState.value == 'REVIEW_APPLICATION'
 
     #- Disable configuration  ---Add-More-Stages-To-A-Loan-Life-Cycle---
     Then print 'Configuration ID ==> ', configurationId
