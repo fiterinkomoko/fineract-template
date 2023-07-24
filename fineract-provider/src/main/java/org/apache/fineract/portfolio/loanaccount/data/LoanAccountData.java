@@ -253,7 +253,7 @@ public final class LoanAccountData {
     private PortfolioAccountData linkedVendorAccount;
     private CodeValueData department;
     private Collection<CodeValueData> departmentOptions;
-    private LoanDecisionStateEnumData loanDecisionStateEnumData;
+    private EnumOptionData loanDecisionState;
 
     public static LoanAccountData importInstanceIndividual(EnumOptionData loanTypeEnumOption, Long clientId, Long productId,
             Long loanOfficerId, LocalDate submittedOnDate, Long fundId, BigDecimal principal, Integer numberOfRepayments,
@@ -1378,7 +1378,7 @@ public final class LoanAccountData {
         loanAccountData.setEquityContributionLoanPercentage(acc.equityContributionLoanPercentage);
         loanAccountData.setDepartment(acc.department);
         loanAccountData.setDepartmentOptions(acc.departmentOptions);
-        loanAccountData.setLoanDecisionState(acc.loanDecisionStateEnumData);
+        loanAccountData.setLoanDecisionState(acc.loanDecisionState);
         return loanAccountData;
     }
 
@@ -2080,7 +2080,7 @@ public final class LoanAccountData {
         this.departmentOptions = departmentOptions;
     }
 
-    public void setLoanDecisionState(LoanDecisionStateEnumData loanDecisionState) {
-        this.loanDecisionStateEnumData = loanDecisionState;
+    public void setLoanDecisionState(EnumOptionData loanDecisionState) {
+        this.loanDecisionState = loanDecisionState;
     }
 }
