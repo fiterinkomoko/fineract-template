@@ -64,7 +64,9 @@ import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookP
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookService;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
+import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.api.JsonQuery;
@@ -269,6 +271,7 @@ public class LoansApiResource {
     private final ClientReadPlatformService clientReadPlatformService;
 
     private final DefaultToApiJsonSerializer<LoanTransactionData> loanTransactionApiJsonSerializer;
+    private final ConfigurationReadPlatformService configurationReadPlatformService;
 
     public LoansApiResource(final PlatformSecurityContext context, final LoanReadPlatformService loanReadPlatformService,
             final LoanProductReadPlatformService loanProductReadPlatformService,
@@ -295,7 +298,8 @@ public class LoansApiResource {
             final GLIMAccountInfoReadPlatformService glimAccountInfoReadPlatformService,
             final LoanCollateralManagementReadPlatformService loanCollateralManagementReadPlatformService,
             final ClientReadPlatformService clientReadPlatformService, InterestRateChartReadPlatformService chartReadPlatformService,
-            DefaultToApiJsonSerializer<LoanTransactionData> loanTransactionApiJsonSerializer) {
+            DefaultToApiJsonSerializer<LoanTransactionData> loanTransactionApiJsonSerializer,
+            final ConfigurationReadPlatformService configurationReadPlatformService) {
         this.context = context;
         this.loanReadPlatformService = loanReadPlatformService;
         this.loanProductReadPlatformService = loanProductReadPlatformService;
@@ -330,6 +334,7 @@ public class LoansApiResource {
         this.chartReadPlatformService = chartReadPlatformService;
         this.clientReadPlatformService = clientReadPlatformService;
         this.loanTransactionApiJsonSerializer = loanTransactionApiJsonSerializer;
+        this.configurationReadPlatformService = configurationReadPlatformService;
     }
 
     /*
@@ -797,6 +802,10 @@ public class LoansApiResource {
             rates = this.rateReadService.retrieveLoanRates(loanId);
         }
 
+        final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
+                .retrieveGlobalConfiguration("Add-More-Stages-To-A-Loan-Life-Cycle");
+        final Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
+
         LoanAccountData loanAccount = LoanAccountData.associationsAndTemplate(loanBasicDetails, repaymentSchedule, loanRepayments, charges,
                 loanCollateralManagementData, guarantors, meeting, productOptions, loanTermFrequencyTypeOptions,
                 repaymentFrequencyTypeOptions, repaymentFrequencyNthDayTypeOptions, repaymentFrequencyDayOfWeekTypeOptions,
@@ -809,6 +818,7 @@ public class LoansApiResource {
         loanAccount.setVendorClientOptions(vendorClientOptions);
         loanAccount.setVendorSavingsAccountOptions(vendorSavingsAccountOptions);
         loanAccount.setDepartmentOptions(departmentOptions);
+        loanAccount.setExtendLoanLifeCycleConfig(isExtendLoanLifeCycleConfig);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);

@@ -148,6 +148,7 @@ Feature: Test loan account apis
     #     Assert that Loan Account has passed REVIEW_APPLICATION Stage
     * assert loanResponse.loanAccount.loanDecisionState.id == 1000
     * assert loanResponse.loanAccount.loanDecisionState.value == 'REVIEW_APPLICATION'
+    * assert loanResponse.loanAccount.isExtendLoanLifeCycleConfig == true
 
     #- Disable configuration  ---Add-More-Stages-To-A-Loan-Life-Cycle---
     Then print 'Configuration ID ==> ', configurationId

@@ -254,6 +254,7 @@ public final class LoanAccountData {
     private CodeValueData department;
     private Collection<CodeValueData> departmentOptions;
     private EnumOptionData loanDecisionState;
+    Boolean isExtendLoanLifeCycleConfig;
 
     public static LoanAccountData importInstanceIndividual(EnumOptionData loanTypeEnumOption, Long clientId, Long productId,
             Long loanOfficerId, LocalDate submittedOnDate, Long fundId, BigDecimal principal, Integer numberOfRepayments,
@@ -2082,5 +2083,9 @@ public final class LoanAccountData {
 
     public void setLoanDecisionState(EnumOptionData loanDecisionState) {
         this.loanDecisionState = loanDecisionState;
+    }
+
+    public void setExtendLoanLifeCycleConfig(Boolean extendLoanLifeCycleConfig) {
+        isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig;
     }
 }
