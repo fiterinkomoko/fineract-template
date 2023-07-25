@@ -705,7 +705,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " lp.can_use_for_topup as canUseForTopup, " + " l.is_topup as isTopup, " + " topup.closure_loan_id as closureLoanId, "
                     + " l.total_recovered_derived as totalRecovered" + ", topuploan.account_no as closureLoanAccountNo, "
                     + " topup.topup_amount as topupAmount ,l.department_cv_id as departmentId,departmentV.code_value as departmentCode, "
-                    + " l.loan_decision_state as loanDecisionState " + " from m_loan l" //
+                    + " ds.loan_decision_state as loanDecisionState " + " from m_loan l" //
                     + " join m_product_loan lp on lp.id = l.product_id" //
                     + " left join m_loan_recalculation_details lir on lir.loan_id = l.id " + " join m_currency rc on rc."
                     + sqlGenerator.escape("code") + " = l.currency_code" //
@@ -725,7 +725,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " left join m_product_loan_variable_installment_config lpvi on lpvi.loan_product_id = l.product_id"
                     + " left join m_loan_topup as topup on l.id = topup.loan_id"
                     + " left join m_loan as topuploan on topuploan.id = topup.closure_loan_id"
-                    + " left join m_portfolio_account_associations as paa on l.id = paa.loan_account_id";
+                    + " left join m_portfolio_account_associations as paa on l.id = paa.loan_account_id"
+                    + " left join m_loan_decision as ds on l.id = ds.loan_id";
 
         }
 
