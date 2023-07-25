@@ -811,7 +811,9 @@ public final class LoanAccountData {
         loanAccountData.setRequiresEquityContribution(acc.requiresEquityContribution);
         loanAccountData.setEquityContributionLoanPercentage(acc.equityContributionLoanPercentage);
         loanAccountData.setVendorClientOptions(clientAcc.vendorClientOptions);
+        loanAccountData.setDepartment(acc.department);
         loanAccountData.setDepartmentOptions(acc.departmentOptions);
+        loanAccountData.setLoanDecisionState(acc.loanDecisionState);
         return loanAccountData;
     }
 
@@ -1399,7 +1401,9 @@ public final class LoanAccountData {
         loanAccountData.setEquityContributionLoanPercentage(acc.equityContributionLoanPercentage);
         loanAccountData.setVendorClientOptions(acc.vendorClientOptions);
         loanAccountData.setVendorSavingsAccountOptions(acc.vendorSavingsAccountOptions);
+        loanAccountData.setDepartment(acc.department);
         loanAccountData.setDepartmentOptions(acc.departmentOptions);
+        loanAccountData.setLoanDecisionState(acc.loanDecisionState);
         return loanAccountData;
     }
 
@@ -1436,6 +1440,9 @@ public final class LoanAccountData {
         loanAccountData.setEquityContributionLoanPercentage(acc.equityContributionLoanPercentage);
         loanAccountData.setVendorClientOptions(acc.vendorClientOptions);
         loanAccountData.setVendorSavingsAccountOptions(acc.vendorSavingsAccountOptions);
+        loanAccountData.setDepartment(acc.department);
+        loanAccountData.setDepartmentOptions(acc.departmentOptions);
+        loanAccountData.setLoanDecisionState(acc.loanDecisionState);
         return loanAccountData;
     }
 
@@ -1540,6 +1547,9 @@ public final class LoanAccountData {
         loanAccountData.setBnplLoan(acc.isBnplLoan);
         loanAccountData.setRequiresEquityContribution(acc.requiresEquityContribution);
         loanAccountData.setEquityContributionLoanPercentage(acc.equityContributionLoanPercentage);
+        loanAccountData.setDepartment(acc.department);
+        loanAccountData.setDepartmentOptions(acc.departmentOptions);
+        loanAccountData.setLoanDecisionState(acc.loanDecisionState);
         return loanAccountData;
     }
 
@@ -1573,6 +1583,9 @@ public final class LoanAccountData {
         loanAccountData.setBnplLoan(acc.isBnplLoan);
         loanAccountData.setRequiresEquityContribution(acc.requiresEquityContribution);
         loanAccountData.setEquityContributionLoanPercentage(acc.equityContributionLoanPercentage);
+        loanAccountData.setDepartment(acc.department);
+        loanAccountData.setDepartmentOptions(acc.departmentOptions);
+        loanAccountData.setLoanDecisionState(acc.loanDecisionState);
         return loanAccountData;
     }
 
