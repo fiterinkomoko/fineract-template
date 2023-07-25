@@ -3778,6 +3778,23 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder createClientRecruitmentSurvey(final long clientId) {
+        this.actionName = "CREATE";
+        this.entityName = "CLIENTRECRUITMENTSURVEY";
+        this.href = "/clients/" + clientId + "/recruitmentSurvey";
+        this.clientId = clientId;
+        return this;
+    }
+
+    public CommandWrapperBuilder updateClientRecruitmentSurvey(final Long surveyId, final Long clientId) {
+        this.actionName = "UPDATE";
+        this.entityName = "CLIENTRECRUITMENTSURVEY";
+        this.href = "/clients/" + clientId + "/recruitmentSurvey" + surveyId;
+        this.clientId = clientId;
+        this.entityId = surveyId;
+        return this;
+    }
+
     public CommandWrapperBuilder acceptLoanApplicationReview(final long loanId) {
         this.actionName = "ACCEPT";
         this.entityName = "LOANAPPLICATIONREVIEW";
