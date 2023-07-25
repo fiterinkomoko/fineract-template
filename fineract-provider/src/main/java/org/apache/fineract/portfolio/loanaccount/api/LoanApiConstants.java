@@ -33,10 +33,12 @@ public interface LoanApiConstants {
     String principalDisbursedParameterName = "transactionAmount";
     String chargesParameterName = "charges";
     String loanIdTobeApproved = "loanId";
+    String loanId = "loanId";
     String postDatedChecks = "postDatedChecks";
 
     String approvedLoanAmountParameterName = "approvedLoanAmount";
     String approvedOnDateParameterName = "approvedOnDate";
+    String loanReviewOnDateParameterName = "loanReviewOnDate";
     String noteParameterName = "note";
     String localeParameterName = "locale";
     String dateFormatParameterName = "dateFormat";
