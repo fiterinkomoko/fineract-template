@@ -253,6 +253,8 @@ public final class LoanAccountData {
     private PortfolioAccountData linkedVendorAccount;
     private CodeValueData department;
     private Collection<CodeValueData> departmentOptions;
+    private EnumOptionData loanDecisionState;
+    Boolean isExtendLoanLifeCycleConfig;
 
     public static LoanAccountData importInstanceIndividual(EnumOptionData loanTypeEnumOption, Long clientId, Long productId,
             Long loanOfficerId, LocalDate submittedOnDate, Long fundId, BigDecimal principal, Integer numberOfRepayments,
@@ -809,7 +811,9 @@ public final class LoanAccountData {
         loanAccountData.setRequiresEquityContribution(acc.requiresEquityContribution);
         loanAccountData.setEquityContributionLoanPercentage(acc.equityContributionLoanPercentage);
         loanAccountData.setVendorClientOptions(clientAcc.vendorClientOptions);
+        loanAccountData.setDepartment(acc.department);
         loanAccountData.setDepartmentOptions(acc.departmentOptions);
+        loanAccountData.setLoanDecisionState(acc.loanDecisionState);
         return loanAccountData;
     }
 
@@ -1377,6 +1381,7 @@ public final class LoanAccountData {
         loanAccountData.setEquityContributionLoanPercentage(acc.equityContributionLoanPercentage);
         loanAccountData.setDepartment(acc.department);
         loanAccountData.setDepartmentOptions(acc.departmentOptions);
+        loanAccountData.setLoanDecisionState(acc.loanDecisionState);
         return loanAccountData;
     }
 
@@ -1396,7 +1401,9 @@ public final class LoanAccountData {
         loanAccountData.setEquityContributionLoanPercentage(acc.equityContributionLoanPercentage);
         loanAccountData.setVendorClientOptions(acc.vendorClientOptions);
         loanAccountData.setVendorSavingsAccountOptions(acc.vendorSavingsAccountOptions);
+        loanAccountData.setDepartment(acc.department);
         loanAccountData.setDepartmentOptions(acc.departmentOptions);
+        loanAccountData.setLoanDecisionState(acc.loanDecisionState);
         return loanAccountData;
     }
 
@@ -1433,6 +1440,9 @@ public final class LoanAccountData {
         loanAccountData.setEquityContributionLoanPercentage(acc.equityContributionLoanPercentage);
         loanAccountData.setVendorClientOptions(acc.vendorClientOptions);
         loanAccountData.setVendorSavingsAccountOptions(acc.vendorSavingsAccountOptions);
+        loanAccountData.setDepartment(acc.department);
+        loanAccountData.setDepartmentOptions(acc.departmentOptions);
+        loanAccountData.setLoanDecisionState(acc.loanDecisionState);
         return loanAccountData;
     }
 
@@ -1537,6 +1547,9 @@ public final class LoanAccountData {
         loanAccountData.setBnplLoan(acc.isBnplLoan);
         loanAccountData.setRequiresEquityContribution(acc.requiresEquityContribution);
         loanAccountData.setEquityContributionLoanPercentage(acc.equityContributionLoanPercentage);
+        loanAccountData.setDepartment(acc.department);
+        loanAccountData.setDepartmentOptions(acc.departmentOptions);
+        loanAccountData.setLoanDecisionState(acc.loanDecisionState);
         return loanAccountData;
     }
 
@@ -1570,6 +1583,9 @@ public final class LoanAccountData {
         loanAccountData.setBnplLoan(acc.isBnplLoan);
         loanAccountData.setRequiresEquityContribution(acc.requiresEquityContribution);
         loanAccountData.setEquityContributionLoanPercentage(acc.equityContributionLoanPercentage);
+        loanAccountData.setDepartment(acc.department);
+        loanAccountData.setDepartmentOptions(acc.departmentOptions);
+        loanAccountData.setLoanDecisionState(acc.loanDecisionState);
         return loanAccountData;
     }
 
@@ -2076,5 +2092,13 @@ public final class LoanAccountData {
 
     public void setDepartmentOptions(Collection<CodeValueData> departmentOptions) {
         this.departmentOptions = departmentOptions;
+    }
+
+    public void setLoanDecisionState(EnumOptionData loanDecisionState) {
+        this.loanDecisionState = loanDecisionState;
+    }
+
+    public void setExtendLoanLifeCycleConfig(Boolean extendLoanLifeCycleConfig) {
+        isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig;
     }
 }
