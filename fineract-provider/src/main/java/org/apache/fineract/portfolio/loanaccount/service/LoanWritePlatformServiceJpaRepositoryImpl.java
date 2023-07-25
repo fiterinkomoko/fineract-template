@@ -282,6 +282,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final RepaymentWithPostDatedChecksAssembler repaymentWithPostDatedChecksAssembler;
     private final PostDatedChecksRepository postDatedChecksRepository;
     private final LoanRepaymentReminderRepository loanRepaymentReminderRepository;
+    private final LoanDecisionStateUtilService loanDecisionStateUtilService;
 
     @Autowired
     private ActiveMqNotificationDomainServiceImpl activeMqNotificationDomainService;
@@ -330,6 +331,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        this.loanDecisionStateUtilService.validateLoanReviewApplicationStateIsFiredBeforeDisbursal(loan);
         if (loan.loanProduct().isDisallowExpectedDisbursements()) {
             // create artificial 'tranche/expected disbursal' as current disburse code expects it for multi-disbursal
             // products
