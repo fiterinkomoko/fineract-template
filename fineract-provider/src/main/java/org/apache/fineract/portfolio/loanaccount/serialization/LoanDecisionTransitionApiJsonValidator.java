@@ -73,9 +73,37 @@ public final class LoanDecisionTransitionApiJsonValidator {
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final LocalDate LoanReviewOnDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.loanReviewOnDateParameterName,
+        final LocalDate loanReviewOnDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.loanReviewOnDateParameterName,
                 element);
-        baseDataValidator.reset().parameter(LoanApiConstants.loanReviewOnDateParameterName).value(LoanReviewOnDate).notNull();
+        baseDataValidator.reset().parameter(LoanApiConstants.loanReviewOnDateParameterName).value(loanReviewOnDate).notNull();
+
+        final String note = this.fromApiJsonHelper.extractStringNamed(LoanApiConstants.noteParameterName, element);
+        baseDataValidator.reset().parameter(LoanApiConstants.noteParameterName).value(note).notExceedingLengthOf(1000).notNull();
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateDueDiligence(final String json) {
+
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+
+        final Set<String> disbursementParameters = new HashSet<>(
+                Arrays.asList(LoanApiConstants.loanId, LoanApiConstants.loanReviewOnDateParameterName, LoanApiConstants.noteParameterName,
+                        LoanApiConstants.localeParameterName, LoanApiConstants.dateFormatParameterName));
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loanDecisionEngine");
+
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        final LocalDate dueDiligenceOn = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.dueDiligenceOnDateParameterName,
+                element);
+        baseDataValidator.reset().parameter(LoanApiConstants.loanReviewOnDateParameterName).value(dueDiligenceOn).notNull();
 
         final String note = this.fromApiJsonHelper.extractStringNamed(LoanApiConstants.noteParameterName, element);
         baseDataValidator.reset().parameter(LoanApiConstants.noteParameterName).value(note).notExceedingLengthOf(1000).notNull();

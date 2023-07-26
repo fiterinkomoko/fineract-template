@@ -24,4 +24,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 public interface LoanApplicationDecisionWritePlatformService {
 
     CommandProcessingResult acceptLoanApplicationReview(Long loanId, JsonCommand command);
+
+    CommandProcessingResult applyDueDiligence(Long loanId, JsonCommand command);
 }
