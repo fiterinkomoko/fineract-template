@@ -4,5 +4,11 @@
     "note": "#(faker.lorem().characters(70))",
     "locale": "en",
     "dateFormat": "#(format)"
+  },
+  "dueDiligence": {
+    "dueDiligenceOn": "#(dueDiligenceOn)",
+    "note": "#(faker.lorem().characters(70))",
+    "locale": "en",
+    "dateFormat": "#(format)"
   }
 }

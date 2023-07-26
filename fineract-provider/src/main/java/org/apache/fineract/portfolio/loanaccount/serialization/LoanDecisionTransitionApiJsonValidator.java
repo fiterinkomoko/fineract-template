@@ -89,9 +89,9 @@ public final class LoanDecisionTransitionApiJsonValidator {
             throw new InvalidJsonException();
         }
 
-        final Set<String> disbursementParameters = new HashSet<>(
-                Arrays.asList(LoanApiConstants.loanId, LoanApiConstants.loanReviewOnDateParameterName, LoanApiConstants.noteParameterName,
-                        LoanApiConstants.localeParameterName, LoanApiConstants.dateFormatParameterName));
+        final Set<String> disbursementParameters = new HashSet<>(Arrays.asList(LoanApiConstants.loanId,
+                LoanApiConstants.loanReviewOnDateParameterName, LoanApiConstants.noteParameterName, LoanApiConstants.localeParameterName,
+                LoanApiConstants.dateFormatParameterName, LoanApiConstants.dueDiligenceOnDateParameterName));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
