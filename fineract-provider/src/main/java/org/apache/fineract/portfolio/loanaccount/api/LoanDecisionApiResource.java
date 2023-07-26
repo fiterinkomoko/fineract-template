@@ -65,13 +65,12 @@ public class LoanDecisionApiResource {
     }
 
     @POST
-    @Path("duediligence/{loanId}")
+    @Path("dueDiligence/{loanId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String applyDueDiligence(@PathParam("loanId") final long loanId, final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().acceptLoanApplicationReview(loanId).withJson(apiRequestBodyAsJson)
-                .build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().applyDueDiligence(loanId).withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

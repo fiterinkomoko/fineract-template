@@ -80,6 +80,8 @@ public class LoanDecision extends AbstractAuditableCustom {
         this.rejectReviewApplicationSigned = rejectReviewApplicationSigned;
         this.reviewApplicationOn = reviewApplicationOn;
         this.reviewApplicationBy = reviewApplicationBy;
+        this.dueDiligenceSigned = Boolean.FALSE;
+        this.rejectDueDiligence = Boolean.FALSE;
     }
 
     public Loan getLoan() {
