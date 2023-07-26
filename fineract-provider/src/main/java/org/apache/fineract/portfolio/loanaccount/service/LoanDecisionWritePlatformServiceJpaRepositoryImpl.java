@@ -76,7 +76,27 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         this.loanDecisionTransitionApiJsonValidator.validateApplicationReview(command.json());
 
         final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
+        final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
 
+        validateReviewApplicationBusinessRule(command, loan, loanDecision);
+        LoanDecision loanDecisionObj = loanDecisionAssembler.assembleFrom(command, loan, currentUser);
+        LoanDecision savedObj = loanDecisionRepository.saveAndFlush(loanDecisionObj);
+
+        Loan loanObj = loan;
+        loanObj.setLoanDecisionState(LoanDecisionState.REVIEW_APPLICATION.getValue());
+        this.loanRepositoryWrapper.saveAndFlush(loanObj);
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(savedObj.getId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .withResourceIdAsString(savedObj.getId().toString()).build();
+    }
+
+    private void validateReviewApplicationBusinessRule(JsonCommand command, Loan loan, LoanDecision loanDecision) {
         final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
                 .retrieveGlobalConfiguration("Add-More-Stages-To-A-Loan-Life-Cycle");
         final Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
@@ -86,7 +106,6 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                     "Add-More-Stages-To-A-Loan-Life-Cycle settings is not set. So this operation is not permitted");
         }
 
-        final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
         if (loanDecision != null) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.account.should.not.exist.in.decision.engine",
                     "Loan Account found in decision engine. Operation [Review Application] is not allowed");
@@ -106,11 +125,25 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
             throw new GeneralPlatformDomainRuleException("error.msg.loan.current.status.is.invalid",
                     "Loan Account current status is invalid. Expected" + loan.status().getCode() + " but found " + loan.status().getCode());
         }
-        LoanDecision loanDecisionObj = loanDecisionAssembler.assembleFrom(command, loan, currentUser);
+    }
+
+    @Override
+    public CommandProcessingResult applyDueDiligence(Long loanId, JsonCommand command) {
+
+        final AppUser currentUser = getAppUserIfPresent();
+
+        this.loanDecisionTransitionApiJsonValidator.validateDueDiligence(command.json());
+
+        final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
+        final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
+
+        validateDueDiligenceBusinessRule(command, loan, loanDecision);
+
+        LoanDecision loanDecisionObj = loanDecisionAssembler.assembleDueDiligenceFrom(command, currentUser, loanDecision);
         LoanDecision savedObj = loanDecisionRepository.saveAndFlush(loanDecisionObj);
 
         Loan loanObj = loan;
-        loanObj.setLoanDecisionState(LoanDecisionState.REVIEW_APPLICATION.getValue());
+        loanObj.setLoanDecisionState(LoanDecisionState.DUE_DILIGENCE.getValue());
         this.loanRepositoryWrapper.saveAndFlush(loanObj);
 
         return new CommandProcessingResultBuilder() //
@@ -121,6 +154,52 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                 .withGroupId(loan.getGroupId()) //
                 .withLoanId(loanId) //
                 .withResourceIdAsString(savedObj.getId().toString()).build();
+    }
+
+    private void validateDueDiligenceBusinessRule(JsonCommand command, Loan loan, LoanDecision loanDecision) {
+        final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
+                .retrieveGlobalConfiguration("Add-More-Stages-To-A-Loan-Life-Cycle");
+        final Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
+
+        if (!isExtendLoanLifeCycleConfig) {
+            throw new GeneralPlatformDomainRuleException("error.msg.Add-More-Stages-To-A-Loan-Life-Cycle.is.not.set",
+                    "Add-More-Stages-To-A-Loan-Life-Cycle settings is not set. So this operation is not permitted");
+        }
+
+        if (loanDecision == null) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.account.should.not.found.in.decision.engine",
+                    "Loan Account not found in decision engine. Operation [Due Diligence] is not allowed");
+        }
+        checkClientOrGroupActive(loan);
+
+        validateLoanDisbursementDataWithMeetingDate(loan);
+        validateLoanTopUp(loan);
+        LocalDate dueDiligenceOn = command.localDateValueOfParameterNamed(LoanApiConstants.loanReviewOnDateParameterName);
+        // Review Loan Application should not be before Due Diligence date
+        if (dueDiligenceOn.isBefore(loanDecision.getReviewApplicationOn())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.due.diligence.date.should.be.after.review.application.date",
+                    "Approve Due Diligence date" + dueDiligenceOn + " should be after Loan Review Application date "
+                            + loanDecision.getReviewApplicationOn());
+        }
+        // Due Diligence date should not be before loan submission date
+        if (dueDiligenceOn.isBefore(loan.getSubmittedOnDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.review.application.date.should.be.after.submission.date",
+                    "Approve Due Diligence date " + dueDiligenceOn + " should be after Loan submission date " + loan.getSubmittedOnDate());
+        }
+
+        if (!loan.status().isSubmittedAndPendingApproval()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.current.status.is.invalid",
+                    "Loan Account current status is invalid. Expected" + loan.status().getCode() + " but found " + loan.status().getCode());
+        }
+        if (!LoanDecisionState.fromInt(loan.getLoanDecisionState()).isReviewApplication()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.decision.state.is.invalid",
+                    "Loan Account Decision state is invalid. Expected" + LoanDecisionState.REVIEW_APPLICATION.getValue() + " but found "
+                            + loan.getLoanDecisionState());
+        }
+        if (!loan.getLoanDecisionState().equals(loanDecision.getLoanDecisionState())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.decision.state.does.not.reconcile",
+                    "Loan Account Decision state Does not reconcile . Operation is terminated");
+        }
     }
 
     private void validateLoanTopUp(Loan loan) {

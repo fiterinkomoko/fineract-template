@@ -43,4 +43,19 @@ public class LoanDecisionAssembler {
         return loanDecision;
     }
 
+    public LoanDecision assembleDueDiligenceFrom(final JsonCommand command, AppUser currentUser, LoanDecision savedLoanDecision) {
+
+        LocalDate dueDiligenceOn = command.localDateValueOfParameterNamed(LoanApiConstants.dueDiligenceOnDateParameterName);
+
+        final String noteText = command.stringValueOfParameterNamed("note");
+
+        LoanDecision loanDecision = savedLoanDecision;
+        loanDecision.setLoanDecisionState(LoanDecisionState.DUE_DILIGENCE.getValue());
+        loanDecision.setDueDiligenceNote(noteText);
+        loanDecision.setDueDiligenceBy(currentUser);
+        loanDecision.setDueDiligenceOn(dueDiligenceOn);
+        loanDecision.setDueDiligenceSigned(Boolean.TRUE);
+        loanDecision.setRejectDueDiligence(Boolean.FALSE);
+        return loanDecision;
+    }
 }

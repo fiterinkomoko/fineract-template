@@ -49,6 +49,18 @@ public class LoanDecision extends AbstractAuditableCustom {
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "review_application_by")
     private AppUser reviewApplicationBy;
+    // Due diligence
+    @Column(name = "due_diligence_note")
+    private String dueDiligenceNote;
+    @Column(name = "is_due_diligence_signed")
+    private Boolean dueDiligenceSigned;
+    @Column(name = "is_reject_due_diligence")
+    private Boolean rejectDueDiligence;
+    @Column(name = "due_diligence_on")
+    private LocalDate dueDiligenceOn;
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "due_diligence_by")
+    private AppUser dueDiligenceBy;
 
     public LoanDecision() {}
 
@@ -96,5 +108,29 @@ public class LoanDecision extends AbstractAuditableCustom {
 
     public AppUser getReviewApplicationBy() {
         return reviewApplicationBy;
+    }
+
+    public void setLoanDecisionState(Integer loanDecisionState) {
+        this.loanDecisionState = loanDecisionState;
+    }
+
+    public void setDueDiligenceNote(String dueDiligenceNote) {
+        this.dueDiligenceNote = dueDiligenceNote;
+    }
+
+    public void setDueDiligenceSigned(Boolean dueDiligenceSigned) {
+        this.dueDiligenceSigned = dueDiligenceSigned;
+    }
+
+    public void setRejectDueDiligence(Boolean rejectDueDiligence) {
+        this.rejectDueDiligence = rejectDueDiligence;
+    }
+
+    public void setDueDiligenceOn(LocalDate dueDiligenceOn) {
+        this.dueDiligenceOn = dueDiligenceOn;
+    }
+
+    public void setDueDiligenceBy(AppUser dueDiligenceBy) {
+        this.dueDiligenceBy = dueDiligenceBy;
     }
 }

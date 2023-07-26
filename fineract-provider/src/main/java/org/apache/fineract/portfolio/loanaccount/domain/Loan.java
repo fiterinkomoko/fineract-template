@@ -7003,4 +7003,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     public void setLoanDecisionState(Integer loanDecisionState) {
         this.loanDecisionState = loanDecisionState;
     }
+
+    public Integer getLoanDecisionState() {
+        return loanDecisionState;
+    }
 }
