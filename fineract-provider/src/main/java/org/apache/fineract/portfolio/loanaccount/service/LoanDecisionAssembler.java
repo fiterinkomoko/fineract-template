@@ -21,11 +21,14 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDecision;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDecisionState;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanDueDiligenceInfo;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +36,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @RequiredArgsConstructor
 public class LoanDecisionAssembler {
+
+    private final CodeValueRepositoryWrapper codeValueRepository;
 
     public LoanDecision assembleFrom(final JsonCommand command, Loan loanId, AppUser currentUser) {
 
@@ -57,5 +62,40 @@ public class LoanDecisionAssembler {
         loanDecision.setDueDiligenceSigned(Boolean.TRUE);
         loanDecision.setRejectDueDiligence(Boolean.FALSE);
         return loanDecision;
+    }
+
+    public LoanDueDiligenceInfo assembleDueDiligenceDetailsFrom(final JsonCommand command, LoanDecision savedLoanDecision, Loan loan) {
+
+        CodeValue surveyLocation = null;
+        CodeValue cohort = null;
+        CodeValue program = null;
+        CodeValue country = null;
+
+        final String surveyName = command.stringValueOfParameterNamed(LoanApiConstants.surveyNameParameterName);
+        LocalDate startDate = command.localDateValueOfParameterNamed(LoanApiConstants.startDateParameterName);
+        LocalDate endDate = command.localDateValueOfParameterNamed(LoanApiConstants.endDateParameterName);
+
+        final Long surveyLocationId = command.longValueOfParameterNamed(LoanApiConstants.surveyLocationParameterName);
+        if (surveyLocationId != null) {
+            surveyLocation = this.codeValueRepository.findOneWithNotFoundDetection(surveyLocationId);
+        }
+
+        final Long cohortId = command.longValueOfParameterNamed(LoanApiConstants.cohortParameterName);
+        if (cohortId != null) {
+            cohort = this.codeValueRepository.findOneWithNotFoundDetection(cohortId);
+        }
+
+        final Long programId = command.longValueOfParameterNamed(LoanApiConstants.programParameterName);
+        if (programId != null) {
+            program = this.codeValueRepository.findOneWithNotFoundDetection(programId);
+        }
+
+        final Long countryId = command.longValueOfParameterNamed(LoanApiConstants.countryParameterName);
+        if (countryId != null) {
+            country = this.codeValueRepository.findOneWithNotFoundDetection(countryId);
+        }
+
+        return LoanDueDiligenceInfo.createNew(loan, savedLoanDecision, surveyName, startDate, endDate, surveyLocation, cohort, program,
+                country);
     }
 }

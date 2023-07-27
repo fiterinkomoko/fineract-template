@@ -41,6 +41,13 @@ public interface LoanApiConstants {
     String loanReviewOnDateParameterName = "loanReviewOnDate";
     String dueDiligenceOnDateParameterName = "dueDiligenceOn";
     String noteParameterName = "note";
+    String surveyNameParameterName = "surveyName";
+    String startDateParameterName = "startDate";
+    String endDateParameterName = "endDate";
+    String surveyLocationParameterName = "surveyLocation";
+    String cohortParameterName = "cohort";
+    String programParameterName = "program";
+    String countryParameterName = "country";
     String localeParameterName = "locale";
     String dateFormatParameterName = "dateFormat";
     String rejectedOnDateParameterName = "rejectedOnDate";

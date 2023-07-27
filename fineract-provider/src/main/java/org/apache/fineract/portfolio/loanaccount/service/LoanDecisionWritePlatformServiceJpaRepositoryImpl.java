@@ -43,12 +43,13 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDecision;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDecisionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDecisionState;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanDueDiligenceInfo;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanDueDiligenceInfoRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleAssembler;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanDecisionTransitionApiJsonValidator;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -66,8 +67,8 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
     private final LoanUtilService loanUtilService;
     private final LoanReadPlatformService loanReadPlatformService;
     private final LoanDecisionAssembler loanDecisionAssembler;
+    private final LoanDueDiligenceInfoRepository loanDueDiligenceInfoRepository;
 
-    @Transactional
     @Override
     public CommandProcessingResult acceptLoanApplicationReview(final Long loanId, final JsonCommand command) {
 
@@ -146,6 +147,9 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         loanObj.setLoanDecisionState(LoanDecisionState.DUE_DILIGENCE.getValue());
         this.loanRepositoryWrapper.saveAndFlush(loanObj);
 
+        LoanDueDiligenceInfo loanDueDiligenceInfo = loanDecisionAssembler.assembleDueDiligenceDetailsFrom(command, savedObj, loanObj);
+        loanDueDiligenceInfoRepository.saveAndFlush(loanDueDiligenceInfo);
+
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(savedObj.getId()) //
@@ -174,7 +178,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         validateLoanDisbursementDataWithMeetingDate(loan);
         validateLoanTopUp(loan);
-        LocalDate dueDiligenceOn = command.localDateValueOfParameterNamed(LoanApiConstants.loanReviewOnDateParameterName);
+        LocalDate dueDiligenceOn = command.localDateValueOfParameterNamed(LoanApiConstants.dueDiligenceOnDateParameterName);
         // Review Loan Application should not be before Due Diligence date
         if (dueDiligenceOn.isBefore(loanDecision.getReviewApplicationOn())) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.due.diligence.date.should.be.after.review.application.date",

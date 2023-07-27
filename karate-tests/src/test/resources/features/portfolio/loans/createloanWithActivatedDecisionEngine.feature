@@ -205,9 +205,53 @@ Feature: Test loan account apis
     * assert loanResponse.loanAccount.loanDecisionState.value == 'REVIEW_APPLICATION'
     * assert loanResponse.loanAccount.isExtendLoanLifeCycleConfig == true
 
-    # Due Diligence
-    * call read('classpath:features/portfolio/loans/loanDecisionSteps.feature@dueDiligenceStage') { dueDiligenceOn : '#(submittedOnDate)', loanId : '#(loanId)' }
+     #-Get code and code values for SurveyLocation
+    *  def surveyLocationCode = 'SurveyLocation'
+    *  def surveyLocationResponse = call read('classpath:features/system/codes/codesStep.feature@fetchCodeByNameStep') { codeName : '#(surveyLocationCode)' }
+    *  def surveyLocationCodeId = surveyLocationResponse.codeName.id
+    #-----------------------------------------------------------
+          #- Fetch codeValue for SurveyLocation
+    * def codeValueResSL = call read('classpath:features/system/codes/codeValuesStep.feature@fetchCodeValuesStep'){ codeId : '#(surveyLocationCodeId)' }
+    * def surveyLocationValueId = codeValueResSL.listOfCodeValues[0].id
 
+         #-Get code and code values for COUNTRY
+    *  def countryCode = 'COUNTRY'
+    *  def countryResponse = call read('classpath:features/system/codes/codesStep.feature@fetchCodeByNameStep') { codeName : '#(countryCode)' }
+    *  def countryCodeId = countryResponse.codeName.id
+    #-----------------------------------------------------------
+          #- Fetch codeValue for country
+    * def codeValueResC = call read('classpath:features/system/codes/codeValuesStep.feature@fetchCodeValuesStep'){ codeId : '#(countryCodeId)' }
+    * def countryValueId = codeValueResC.listOfCodeValues[0].id
+
+
+             #-Get code and code values for Program
+    *  def programCode = 'Program'
+    *  def programResponse = call read('classpath:features/system/codes/codesStep.feature@fetchCodeByNameStep') { codeName : '#(programCode)' }
+    *  def programCodeId = programResponse.codeName.id
+    #-----------------------------------------------------------
+          #- Fetch codeValue for Program
+    * def codeValueResP = call read('classpath:features/system/codes/codeValuesStep.feature@fetchCodeValuesStep'){ codeId : '#(programCodeId)' }
+    * def programValueId = codeValueResP.listOfCodeValues[0].id
+
+                 #-Get code and code values for Cohort
+    *  def cohortCode = 'Cohort'
+    *  def cohortResponse = call read('classpath:features/system/codes/codesStep.feature@fetchCodeByNameStep') { codeName : '#(cohortCode)' }
+    *  def cohortCodeId = cohortResponse.codeName.id
+    #-----------------------------------------------------------
+          #- Fetch codeValue for Cohort
+    * def codeValueResCT = call read('classpath:features/system/codes/codeValuesStep.feature@fetchCodeValuesStep'){ codeId : '#(cohortCodeId)' }
+    * def cohortValueId = codeValueResCT.listOfCodeValues[0].id
+
+
+
+    # Due Diligence
+    * call read('classpath:features/portfolio/loans/loanDecisionSteps.feature@dueDiligenceStage') { dueDiligenceOn : '#(submittedOnDate)', loanId : '#(loanId)', surveyLocation : '#(surveyLocationValueId)', country : '#(countryValueId)', program : '#(programValueId)', cohort : '#(cohortValueId)' }
+    #     Assert that Loan Account has passed DUE_DILIGENCE Stage
+    * def loanResponseAfterDueDiligence = call read('classpath:features/portfolio/loans/loansteps.feature@findloanbyidWithAllAssociationStep') { loanId : '#(loanId)' }
+
+    * assert loanResponseAfterDueDiligence.loanAccount.loanDecisionState.id == 1200
+    * assert loanResponseAfterDueDiligence.loanAccount.loanDecisionState.value == 'DUE_DILIGENCE'
+    * assert loanResponseAfterDueDiligence.loanAccount.isExtendLoanLifeCycleConfig == true
 
 
     #- Disable configuration  ---Add-More-Stages-To-A-Loan-Life-Cycle---
