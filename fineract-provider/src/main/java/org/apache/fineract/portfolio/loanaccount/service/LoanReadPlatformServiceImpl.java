@@ -1491,6 +1491,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final Collection<CodeValueData> loanCollateralOptions = this.codeValueReadPlatformService
                 .retrieveCodeValuesByCode("LoanCollateral");
         final Collection<CodeValueData> departmentOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("Department");
+        final Collection<CodeValueData> surveyLocationOptions = this.codeValueReadPlatformService
+                .retrieveCodeValuesByCode("SurveyLocation");
+        final Collection<CodeValueData> programOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("Program");
+        final Collection<CodeValueData> countryOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("COUNTRY");
+        final Collection<CodeValueData> cohortOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("Cohort");
         Collection<ChargeData> chargeOptions = null;
         if (loanProduct.getMultiDisburseLoan()) {
             chargeOptions = this.chargeReadPlatformService.retrieveLoanProductApplicableCharges(productId,
@@ -1525,6 +1530,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         loanAccountData.setEquityContributionLoanPercentage(loanProduct.getEquityContributionLoanPercentage());
         loanAccountData.setRequiresEquityContribution(loanProduct.getRequiresEquityContribution());
         loanAccountData.setDepartmentOptions(departmentOptions);
+        loanAccountData.setSurveyLocationOptions(surveyLocationOptions);
+        loanAccountData.setCohortOptions(cohortOptions);
+        loanAccountData.setCountryOptions(countryOptions);
+        loanAccountData.setProgramOptions(programOptions);
         return loanAccountData;
     }
 
@@ -2537,6 +2546,26 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 null, null, null, null, outstandingLoanBalance, unrecognizedIncomePortion, false, null);
         loanTransactionData.setWriteOffReasonOptions(writeOffReasonOptions);
         return loanTransactionData;
+    }
+
+    @Override
+    public LoanAccountData retrieveLoanDecisionDetailsTemplate(Long loanId) {
+        this.context.authenticatedUser();
+
+        final LoanAccountData loanAccountData = retrieveOne(loanId);
+
+        final Collection<CodeValueData> departmentOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("Department");
+        final Collection<CodeValueData> surveyLocationOptions = this.codeValueReadPlatformService
+                .retrieveCodeValuesByCode("SurveyLocation");
+        final Collection<CodeValueData> programOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("Program");
+        final Collection<CodeValueData> countryOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("COUNTRY");
+        final Collection<CodeValueData> cohortOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("Cohort");
+
+        loanAccountData.setSurveyLocationOptions(surveyLocationOptions);
+        loanAccountData.setCohortOptions(cohortOptions);
+        loanAccountData.setCountryOptions(countryOptions);
+        loanAccountData.setProgramOptions(programOptions);
+        return loanAccountData;
     }
 
     private static final class CollectionDataMapper implements RowMapper<CollectionData> {
