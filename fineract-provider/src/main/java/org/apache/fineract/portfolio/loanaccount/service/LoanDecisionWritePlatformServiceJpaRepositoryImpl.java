@@ -179,6 +179,8 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         validateLoanDisbursementDataWithMeetingDate(loan);
         validateLoanTopUp(loan);
         LocalDate dueDiligenceOn = command.localDateValueOfParameterNamed(LoanApiConstants.dueDiligenceOnDateParameterName);
+        LocalDate startDate = command.localDateValueOfParameterNamed(LoanApiConstants.startDateParameterName);
+        LocalDate endDate = command.localDateValueOfParameterNamed(LoanApiConstants.endDateParameterName);
         // Review Loan Application should not be before Due Diligence date
         if (dueDiligenceOn.isBefore(loanDecision.getReviewApplicationOn())) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.due.diligence.date.should.be.after.review.application.date",
@@ -203,6 +205,11 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         if (!loan.getLoanDecisionState().equals(loanDecision.getLoanDecisionState())) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.decision.state.does.not.reconcile",
                     "Loan Account Decision state Does not reconcile . Operation is terminated");
+        }
+        if (startDate.isAfter(endDate)) {
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.loan.due.diligence.startDate.should.not.be.before.endDate.operation.terminated",
+                    "Due Diligence startDate " + startDate + " should not be after endDate " + endDate);
         }
     }
 
