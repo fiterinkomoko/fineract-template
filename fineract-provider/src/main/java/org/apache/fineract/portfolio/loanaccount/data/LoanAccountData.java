@@ -253,6 +253,10 @@ public final class LoanAccountData {
     private PortfolioAccountData linkedVendorAccount;
     private CodeValueData department;
     private Collection<CodeValueData> departmentOptions;
+    private Collection<CodeValueData> surveyLocationOptions;
+    private Collection<CodeValueData> programOptions;
+    private Collection<CodeValueData> countryOptions;
+    private Collection<CodeValueData> cohortOptions;
     private EnumOptionData loanDecisionState;
     Boolean isExtendLoanLifeCycleConfig;
 
@@ -814,6 +818,10 @@ public final class LoanAccountData {
         loanAccountData.setDepartment(acc.department);
         loanAccountData.setDepartmentOptions(acc.departmentOptions);
         loanAccountData.setLoanDecisionState(acc.loanDecisionState);
+        loanAccountData.setSurveyLocationOptions(acc.surveyLocationOptions);
+        loanAccountData.setCohortOptions(acc.cohortOptions);
+        loanAccountData.setCountryOptions(acc.countryOptions);
+        loanAccountData.setProgramOptions(acc.programOptions);
         return loanAccountData;
     }
 
@@ -1382,6 +1390,10 @@ public final class LoanAccountData {
         loanAccountData.setDepartment(acc.department);
         loanAccountData.setDepartmentOptions(acc.departmentOptions);
         loanAccountData.setLoanDecisionState(acc.loanDecisionState);
+        loanAccountData.setSurveyLocationOptions(acc.surveyLocationOptions);
+        loanAccountData.setCohortOptions(acc.cohortOptions);
+        loanAccountData.setCountryOptions(acc.countryOptions);
+        loanAccountData.setProgramOptions(acc.programOptions);
         return loanAccountData;
     }
 
@@ -1404,6 +1416,10 @@ public final class LoanAccountData {
         loanAccountData.setDepartment(acc.department);
         loanAccountData.setDepartmentOptions(acc.departmentOptions);
         loanAccountData.setLoanDecisionState(acc.loanDecisionState);
+        loanAccountData.setSurveyLocationOptions(acc.surveyLocationOptions);
+        loanAccountData.setCohortOptions(acc.cohortOptions);
+        loanAccountData.setCountryOptions(acc.countryOptions);
+        loanAccountData.setProgramOptions(acc.programOptions);
         return loanAccountData;
     }
 
@@ -1443,6 +1459,10 @@ public final class LoanAccountData {
         loanAccountData.setDepartment(acc.department);
         loanAccountData.setDepartmentOptions(acc.departmentOptions);
         loanAccountData.setLoanDecisionState(acc.loanDecisionState);
+        loanAccountData.setSurveyLocationOptions(acc.surveyLocationOptions);
+        loanAccountData.setCohortOptions(acc.cohortOptions);
+        loanAccountData.setCountryOptions(acc.countryOptions);
+        loanAccountData.setProgramOptions(acc.programOptions);
         return loanAccountData;
     }
 
@@ -1550,6 +1570,10 @@ public final class LoanAccountData {
         loanAccountData.setDepartment(acc.department);
         loanAccountData.setDepartmentOptions(acc.departmentOptions);
         loanAccountData.setLoanDecisionState(acc.loanDecisionState);
+        loanAccountData.setSurveyLocationOptions(acc.surveyLocationOptions);
+        loanAccountData.setCohortOptions(acc.cohortOptions);
+        loanAccountData.setCountryOptions(acc.countryOptions);
+        loanAccountData.setProgramOptions(acc.programOptions);
         return loanAccountData;
     }
 
@@ -1586,6 +1610,10 @@ public final class LoanAccountData {
         loanAccountData.setDepartment(acc.department);
         loanAccountData.setDepartmentOptions(acc.departmentOptions);
         loanAccountData.setLoanDecisionState(acc.loanDecisionState);
+        loanAccountData.setSurveyLocationOptions(acc.surveyLocationOptions);
+        loanAccountData.setCohortOptions(acc.cohortOptions);
+        loanAccountData.setCountryOptions(acc.countryOptions);
+        loanAccountData.setProgramOptions(acc.programOptions);
         return loanAccountData;
     }
 
@@ -2100,5 +2128,21 @@ public final class LoanAccountData {
 
     public void setExtendLoanLifeCycleConfig(Boolean extendLoanLifeCycleConfig) {
         isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig;
+    }
+
+    public void setSurveyLocationOptions(Collection<CodeValueData> surveyLocationOptions) {
+        this.surveyLocationOptions = surveyLocationOptions;
+    }
+
+    public void setProgramOptions(Collection<CodeValueData> programOptions) {
+        this.programOptions = programOptions;
+    }
+
+    public void setCountryOptions(Collection<CodeValueData> countryOptions) {
+        this.countryOptions = countryOptions;
+    }
+
+    public void setCohortOptions(Collection<CodeValueData> cohortOptions) {
+        this.cohortOptions = cohortOptions;
     }
 }
