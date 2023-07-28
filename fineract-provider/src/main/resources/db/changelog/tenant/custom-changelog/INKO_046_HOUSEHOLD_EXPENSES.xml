@@ -145,4 +145,9 @@
             <column defaultValueComputed="now()"  name="lastmodified_date" type="datetime"/>
         </createTable>
     </changeSet>
+    <changeSet id="drop-uk.m_client_household_expenses.external_id" author="bosco@fiter.io">
+        <dropUniqueConstraint tableName="m_client_household_expenses"
+                              uniqueColumns="external_id"
+                              constraintName="m_client_household_expenses_external_id_key"/>
+    </changeSet>
 </databaseChangeLog>
