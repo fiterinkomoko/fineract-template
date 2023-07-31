@@ -77,22 +77,26 @@ public class LoanDecisionAssembler {
 
         final Long surveyLocationId = command.longValueOfParameterNamed(LoanApiConstants.surveyLocationParameterName);
         if (surveyLocationId != null) {
-            surveyLocation = this.codeValueRepository.findOneWithNotFoundDetection(surveyLocationId);
+            surveyLocation = this.codeValueRepository
+                    .findOneByCodeNameAndIdWithNotFoundDetection(LoanApiConstants.surveyLocationCodeParameterName, surveyLocationId);
         }
 
         final Long cohortId = command.longValueOfParameterNamed(LoanApiConstants.cohortParameterName);
         if (cohortId != null) {
-            cohort = this.codeValueRepository.findOneWithNotFoundDetection(cohortId);
+            cohort = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(LoanApiConstants.cohortCodeParameterName,
+                    cohortId);
         }
 
         final Long programId = command.longValueOfParameterNamed(LoanApiConstants.programParameterName);
         if (programId != null) {
-            program = this.codeValueRepository.findOneWithNotFoundDetection(programId);
+            program = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(LoanApiConstants.programCodeParameterName,
+                    programId);
         }
 
         final Long countryId = command.longValueOfParameterNamed(LoanApiConstants.countryParameterName);
         if (countryId != null) {
-            country = this.codeValueRepository.findOneWithNotFoundDetection(countryId);
+            country = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(LoanApiConstants.countryCodeParameterName,
+                    countryId);
         }
 
         return LoanDueDiligenceInfo.createNew(loan, savedLoanDecision, surveyName, startDate, endDate, surveyLocation, cohort, program,

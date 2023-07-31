@@ -45,6 +45,10 @@ public interface LoanApiConstants {
     String startDateParameterName = "startDate";
     String endDateParameterName = "endDate";
     String surveyLocationParameterName = "surveyLocation";
+    String surveyLocationCodeParameterName = "SurveyLocation";
+    String cohortCodeParameterName = "Cohort";
+    String programCodeParameterName = "Program";
+    String countryCodeParameterName = "COUNTRY";
     String cohortParameterName = "cohort";
     String programParameterName = "program";
     String countryParameterName = "country";
