@@ -16,17 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.domain;
+package org.apache.fineract.portfolio.loanaccount.data;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import java.time.LocalDate;
+import lombok.Data;
 
-public interface LoanDueDiligenceInfoRepository
-        extends JpaRepository<LoanDueDiligenceInfo, Long>, JpaSpecificationExecutor<LoanDueDiligenceInfo> {
+@Data
+public class LoanDueDiligenceData {
 
-    @Query("select dec from LoanDueDiligenceInfo dec where dec.loan.id =:loanId")
-    LoanDueDiligenceInfo findLoanDueDiligenceInfoByLoanId(@Param("loanId") Long loanId);
-
+    private String surveyName;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private String surveyLocation;
+    private String cohort;
+    private String program;
+    private String country;
 }

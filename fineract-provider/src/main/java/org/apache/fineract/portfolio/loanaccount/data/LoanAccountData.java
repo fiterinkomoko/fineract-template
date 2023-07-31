@@ -258,7 +258,8 @@ public final class LoanAccountData {
     private Collection<CodeValueData> countryOptions;
     private Collection<CodeValueData> cohortOptions;
     private EnumOptionData loanDecisionState;
-    Boolean isExtendLoanLifeCycleConfig;
+    private Boolean isExtendLoanLifeCycleConfig;
+    private LoanDueDiligenceData loanDueDiligenceData;
 
     public static LoanAccountData importInstanceIndividual(EnumOptionData loanTypeEnumOption, Long clientId, Long productId,
             Long loanOfficerId, LocalDate submittedOnDate, Long fundId, BigDecimal principal, Integer numberOfRepayments,
@@ -2144,5 +2145,9 @@ public final class LoanAccountData {
 
     public void setCohortOptions(Collection<CodeValueData> cohortOptions) {
         this.cohortOptions = cohortOptions;
+    }
+
+    public void setLoanDueDiligenceData(LoanDueDiligenceData loanDueDiligenceData) {
+        this.loanDueDiligenceData = loanDueDiligenceData;
     }
 }

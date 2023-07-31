@@ -25,9 +25,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import lombok.Data;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 
+@Data
 @Entity
 @Table(name = "m_loan_due_diligence_info")
 public class LoanDueDiligenceInfo extends AbstractAuditableCustom {
