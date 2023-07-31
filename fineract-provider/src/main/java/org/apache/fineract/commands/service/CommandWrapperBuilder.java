@@ -3812,4 +3812,13 @@ public class CommandWrapperBuilder {
 
         return this;
     }
+
+    public CommandWrapperBuilder acceptLoanCollateralReview(final long loanId) {
+        this.actionName = "ACCEPT";
+        this.entityName = "LOANCOLLATERALREVIEW";
+        this.href = "/loans/decision/collateralreview/" + loanId;
+        this.loanId = loanId;
+
+        return this;
+    }
 }

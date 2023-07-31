@@ -174,6 +174,11 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                 .withResourceIdAsString(savedObj.getId().toString()).build();
     }
 
+    @Override
+    public CommandProcessingResult acceptLoanCollateralReview(Long loanId, JsonCommand command) {
+        return null;
+    }
+
     private void validateDueDiligenceBusinessRule(JsonCommand command, Loan loan, LoanDecision loanDecision) {
         final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
                 .retrieveGlobalConfiguration("Add-More-Stages-To-A-Loan-Life-Cycle");
