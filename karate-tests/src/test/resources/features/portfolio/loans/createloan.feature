@@ -3,6 +3,14 @@ Feature: Test loan account apis
     * callonce read('classpath:features/base.feature')
     * url baseUrl
 
+    *  def configName = 'Add-More-Stages-To-A-Loan-Life-Cycle'
+    *  def response = call read('classpath:features/portfolio/configuration/configurationsteps.feature@findByNameStep') { configName : '#(configName)' }
+    *  def configurationId = response.globalConfig.id
+        #- Disable configuration  ---Add-More-Stages-To-A-Loan-Life-Cycle---
+    Then print 'Configuration ID ==> ', configurationId
+    * def configResponse = call read('classpath:features/portfolio/configuration/configurationsteps.feature@disable_global_config') { configurationsId : '#(configurationId)' }
+    Then print 'Configuration Response ==> ', configResponse
+
   @createanddisburseloan
   Scenario: Create approve and disburse loan
       #to choose an earlier date use faker.date().past(20, TimeUnit.DAYS)

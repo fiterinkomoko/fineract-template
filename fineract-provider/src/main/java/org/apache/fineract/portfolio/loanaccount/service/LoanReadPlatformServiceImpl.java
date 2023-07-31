@@ -2576,8 +2576,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     @Override
     public LoanDueDiligenceData retrieveLoanDueDiligenceData(Long loanId) {
         LoanDueDiligenceInfo loanDueDiligenceInfo = this.loanDueDiligenceInfoRepository.findLoanDueDiligenceInfoByLoanId(loanId);
-        LoanDueDiligenceData loanDueDiligenceData = new LoanDueDiligenceData();
+        LoanDueDiligenceData loanDueDiligenceData = null;
         if (loanDueDiligenceInfo != null) {
+            loanDueDiligenceData = new LoanDueDiligenceData();
             loanDueDiligenceData.setSurveyName(loanDueDiligenceInfo.getSurveyName());
             loanDueDiligenceData.setCohort(loanDueDiligenceInfo.getCohort().label());
             loanDueDiligenceData.setCountry(loanDueDiligenceInfo.getCountry().label());
