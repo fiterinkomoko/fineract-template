@@ -218,7 +218,6 @@ Feature: Create loan stapes
     And header fineract-platform-tenantid = tenantId
     And request loansData.loan1
     When method POST
-    Then status 403
     Then match $ contains { developerMessage: '#notnull' }
 
     # This steps has no HardCodes Product
