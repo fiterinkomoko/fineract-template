@@ -204,6 +204,9 @@ Feature: Test loan account apis
     * assert loanResponse.loanAccount.loanDecisionState.id == 1000
     * assert loanResponse.loanAccount.loanDecisionState.value == 'REVIEW_APPLICATION'
     * assert loanResponse.loanAccount.isExtendLoanLifeCycleConfig == true
+    * assert loanResponse.loanAccount.loanDueDiligenceData == null
+    * def noteResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findLoanAccountNotesByLoanId') { loanId : '#(loanId)' }
+    * assert karate.sizeOf(noteResponse.notes) == 1
 
      #-Get code and code values for SurveyLocation
     *  def surveyLocationCode = 'SurveyLocation'
@@ -252,6 +255,10 @@ Feature: Test loan account apis
     * assert loanResponseAfterDueDiligence.loanAccount.loanDecisionState.id == 1200
     * assert loanResponseAfterDueDiligence.loanAccount.loanDecisionState.value == 'DUE_DILIGENCE'
     * assert loanResponseAfterDueDiligence.loanAccount.isExtendLoanLifeCycleConfig == true
+    * assert loanResponseAfterDueDiligence.loanAccount.loanDueDiligenceData != null
+
+    * def noteResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findLoanAccountNotesByLoanId') { loanId : '#(loanId)' }
+    * assert karate.sizeOf(noteResponse.notes) == 2
 
 
     #- Disable configuration  ---Add-More-Stages-To-A-Loan-Life-Cycle---

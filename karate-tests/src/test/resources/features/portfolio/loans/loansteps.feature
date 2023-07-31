@@ -465,3 +465,17 @@ Feature: Create loan stapes
     Then match $ contains { developerMessage: '#notnull' }
     Then assert response.developerMessage == 'Request was understood but caused a domain rule violation.'
     Then assert response.errors[0].developerMessage == 'Loan Account is not permitted for Disbursement since new workflow [Add-More-Stages-To-A-Loan-Life-Cycle] is activated and next stage is [Review Application]'
+
+
+  @ignore
+  @findLoanAccountNotesByLoanId
+  Scenario: Get loan account Notes by Loan ID
+    Given configure ssl = true
+    Given path 'loans',loanId, 'notes'
+    And header Accept = 'application/json'
+    And header Content-Type = 'application/json'
+    And header Authorization = authToken
+    And header fineract-platform-tenantid = tenantId
+    When method GET
+    Then status 200
+    Then def notes = response
