@@ -16,14 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.portfolio.loanaccount.domain;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-public interface LoanApplicationDecisionWritePlatformService {
+public interface LoanDueDiligenceInfoRepository
+        extends JpaRepository<LoanDueDiligenceInfo, Long>, JpaSpecificationExecutor<LoanDueDiligenceInfo> {
 
-    CommandProcessingResult acceptLoanApplicationReview(Long loanId, JsonCommand command);
+    @Query("select dec from LoanDueDiligenceInfo dec where dec.loan.id =:loanId")
+    LoanDueDiligenceInfo findLoanDueDiligenceInfoByLoanId(@Param("loanId") Long loanId);
 
-    CommandProcessingResult applyDueDiligence(Long loanId, JsonCommand command);
 }

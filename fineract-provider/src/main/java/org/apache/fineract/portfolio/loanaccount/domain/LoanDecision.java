@@ -26,9 +26,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import lombok.Data;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.useradministration.domain.AppUser;
 
+@Data
 @Entity
 @Table(name = "m_loan_decision")
 public class LoanDecision extends AbstractAuditableCustom {
@@ -49,6 +51,18 @@ public class LoanDecision extends AbstractAuditableCustom {
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "review_application_by")
     private AppUser reviewApplicationBy;
+    // Due diligence
+    @Column(name = "due_diligence_note")
+    private String dueDiligenceNote;
+    @Column(name = "is_due_diligence_signed")
+    private Boolean dueDiligenceSigned;
+    @Column(name = "is_reject_due_diligence")
+    private Boolean rejectDueDiligence;
+    @Column(name = "due_diligence_on")
+    private LocalDate dueDiligenceOn;
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "due_diligence_by")
+    private AppUser dueDiligenceBy;
 
     public LoanDecision() {}
 
@@ -68,33 +82,7 @@ public class LoanDecision extends AbstractAuditableCustom {
         this.rejectReviewApplicationSigned = rejectReviewApplicationSigned;
         this.reviewApplicationOn = reviewApplicationOn;
         this.reviewApplicationBy = reviewApplicationBy;
-    }
-
-    public Loan getLoan() {
-        return loan;
-    }
-
-    public Integer getLoanDecisionState() {
-        return loanDecisionState;
-    }
-
-    public String getReviewApplicationNote() {
-        return reviewApplicationNote;
-    }
-
-    public Boolean getReviewApplicationSigned() {
-        return reviewApplicationSigned;
-    }
-
-    public Boolean getRejectReviewApplicationSigned() {
-        return rejectReviewApplicationSigned;
-    }
-
-    public LocalDate getReviewApplicationOn() {
-        return reviewApplicationOn;
-    }
-
-    public AppUser getReviewApplicationBy() {
-        return reviewApplicationBy;
+        this.dueDiligenceSigned = Boolean.FALSE;
+        this.rejectDueDiligence = Boolean.FALSE;
     }
 }

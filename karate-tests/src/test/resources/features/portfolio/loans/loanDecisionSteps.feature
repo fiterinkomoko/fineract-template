@@ -18,3 +18,19 @@ Feature: Create loan stapes
     When method POST
     Then status 200
     Then match $ contains { resourceId: '#notnull' }
+
+
+
+  @ignore
+  @dueDiligenceStage
+  Scenario: Due Diligence Stage
+    Given configure ssl = true
+    * def loansData = read('classpath:templates/loansDecision.json')
+    Given path 'loans/decision/dueDiligence',loanId
+    And header Accept = 'application/json'
+    And header Authorization = authToken
+    And header fineract-platform-tenantid = tenantId
+    And request loansData.dueDiligence
+    When method POST
+    Then status 200
+    Then match $ contains { resourceId: '#notnull' }
