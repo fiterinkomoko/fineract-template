@@ -26,9 +26,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import lombok.Data;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.useradministration.domain.AppUser;
 
+@Data
 @Entity
 @Table(name = "m_loan_decision")
 public class LoanDecision extends AbstractAuditableCustom {
@@ -82,57 +84,5 @@ public class LoanDecision extends AbstractAuditableCustom {
         this.reviewApplicationBy = reviewApplicationBy;
         this.dueDiligenceSigned = Boolean.FALSE;
         this.rejectDueDiligence = Boolean.FALSE;
-    }
-
-    public Loan getLoan() {
-        return loan;
-    }
-
-    public Integer getLoanDecisionState() {
-        return loanDecisionState;
-    }
-
-    public String getReviewApplicationNote() {
-        return reviewApplicationNote;
-    }
-
-    public Boolean getReviewApplicationSigned() {
-        return reviewApplicationSigned;
-    }
-
-    public Boolean getRejectReviewApplicationSigned() {
-        return rejectReviewApplicationSigned;
-    }
-
-    public LocalDate getReviewApplicationOn() {
-        return reviewApplicationOn;
-    }
-
-    public AppUser getReviewApplicationBy() {
-        return reviewApplicationBy;
-    }
-
-    public void setLoanDecisionState(Integer loanDecisionState) {
-        this.loanDecisionState = loanDecisionState;
-    }
-
-    public void setDueDiligenceNote(String dueDiligenceNote) {
-        this.dueDiligenceNote = dueDiligenceNote;
-    }
-
-    public void setDueDiligenceSigned(Boolean dueDiligenceSigned) {
-        this.dueDiligenceSigned = dueDiligenceSigned;
-    }
-
-    public void setRejectDueDiligence(Boolean rejectDueDiligence) {
-        this.rejectDueDiligence = rejectDueDiligence;
-    }
-
-    public void setDueDiligenceOn(LocalDate dueDiligenceOn) {
-        this.dueDiligenceOn = dueDiligenceOn;
-    }
-
-    public void setDueDiligenceBy(AppUser dueDiligenceBy) {
-        this.dueDiligenceBy = dueDiligenceBy;
     }
 }

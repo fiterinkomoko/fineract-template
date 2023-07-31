@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
@@ -48,6 +49,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanDueDiligenceInfoRepo
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleAssembler;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanDecisionTransitionApiJsonValidator;
+import org.apache.fineract.portfolio.note.domain.Note;
+import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.stereotype.Service;
 
@@ -68,6 +71,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
     private final LoanReadPlatformService loanReadPlatformService;
     private final LoanDecisionAssembler loanDecisionAssembler;
     private final LoanDueDiligenceInfoRepository loanDueDiligenceInfoRepository;
+    private final NoteRepository noteRepository;
 
     @Override
     public CommandProcessingResult acceptLoanApplicationReview(final Long loanId, final JsonCommand command) {
@@ -86,6 +90,11 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         Loan loanObj = loan;
         loanObj.setLoanDecisionState(LoanDecisionState.REVIEW_APPLICATION.getValue());
         this.loanRepositoryWrapper.saveAndFlush(loanObj);
+
+        if (StringUtils.isNotBlank(loanDecisionObj.getReviewApplicationNote())) {
+            final Note note = Note.loanNote(loanObj, "Review Application: " + loanDecisionObj.getReviewApplicationNote());
+            this.noteRepository.save(note);
+        }
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -149,6 +158,11 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         LoanDueDiligenceInfo loanDueDiligenceInfo = loanDecisionAssembler.assembleDueDiligenceDetailsFrom(command, savedObj, loanObj);
         loanDueDiligenceInfoRepository.saveAndFlush(loanDueDiligenceInfo);
+
+        if (StringUtils.isNotBlank(loanDecisionObj.getDueDiligenceNote())) {
+            final Note note = Note.loanNote(loanObj, "Due Diligence : " + loanDecisionObj.getDueDiligenceNote());
+            this.noteRepository.save(note);
+        }
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
