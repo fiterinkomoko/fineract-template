@@ -3798,7 +3798,16 @@ public class CommandWrapperBuilder {
     public CommandWrapperBuilder acceptLoanApplicationReview(final long loanId) {
         this.actionName = "ACCEPT";
         this.entityName = "LOANAPPLICATIONREVIEW";
-        this.href = "/loans/decision/" + loanId;
+        this.href = "/loans/decision/reviewapplication/" + loanId;
+        this.loanId = loanId;
+
+        return this;
+    }
+
+    public CommandWrapperBuilder applyDueDiligence(final long loanId) {
+        this.actionName = "ACCEPT";
+        this.entityName = "DUEDILIGENCE";
+        this.href = "/loans/decision/duediligence/" + loanId;
         this.loanId = loanId;
 
         return this;

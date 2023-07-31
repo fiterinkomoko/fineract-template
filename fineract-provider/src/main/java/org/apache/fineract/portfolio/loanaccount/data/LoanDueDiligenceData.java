@@ -16,14 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.portfolio.loanaccount.data;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import java.time.LocalDate;
+import lombok.Data;
 
-public interface LoanApplicationDecisionWritePlatformService {
+@Data
+public class LoanDueDiligenceData {
 
-    CommandProcessingResult acceptLoanApplicationReview(Long loanId, JsonCommand command);
-
-    CommandProcessingResult applyDueDiligence(Long loanId, JsonCommand command);
+    private String surveyName;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private String surveyLocation;
+    private String cohort;
+    private String program;
+    private String country;
 }
