@@ -4,5 +4,18 @@
     "note": "#(faker.lorem().characters(70))",
     "locale": "en",
     "dateFormat": "#(format)"
+  },
+  "dueDiligence": {
+    "dueDiligenceOn": "#(dueDiligenceOn)",
+    "note": "#(faker.lorem().characters(70))",
+    "surveyName": "#(faker.lorem().characters(50))",
+    "startDate": "#(dueDiligenceOn)",
+    "endDate": "#(dueDiligenceOn)",
+    "surveyLocation": "#(surveyLocation)",
+    "cohort": "#(cohort)",
+    "program": "#(program)",
+    "country": "#(country)",
+    "locale": "en",
+    "dateFormat": "#(format)"
   }
 }

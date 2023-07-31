@@ -91,6 +91,7 @@ import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApplicationTimelineData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanDueDiligenceData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInterestRecalculationData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentScheduleInstallmentData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
@@ -103,6 +104,8 @@ import org.apache.fineract.portfolio.loanaccount.data.PaidInAdvanceData;
 import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanDueDiligenceInfo;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanDueDiligenceInfoRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
@@ -175,6 +178,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService;
 
     private final SearchReadPlatformService searchReadPlatformService;
+    private final LoanDueDiligenceInfoRepository loanDueDiligenceInfoRepository;
 
     @Autowired
     public LoanReadPlatformServiceImpl(final PlatformSecurityContext context,
@@ -191,7 +195,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService,
             final AccountDetailsReadPlatformService accountDetailsReadPlatformService, final LoanRepositoryWrapper loanRepositoryWrapper,
             final ColumnValidator columnValidator, DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper,
-            SearchReadPlatformService searchReadPlatformService) {
+            SearchReadPlatformService searchReadPlatformService, final LoanDueDiligenceInfoRepository loanDueDiligenceInfoRepository) {
         this.context = context;
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
@@ -218,6 +222,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         this.paginationHelper = paginationHelper;
         this.portfolioAccountReadPlatformService = portfolioAccountReadPlatformService;
         this.searchReadPlatformService = searchReadPlatformService;
+        this.loanDueDiligenceInfoRepository = loanDueDiligenceInfoRepository;
     }
 
     @Override
@@ -1491,6 +1496,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final Collection<CodeValueData> loanCollateralOptions = this.codeValueReadPlatformService
                 .retrieveCodeValuesByCode("LoanCollateral");
         final Collection<CodeValueData> departmentOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("Department");
+        final Collection<CodeValueData> surveyLocationOptions = this.codeValueReadPlatformService
+                .retrieveCodeValuesByCode("SurveyLocation");
+        final Collection<CodeValueData> programOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("Program");
+        final Collection<CodeValueData> countryOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("COUNTRY");
+        final Collection<CodeValueData> cohortOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("Cohort");
         Collection<ChargeData> chargeOptions = null;
         if (loanProduct.getMultiDisburseLoan()) {
             chargeOptions = this.chargeReadPlatformService.retrieveLoanProductApplicableCharges(productId,
@@ -1525,6 +1535,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         loanAccountData.setEquityContributionLoanPercentage(loanProduct.getEquityContributionLoanPercentage());
         loanAccountData.setRequiresEquityContribution(loanProduct.getRequiresEquityContribution());
         loanAccountData.setDepartmentOptions(departmentOptions);
+        loanAccountData.setSurveyLocationOptions(surveyLocationOptions);
+        loanAccountData.setCohortOptions(cohortOptions);
+        loanAccountData.setCountryOptions(countryOptions);
+        loanAccountData.setProgramOptions(programOptions);
         return loanAccountData;
     }
 
@@ -2537,6 +2551,43 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 null, null, null, null, outstandingLoanBalance, unrecognizedIncomePortion, false, null);
         loanTransactionData.setWriteOffReasonOptions(writeOffReasonOptions);
         return loanTransactionData;
+    }
+
+    @Override
+    public LoanAccountData retrieveLoanDecisionDetailsTemplate(Long loanId) {
+        this.context.authenticatedUser();
+
+        final LoanAccountData loanAccountData = retrieveOne(loanId);
+
+        final Collection<CodeValueData> departmentOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("Department");
+        final Collection<CodeValueData> surveyLocationOptions = this.codeValueReadPlatformService
+                .retrieveCodeValuesByCode("SurveyLocation");
+        final Collection<CodeValueData> programOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("Program");
+        final Collection<CodeValueData> countryOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("COUNTRY");
+        final Collection<CodeValueData> cohortOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("Cohort");
+
+        loanAccountData.setSurveyLocationOptions(surveyLocationOptions);
+        loanAccountData.setCohortOptions(cohortOptions);
+        loanAccountData.setCountryOptions(countryOptions);
+        loanAccountData.setProgramOptions(programOptions);
+        return loanAccountData;
+    }
+
+    @Override
+    public LoanDueDiligenceData retrieveLoanDueDiligenceData(Long loanId) {
+        LoanDueDiligenceInfo loanDueDiligenceInfo = this.loanDueDiligenceInfoRepository.findLoanDueDiligenceInfoByLoanId(loanId);
+        LoanDueDiligenceData loanDueDiligenceData = null;
+        if (loanDueDiligenceInfo != null) {
+            loanDueDiligenceData = new LoanDueDiligenceData();
+            loanDueDiligenceData.setSurveyName(loanDueDiligenceInfo.getSurveyName());
+            loanDueDiligenceData.setCohort(loanDueDiligenceInfo.getCohort().label());
+            loanDueDiligenceData.setCountry(loanDueDiligenceInfo.getCountry().label());
+            loanDueDiligenceData.setProgram(loanDueDiligenceInfo.getProgram().label());
+            loanDueDiligenceData.setSurveyLocation(loanDueDiligenceInfo.getSurveyLocation().label());
+            loanDueDiligenceData.setStartDate(loanDueDiligenceInfo.getStartDate());
+            loanDueDiligenceData.setEndDate(loanDueDiligenceInfo.getEndDate());
+        }
+        return loanDueDiligenceData;
     }
 
     private static final class CollectionDataMapper implements RowMapper<CollectionData> {
