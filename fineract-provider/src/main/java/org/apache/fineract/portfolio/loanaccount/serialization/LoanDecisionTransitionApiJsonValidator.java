@@ -135,4 +135,32 @@ public final class LoanDecisionTransitionApiJsonValidator {
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
+
+    public void validateCollateralReview(final String json) {
+
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+
+        final Set<String> disbursementParameters = new HashSet<>(Arrays.asList(LoanApiConstants.loanId,
+                LoanApiConstants.collateralReviewOnDateParameterName, LoanApiConstants.noteParameterName,
+                LoanApiConstants.localeParameterName, LoanApiConstants.dateFormatParameterName));
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loanDecisionEngine");
+
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        final LocalDate collateralReviewOn = this.fromApiJsonHelper
+                .extractLocalDateNamed(LoanApiConstants.collateralReviewOnDateParameterName, element);
+        baseDataValidator.reset().parameter(LoanApiConstants.collateralReviewOnDateParameterName).value(collateralReviewOn).notNull();
+
+        final String note = this.fromApiJsonHelper.extractStringNamed(LoanApiConstants.noteParameterName, element);
+        baseDataValidator.reset().parameter(LoanApiConstants.noteParameterName).value(note).notExceedingLengthOf(1000).notNull();
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
 }
