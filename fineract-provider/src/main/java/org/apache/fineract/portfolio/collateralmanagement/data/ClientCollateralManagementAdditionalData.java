@@ -22,6 +22,7 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagementAdditionalDetails;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public final class ClientCollateralManagementAdditionalData {
 
@@ -48,7 +49,17 @@ public final class ClientCollateralManagementAdditionalData {
 
     private final CodeValueData cell;
 
-    private final CodeValueData village;
+    private CodeValueData village;
+
+    private List<CodeValueData> provinces;
+
+    private List<CodeValueData> districts;
+
+    private List<CodeValueData> sectors;
+
+    private List<CodeValueData> cells;
+
+    private List<CodeValueData> villages;
 
 
     public ClientCollateralManagementAdditionalData(Long id, String upiNo, String chassisNo, String collateralOwnerFirst, String idNoOfCollateralOwnerFirst, String collateralOwnerSecond, String idNoOfCollateralOwnerSecond, BigDecimal worthOfCollateral, CodeValueData province, CodeValueData district, CodeValueData sector, CodeValueData cell, CodeValueData village) {
@@ -66,9 +77,36 @@ public final class ClientCollateralManagementAdditionalData {
         this.cell = cell;
         this.village = village;
     }
+
+    public ClientCollateralManagementAdditionalData(List<CodeValueData> provinces, List<CodeValueData> districts, List<CodeValueData> sectors,
+                                                    List<CodeValueData> cells, List<CodeValueData> villages) {
+        this.id = null;
+        this.upiNo = null;
+        this.chassisNo = null;
+        this.collateralOwnerFirst = null;
+        this.idNoOfCollateralOwnerFirst = null;
+        this.collateralOwnerSecond = null;
+        this.idNoOfCollateralOwnerSecond = null;
+        this.worthOfCollateral = null;
+        this.province = null;
+        this.district = null;
+        this.sector = null;
+        this.cell = null;
+        this.village = null;
+        this.provinces = provinces;
+        this.districts = districts;
+        this.sectors = sectors;
+        this.cells = cells;
+        this.villages = villages;
+    }
+
     public static ClientCollateralManagementAdditionalData instance(ClientCollateralManagementAdditionalDetails details, CodeValueData province, CodeValueData district, CodeValueData sector, CodeValueData cell, CodeValueData village) {
         return new ClientCollateralManagementAdditionalData(details.getId(), details.getUpiNo(), details.getChassisNo(), details.getCollateralOwnerFirst(),details.getIdNoOfCollateralOwnerFirst(), details.getCollateralOwnerSecond(),
                 details.getIdNoOfCollateralOwnerSecond(), details.getWorthOfCollateral(), province, district, sector, cell, village);
+    }
+
+    public static ClientCollateralManagementAdditionalData template(List<CodeValueData> provinces, List<CodeValueData> districts, List<CodeValueData> sectors, List<CodeValueData> cells, List<CodeValueData> villages) {
+        return new ClientCollateralManagementAdditionalData(provinces, districts, sectors, cells, villages);
     }
 
 }
