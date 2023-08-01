@@ -17,5 +17,11 @@
     "country": "#(country)",
     "locale": "en",
     "dateFormat": "#(format)"
+  },
+  "collateralReview": {
+    "collateralReviewOn": "#(collateralReviewOn)",
+    "note": "#(faker.lorem().characters(70))",
+    "locale": "en",
+    "dateFormat": "#(format)"
   }
 }

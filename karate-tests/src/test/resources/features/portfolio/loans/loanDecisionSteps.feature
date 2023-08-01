@@ -34,3 +34,17 @@ Feature: Create loan stapes
     When method POST
     Then status 200
     Then match $ contains { resourceId: '#notnull' }
+
+  @ignore
+  @collateralReviewStage
+  Scenario: Collateral Review Stage
+    Given configure ssl = true
+    * def loansData = read('classpath:templates/loansDecision.json')
+    Given path 'loans/decision/collateralReview',loanId
+    And header Accept = 'application/json'
+    And header Authorization = authToken
+    And header fineract-platform-tenantid = tenantId
+    And request loansData.collateralReview
+    When method POST
+    Then status 200
+    Then match $ contains { resourceId: '#notnull' }
