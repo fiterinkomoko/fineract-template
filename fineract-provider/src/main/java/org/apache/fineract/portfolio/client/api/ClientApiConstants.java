@@ -344,11 +344,11 @@ public class ClientApiConstants {
     public static final String collateralOwnerSecondParamName = "collateralOwnerSecond";
     public static final String idNoOfCollateralOwnerFirstParamName = "idNoOfCollateralOwnerFirst";
     public static final String idNoOfCollateralOwnerSecondParamName = "idNoOfCollateralOwnerSecond";
-    public static final String provinceIdParamName = "province";
-    public static final String districtIdParamName = "district";
-    public static final String sectorIdParamName = "sector";
-    public static final String cellIdParamName = "cell";
-    public static final String villageIdParamName = "village";
+    public static final String provinceIdParamName = "provinceId";
+    public static final String districtIdParamName = "districtId";
+    public static final String sectorIdParamName = "sectorId";
+    public static final String cellIdParamName = "cellId";
+    public static final String villageIdParamName = "villageId";
 
     public static final String worthOfCollateralParamName = "worthOfCollateral";
 

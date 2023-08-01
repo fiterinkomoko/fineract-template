@@ -22,7 +22,6 @@ import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
-import org.apache.fineract.portfolio.collateralmanagement.api.CollateralManagementJsonInputParams;
 
 import javax.persistence.OneToOne;
 import javax.persistence.JoinColumn;

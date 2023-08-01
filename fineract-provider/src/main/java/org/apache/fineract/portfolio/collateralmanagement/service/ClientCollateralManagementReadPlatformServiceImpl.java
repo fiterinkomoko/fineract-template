@@ -25,9 +25,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
+import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.collateralmanagement.data.ClientCollateralManagementAdditionalData;
 import org.apache.fineract.portfolio.collateralmanagement.data.ClientCollateralManagementData;
 import org.apache.fineract.portfolio.collateralmanagement.data.LoanCollateralTemplateData;
@@ -52,16 +54,18 @@ public class ClientCollateralManagementReadPlatformServiceImpl implements Client
     private final ClientCollateralManagementAdditionalDetailsRepository clientCollateralManagementAdditionalDetailsRepository;
     private final LoanTransactionRepository loanTransactionRepository;
     private final ConfigurationReadPlatformService configurationReadPlatformService;
+    private final CodeValueReadPlatformService codeValueReadPlatformService;
 
     @Autowired
     public ClientCollateralManagementReadPlatformServiceImpl(final PlatformSecurityContext context,
                                                              final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper,
-                                                             ClientCollateralManagementAdditionalDetailsRepository clientCollateralManagementAdditionalDetailsRepository, final LoanTransactionRepository loanTransactionRepository, ConfigurationReadPlatformService configurationReadPlatformService) {
+                                                             ClientCollateralManagementAdditionalDetailsRepository clientCollateralManagementAdditionalDetailsRepository, final LoanTransactionRepository loanTransactionRepository, ConfigurationReadPlatformService configurationReadPlatformService, CodeValueReadPlatformService codeValueReadPlatformService) {
         this.context = context;
         this.clientCollateralManagementRepositoryWrapper = clientCollateralManagementRepositoryWrapper;
         this.clientCollateralManagementAdditionalDetailsRepository = clientCollateralManagementAdditionalDetailsRepository;
         this.loanTransactionRepository = loanTransactionRepository;
         this.configurationReadPlatformService = configurationReadPlatformService;
+        this.codeValueReadPlatformService = codeValueReadPlatformService;
     }
 
     @Override
@@ -132,4 +136,15 @@ public class ClientCollateralManagementReadPlatformServiceImpl implements Client
 
         return ClientCollateralManagementAdditionalData.instance(details, province, district, sector, cell, village);
     }
+
+    @Override
+    public ClientCollateralManagementAdditionalData getClientCollateralAdditionalTemplate(final Long clientId) {
+        final List<CodeValueData> province = new ArrayList<>(this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.PROVINCE));
+        final List<CodeValueData> district = new ArrayList<>(this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.DISTRICT));
+        final List<CodeValueData> sector = new ArrayList<>(this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.SECTOR));
+        final List<CodeValueData> cell = new ArrayList<>(this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CELL));
+        final List<CodeValueData> village = new ArrayList<>(this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.VILLAGE));
+    return  ClientCollateralManagementAdditionalData.template(province, district, sector, cell, village);
+    }
+
 }
