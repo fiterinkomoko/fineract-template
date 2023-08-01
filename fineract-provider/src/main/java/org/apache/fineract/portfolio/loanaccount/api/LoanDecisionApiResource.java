@@ -117,4 +117,18 @@ public class LoanDecisionApiResource {
         return this.loanApprovalDataToApiJsonSerializer.serialize(settings, loanAccountData, this.loanDataParameters);
 
     }
+
+    @POST
+    @Path("collateralReview/{loanId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String acceptLoanCollateralReview(@PathParam("loanId") final long loanId, final String apiRequestBodyAsJson) {
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().acceptLoanCollateralReview(loanId).withJson(apiRequestBodyAsJson)
+                .build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
 }

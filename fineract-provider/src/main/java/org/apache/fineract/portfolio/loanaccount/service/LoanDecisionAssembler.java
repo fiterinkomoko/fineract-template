@@ -102,4 +102,20 @@ public class LoanDecisionAssembler {
         return LoanDueDiligenceInfo.createNew(loan, savedLoanDecision, surveyName, startDate, endDate, surveyLocation, cohort, program,
                 country);
     }
+
+    public LoanDecision assembleCollateralReviewFrom(final JsonCommand command, AppUser currentUser, LoanDecision savedLoanDecision) {
+
+        LocalDate collateralReviewOn = command.localDateValueOfParameterNamed(LoanApiConstants.collateralReviewOnDateParameterName);
+
+        final String noteText = command.stringValueOfParameterNamed("note");
+
+        LoanDecision loanDecision = savedLoanDecision;
+        loanDecision.setLoanDecisionState(LoanDecisionState.COLLATERAL_REVIEW.getValue());
+        loanDecision.setCollateralReviewNote(noteText);
+        loanDecision.setCollateralReviewBy(currentUser);
+        loanDecision.setCollateralReviewOn(collateralReviewOn);
+        loanDecision.setCollateralReviewSigned(Boolean.TRUE);
+        loanDecision.setRejectCollateralReviewSigned(Boolean.FALSE);
+        return loanDecision;
+    }
 }
