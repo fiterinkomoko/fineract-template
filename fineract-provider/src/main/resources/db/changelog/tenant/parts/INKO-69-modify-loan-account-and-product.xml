@@ -468,4 +468,233 @@
     </changeSet>
 
 
+    <changeSet id="create-m_loan_approval_matrix" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_loan_approval_matrix"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_loan_approval_matrix">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="currency" type="varchar(10)">
+                <constraints nullable="false" />
+            </column>
+
+            <column name="level_one_unsecured_first_cycle_max_amount" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_one_unsecured_first_cycle_min_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_one_unsecured_first_cycle_max_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="level_one_unsecured_second_cycle_max_amount" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_one_unsecured_second_cycle_min_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_one_unsecured_second_cycle_max_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="level_one_secured_first_cycle_max_amount" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_one_secured_first_cycle_min_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_one_secured_first_cycle_max_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="level_one_secured_second_cycle_max_amount" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_one_secured_second_cycle_min_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_one_secured_second_cycle_max_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+
+            <column name="level_two_unsecured_first_cycle_max_amount" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_two_unsecured_first_cycle_min_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_two_unsecured_first_cycle_max_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="level_two_unsecured_second_cycle_max_amount" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_two_unsecured_second_cycle_min_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_two_unsecured_second_cycle_max_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="level_two_secured_first_cycle_max_amount" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_two_secured_first_cycle_min_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_two_secured_first_cycle_max_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="level_two_secured_second_cycle_max_amount" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_two_secured_second_cycle_min_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_two_secured_second_cycle_max_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_three_unsecured_first_cycle_max_amount" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_three_unsecured_first_cycle_min_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_three_unsecured_first_cycle_max_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="level_three_unsecured_second_cycle_max_amount" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_three_unsecured_second_cycle_min_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_three_unsecured_second_cycle_max_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="level_three_secured_first_cycle_max_amount" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_three_secured_first_cycle_min_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_three_secured_first_cycle_max_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="level_three_secured_second_cycle_max_amount" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_three_secured_second_cycle_min_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_three_secured_second_cycle_max_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="level_four_unsecured_first_cycle_max_amount" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_four_unsecured_first_cycle_min_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_four_unsecured_first_cycle_max_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="level_four_unsecured_second_cycle_max_amount" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_four_unsecured_second_cycle_min_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_four_unsecured_second_cycle_max_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="level_four_secured_first_cycle_max_amount" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_four_secured_first_cycle_min_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_four_secured_first_cycle_max_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="level_four_secured_second_cycle_max_amount" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_four_secured_second_cycle_min_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_four_secured_second_cycle_max_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="level_five_unsecured_first_cycle_max_amount" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_five_unsecured_first_cycle_min_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_five_unsecured_first_cycle_max_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="level_five_unsecured_second_cycle_max_amount" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_five_unsecured_second_cycle_min_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_five_unsecured_second_cycle_max_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="level_five_secured_first_cycle_max_amount" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_five_secured_first_cycle_min_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_five_secured_first_cycle_max_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="level_five_secured_second_cycle_max_amount" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_five_secured_second_cycle_min_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level_five_secured_second_cycle_max_term" type="int">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="createdby_id" type="bigint">
+                <constraints nullable="true" foreignKeyName="FK_m_loan_approval_matrix-created_by" references="m_appuser(id)"/>
+            </column>
+            <column name="created_date" type="timestamp" defaultValueComputed="now()">
+                <constraints nullable="false" />
+            </column>
+            <column name="lastmodifiedby_id" type="bigint">
+                <constraints nullable="true" foreignKeyName="FK_m_loan_approval_matrix-lastmodifiedby_id" references="m_appuser(id)"/>
+            </column>
+            <column name="lastmodified_date" type="timestamp" defaultValueComputed="now()">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>
