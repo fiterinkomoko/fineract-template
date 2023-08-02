@@ -388,5 +388,84 @@
         </insert>
     </changeSet>
 
+    <changeSet author="bosco@fiter.io" id="add_permission_ACCEPT_LOANCOLLATERALREVIEW">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_permission where code = 'ACCEPT_LOANCOLLATERALREVIEW';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio" />
+            <column name="code" value="ACCEPT_LOANCOLLATERALREVIEW" />
+            <column name="entity_name" value="LOANCOLLATERALREVIEW" />
+            <column name="action_name" value="ACCEPT" />
+        </insert>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_collateral_review_note_column_to_m_loan_decision_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan_decision" columnName="collateral_review_note"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan_decision">
+            <column name="collateral_review_note" type="varchar(255)" >
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_is_collateral_review_signed_column_to_m_loan_decision_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan_decision" columnName="is_collateral_review_signed"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan_decision">
+            <column name="is_collateral_review_signed"  type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_is_reject_collateral_review_column_to_m_loan_decision_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan_decision" columnName="is_reject_collateral_review"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan_decision">
+            <column name="is_reject_collateral_review"  type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_collateral_review_on_column_to_m_loan_decision_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan_decision" columnName="collateral_review_on"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan_decision">
+            <column name="collateral_review_on"  type="date">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_collateral_review_by_column_to_m_loan_decision_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan_decision" columnName="collateral_review_by"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan_decision">
+            <column name="collateral_review_by"  type="bigint">
+                <constraints nullable="true" foreignKeyName="FK_m_loan_decision-m_appuser-collateral_review_by" references="m_appuser(id)"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 
 </databaseChangeLog>
