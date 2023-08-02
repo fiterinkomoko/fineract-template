@@ -40,13 +40,8 @@ import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanDecision;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanDecisionRepository;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanDecisionState;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanDueDiligenceInfo;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanDueDiligenceInfoRepository;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.api.LoanApprovalMatrixConstants;
+import org.apache.fineract.portfolio.loanaccount.domain.*;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleAssembler;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanDecisionTransitionApiJsonValidator;
 import org.apache.fineract.portfolio.note.domain.Note;
@@ -72,6 +67,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
     private final LoanDecisionAssembler loanDecisionAssembler;
     private final LoanDueDiligenceInfoRepository loanDueDiligenceInfoRepository;
     private final NoteRepository noteRepository;
+    private final LoanApprovalMatrixRepository loanApprovalMatrixRepository;
 
     @Override
     public CommandProcessingResult acceptLoanApplicationReview(final Long loanId, final JsonCommand command) {
@@ -222,6 +218,14 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         }
 
         this.loanDecisionTransitionApiJsonValidator.validateApprovalMatrix(command.json());
+
+        final String currency = command.stringValueOfParameterNamed(LoanApprovalMatrixConstants.currencyParameterName);
+        LoanApprovalMatrix loanApprovalMatrix = this.loanApprovalMatrixRepository.findLoanApprovalMatrixByCurrency(currency);
+
+        if (loanApprovalMatrix != null) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.approval.matrix.with.this.currency.already.exist.",
+                    String.format("Loan Approval Matrix with Currency [ %s ] exist. Only One currency per Matrix is accepted",currency));
+        }
 
         return null;
     }
