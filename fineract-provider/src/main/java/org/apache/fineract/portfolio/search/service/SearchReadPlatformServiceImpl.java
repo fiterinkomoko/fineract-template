@@ -231,9 +231,17 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
 
             switch (filterConstraint.getFilterElement()) {
                 case EQUALS:
-                    queryBuilder.append(" AND ").append(getFilterSelection(filterConstraint.getFilterSelection(), searchRequestMap))
-                            .append(" = ? ");
-                    params.add(convertValue(filterConstraint.getValue()));
+                    Object val = convertValue(filterConstraint.getValue());
+                    queryBuilder.append(" AND ");
+                    String filterSelection = getFilterSelection(filterConstraint.getFilterSelection(), searchRequestMap);
+                    if (val instanceof String) {
+                        val = ((String) val).toLowerCase();
+                        queryBuilder.append("lower(" + filterSelection + ")");
+                    } else {
+                        queryBuilder.append(filterSelection);
+                    }
+                    queryBuilder.append(" = ? ");
+                    params.add(val);
                 break;
 
                 case EQUALS_CASE_SENSITIVE:
