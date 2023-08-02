@@ -224,7 +224,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         if (loanApprovalMatrix != null) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.approval.matrix.with.this.currency.already.exist.",
-                    String.format("Loan Approval Matrix with Currency [ %s ] exist. Only One currency per Matrix is accepted",currency));
+                    String.format("Loan Approval Matrix with Currency [ %s ] exist. Only One currency per Matrix is accepted", currency));
         }
 
         return null;
