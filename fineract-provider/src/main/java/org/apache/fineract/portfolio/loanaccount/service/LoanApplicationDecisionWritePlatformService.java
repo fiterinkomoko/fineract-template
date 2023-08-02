@@ -28,4 +28,6 @@ public interface LoanApplicationDecisionWritePlatformService {
     CommandProcessingResult applyDueDiligence(Long loanId, JsonCommand command);
 
     CommandProcessingResult acceptLoanCollateralReview(Long loanId, JsonCommand command);
+
+    CommandProcessingResult createLoanApprovalMatrix(JsonCommand command);
 }

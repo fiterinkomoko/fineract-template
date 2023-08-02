@@ -3821,4 +3821,13 @@ public class CommandWrapperBuilder {
 
         return this;
     }
+
+    public CommandWrapperBuilder createLoanApprovalMatrix() {
+        this.actionName = "CREATE";
+        this.entityName = "LOANAPPROVALMATRIX";
+        this.entityId = null;
+        this.href = "/loans/decision/approvalmatrix/template/";
+
+        return this;
+    }
 }

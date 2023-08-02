@@ -131,4 +131,17 @@ public class LoanDecisionApiResource {
 
         return this.toApiJsonSerializer.serialize(result);
     }
+
+    @POST
+    @Path("createApprovalMatrix")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String createLoanApprovalMatrix(final String apiRequestBodyAsJson) {
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createLoanApprovalMatrix().withJson(apiRequestBodyAsJson).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
 }
