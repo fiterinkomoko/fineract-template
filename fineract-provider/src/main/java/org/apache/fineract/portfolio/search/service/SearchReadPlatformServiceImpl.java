@@ -236,7 +236,7 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
                     String filterSelection = getFilterSelection(filterConstraint.getFilterSelection(), searchRequestMap);
                     if (val instanceof String) {
                         val = ((String) val).toLowerCase();
-                        queryBuilder.append("lower("+filterSelection+")");
+                        queryBuilder.append("lower(" + filterSelection + ")");
                     } else {
                         queryBuilder.append(filterSelection);
                     }
