@@ -23,7 +23,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface LoanApprovalMatrixRepository extends JpaRepository<LoanApprovalMatrix, Long>, JpaSpecificationExecutor<LoanApprovalMatrix> {
+public interface LoanApprovalMatrixRepository
+        extends JpaRepository<LoanApprovalMatrix, Long>, JpaSpecificationExecutor<LoanApprovalMatrix> {
 
     @Query("select mtx from LoanApprovalMatrix mtx where mtx.currency =:currency")
     LoanApprovalMatrix findLoanApprovalMatrixByCurrency(@Param("currency") String currency);
