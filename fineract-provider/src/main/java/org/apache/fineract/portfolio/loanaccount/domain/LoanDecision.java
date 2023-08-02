@@ -64,6 +64,19 @@ public class LoanDecision extends AbstractAuditableCustom {
     @JoinColumn(name = "due_diligence_by")
     private AppUser dueDiligenceBy;
 
+    // collateral review
+    @Column(name = "collateral_review_note")
+    private String collateralReviewNote;
+    @Column(name = "is_collateral_review_signed")
+    private Boolean collateralReviewSigned;
+    @Column(name = "is_reject_collateral_review")
+    private Boolean rejectCollateralReviewSigned;
+    @Column(name = "collateral_review_on")
+    private LocalDate collateralReviewOn;
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "collateral_review_by")
+    private AppUser collateralReviewBy;
+
     public LoanDecision() {}
 
     public static LoanDecision reviewApplication(Loan loan, Integer loanDecisionState, String reviewApplicationNote,
@@ -84,5 +97,7 @@ public class LoanDecision extends AbstractAuditableCustom {
         this.reviewApplicationBy = reviewApplicationBy;
         this.dueDiligenceSigned = Boolean.FALSE;
         this.rejectDueDiligence = Boolean.FALSE;
+        this.collateralReviewSigned = Boolean.FALSE;
+        this.rejectCollateralReviewSigned = Boolean.FALSE;
     }
 }

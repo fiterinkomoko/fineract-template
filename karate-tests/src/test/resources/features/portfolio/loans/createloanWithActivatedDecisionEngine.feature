@@ -260,6 +260,18 @@ Feature: Test loan account apis
     * def noteResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findLoanAccountNotesByLoanId') { loanId : '#(loanId)' }
     * assert karate.sizeOf(noteResponse.notes) == 2
 
+      #Collateral Review Stage With Decision Stage
+    * call read('classpath:features/portfolio/loans/loanDecisionSteps.feature@collateralReviewStage') { collateralReviewOn : '#(submittedOnDate)', loanId : '#(loanId)' }
+
+    * def loanResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findloanbyidWithAllAssociationStep') { loanId : '#(loanId)' }
+    #     Assert that Loan Account has passed COLLATERAL_REVIEW Stage
+    * assert loanResponse.loanAccount.loanDecisionState.id == 1300
+    * assert loanResponse.loanAccount.loanDecisionState.value == 'COLLATERAL_REVIEW'
+    * assert loanResponse.loanAccount.isExtendLoanLifeCycleConfig == true
+    * assert loanResponse.loanAccount.loanDueDiligenceData != null
+    * def noteResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findLoanAccountNotesByLoanId') { loanId : '#(loanId)' }
+    * assert karate.sizeOf(noteResponse.notes) == 3
+
 
     #- Disable configuration  ---Add-More-Stages-To-A-Loan-Life-Cycle---
     Then print 'Configuration ID ==> ', configurationId
