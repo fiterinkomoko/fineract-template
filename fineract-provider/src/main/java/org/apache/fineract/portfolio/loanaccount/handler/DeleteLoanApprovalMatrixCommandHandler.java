@@ -29,8 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@CommandType(entity = "LOANAPPROVALMATRIX", action = "CREATE")
-public class LoanApprovalMatrixCommandHandler implements NewCommandSourceHandler {
+@CommandType(entity = "LOANAPPROVALMATRIX", action = "DELETE")
+public class DeleteLoanApprovalMatrixCommandHandler implements NewCommandSourceHandler {
 
     private final LoanApplicationDecisionWritePlatformService loanApplicationDecisionWritePlatformService;
 
@@ -38,6 +38,6 @@ public class LoanApprovalMatrixCommandHandler implements NewCommandSourceHandler
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.loanApplicationDecisionWritePlatformService.createLoanApprovalMatrix(command);
+        return this.loanApplicationDecisionWritePlatformService.deleteLoanApprovalMatrix(command.entityId());
     }
 }

@@ -157,4 +157,102 @@ public class LoanApprovalMatrix extends AbstractAuditableCustom {
     @Column(name = "level_five_secured_second_cycle_max_term")
     private Integer levelFiveSecuredSecondCycleMaxTerm;
 
+    public LoanApprovalMatrix() {}
+
+    public LoanApprovalMatrix(String currency, BigDecimal levelOneUnsecuredFirstCycleMaxAmount, Integer levelOneUnsecuredFirstCycleMinTerm,
+            Integer levelOneUnsecuredFirstCycleMaxTerm, BigDecimal levelOneUnsecuredSecondCycleMaxAmount,
+            Integer levelOneUnsecuredSecondCycleMinTerm, Integer levelOneUnsecuredSecondCycleMaxTerm,
+            BigDecimal levelOneSecuredFirstCycleMaxAmount, Integer levelOneSecuredFirstCycleMinTerm,
+            Integer levelOneSecuredFirstCycleMaxTerm, BigDecimal levelOneSecuredSecondCycleMaxAmount,
+            Integer levelOneSecuredSecondCycleMinTerm, Integer levelOneSecuredSecondCycleMaxTerm,
+            BigDecimal levelTwoUnsecuredFirstCycleMaxAmount, Integer levelTwoUnsecuredFirstCycleMinTerm,
+            Integer levelTwoUnsecuredFirstCycleMaxTerm, BigDecimal levelTwoUnsecuredSecondCycleMaxAmount,
+            Integer levelTwoUnsecuredSecondCycleMinTerm, Integer levelTwoUnsecuredSecondCycleMaxTerm,
+            BigDecimal levelTwoSecuredFirstCycleMaxAmount, Integer levelTwoSecuredFirstCycleMinTerm,
+            Integer levelTwoSecuredFirstCycleMaxTerm, BigDecimal levelTwoSecuredSecondCycleMaxAmount,
+            Integer levelTwoSecuredSecondCycleMinTerm, Integer levelTwoSecuredSecondCycleMaxTerm,
+            BigDecimal levelThreeUnsecuredFirstCycleMaxAmount, Integer levelThreeUnsecuredFirstCycleMinTerm,
+            Integer levelThreeUnsecuredFirstCycleMaxTerm, BigDecimal levelThreeUnsecuredSecondCycleMaxAmount,
+            Integer levelThreeUnsecuredSecondCycleMinTerm, Integer levelThreeUnsecuredSecondCycleMaxTerm,
+            BigDecimal levelThreeSecuredFirstCycleMaxAmount, Integer levelThreeSecuredFirstCycleMinTerm,
+            Integer levelThreeSecuredFirstCycleMaxTerm, BigDecimal levelThreeSecuredSecondCycleMaxAmount,
+            Integer levelThreeSecuredSecondCycleMinTerm, Integer levelThreeSecuredSecondCycleMaxTerm,
+            BigDecimal levelFourUnsecuredFirstCycleMaxAmount, Integer levelFourUnsecuredFirstCycleMinTerm,
+            Integer levelFourUnsecuredFirstCycleMaxTerm, BigDecimal levelFourUnsecuredSecondCycleMaxAmount,
+            Integer levelFourUnsecuredSecondCycleMinTerm, Integer levelFourUnsecuredSecondCycleMaxTerm,
+            BigDecimal levelFourSecuredFirstCycleMaxAmount, Integer levelFourSecuredFirstCycleMinTerm,
+            Integer levelFourSecuredFirstCycleMaxTerm, BigDecimal levelFourSecuredSecondCycleMaxAmount,
+            Integer levelFourSecuredSecondCycleMinTerm, Integer levelFourSecuredSecondCycleMaxTerm,
+            BigDecimal levelFiveUnsecuredFirstCycleMaxAmount, Integer levelFiveUnsecuredFirstCycleMinTerm,
+            Integer levelFiveUnsecuredFirstCycleMaxTerm, BigDecimal levelFiveUnsecuredSecondCycleMaxAmount,
+            Integer levelFiveUnsecuredSecondCycleMinTerm, Integer levelFiveUnsecuredSecondCycleMaxTerm,
+            BigDecimal levelFiveSecuredFirstCycleMaxAmount, Integer levelFiveSecuredFirstCycleMinTerm,
+            Integer levelFiveSecuredFirstCycleMaxTerm, BigDecimal levelFiveSecuredSecondCycleMaxAmount,
+            Integer levelFiveSecuredSecondCycleMinTerm, Integer levelFiveSecuredSecondCycleMaxTerm) {
+        this.currency = currency;
+        this.levelOneUnsecuredFirstCycleMaxAmount = levelOneUnsecuredFirstCycleMaxAmount;
+        this.levelOneUnsecuredFirstCycleMinTerm = levelOneUnsecuredFirstCycleMinTerm;
+        this.levelOneUnsecuredFirstCycleMaxTerm = levelOneUnsecuredFirstCycleMaxTerm;
+        this.levelOneUnsecuredSecondCycleMaxAmount = levelOneUnsecuredSecondCycleMaxAmount;
+        this.levelOneUnsecuredSecondCycleMinTerm = levelOneUnsecuredSecondCycleMinTerm;
+        this.levelOneUnsecuredSecondCycleMaxTerm = levelOneUnsecuredSecondCycleMaxTerm;
+        this.levelOneSecuredFirstCycleMaxAmount = levelOneSecuredFirstCycleMaxAmount;
+        this.levelOneSecuredFirstCycleMinTerm = levelOneSecuredFirstCycleMinTerm;
+        this.levelOneSecuredFirstCycleMaxTerm = levelOneSecuredFirstCycleMaxTerm;
+        this.levelOneSecuredSecondCycleMaxAmount = levelOneSecuredSecondCycleMaxAmount;
+        this.levelOneSecuredSecondCycleMinTerm = levelOneSecuredSecondCycleMinTerm;
+        this.levelOneSecuredSecondCycleMaxTerm = levelOneSecuredSecondCycleMaxTerm;
+
+        this.levelTwoUnsecuredFirstCycleMaxAmount = levelTwoUnsecuredFirstCycleMaxAmount;
+        this.levelTwoUnsecuredFirstCycleMinTerm = levelTwoUnsecuredFirstCycleMinTerm;
+        this.levelTwoUnsecuredFirstCycleMaxTerm = levelTwoUnsecuredFirstCycleMaxTerm;
+        this.levelTwoUnsecuredSecondCycleMaxAmount = levelTwoUnsecuredSecondCycleMaxAmount;
+        this.levelTwoUnsecuredSecondCycleMinTerm = levelTwoUnsecuredSecondCycleMinTerm;
+        this.levelTwoUnsecuredSecondCycleMaxTerm = levelTwoUnsecuredSecondCycleMaxTerm;
+        this.levelTwoSecuredFirstCycleMaxAmount = levelTwoSecuredFirstCycleMaxAmount;
+        this.levelTwoSecuredFirstCycleMinTerm = levelTwoSecuredFirstCycleMinTerm;
+        this.levelTwoSecuredFirstCycleMaxTerm = levelTwoSecuredFirstCycleMaxTerm;
+        this.levelTwoSecuredSecondCycleMaxAmount = levelTwoSecuredSecondCycleMaxAmount;
+        this.levelTwoSecuredSecondCycleMinTerm = levelTwoSecuredSecondCycleMinTerm;
+        this.levelTwoSecuredSecondCycleMaxTerm = levelTwoSecuredSecondCycleMaxTerm;
+
+        this.levelThreeUnsecuredFirstCycleMaxAmount = levelThreeUnsecuredFirstCycleMaxAmount;
+        this.levelThreeUnsecuredFirstCycleMinTerm = levelThreeUnsecuredFirstCycleMinTerm;
+        this.levelThreeUnsecuredFirstCycleMaxTerm = levelThreeUnsecuredFirstCycleMaxTerm;
+        this.levelThreeUnsecuredSecondCycleMaxAmount = levelThreeUnsecuredSecondCycleMaxAmount;
+        this.levelThreeUnsecuredSecondCycleMinTerm = levelThreeUnsecuredSecondCycleMinTerm;
+        this.levelThreeUnsecuredSecondCycleMaxTerm = levelThreeUnsecuredSecondCycleMaxTerm;
+        this.levelThreeSecuredFirstCycleMaxAmount = levelThreeSecuredFirstCycleMaxAmount;
+        this.levelThreeSecuredFirstCycleMinTerm = levelThreeSecuredFirstCycleMinTerm;
+        this.levelThreeSecuredFirstCycleMaxTerm = levelThreeSecuredFirstCycleMaxTerm;
+        this.levelThreeSecuredSecondCycleMaxAmount = levelThreeSecuredSecondCycleMaxAmount;
+        this.levelThreeSecuredSecondCycleMinTerm = levelThreeSecuredSecondCycleMinTerm;
+        this.levelThreeSecuredSecondCycleMaxTerm = levelThreeSecuredSecondCycleMaxTerm;
+
+        this.levelFourUnsecuredFirstCycleMaxAmount = levelFourUnsecuredFirstCycleMaxAmount;
+        this.levelFourUnsecuredFirstCycleMinTerm = levelFourUnsecuredFirstCycleMinTerm;
+        this.levelFourUnsecuredFirstCycleMaxTerm = levelFourUnsecuredFirstCycleMaxTerm;
+        this.levelFourUnsecuredSecondCycleMaxAmount = levelFourUnsecuredSecondCycleMaxAmount;
+        this.levelFourUnsecuredSecondCycleMinTerm = levelFourUnsecuredSecondCycleMinTerm;
+        this.levelFourUnsecuredSecondCycleMaxTerm = levelFourUnsecuredSecondCycleMaxTerm;
+        this.levelFourSecuredFirstCycleMaxAmount = levelFourSecuredFirstCycleMaxAmount;
+        this.levelFourSecuredFirstCycleMinTerm = levelFourSecuredFirstCycleMinTerm;
+        this.levelFourSecuredFirstCycleMaxTerm = levelFourSecuredFirstCycleMaxTerm;
+        this.levelFourSecuredSecondCycleMaxAmount = levelFourSecuredSecondCycleMaxAmount;
+        this.levelFourSecuredSecondCycleMinTerm = levelFourSecuredSecondCycleMinTerm;
+        this.levelFourSecuredSecondCycleMaxTerm = levelFourSecuredSecondCycleMaxTerm;
+
+        this.levelFiveUnsecuredFirstCycleMaxAmount = levelFiveUnsecuredFirstCycleMaxAmount;
+        this.levelFiveUnsecuredFirstCycleMinTerm = levelFiveUnsecuredFirstCycleMinTerm;
+        this.levelFiveUnsecuredFirstCycleMaxTerm = levelFiveUnsecuredFirstCycleMaxTerm;
+        this.levelFiveUnsecuredSecondCycleMaxAmount = levelFiveUnsecuredSecondCycleMaxAmount;
+        this.levelFiveUnsecuredSecondCycleMinTerm = levelFiveUnsecuredSecondCycleMinTerm;
+        this.levelFiveUnsecuredSecondCycleMaxTerm = levelFiveUnsecuredSecondCycleMaxTerm;
+        this.levelFiveSecuredFirstCycleMaxAmount = levelFiveSecuredFirstCycleMaxAmount;
+        this.levelFiveSecuredFirstCycleMinTerm = levelFiveSecuredFirstCycleMinTerm;
+        this.levelFiveSecuredFirstCycleMaxTerm = levelFiveSecuredFirstCycleMaxTerm;
+        this.levelFiveSecuredSecondCycleMaxAmount = levelFiveSecuredSecondCycleMaxAmount;
+        this.levelFiveSecuredSecondCycleMinTerm = levelFiveSecuredSecondCycleMinTerm;
+        this.levelFiveSecuredSecondCycleMaxTerm = levelFiveSecuredSecondCycleMaxTerm;
+    }
 }

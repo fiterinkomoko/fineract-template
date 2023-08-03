@@ -697,4 +697,32 @@
         </createTable>
     </changeSet>
 
+    <changeSet author="bosco@fiter.io" id="add_permission_CREATE_LOANAPPROVALMATRIX">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_permission where code = 'CREATE_LOANAPPROVALMATRIX';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio" />
+            <column name="code" value="CREATE_LOANAPPROVALMATRIX" />
+            <column name="entity_name" value="LOANAPPROVALMATRIX" />
+            <column name="action_name" value="CREATE" />
+        </insert>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_permission_DELETE_LOANAPPROVALMATRIX">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_permission where code = 'DELETE_LOANAPPROVALMATRIX';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio" />
+            <column name="code" value="DELETE_LOANAPPROVALMATRIX" />
+            <column name="entity_name" value="LOANAPPROVALMATRIX" />
+            <column name="action_name" value="DELETE" />
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

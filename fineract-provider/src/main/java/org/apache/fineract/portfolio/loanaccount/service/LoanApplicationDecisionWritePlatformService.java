@@ -30,4 +30,6 @@ public interface LoanApplicationDecisionWritePlatformService {
     CommandProcessingResult acceptLoanCollateralReview(Long loanId, JsonCommand command);
 
     CommandProcessingResult createLoanApprovalMatrix(JsonCommand command);
+
+    CommandProcessingResult deleteLoanApprovalMatrix(Long matrixId);
 }
