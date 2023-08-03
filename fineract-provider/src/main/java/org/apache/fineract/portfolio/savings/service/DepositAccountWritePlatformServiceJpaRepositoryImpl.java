@@ -118,6 +118,7 @@ import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
+import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.apache.fineract.portfolio.savings.DepositAccountOnClosureType;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
 import org.apache.fineract.portfolio.savings.DepositsApiConstants;
@@ -218,33 +219,35 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
     private final ChargeReadPlatformService chargeReadPlatformService;
 
+    private final PaymentTypeRepositoryWrapper repositoryWrapper;
+
     @Autowired
     public DepositAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final SavingsAccountRepositoryWrapper savingAccountRepositoryWrapper,
-            final SavingsAccountTransactionRepository savingsAccountTransactionRepository,
-            final DepositAccountAssembler depositAccountAssembler,
-            final DepositAccountTransactionDataValidator depositAccountTransactionDataValidator,
-            final SavingsAccountChargeDataValidator savingsAccountChargeDataValidator,
-            final PaymentDetailWritePlatformService paymentDetailWritePlatformService,
-            final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper,
-            final JournalEntryWritePlatformService journalEntryWritePlatformService,
-            final DepositAccountDomainService depositAccountDomainService, final NoteRepository noteRepository,
-            final AccountTransfersReadPlatformService accountTransfersReadPlatformService, final ChargeRepositoryWrapper chargeRepository,
-            final SavingsAccountChargeRepositoryWrapper savingsAccountChargeRepository, final HolidayRepositoryWrapper holidayRepository,
-            final WorkingDaysRepositoryWrapper workingDaysRepository,
-            final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService,
-            final AccountTransfersWritePlatformService accountTransfersWritePlatformService,
-            final DepositAccountReadPlatformService depositAccountReadPlatformService,
-            final CalendarInstanceRepository calendarInstanceRepository, final ConfigurationDomainService configurationDomainService,
-            final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository,
-            final DepositApplicationProcessWritePlatformService depositApplicationProcessWritePlatformService,
-            final SavingsAccountActionService savingsAccountActionService,
-            final AccountAssociationsRepository accountAssociationsRepository, ReadWriteNonCoreDataService readWriteNonCoreDataService,
-            final SavingsAccountChargeRepositoryWrapper savingsAccountChargeRepositoryWrapper, final FromJsonHelper fromJsonHelper,
-            AccountingProcessorHelper helper, RecurringDepositProductRepository recurringDepositProductRepository,
-            SavingsAccountWritePlatformService savingsAccountWritePlatformService, SavingsAccountRepository savingsAccountRepository,
-            ChargeSlabRepository chargeSlabRepository, SavingsAccountReadPlatformService savingsAccountReadPlatformService,
-            ChargeReadPlatformService chargeReadPlatformService) {
+                                                               final SavingsAccountRepositoryWrapper savingAccountRepositoryWrapper,
+                                                               final SavingsAccountTransactionRepository savingsAccountTransactionRepository,
+                                                               final DepositAccountAssembler depositAccountAssembler,
+                                                               final DepositAccountTransactionDataValidator depositAccountTransactionDataValidator,
+                                                               final SavingsAccountChargeDataValidator savingsAccountChargeDataValidator,
+                                                               final PaymentDetailWritePlatformService paymentDetailWritePlatformService,
+                                                               final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper,
+                                                               final JournalEntryWritePlatformService journalEntryWritePlatformService,
+                                                               final DepositAccountDomainService depositAccountDomainService, final NoteRepository noteRepository,
+                                                               final AccountTransfersReadPlatformService accountTransfersReadPlatformService, final ChargeRepositoryWrapper chargeRepository,
+                                                               final SavingsAccountChargeRepositoryWrapper savingsAccountChargeRepository, final HolidayRepositoryWrapper holidayRepository,
+                                                               final WorkingDaysRepositoryWrapper workingDaysRepository,
+                                                               final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService,
+                                                               final AccountTransfersWritePlatformService accountTransfersWritePlatformService,
+                                                               final DepositAccountReadPlatformService depositAccountReadPlatformService,
+                                                               final CalendarInstanceRepository calendarInstanceRepository, final ConfigurationDomainService configurationDomainService,
+                                                               final DepositAccountOnHoldTransactionRepository depositAccountOnHoldTransactionRepository,
+                                                               final DepositApplicationProcessWritePlatformService depositApplicationProcessWritePlatformService,
+                                                               final SavingsAccountActionService savingsAccountActionService,
+                                                               final AccountAssociationsRepository accountAssociationsRepository, ReadWriteNonCoreDataService readWriteNonCoreDataService,
+                                                               final SavingsAccountChargeRepositoryWrapper savingsAccountChargeRepositoryWrapper, final FromJsonHelper fromJsonHelper,
+                                                               AccountingProcessorHelper helper, RecurringDepositProductRepository recurringDepositProductRepository,
+                                                               SavingsAccountWritePlatformService savingsAccountWritePlatformService, SavingsAccountRepository savingsAccountRepository,
+                                                               ChargeSlabRepository chargeSlabRepository, SavingsAccountReadPlatformService savingsAccountReadPlatformService,
+                                                               ChargeReadPlatformService chargeReadPlatformService, PaymentTypeRepositoryWrapper repositoryWrapper) {
 
         this.context = context;
         this.savingAccountRepositoryWrapper = savingAccountRepositoryWrapper;
@@ -281,6 +284,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         this.chargeSlabRepository = chargeSlabRepository;
         this.savingsAccountReadPlatformService = savingsAccountReadPlatformService;
         this.chargeReadPlatformService = chargeReadPlatformService;
+        this.repositoryWrapper = repositoryWrapper;
     }
 
     @Transactional
@@ -687,6 +691,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         boolean isInterestTransfer = false;
         LocalDate postInterestOnDate = null;
         account.setSavingsAccountTransactionRepository(this.savingsAccountTransactionRepository);
+        account.setRepositoryWrapper(this.repositoryWrapper);
+        account.setPaymentDetailWritePlatformService(this.paymentDetailWritePlatformService);
 
         account.postInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
                 postInterestOnDate);
