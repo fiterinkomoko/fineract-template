@@ -3830,4 +3830,13 @@ public class CommandWrapperBuilder {
 
         return this;
     }
+
+    public CommandWrapperBuilder deleteLoanApprovalMatrix(final long matrixId) {
+        this.actionName = "DELETE";
+        this.entityName = "LOANAPPROVALMATRIX";
+        this.entityId = matrixId;
+        this.href = "/loans/decision/approvalmatrix/" + matrixId;
+
+        return this;
+    }
 }
