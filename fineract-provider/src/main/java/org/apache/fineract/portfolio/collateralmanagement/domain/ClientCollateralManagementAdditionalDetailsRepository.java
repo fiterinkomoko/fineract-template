@@ -23,10 +23,9 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-
-
 public interface ClientCollateralManagementAdditionalDetailsRepository
-        extends JpaRepository<ClientCollateralManagementAdditionalDetails, Long>, JpaSpecificationExecutor<ClientCollateralManagementAdditionalDetails> {
+        extends JpaRepository<ClientCollateralManagementAdditionalDetails, Long>,
+        JpaSpecificationExecutor<ClientCollateralManagementAdditionalDetails> {
 
     @Query("select collateralDetails from ClientCollateralManagementAdditionalDetails collateralDetails where collateralDetails.clientCollateral=:clientCollateral")
     ClientCollateralManagementAdditionalDetails findByCollateralId(@Param("clientCollateral") ClientCollateralManagement clientCollateral);
