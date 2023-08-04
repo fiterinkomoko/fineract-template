@@ -172,7 +172,12 @@ public class ClientCollateralManagementWritePlatformServiceImpl implements Clien
         final ClientCollateralManagement collateral = this.clientCollateralManagementRepositoryWrapper.getCollateral(command.entityId());
         final Map<String, Object> changes = collateral.update(command);
         this.clientCollateralManagementRepositoryWrapper.updateClientCollateralProduct(collateral);
-        this.updateClientCollateralAdditionalDetails(command, collateral);
+        final GlobalConfigurationPropertyData clientCollateralAdditionalDataConfig = this.configurationReadPlatformService
+                .retrieveGlobalConfiguration("Enable-Client-Collateral-Addition_Details");
+        final Boolean isClientCollateralAdditionalDataConfigEnable = clientCollateralAdditionalDataConfig.isEnabled();
+        if(isClientCollateralAdditionalDataConfigEnable){
+            this.updateClientCollateralAdditionalDetails(command, collateral);
+        }
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(command.entityId())
                 .withClientId(command.getClientId()).with(changes).build();
     }
@@ -265,7 +270,10 @@ public class ClientCollateralManagementWritePlatformServiceImpl implements Clien
                     details.updateVillage(villageCodeValue);
             }
             this.clientCollateralManagementAdditionalDetailsRepository.saveAndFlush(details);
+        }else{
+            this.createClientCollateralAdditionalDetails(command, clientCollateralManagement);
         }
+
     }
 
 
