@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.transaction.Transactional;
-
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
@@ -66,7 +65,11 @@ public class ClientCollateralManagementWritePlatformServiceImpl implements Clien
     public ClientCollateralManagementWritePlatformServiceImpl(
             final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper,
             final CollateralManagementRepositoryWrapper collateralManagementRepositoryWrapper,
-            final ClientRepositoryWrapper clientRepositoryWrapper, ClientCollateralAdditionalDataValidator clientCollateralAdditionalDataValidator, ConfigurationReadPlatformService configurationReadPlatformService, ClientCollateralManagementAdditionalDetailsRepository clientCollateralManagementAdditionalDetailsRepository, CodeValueRepositoryWrapper codeValueRepository) {
+            final ClientRepositoryWrapper clientRepositoryWrapper,
+            ClientCollateralAdditionalDataValidator clientCollateralAdditionalDataValidator,
+            ConfigurationReadPlatformService configurationReadPlatformService,
+            ClientCollateralManagementAdditionalDetailsRepository clientCollateralManagementAdditionalDetailsRepository,
+            CodeValueRepositoryWrapper codeValueRepository) {
         this.clientCollateralManagementRepositoryWrapper = clientCollateralManagementRepositoryWrapper;
         this.collateralManagementRepositoryWrapper = collateralManagementRepositoryWrapper;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
@@ -97,7 +100,7 @@ public class ClientCollateralManagementWritePlatformServiceImpl implements Clien
                 .retrieveGlobalConfiguration("Enable-Client-Collateral-Addition_Details");
         final Boolean isClientCollateralAdditionalDataConfigEnable = clientCollateralAdditionalDataConfig.isEnabled();
 
-        if(isClientCollateralAdditionalDataConfigEnable) {
+        if (isClientCollateralAdditionalDataConfigEnable) {
             createClientCollateralAdditionalDetails(command, clientCollateralManagement);
         }
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withClientId(command.getClientId())
@@ -128,42 +131,43 @@ public class ClientCollateralManagementWritePlatformServiceImpl implements Clien
         }
     }
 
-    private void createClientCollateralAdditionalDetails(final JsonCommand command, final ClientCollateralManagement clientCollateralManagement) {
+    private void createClientCollateralAdditionalDetails(final JsonCommand command,
+            final ClientCollateralManagement clientCollateralManagement) {
 
-            this.clientCollateralAdditionalDataValidator.validateForCreate(command.json());
-            CodeValue province = null;
-            final Long provinceId = command.longValueOfParameterNamed(ClientApiConstants.provinceIdParamName);
-            if (provinceId != null) {
-                province = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.PROVINCE, provinceId);
-            }
+        this.clientCollateralAdditionalDataValidator.validateForCreate(command.json());
+        CodeValue province = null;
+        final Long provinceId = command.longValueOfParameterNamed(ClientApiConstants.provinceIdParamName);
+        if (provinceId != null) {
+            province = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.PROVINCE, provinceId);
+        }
 
-            CodeValue district = null;
-            final Long districtId = command.longValueOfParameterNamed(ClientApiConstants.districtIdParamName);
-            if (districtId != null) {
-                district = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.DISTRICT, districtId);
-            }
-            CodeValue sector = null;
-            final Long sectorId = command.longValueOfParameterNamed(ClientApiConstants.sectorIdParamName);
-            if (sectorId != null) {
-                sector = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.SECTOR, sectorId);
-            }
+        CodeValue district = null;
+        final Long districtId = command.longValueOfParameterNamed(ClientApiConstants.districtIdParamName);
+        if (districtId != null) {
+            district = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.DISTRICT, districtId);
+        }
+        CodeValue sector = null;
+        final Long sectorId = command.longValueOfParameterNamed(ClientApiConstants.sectorIdParamName);
+        if (sectorId != null) {
+            sector = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.SECTOR, sectorId);
+        }
 
-            CodeValue cell = null;
-            final Long cellId = command.longValueOfParameterNamed(ClientApiConstants.cellIdParamName);
-            if (cellId != null) {
-                cell = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.CELL, cellId);
-            }
-            CodeValue village = null;
-            final Long villageId = command.longValueOfParameterNamed(ClientApiConstants.villageIdParamName);
-            if (villageId != null) {
-                village = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.VILLAGE, villageId);
-            }
+        CodeValue cell = null;
+        final Long cellId = command.longValueOfParameterNamed(ClientApiConstants.cellIdParamName);
+        if (cellId != null) {
+            cell = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.CELL, cellId);
+        }
+        CodeValue village = null;
+        final Long villageId = command.longValueOfParameterNamed(ClientApiConstants.villageIdParamName);
+        if (villageId != null) {
+            village = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.VILLAGE, villageId);
+        }
 
-            final ClientCollateralManagementAdditionalDetails clientCollateralManagementAdditionalDetails = ClientCollateralManagementAdditionalDetails.createNew(clientCollateralManagement, command, province, district, sector, cell, village);
-            this.clientCollateralManagementAdditionalDetailsRepository.saveAndFlush(clientCollateralManagementAdditionalDetails);
+        final ClientCollateralManagementAdditionalDetails clientCollateralManagementAdditionalDetails = ClientCollateralManagementAdditionalDetails
+                .createNew(clientCollateralManagement, command, province, district, sector, cell, village);
+        this.clientCollateralManagementAdditionalDetailsRepository.saveAndFlush(clientCollateralManagementAdditionalDetails);
 
     }
-
 
     @Transactional
     @Override
@@ -175,7 +179,7 @@ public class ClientCollateralManagementWritePlatformServiceImpl implements Clien
         final GlobalConfigurationPropertyData clientCollateralAdditionalDataConfig = this.configurationReadPlatformService
                 .retrieveGlobalConfiguration("Enable-Client-Collateral-Addition_Details");
         final Boolean isClientCollateralAdditionalDataConfigEnable = clientCollateralAdditionalDataConfig.isEnabled();
-        if(isClientCollateralAdditionalDataConfigEnable){
+        if (isClientCollateralAdditionalDataConfigEnable) {
             this.updateClientCollateralAdditionalDetails(command, collateral);
         }
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(command.entityId())
@@ -220,11 +224,14 @@ public class ClientCollateralManagementWritePlatformServiceImpl implements Clien
         }
 
     }
-    private void updateClientCollateralAdditionalDetails(final JsonCommand command, final ClientCollateralManagement clientCollateralManagement) {
 
-        ClientCollateralManagementAdditionalDetails details = this.clientCollateralManagementAdditionalDetailsRepository.findByCollateralId(clientCollateralManagement);
+    private void updateClientCollateralAdditionalDetails(final JsonCommand command,
+            final ClientCollateralManagement clientCollateralManagement) {
 
-        if(details != null){
+        ClientCollateralManagementAdditionalDetails details = this.clientCollateralManagementAdditionalDetailsRepository
+                .findByCollateralId(clientCollateralManagement);
+
+        if (details != null) {
             this.clientCollateralAdditionalDataValidator.validateForUpdate(command.json());
             final Map<String, Object> changes = details.update(command);
             if (changes.containsKey(ClientApiConstants.provinceIdParamName)) {
@@ -234,7 +241,7 @@ public class ClientCollateralManagementWritePlatformServiceImpl implements Clien
                     provinceCodeValue = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.PROVINCE,
                             provinceId);
                 }
-                    details.updateProvince(provinceCodeValue);
+                details.updateProvince(provinceCodeValue);
             }
             if (changes.containsKey(ClientApiConstants.districtIdParamName)) {
                 final Long districtId = command.longValueOfParameterNamed(ClientApiConstants.districtIdParamName);
@@ -243,39 +250,40 @@ public class ClientCollateralManagementWritePlatformServiceImpl implements Clien
                     districtCodeValue = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.DISTRICT,
                             districtId);
                 }
-                    details.updateDistrict(districtCodeValue);
+                details.updateDistrict(districtCodeValue);
             }
-            if(changes.containsKey(ClientApiConstants.sectorIdParamName)){
+            if (changes.containsKey(ClientApiConstants.sectorIdParamName)) {
                 final Long sectorId = command.longValueOfParameterNamed(ClientApiConstants.sectorIdParamName);
                 CodeValue sectorCodeValue = null;
-                if(sectorId != null){
-                    sectorCodeValue = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.SECTOR, sectorId);
+                if (sectorId != null) {
+                    sectorCodeValue = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.SECTOR,
+                            sectorId);
                 }
-                    details.updateSector(sectorCodeValue);
+                details.updateSector(sectorCodeValue);
             }
-            if(changes.containsKey(ClientApiConstants.cellIdParamName)){
+            if (changes.containsKey(ClientApiConstants.cellIdParamName)) {
                 final Long cellId = command.longValueOfParameterNamed(ClientApiConstants.cellIdParamName);
                 CodeValue cellCodeValue = null;
-                if(cellId != null){
+                if (cellId != null) {
                     cellCodeValue = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.CELL, cellId);
                 }
-                    details.updateCell(cellCodeValue);
+                details.updateCell(cellCodeValue);
             }
-            if(changes.containsKey(ClientApiConstants.villageIdParamName)){
+            if (changes.containsKey(ClientApiConstants.villageIdParamName)) {
                 final Long villageId = command.longValueOfParameterNamed(ClientApiConstants.villageIdParamName);
                 CodeValue villageCodeValue = null;
-                if(villageId != null){
-                    villageCodeValue = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.VILLAGE, villageId);
+                if (villageId != null) {
+                    villageCodeValue = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.VILLAGE,
+                            villageId);
                 }
-                    details.updateVillage(villageCodeValue);
+                details.updateVillage(villageCodeValue);
             }
             this.clientCollateralManagementAdditionalDetailsRepository.saveAndFlush(details);
-        }else{
+        } else {
             this.createClientCollateralAdditionalDetails(command, clientCollateralManagement);
         }
 
     }
-
 
     @Transactional
     @Override
