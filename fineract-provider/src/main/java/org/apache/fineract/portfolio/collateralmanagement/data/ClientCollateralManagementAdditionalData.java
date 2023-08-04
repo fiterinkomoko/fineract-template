@@ -18,11 +18,10 @@
  */
 package org.apache.fineract.portfolio.collateralmanagement.data;
 
-import org.apache.fineract.infrastructure.codes.data.CodeValueData;
-import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagementAdditionalDetails;
-
 import java.math.BigDecimal;
 import java.util.List;
+import org.apache.fineract.infrastructure.codes.data.CodeValueData;
+import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagementAdditionalDetails;
 
 public final class ClientCollateralManagementAdditionalData {
 
@@ -61,8 +60,10 @@ public final class ClientCollateralManagementAdditionalData {
 
     private List<CodeValueData> villages;
 
-
-    public ClientCollateralManagementAdditionalData(Long id, String upiNo, String chassisNo, String collateralOwnerFirst, String idNoOfCollateralOwnerFirst, String collateralOwnerSecond, String idNoOfCollateralOwnerSecond, BigDecimal worthOfCollateral, CodeValueData province, CodeValueData district, CodeValueData sector, CodeValueData cell, CodeValueData village) {
+    public ClientCollateralManagementAdditionalData(Long id, String upiNo, String chassisNo, String collateralOwnerFirst,
+            String idNoOfCollateralOwnerFirst, String collateralOwnerSecond, String idNoOfCollateralOwnerSecond,
+            BigDecimal worthOfCollateral, CodeValueData province, CodeValueData district, CodeValueData sector, CodeValueData cell,
+            CodeValueData village) {
         this.id = id;
         this.upiNo = upiNo;
         this.chassisNo = chassisNo;
@@ -78,8 +79,8 @@ public final class ClientCollateralManagementAdditionalData {
         this.village = village;
     }
 
-    public ClientCollateralManagementAdditionalData(List<CodeValueData> provinces, List<CodeValueData> districts, List<CodeValueData> sectors,
-                                                    List<CodeValueData> cells, List<CodeValueData> villages) {
+    public ClientCollateralManagementAdditionalData(List<CodeValueData> provinces, List<CodeValueData> districts,
+            List<CodeValueData> sectors, List<CodeValueData> cells, List<CodeValueData> villages) {
         this.id = null;
         this.upiNo = null;
         this.chassisNo = null;
@@ -100,12 +101,15 @@ public final class ClientCollateralManagementAdditionalData {
         this.villages = villages;
     }
 
-    public static ClientCollateralManagementAdditionalData instance(ClientCollateralManagementAdditionalDetails details, CodeValueData province, CodeValueData district, CodeValueData sector, CodeValueData cell, CodeValueData village) {
-        return new ClientCollateralManagementAdditionalData(details.getId(), details.getUpiNo(), details.getChassisNo(), details.getCollateralOwnerFirst(),details.getIdNoOfCollateralOwnerFirst(), details.getCollateralOwnerSecond(),
+    public static ClientCollateralManagementAdditionalData instance(ClientCollateralManagementAdditionalDetails details,
+            CodeValueData province, CodeValueData district, CodeValueData sector, CodeValueData cell, CodeValueData village) {
+        return new ClientCollateralManagementAdditionalData(details.getId(), details.getUpiNo(), details.getChassisNo(),
+                details.getCollateralOwnerFirst(), details.getIdNoOfCollateralOwnerFirst(), details.getCollateralOwnerSecond(),
                 details.getIdNoOfCollateralOwnerSecond(), details.getWorthOfCollateral(), province, district, sector, cell, village);
     }
 
-    public static ClientCollateralManagementAdditionalData template(List<CodeValueData> provinces, List<CodeValueData> districts, List<CodeValueData> sectors, List<CodeValueData> cells, List<CodeValueData> villages) {
+    public static ClientCollateralManagementAdditionalData template(List<CodeValueData> provinces, List<CodeValueData> districts,
+            List<CodeValueData> sectors, List<CodeValueData> cells, List<CodeValueData> villages) {
         return new ClientCollateralManagementAdditionalData(provinces, districts, sectors, cells, villages);
     }
 
