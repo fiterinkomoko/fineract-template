@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
@@ -58,8 +57,10 @@ public class ClientCollateralManagementReadPlatformServiceImpl implements Client
 
     @Autowired
     public ClientCollateralManagementReadPlatformServiceImpl(final PlatformSecurityContext context,
-                                                             final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper,
-                                                             ClientCollateralManagementAdditionalDetailsRepository clientCollateralManagementAdditionalDetailsRepository, final LoanTransactionRepository loanTransactionRepository, ConfigurationReadPlatformService configurationReadPlatformService, CodeValueReadPlatformService codeValueReadPlatformService) {
+            final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper,
+            ClientCollateralManagementAdditionalDetailsRepository clientCollateralManagementAdditionalDetailsRepository,
+            final LoanTransactionRepository loanTransactionRepository, ConfigurationReadPlatformService configurationReadPlatformService,
+            CodeValueReadPlatformService codeValueReadPlatformService) {
         this.context = context;
         this.clientCollateralManagementRepositoryWrapper = clientCollateralManagementRepositoryWrapper;
         this.clientCollateralManagementAdditionalDetailsRepository = clientCollateralManagementAdditionalDetailsRepository;
@@ -112,7 +113,8 @@ public class ClientCollateralManagementReadPlatformServiceImpl implements Client
                 loanTransactionDataList.add(loanTransactionData);
             }
         }
-        ClientCollateralManagementAdditionalDetails details = this.clientCollateralManagementAdditionalDetailsRepository.findByCollateralId(clientCollateralManagement);
+        ClientCollateralManagementAdditionalDetails details = this.clientCollateralManagementAdditionalDetailsRepository
+                .findByCollateralId(clientCollateralManagement);
         ClientCollateralManagementData data = ClientCollateralManagementData.instance(clientCollateralManagement.getCollaterals().getName(),
                 clientCollateralManagement.getQuantity(), total, totalCollateral, clientCollateralManagement.getClient().getId(),
                 loanTransactionDataList, clientCollateralManagement.getId());
@@ -120,31 +122,45 @@ public class ClientCollateralManagementReadPlatformServiceImpl implements Client
                 .retrieveGlobalConfiguration("Enable-Client-Collateral-Addition_Details");
         final Boolean isClientCollateralAdditionalDataConfigEnable = clientCollateralAdditionalDataConfig.isEnabled();
         data.setAdditionalDetailsEnabled(isClientCollateralAdditionalDataConfigEnable);
-        if(details != null){
+        if (details != null) {
             data.setAdditionalDetails(prepareAdditionalData(details));
         }
 
         return data;
     }
 
-    private ClientCollateralManagementAdditionalData prepareAdditionalData(ClientCollateralManagementAdditionalDetails details){
-        CodeValueData province = details.getProvince() !=null ? CodeValueData.instance(details.getProvince().getId(), details.getProvince().label()) : null;
-        CodeValueData district = details.getDistrict() !=null ? CodeValueData.instance(details.getDistrict().getId(), details.getDistrict().label()) : null;
-        CodeValueData sector = details.getSector() !=null ? CodeValueData.instance(details.getSector().getId(), details.getSector().label()) : null;
-        CodeValueData cell = details.getCell() !=null ? CodeValueData.instance(details.getCell().getId(), details.getCell().label()) : null;
-        CodeValueData village = details.getVillage() !=null ? CodeValueData.instance(details.getVillage().getId(), details.getVillage().label()) : null;
+    private ClientCollateralManagementAdditionalData prepareAdditionalData(ClientCollateralManagementAdditionalDetails details) {
+        CodeValueData province = details.getProvince() != null
+                ? CodeValueData.instance(details.getProvince().getId(), details.getProvince().label())
+                : null;
+        CodeValueData district = details.getDistrict() != null
+                ? CodeValueData.instance(details.getDistrict().getId(), details.getDistrict().label())
+                : null;
+        CodeValueData sector = details.getSector() != null
+                ? CodeValueData.instance(details.getSector().getId(), details.getSector().label())
+                : null;
+        CodeValueData cell = details.getCell() != null ? CodeValueData.instance(details.getCell().getId(), details.getCell().label())
+                : null;
+        CodeValueData village = details.getVillage() != null
+                ? CodeValueData.instance(details.getVillage().getId(), details.getVillage().label())
+                : null;
 
         return ClientCollateralManagementAdditionalData.instance(details, province, district, sector, cell, village);
     }
 
     @Override
     public ClientCollateralManagementAdditionalData getClientCollateralAdditionalTemplate(final Long clientId) {
-        final List<CodeValueData> province = new ArrayList<>(this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.PROVINCE));
-        final List<CodeValueData> district = new ArrayList<>(this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.DISTRICT));
-        final List<CodeValueData> sector = new ArrayList<>(this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.SECTOR));
-        final List<CodeValueData> cell = new ArrayList<>(this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CELL));
-        final List<CodeValueData> village = new ArrayList<>(this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.VILLAGE));
-    return  ClientCollateralManagementAdditionalData.template(province, district, sector, cell, village);
+        final List<CodeValueData> province = new ArrayList<>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.PROVINCE));
+        final List<CodeValueData> district = new ArrayList<>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.DISTRICT));
+        final List<CodeValueData> sector = new ArrayList<>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.SECTOR));
+        final List<CodeValueData> cell = new ArrayList<>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.CELL));
+        final List<CodeValueData> village = new ArrayList<>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.VILLAGE));
+        return ClientCollateralManagementAdditionalData.template(province, district, sector, cell, village);
     }
 
 }
