@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -46,6 +47,7 @@ import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformSer
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalMatrixData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDecisionData;
+import org.apache.fineract.portfolio.loanaccount.service.LoanApprovalMatrixReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -68,13 +70,15 @@ public class LoanDecisionApiResource {
     private final DefaultToApiJsonSerializer<LoanApprovalMatrixData> loanApprovalMatrixDataToApiJsonSerializer;
     private final LoanReadPlatformService loanReadPlatformService;
     private final CurrencyReadPlatformService currencyReadPlatformService;
+    private final LoanApprovalMatrixReadPlatformService loanApprovalMatrixReadPlatformService;
 
     public LoanDecisionApiResource(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final DefaultToApiJsonSerializer<LoanDecisionData> toApiJsonSerializer, final PlatformSecurityContext context,
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final DefaultToApiJsonSerializer<LoanAccountData> loanApprovalDataToApiJsonSerializer,
             final LoanReadPlatformService loanReadPlatformService, final CurrencyReadPlatformService currencyReadPlatformService,
-            DefaultToApiJsonSerializer<LoanApprovalMatrixData> loanApprovalMatrixDataToApiJsonSerializer) {
+            DefaultToApiJsonSerializer<LoanApprovalMatrixData> loanApprovalMatrixDataToApiJsonSerializer,
+            final LoanApprovalMatrixReadPlatformService loanApprovalMatrixReadPlatformService) {
 
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
@@ -84,6 +88,7 @@ public class LoanDecisionApiResource {
         this.loanReadPlatformService = loanReadPlatformService;
         this.currencyReadPlatformService = currencyReadPlatformService;
         this.loanApprovalMatrixDataToApiJsonSerializer = loanApprovalMatrixDataToApiJsonSerializer;
+        this.loanApprovalMatrixReadPlatformService = loanApprovalMatrixReadPlatformService;
     }
 
     @POST
@@ -180,6 +185,21 @@ public class LoanDecisionApiResource {
         final Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
         LoanApprovalMatrixData loanApprovalMatrixData = new LoanApprovalMatrixData();
         loanApprovalMatrixData.setCurrencyOptions(currencyOptions);
+
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.loanApprovalMatrixDataToApiJsonSerializer.serialize(settings, loanApprovalMatrixData, this.loanDataParameters);
+
+    }
+
+    @GET
+    @Path("getAllApprovalMatrix")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String getAllApprovalMatrixTemplate(@Context final UriInfo uriInfo) {
+
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+
+        List<LoanApprovalMatrixData> loanApprovalMatrixData = this.loanApprovalMatrixReadPlatformService.findAll();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.loanApprovalMatrixDataToApiJsonSerializer.serialize(settings, loanApprovalMatrixData, this.loanDataParameters);
