@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.api;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import javax.ws.rs.Consumes;
@@ -40,7 +41,10 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalMatrixData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDecisionData;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.springframework.context.annotation.Scope;
@@ -54,20 +58,23 @@ public class LoanDecisionApiResource {
 
     private final String resourceNameForPermissions = "LOAN";
     private final Set<String> loanDataParameters = new HashSet<>(Arrays.asList("cohortOptions", "countryOptions", "programOptions",
-            "surveyLocationOptions", "clientId", "clientName", "loanProductName", "loanProductId"));
+            "surveyLocationOptions", "clientId", "clientName", "loanProductName", "loanProductId", "currencyOptions"));
 
     private final DefaultToApiJsonSerializer<LoanDecisionData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final PlatformSecurityContext context;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final DefaultToApiJsonSerializer<LoanAccountData> loanApprovalDataToApiJsonSerializer;
+    private final DefaultToApiJsonSerializer<LoanApprovalMatrixData> loanApprovalMatrixDataToApiJsonSerializer;
     private final LoanReadPlatformService loanReadPlatformService;
+    private final CurrencyReadPlatformService currencyReadPlatformService;
 
     public LoanDecisionApiResource(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final DefaultToApiJsonSerializer<LoanDecisionData> toApiJsonSerializer, final PlatformSecurityContext context,
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final DefaultToApiJsonSerializer<LoanAccountData> loanApprovalDataToApiJsonSerializer,
-            final LoanReadPlatformService loanReadPlatformService) {
+            final LoanReadPlatformService loanReadPlatformService, final CurrencyReadPlatformService currencyReadPlatformService,
+            DefaultToApiJsonSerializer<LoanApprovalMatrixData> loanApprovalMatrixDataToApiJsonSerializer) {
 
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
@@ -75,6 +82,8 @@ public class LoanDecisionApiResource {
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.loanApprovalDataToApiJsonSerializer = loanApprovalDataToApiJsonSerializer;
         this.loanReadPlatformService = loanReadPlatformService;
+        this.currencyReadPlatformService = currencyReadPlatformService;
+        this.loanApprovalMatrixDataToApiJsonSerializer = loanApprovalMatrixDataToApiJsonSerializer;
     }
 
     @POST
@@ -158,5 +167,22 @@ public class LoanDecisionApiResource {
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
+    }
+
+    @GET
+    @Path("template/approvalMatrix")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String approvalMatrixTemplate(@Context final UriInfo uriInfo) {
+
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+
+        final Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
+        LoanApprovalMatrixData loanApprovalMatrixData = new LoanApprovalMatrixData();
+        loanApprovalMatrixData.setCurrencyOptions(currencyOptions);
+
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.loanApprovalMatrixDataToApiJsonSerializer.serialize(settings, loanApprovalMatrixData, this.loanDataParameters);
+
     }
 }
