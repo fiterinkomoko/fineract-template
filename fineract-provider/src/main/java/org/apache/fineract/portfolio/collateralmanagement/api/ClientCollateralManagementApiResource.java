@@ -203,8 +203,8 @@ public class ClientCollateralManagementApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Get Client Collateral Additional Details Template", description = "Get Client Collateral Additional Details Template")
     public String getClientCollateralAdditionalDetailsTemplate(@Context final UriInfo uriInfo,
-                                              @PathParam("clientId") @Parameter(description = "clientId") final Long clientId) {
-     ClientCollateralManagementAdditionalData additionalData = this.clientCollateralManagementReadPlatformService
+            @PathParam("clientId") @Parameter(description = "clientId") final Long clientId) {
+        ClientCollateralManagementAdditionalData additionalData = this.clientCollateralManagementReadPlatformService
                 .getClientCollateralAdditionalTemplate(clientId);
         return this.apiJsonSerializerForLoanCollateralTemplateService.serialize(additionalData);
     }
