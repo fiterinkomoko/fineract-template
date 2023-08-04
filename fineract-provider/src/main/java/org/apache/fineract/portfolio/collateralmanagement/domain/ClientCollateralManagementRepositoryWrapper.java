@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.collateralmanagement.domain;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
@@ -45,7 +44,8 @@ public class ClientCollateralManagementRepositoryWrapper {
 
     @Autowired
     public ClientCollateralManagementRepositoryWrapper(final ClientCollateralManagementRepository clientCollateralManagementRepository,
-                                                       final ClientRepositoryWrapper clientRepositoryWrapper, final LoanProductRepository loanProductRepository, ClientCollateralManagementAdditionalDetailsRepository clientCollateralManagementAdditionalDetailsRepository) {
+            final ClientRepositoryWrapper clientRepositoryWrapper, final LoanProductRepository loanProductRepository,
+            ClientCollateralManagementAdditionalDetailsRepository clientCollateralManagementAdditionalDetailsRepository) {
         this.clientCollateralManagementRepository = clientCollateralManagementRepository;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
         this.loanProductRepository = loanProductRepository;
@@ -74,9 +74,10 @@ public class ClientCollateralManagementRepositoryWrapper {
             if (prodId != null && clientCollateralManagement.getCollaterals().getCurrency().getCode().equals(currency)) {
                 ClientCollateralManagementAdditionalDetails details = this.clientCollateralManagementAdditionalDetailsRepository
                         .findByCollateralId(clientCollateralManagement);
-                ClientCollateralManagementData data = ClientCollateralManagementData.instance(clientCollateralManagement.getCollaterals().getName(), quantity, total,
-                        totalCollateralValue, clientId, null, clientCollateralManagement.getId());
-                if(details != null){
+                ClientCollateralManagementData data = ClientCollateralManagementData.instance(
+                        clientCollateralManagement.getCollaterals().getName(), quantity, total, totalCollateralValue, clientId, null,
+                        clientCollateralManagement.getId());
+                if (details != null) {
                     data.setAdditionalDetails(prepareAdditionalData(details));
                 }
                 clientCollateralManagementDataSet.add(data);
@@ -85,7 +86,8 @@ public class ClientCollateralManagementRepositoryWrapper {
 
         return clientCollateralManagementDataSet;
     }
-    private ClientCollateralManagementAdditionalData prepareAdditionalData(ClientCollateralManagementAdditionalDetails details){
+
+    private ClientCollateralManagementAdditionalData prepareAdditionalData(ClientCollateralManagementAdditionalDetails details) {
         CodeValueData province = CodeValueData.instance(details.getProvince().getId(), details.getProvince().label());
         CodeValueData district = CodeValueData.instance(details.getDistrict().getId(), details.getDistrict().label());
         CodeValueData sector = CodeValueData.instance(details.getSector().getId(), details.getSector().label());
