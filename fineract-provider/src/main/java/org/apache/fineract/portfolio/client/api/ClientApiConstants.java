@@ -358,9 +358,9 @@ public class ClientApiConstants {
     public static final String CELL = "Cell";
     public static final String VILLAGE = "Village";
     public static final String CLIENT_COLLATERAL_ADDITIONAL_DATA_RESOURCE_NAME = "ClientCollateralAdditionalData";
-    public static final Set<String> CLIENT_COLLATERAL_ADDITIONAL_DATA_RESPONSE_REQUEST_PARAMETER = new HashSet<>(
-            Arrays.asList(upiNoParamName, chassisNoParamName, collateralOwnerFirstParamName, collateralOwnerSecondParamName,
-                    idNoOfCollateralOwnerFirstParamName, idNoOfCollateralOwnerSecondParamName, worthOfCollateralParamName, provinceIdParamName, districtIdParamName,
-                    sectorIdParamName, cellIdParamName, villageIdParamName, localeParamName, "quantity", "collateralId"));
+    public static final Set<String> CLIENT_COLLATERAL_ADDITIONAL_DATA_RESPONSE_REQUEST_PARAMETER = new HashSet<>(Arrays.asList(
+            upiNoParamName, chassisNoParamName, collateralOwnerFirstParamName, collateralOwnerSecondParamName,
+            idNoOfCollateralOwnerFirstParamName, idNoOfCollateralOwnerSecondParamName, worthOfCollateralParamName, provinceIdParamName,
+            districtIdParamName, sectorIdParamName, cellIdParamName, villageIdParamName, localeParamName, "quantity", "collateralId"));
 
 }
