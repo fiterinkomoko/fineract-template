@@ -32,4 +32,6 @@ public interface LoanApplicationDecisionWritePlatformService {
     CommandProcessingResult createLoanApprovalMatrix(JsonCommand command);
 
     CommandProcessingResult deleteLoanApprovalMatrix(Long matrixId);
+
+    CommandProcessingResult updateLoanApprovalMatrix(JsonCommand command, Long matrixId);
 }

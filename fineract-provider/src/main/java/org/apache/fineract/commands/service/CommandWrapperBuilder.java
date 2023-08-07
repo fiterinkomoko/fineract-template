@@ -3839,4 +3839,13 @@ public class CommandWrapperBuilder {
 
         return this;
     }
+
+    public CommandWrapperBuilder updateLoanApprovalMatrix(final long matrixId) {
+        this.actionName = "UPDATE";
+        this.entityName = "LOANAPPROVALMATRIX";
+        this.entityId = matrixId;
+        this.href = "/loans/decision/approvalmatrix/update/" + matrixId;
+
+        return this;
+    }
 }
