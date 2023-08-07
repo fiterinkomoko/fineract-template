@@ -90,3 +90,29 @@ Feature: Create loan stapes
     When method POST
     Then status 403
     Then match $ contains { developerMessage: '#notnull' }
+
+
+
+  @ignore
+  @getAllLoanApprovalMatrixStep
+  Scenario: Get All Loan Approval Matrix Step
+    Given configure ssl = true
+    Given path 'loans/decision/getAllApprovalMatrix'
+    And header Accept = 'application/json'
+    And header Authorization = authToken
+    And header fineract-platform-tenantid = tenantId
+    When method GET
+    Then status 200
+
+
+  @ignore
+  @getLoanApprovalMatrixStep
+  Scenario: Get Loan Approval Matrix Step
+    Given configure ssl = true
+    Given path 'loans/decision/getApprovalMatrixDetails',matrixId
+    And header Accept = 'application/json'
+    And header Authorization = authToken
+    And header fineract-platform-tenantid = tenantId
+    When method GET
+    Then status 200
+    Then match $ contains { id: '#notnull' }
