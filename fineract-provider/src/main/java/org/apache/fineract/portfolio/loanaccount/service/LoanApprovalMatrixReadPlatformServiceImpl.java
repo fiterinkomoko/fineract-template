@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalMatrixData;
@@ -39,6 +40,16 @@ public class LoanApprovalMatrixReadPlatformServiceImpl implements LoanApprovalMa
     public List<LoanApprovalMatrixData> findAll() {
         List<LoanApprovalMatrix> loanApprovalMatrices = loanApprovalMatrixRepository.findAll();
         return mapper.map(loanApprovalMatrices);
+    }
+
+    @Override
+    public LoanApprovalMatrixData getApprovalMatrixDetails(Long approvalMatrixId) {
+        LoanApprovalMatrixData loanApprovalMatrixData = null;
+        Optional<LoanApprovalMatrix> loanApproval = loanApprovalMatrixRepository.findById(approvalMatrixId);
+        if (loanApproval.isPresent()) {
+            loanApprovalMatrixData = mapper.map(loanApproval.get());
+        }
+        return loanApprovalMatrixData;
     }
 
 }

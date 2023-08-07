@@ -205,4 +205,20 @@ public class LoanDecisionApiResource {
         return this.loanApprovalMatrixDataToApiJsonSerializer.serialize(settings, loanApprovalMatrixData, this.loanDataParameters);
 
     }
+
+    @GET
+    @Path("getApprovalMatrixDetails/{approvalMatrixId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String getApprovalMatrixDetails(@PathParam("approvalMatrixId") final long approvalMatrixId, @Context final UriInfo uriInfo) {
+
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+
+        LoanApprovalMatrixData loanApprovalMatrixData = this.loanApprovalMatrixReadPlatformService
+                .getApprovalMatrixDetails(approvalMatrixId);
+
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.loanApprovalMatrixDataToApiJsonSerializer.serialize(settings, loanApprovalMatrixData, this.loanDataParameters);
+
+    }
 }

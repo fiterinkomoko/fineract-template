@@ -25,4 +25,6 @@ public interface LoanApprovalMatrixReadPlatformService {
 
     List<LoanApprovalMatrixData> findAll();
 
+    LoanApprovalMatrixData getApprovalMatrixDetails(Long approvalMatrixId);
+
 }

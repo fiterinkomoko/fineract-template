@@ -20,6 +20,13 @@ Feature: Test loan account apis
      # Simulate  a duplicate Currency and it should fail
     * call read('classpath:features/portfolio/loans/loanDecisionSteps.feature@createLoanApprovalMatrixAndShouldFailDueToDuplicateCurrencyStep') { currency : '#(currency)'}
 
+    #Get Approval Matrix By ID
+    * call read('classpath:features/portfolio/loans/loanDecisionSteps.feature@getLoanApprovalMatrixStep') { matrixId : '#(matrixId)'}
+
+        #Get All Approval Matrix By ID
+    * def allApprovalMatrices = call read('classpath:features/portfolio/loans/loanDecisionSteps.feature@getAllLoanApprovalMatrixStep') {}
+    * assert karate.sizeOf(allApprovalMatrices.response) == 1
+
      # Delete Loan Approval Matrix created above. We Create a single unique record by currency
     * call read('classpath:features/portfolio/loans/loanDecisionSteps.feature@deleteLoanApprovalMatrixStep') { matrixId : '#(matrixId)'}
 
