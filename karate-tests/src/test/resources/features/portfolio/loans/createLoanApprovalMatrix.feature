@@ -20,7 +20,11 @@ Feature: Test loan account apis
      # Simulate  a duplicate Currency and it should fail
     * call read('classpath:features/portfolio/loans/loanDecisionSteps.feature@createLoanApprovalMatrixAndShouldFailDueToDuplicateCurrencyStep') { currency : '#(currency)'}
 
-    #Get Approval Matrix By ID
+    # Update Approval Matrix based on currency
+    * def update = call read('classpath:features/portfolio/loans/loanDecisionSteps.feature@UpdateLoanApprovalMatrixStep') { currency : '#(currency)', matrixId : '#(matrixId)'}
+    * def matrixId = result.matrixId
+
+        #Get Approval Matrix By ID
     * call read('classpath:features/portfolio/loans/loanDecisionSteps.feature@getLoanApprovalMatrixStep') { matrixId : '#(matrixId)'}
 
         #Get All Approval Matrix By ID

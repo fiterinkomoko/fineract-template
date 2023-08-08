@@ -725,4 +725,18 @@
         </insert>
     </changeSet>
 
+    <changeSet author="bosco@fiter.io" id="add_permission_UPDATE_LOANAPPROVALMATRIX">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_permission where code = 'UPDATE_LOANAPPROVALMATRIX';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio" />
+            <column name="code" value="UPDATE_LOANAPPROVALMATRIX" />
+            <column name="entity_name" value="LOANAPPROVALMATRIX" />
+            <column name="action_name" value="UPDATE" />
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>
