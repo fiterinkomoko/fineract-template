@@ -196,7 +196,7 @@ public class LoanDecisionApiResource {
     @Path("getAllApprovalMatrix")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String getAllApprovalMatrixTemplate(@Context final UriInfo uriInfo) {
+    public String getAllApprovalMatrix(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
