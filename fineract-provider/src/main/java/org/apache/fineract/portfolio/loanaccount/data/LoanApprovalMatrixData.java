@@ -98,4 +98,5 @@ public final class LoanApprovalMatrixData {
     private Integer levelFiveSecuredSecondCycleMinTerm;
     private Integer levelFiveSecuredSecondCycleMaxTerm;
     Collection<CurrencyData> currencyOptions;
+    private CurrencyData currencyData;
 }

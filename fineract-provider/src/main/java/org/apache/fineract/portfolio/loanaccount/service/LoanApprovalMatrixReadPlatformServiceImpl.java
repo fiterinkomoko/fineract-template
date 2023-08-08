@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalMatrixData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanApprovalMatrix;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanApprovalMatrixRepository;
@@ -35,6 +37,7 @@ public class LoanApprovalMatrixReadPlatformServiceImpl implements LoanApprovalMa
 
     private final LoanApprovalMatrixRepository loanApprovalMatrixRepository;
     private final LoanApprovalMatrixMapper mapper;
+    private final CurrencyReadPlatformServiceImpl currencyReadPlatformService;
 
     @Override
     public List<LoanApprovalMatrixData> findAll() {
@@ -47,7 +50,10 @@ public class LoanApprovalMatrixReadPlatformServiceImpl implements LoanApprovalMa
         LoanApprovalMatrixData loanApprovalMatrixData = null;
         Optional<LoanApprovalMatrix> loanApproval = loanApprovalMatrixRepository.findById(approvalMatrixId);
         if (loanApproval.isPresent()) {
+            CurrencyData currencyData = currencyReadPlatformService.retrieveCurrency(loanApproval.get().getCurrency());
+
             loanApprovalMatrixData = mapper.map(loanApproval.get());
+            loanApprovalMatrixData.setCurrencyData(currencyData);
         }
         return loanApprovalMatrixData;
     }
