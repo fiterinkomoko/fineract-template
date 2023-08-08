@@ -116,3 +116,18 @@ Feature: Create loan stapes
     When method GET
     Then status 200
     Then match $ contains { id: '#notnull' }
+
+  @ignore
+  @UpdateLoanApprovalMatrixStep
+  Scenario: Update Loan Approval Matrix Step
+    Given configure ssl = true
+    * def matrix = read('classpath:templates/loanApprovalMatrix.json')
+    Given path 'loans/decision/updateApprovalMatrix',matrixId
+    And header Accept = 'application/json'
+    And header Authorization = authToken
+    And header fineract-platform-tenantid = tenantId
+    And request matrix.updateLoanApprovalMatrix
+    When method PUT
+    Then status 200
+    Then match $ contains { resourceId: '#notnull' }
+    Then def matrixId = response.resourceId
