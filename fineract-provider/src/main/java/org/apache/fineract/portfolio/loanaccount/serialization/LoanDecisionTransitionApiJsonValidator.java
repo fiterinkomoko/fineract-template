@@ -559,7 +559,65 @@ public final class LoanDecisionTransitionApiJsonValidator {
         validateAmountsSecuredSecondCycle(levelOneSecuredSecondCycleMaxAmount, levelTwoSecuredSecondCycleMaxAmount,
                 levelThreeSecuredSecondCycleMaxAmount, levelFourSecuredSecondCycleMaxAmount, levelFiveSecuredSecondCycleMaxAmount);
 
+        // Level One
+        loanTermValidation(LoanApprovalMatrixConstants.levelOneUnsecuredFirstCycleMinTerm, levelOneUnsecuredFirstCycleMinTerm,
+                LoanApprovalMatrixConstants.levelOneUnsecuredFirstCycleMaxTerm, levelOneUnsecuredFirstCycleMaxTerm);
+        loanTermValidation(LoanApprovalMatrixConstants.levelOneUnsecuredSecondCycleMinTerm, levelOneUnsecuredSecondCycleMinTerm,
+                LoanApprovalMatrixConstants.levelOneUnsecuredSecondCycleMaxTerm, levelOneUnsecuredSecondCycleMaxTerm);
+        loanTermValidation(LoanApprovalMatrixConstants.levelOneSecuredFirstCycleMinTerm, levelOneSecuredFirstCycleMinTerm,
+                LoanApprovalMatrixConstants.levelOneSecuredFirstCycleMaxTerm, levelOneSecuredFirstCycleMaxTerm);
+        loanTermValidation(LoanApprovalMatrixConstants.levelOneSecuredSecondCycleMinTerm, levelOneSecuredSecondCycleMinTerm,
+                LoanApprovalMatrixConstants.levelOneSecuredSecondCycleMaxTerm, levelOneSecuredSecondCycleMaxTerm);
+
+        // Level Two
+        loanTermValidation(LoanApprovalMatrixConstants.levelTwoUnsecuredFirstCycleMinTerm, levelTwoUnsecuredFirstCycleMinTerm,
+                LoanApprovalMatrixConstants.levelTwoUnsecuredFirstCycleMaxTerm, levelTwoUnsecuredFirstCycleMaxTerm);
+        loanTermValidation(LoanApprovalMatrixConstants.levelTwoUnsecuredSecondCycleMinTerm, levelTwoUnsecuredSecondCycleMinTerm,
+                LoanApprovalMatrixConstants.levelTwoUnsecuredSecondCycleMaxTerm, levelTwoUnsecuredSecondCycleMaxTerm);
+        loanTermValidation(LoanApprovalMatrixConstants.levelTwoSecuredFirstCycleMinTerm, levelTwoSecuredFirstCycleMinTerm,
+                LoanApprovalMatrixConstants.levelTwoSecuredFirstCycleMaxTerm, levelTwoSecuredFirstCycleMaxTerm);
+        loanTermValidation(LoanApprovalMatrixConstants.levelTwoSecuredSecondCycleMinTerm, levelTwoSecuredSecondCycleMinTerm,
+                LoanApprovalMatrixConstants.levelTwoSecuredSecondCycleMaxTerm, levelTwoSecuredSecondCycleMaxTerm);
+
+        // Level Three
+        loanTermValidation(LoanApprovalMatrixConstants.levelThreeUnsecuredFirstCycleMinTerm, levelThreeUnsecuredFirstCycleMinTerm,
+                LoanApprovalMatrixConstants.levelThreeUnsecuredFirstCycleMaxTerm, levelThreeUnsecuredFirstCycleMaxTerm);
+        loanTermValidation(LoanApprovalMatrixConstants.levelThreeUnsecuredSecondCycleMinTerm, levelThreeUnsecuredSecondCycleMinTerm,
+                LoanApprovalMatrixConstants.levelThreeUnsecuredSecondCycleMaxTerm, levelThreeUnsecuredSecondCycleMaxTerm);
+        loanTermValidation(LoanApprovalMatrixConstants.levelThreeSecuredFirstCycleMinTerm, levelThreeSecuredFirstCycleMinTerm,
+                LoanApprovalMatrixConstants.levelThreeSecuredFirstCycleMaxTerm, levelThreeSecuredFirstCycleMaxTerm);
+        loanTermValidation(LoanApprovalMatrixConstants.levelThreeSecuredSecondCycleMinTerm, levelThreeSecuredSecondCycleMinTerm,
+                LoanApprovalMatrixConstants.levelThreeSecuredSecondCycleMaxTerm, levelThreeSecuredSecondCycleMaxTerm);
+
+        // Level Four
+        loanTermValidation(LoanApprovalMatrixConstants.levelFourUnsecuredFirstCycleMinTerm, levelFourUnsecuredFirstCycleMinTerm,
+                LoanApprovalMatrixConstants.levelFourUnsecuredFirstCycleMaxTerm, levelFourUnsecuredFirstCycleMaxTerm);
+        loanTermValidation(LoanApprovalMatrixConstants.levelFourUnsecuredSecondCycleMinTerm, levelFourUnsecuredSecondCycleMinTerm,
+                LoanApprovalMatrixConstants.levelFourUnsecuredSecondCycleMaxTerm, levelFourUnsecuredSecondCycleMaxTerm);
+        loanTermValidation(LoanApprovalMatrixConstants.levelFourSecuredFirstCycleMinTerm, levelFourSecuredFirstCycleMinTerm,
+                LoanApprovalMatrixConstants.levelFourSecuredFirstCycleMaxTerm, levelFourSecuredFirstCycleMaxTerm);
+        loanTermValidation(LoanApprovalMatrixConstants.levelFourSecuredSecondCycleMinTerm, levelFourSecuredSecondCycleMinTerm,
+                LoanApprovalMatrixConstants.levelFourSecuredSecondCycleMaxTerm, levelFourSecuredSecondCycleMaxTerm);
+
+        // Level Five
+        loanTermValidation(LoanApprovalMatrixConstants.levelFiveUnsecuredFirstCycleMinTerm, levelFiveUnsecuredFirstCycleMinTerm,
+                LoanApprovalMatrixConstants.levelFiveUnsecuredFirstCycleMaxTerm, levelFiveUnsecuredFirstCycleMaxTerm);
+        loanTermValidation(LoanApprovalMatrixConstants.levelFiveUnsecuredSecondCycleMinTerm, levelFiveUnsecuredSecondCycleMinTerm,
+                LoanApprovalMatrixConstants.levelFiveUnsecuredSecondCycleMaxTerm, levelFiveUnsecuredSecondCycleMaxTerm);
+        loanTermValidation(LoanApprovalMatrixConstants.levelFiveSecuredFirstCycleMinTerm, levelFiveSecuredFirstCycleMinTerm,
+                LoanApprovalMatrixConstants.levelFiveSecuredFirstCycleMaxTerm, levelFiveSecuredFirstCycleMaxTerm);
+        loanTermValidation(LoanApprovalMatrixConstants.levelFiveSecuredSecondCycleMinTerm, levelFiveSecuredSecondCycleMinTerm,
+                LoanApprovalMatrixConstants.levelFiveSecuredSecondCycleMaxTerm, levelFiveSecuredSecondCycleMaxTerm);
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private static void loanTermValidation(String minimumLoanTermName, Integer minTerm, String maximumLoanTermName, Integer maxTerm) {
+        if (minTerm > maxTerm) {
+            throw new GeneralPlatformDomainRuleException("error.msg.minimum.loan.term.should.not.be.greater.than.maximum.loan.term",
+                    String.format("Minimum Loan Term - %s - [%s] should not be greater than maximum Loan Term - %s -  [%s] ",
+                            minimumLoanTermName, minTerm, maximumLoanTermName, maxTerm));
+        }
     }
 
     private static void validateAmountsUnsecuredFirstCycle(BigDecimal levelOneUnsecuredFirstCycleMaxAmount,
