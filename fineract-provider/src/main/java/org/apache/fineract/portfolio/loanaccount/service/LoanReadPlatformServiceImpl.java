@@ -2559,7 +2559,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         final LoanAccountData loanAccountData = retrieveOne(loanId);
 
-        final Collection<CodeValueData> departmentOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("Department");
         final Collection<CodeValueData> surveyLocationOptions = this.codeValueReadPlatformService
                 .retrieveCodeValuesByCode("SurveyLocation");
         final Collection<CodeValueData> programOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("Program");

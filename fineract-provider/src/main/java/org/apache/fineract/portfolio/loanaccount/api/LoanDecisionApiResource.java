@@ -38,6 +38,8 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
+import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
@@ -72,6 +74,7 @@ public class LoanDecisionApiResource {
     private final LoanReadPlatformService loanReadPlatformService;
     private final CurrencyReadPlatformService currencyReadPlatformService;
     private final LoanApprovalMatrixReadPlatformService loanApprovalMatrixReadPlatformService;
+    private final ConfigurationReadPlatformService configurationReadPlatformService;
 
     public LoanDecisionApiResource(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final DefaultToApiJsonSerializer<LoanDecisionData> toApiJsonSerializer, final PlatformSecurityContext context,
@@ -79,7 +82,8 @@ public class LoanDecisionApiResource {
             final DefaultToApiJsonSerializer<LoanAccountData> loanApprovalDataToApiJsonSerializer,
             final LoanReadPlatformService loanReadPlatformService, final CurrencyReadPlatformService currencyReadPlatformService,
             DefaultToApiJsonSerializer<LoanApprovalMatrixData> loanApprovalMatrixDataToApiJsonSerializer,
-            final LoanApprovalMatrixReadPlatformService loanApprovalMatrixReadPlatformService) {
+            final LoanApprovalMatrixReadPlatformService loanApprovalMatrixReadPlatformService,
+            final ConfigurationReadPlatformService configurationReadPlatformService) {
 
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
@@ -90,6 +94,7 @@ public class LoanDecisionApiResource {
         this.currencyReadPlatformService = currencyReadPlatformService;
         this.loanApprovalMatrixDataToApiJsonSerializer = loanApprovalMatrixDataToApiJsonSerializer;
         this.loanApprovalMatrixReadPlatformService = loanApprovalMatrixReadPlatformService;
+        this.configurationReadPlatformService = configurationReadPlatformService;
     }
 
     @POST
@@ -183,9 +188,15 @@ public class LoanDecisionApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
+        final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
+                .retrieveGlobalConfiguration("Add-More-Stages-To-A-Loan-Life-Cycle");
+
+        final Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
+
         final Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
         LoanApprovalMatrixData loanApprovalMatrixData = new LoanApprovalMatrixData();
         loanApprovalMatrixData.setCurrencyOptions(currencyOptions);
+        loanApprovalMatrixData.setIsExtendLoanLifeCycleConfig(isExtendLoanLifeCycleConfig);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.loanApprovalMatrixDataToApiJsonSerializer.serialize(settings, loanApprovalMatrixData, this.loanDataParameters);
