@@ -18,20 +18,13 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import java.util.List;
+import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalMatrixData;
 
-public interface LoanApplicationDecisionWritePlatformService {
+public interface LoanApprovalMatrixReadPlatformService {
 
-    CommandProcessingResult acceptLoanApplicationReview(Long loanId, JsonCommand command);
+    List<LoanApprovalMatrixData> findAll();
 
-    CommandProcessingResult applyDueDiligence(Long loanId, JsonCommand command);
+    LoanApprovalMatrixData getApprovalMatrixDetails(Long approvalMatrixId);
 
-    CommandProcessingResult acceptLoanCollateralReview(Long loanId, JsonCommand command);
-
-    CommandProcessingResult createLoanApprovalMatrix(JsonCommand command);
-
-    CommandProcessingResult deleteLoanApprovalMatrix(Long matrixId);
-
-    CommandProcessingResult updateLoanApprovalMatrix(JsonCommand command, Long matrixId);
 }

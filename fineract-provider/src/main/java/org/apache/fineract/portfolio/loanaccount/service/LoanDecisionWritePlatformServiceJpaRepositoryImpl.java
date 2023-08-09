@@ -20,6 +20,8 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Map;
+import javax.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -40,7 +42,10 @@ import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
+import org.apache.fineract.portfolio.loanaccount.api.LoanApprovalMatrixConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanApprovalMatrix;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanApprovalMatrixRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDecision;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDecisionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDecisionState;
@@ -52,6 +57,7 @@ import org.apache.fineract.portfolio.loanaccount.serialization.LoanDecisionTrans
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -72,6 +78,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
     private final LoanDecisionAssembler loanDecisionAssembler;
     private final LoanDueDiligenceInfoRepository loanDueDiligenceInfoRepository;
     private final NoteRepository noteRepository;
+    private final LoanApprovalMatrixRepository loanApprovalMatrixRepository;
 
     @Override
     public CommandProcessingResult acceptLoanApplicationReview(final Long loanId, final JsonCommand command) {
@@ -206,6 +213,105 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                 .withGroupId(loan.getGroupId()) //
                 .withLoanId(loanId) //
                 .withResourceIdAsString(savedObj.getId().toString()).build();
+    }
+
+    @Override
+    public CommandProcessingResult createLoanApprovalMatrix(JsonCommand command) {
+
+        final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
+                .retrieveGlobalConfiguration("Add-More-Stages-To-A-Loan-Life-Cycle");
+        final Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
+
+        if (!isExtendLoanLifeCycleConfig) {
+            throw new GeneralPlatformDomainRuleException("error.msg.Add-More-Stages-To-A-Loan-Life-Cycle.is.not.set",
+                    "Add-More-Stages-To-A-Loan-Life-Cycle settings is not set. So this operation is not permitted");
+        }
+
+        this.loanDecisionTransitionApiJsonValidator.validateCreateApprovalMatrix(command.json());
+
+        final String currency = command.stringValueOfParameterNamed(LoanApprovalMatrixConstants.currencyParameterName);
+        LoanApprovalMatrix loanApprovalMatrix = this.loanApprovalMatrixRepository.findLoanApprovalMatrixByCurrency(currency);
+
+        if (loanApprovalMatrix != null) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.approval.matrix.with.this.currency.already.exist.",
+                    String.format("Loan Approval Matrix with Currency [ %s ] exist. Only One currency per Matrix is accepted", currency));
+        }
+
+        LoanApprovalMatrix loanApprovalMatrixFrom = loanDecisionAssembler.assembleLoanApprovalMatrixFrom(command);
+        this.loanApprovalMatrixRepository.saveAndFlush(loanApprovalMatrixFrom);
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(loanApprovalMatrixFrom.getId()) //
+                .withResourceIdAsString(loanApprovalMatrixFrom.getId().toString()).build();
+
+    }
+
+    @Override
+    public CommandProcessingResult deleteLoanApprovalMatrix(Long matrixId) {
+        final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
+                .retrieveGlobalConfiguration("Add-More-Stages-To-A-Loan-Life-Cycle");
+        final Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
+
+        if (!isExtendLoanLifeCycleConfig) {
+            throw new GeneralPlatformDomainRuleException("error.msg.Add-More-Stages-To-A-Loan-Life-Cycle.is.not.set",
+                    "Add-More-Stages-To-A-Loan-Life-Cycle settings is not set. So this operation is not permitted");
+        }
+
+        LoanApprovalMatrix loanApprovalMatrix = this.loanApprovalMatrixRepository.findById(matrixId).orElseThrow();
+
+        this.loanApprovalMatrixRepository.delete(loanApprovalMatrix);
+
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(matrixId) //
+                .withResourceIdAsString(matrixId.toString()).build();
+    }
+
+    @Override
+    public CommandProcessingResult updateLoanApprovalMatrix(JsonCommand command, Long matrixId) {
+        try {
+            this.context.authenticatedUser();
+
+            final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
+                    .retrieveGlobalConfiguration("Add-More-Stages-To-A-Loan-Life-Cycle");
+            final Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
+
+            if (!isExtendLoanLifeCycleConfig) {
+                throw new GeneralPlatformDomainRuleException("error.msg.Add-More-Stages-To-A-Loan-Life-Cycle.is.not.set",
+                        "Add-More-Stages-To-A-Loan-Life-Cycle settings is not set. So this operation is not permitted");
+            }
+            this.loanDecisionTransitionApiJsonValidator.validateUpdateApprovalMatrix(command.json());
+
+            LoanApprovalMatrix loanApprovalMatrix = this.loanApprovalMatrixRepository.findById(matrixId).orElseThrow();
+
+            final String currency = command.stringValueOfParameterNamed(LoanApprovalMatrixConstants.currencyParameterName);
+
+            if (!currency.equals(loanApprovalMatrix.getCurrency())) {
+                LoanApprovalMatrix matrixCurrency = this.loanApprovalMatrixRepository.findLoanApprovalMatrixByCurrency(currency);
+
+                if (matrixCurrency != null && !matrixCurrency.getId().equals(loanApprovalMatrix.getId())) {
+                    throw new GeneralPlatformDomainRuleException("error.msg.loan.approval.matrix.with.this.currency.already.exist.", String
+                            .format("Loan Approval Matrix with Currency [ %s ] exist. Only One currency per Matrix is accepted", currency));
+                }
+            }
+
+            final Map<String, Object> changes = loanApprovalMatrix.update(command);
+
+            if (!changes.isEmpty()) {
+                this.loanApprovalMatrixRepository.saveAndFlush(loanApprovalMatrix);
+            }
+
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withResourceIdAsString(loanApprovalMatrix.getId().toString()) //
+                    .withEntityId(loanApprovalMatrix.getId()) //
+                    .with(changes) //
+                    .build();
+        } catch (final JpaSystemException ex) {
+            return CommandProcessingResult.empty();
+        } catch (final PersistenceException dve) {
+            return CommandProcessingResult.empty();
+        }
     }
 
     private void validateDueDiligenceBusinessRule(JsonCommand command, Loan loan, LoanDecision loanDecision) {

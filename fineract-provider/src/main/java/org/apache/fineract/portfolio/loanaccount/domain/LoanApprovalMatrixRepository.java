@@ -16,22 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.portfolio.loanaccount.domain;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-public interface LoanApplicationDecisionWritePlatformService {
+public interface LoanApprovalMatrixRepository
+        extends JpaRepository<LoanApprovalMatrix, Long>, JpaSpecificationExecutor<LoanApprovalMatrix> {
 
-    CommandProcessingResult acceptLoanApplicationReview(Long loanId, JsonCommand command);
+    @Query("select mtx from LoanApprovalMatrix mtx where mtx.currency =:currency")
+    LoanApprovalMatrix findLoanApprovalMatrixByCurrency(@Param("currency") String currency);
 
-    CommandProcessingResult applyDueDiligence(Long loanId, JsonCommand command);
-
-    CommandProcessingResult acceptLoanCollateralReview(Long loanId, JsonCommand command);
-
-    CommandProcessingResult createLoanApprovalMatrix(JsonCommand command);
-
-    CommandProcessingResult deleteLoanApprovalMatrix(Long matrixId);
-
-    CommandProcessingResult updateLoanApprovalMatrix(JsonCommand command, Long matrixId);
 }

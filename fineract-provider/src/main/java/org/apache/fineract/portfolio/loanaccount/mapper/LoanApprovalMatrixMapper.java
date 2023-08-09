@@ -16,22 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.portfolio.loanaccount.mapper;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import java.util.List;
+import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalMatrixData;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanApprovalMatrix;
+import org.mapstruct.Mapper;
 
-public interface LoanApplicationDecisionWritePlatformService {
+@Mapper(componentModel = "spring")
+public interface LoanApprovalMatrixMapper {
 
-    CommandProcessingResult acceptLoanApplicationReview(Long loanId, JsonCommand command);
+    LoanApprovalMatrixData map(LoanApprovalMatrix source);
 
-    CommandProcessingResult applyDueDiligence(Long loanId, JsonCommand command);
-
-    CommandProcessingResult acceptLoanCollateralReview(Long loanId, JsonCommand command);
-
-    CommandProcessingResult createLoanApprovalMatrix(JsonCommand command);
-
-    CommandProcessingResult deleteLoanApprovalMatrix(Long matrixId);
-
-    CommandProcessingResult updateLoanApprovalMatrix(JsonCommand command, Long matrixId);
+    List<LoanApprovalMatrixData> map(List<LoanApprovalMatrix> sources);
 }

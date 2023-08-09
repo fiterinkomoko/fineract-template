@@ -3821,4 +3821,31 @@ public class CommandWrapperBuilder {
 
         return this;
     }
+
+    public CommandWrapperBuilder createLoanApprovalMatrix() {
+        this.actionName = "CREATE";
+        this.entityName = "LOANAPPROVALMATRIX";
+        this.entityId = null;
+        this.href = "/loans/decision/approvalmatrix/template/";
+
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteLoanApprovalMatrix(final long matrixId) {
+        this.actionName = "DELETE";
+        this.entityName = "LOANAPPROVALMATRIX";
+        this.entityId = matrixId;
+        this.href = "/loans/decision/approvalmatrix/" + matrixId;
+
+        return this;
+    }
+
+    public CommandWrapperBuilder updateLoanApprovalMatrix(final long matrixId) {
+        this.actionName = "UPDATE";
+        this.entityName = "LOANAPPROVALMATRIX";
+        this.entityId = matrixId;
+        this.href = "/loans/decision/approvalmatrix/update/" + matrixId;
+
+        return this;
+    }
 }
