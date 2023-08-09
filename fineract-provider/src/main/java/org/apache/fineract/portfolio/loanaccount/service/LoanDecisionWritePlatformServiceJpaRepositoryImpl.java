@@ -20,10 +20,12 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import javax.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -52,6 +54,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanDecisionState;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDueDiligenceInfo;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDueDiligenceInfoRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagementRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleAssembler;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanDecisionTransitionApiJsonValidator;
 import org.apache.fineract.portfolio.note.domain.Note;
@@ -79,6 +83,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
     private final LoanDueDiligenceInfoRepository loanDueDiligenceInfoRepository;
     private final NoteRepository noteRepository;
     private final LoanApprovalMatrixRepository loanApprovalMatrixRepository;
+    private final LoanCollateralManagementRepository loanCollateralManagementRepository;
 
     @Override
     public CommandProcessingResult acceptLoanApplicationReview(final Long loanId, final JsonCommand command) {
@@ -314,6 +319,97 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         }
     }
 
+    @Override
+    public CommandProcessingResult acceptIcReviewDecisionLevelOne(Long loanId, JsonCommand command) {
+        final AppUser currentUser = getAppUserIfPresent();
+
+        this.loanDecisionTransitionApiJsonValidator.validateIcReviewStage(command.json());
+
+        final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
+        final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
+
+        validateIcReviewDecisionLevelOneBusinessRule(command, loan, loanDecision);
+        LoanApprovalMatrix matrixCurrency = this.loanApprovalMatrixRepository.findLoanApprovalMatrixByCurrency(loan.getCurrencyCode());
+
+        if(matrixCurrency == null){
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.approval.matrix.with.this.currency.does.not.exist.", String
+                    .format("Loan Approval Matrix with Currency [ %s ] doesn't exist. Approval matrix is expected to continue ", loan.getCurrencyCode()));
+        }
+        //Get Loan Matrix
+        //Determine which cycle of this Loan Account
+        //Determine the Next Level or stage to review
+        //Add custom Params in Decision Table
+        List<Loan> loanIndividualCounter;
+        if(loan.isIndividualLoan()){
+            //Validate Individual Loan Cycle . . .
+            loanIndividualCounter = this.loanRepositoryWrapper.findLoanByClientId(loan.getClientId());
+        }else{
+            // Throw Not Support Loan Type
+            throw new GeneralPlatformDomainRuleException("error.msg.invalid.loan.type.not.supported.for.Ic.Review", String
+                    .format("This Loan Type [ %s ] , is not supported for IC Review Operations .", loan.getLoanType()));
+        }
+
+        Boolean isLoanFirstCycle = isLoanFirstCycle(loan, loanIndividualCounter);
+        Boolean isLoanUnsecure = isLoanUnSecure(loan);
+
+        //generate the next stage based on loan approval matrix via amounts to be disbursed
+        if(isLoanFirstCycle  && isLoanUnsecure){
+        //Loan is FirstCycle and Unsecure
+        } else if (!isLoanFirstCycle && isLoanUnsecure) {
+        // Loan is not first cycle (Second cycle or plus) and Unsecure
+        } else if (isLoanFirstCycle && !isLoanUnsecure) {
+        // First Cycle and secured Loan
+        } else if (!isLoanFirstCycle && !isLoanUnsecure) {
+        //Second Cycle or plus and secured
+        }else{
+            //throw not sure the Loan state
+        }
+
+
+        LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelOneFrom(command, currentUser, loanDecision);
+        LoanDecision savedObj = loanDecisionRepository.saveAndFlush(loanDecisionObj);
+
+        Loan loanObj = loan;
+        loanObj.setLoanDecisionState(LoanDecisionState.IC_REVIEW_LEVEL_ONE.getValue());
+        this.loanRepositoryWrapper.saveAndFlush(loanObj);
+
+        if (StringUtils.isNotBlank(loanDecisionObj.getDueDiligenceNote())) {
+            final Note note = Note.loanNote(loanObj, "IC Review-Decision Level One : " + loanDecisionObj.getIcReviewDecisionLevelOneNote());
+            this.noteRepository.save(note);
+        }
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(savedObj.getId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .withResourceIdAsString(savedObj.getId().toString()).build();
+    }
+
+    private Boolean isLoanFirstCycle(Loan loan, List<Loan> loanIndividualCounter) {
+        if(CollectionUtils.isEmpty(loanIndividualCounter)){
+            throw new GeneralPlatformDomainRuleException("error.msg.invalid.loan.counter.not.able.to.detect.this.client's.loan.account/s", String
+                    .format("TThere is no Loan Account/s detected for client Id : [ %s ] , ", loan.getClientId()));
+        } else   if (loanIndividualCounter.size() == 1) {
+            // First Cycle
+            return true;
+        }else {
+            //second and plus
+           return false;
+        }
+    }
+
+
+    private Boolean isLoanUnSecure(Loan loan) {
+        List<LoanCollateralManagement> collateralManagementList = loanCollateralManagementRepository.findByLoan(loan);
+        if(CollectionUtils.isEmpty(collateralManagementList)){
+            return true;
+        }
+        return false;
+    }
+
     private void validateDueDiligenceBusinessRule(JsonCommand command, Loan loan, LoanDecision loanDecision) {
         final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
                 .retrieveGlobalConfiguration("Add-More-Stages-To-A-Loan-Life-Cycle");
@@ -486,6 +582,63 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         if (!LoanDecisionState.fromInt(loan.getLoanDecisionState()).isDueDiligence()) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.decision.state.is.invalid",
                     "Loan Account Decision state is invalid. Expected" + LoanDecisionState.DUE_DILIGENCE.getValue() + " but found "
+                            + loan.getLoanDecisionState());
+        }
+        if (!loan.getLoanDecisionState().equals(loanDecision.getLoanDecisionState())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.decision.state.does.not.reconcile",
+                    "Loan Account Decision state Does not reconcile . Operation is terminated");
+        }
+    }
+
+    private void validateIcReviewDecisionLevelOneBusinessRule(JsonCommand command, Loan loan, LoanDecision loanDecision) {
+        final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
+                .retrieveGlobalConfiguration("Add-More-Stages-To-A-Loan-Life-Cycle");
+        final Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
+
+        if (!isExtendLoanLifeCycleConfig) {
+            throw new GeneralPlatformDomainRuleException("error.msg.Add-More-Stages-To-A-Loan-Life-Cycle.is.not.set",
+                    "Add-More-Stages-To-A-Loan-Life-Cycle settings is not set. So this operation is not permitted");
+        }
+
+        if (loanDecision == null) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.account.should.not.found.in.decision.engine",
+                    "Loan Account not found in decision engine. Operation [IC Review Decision Level One] is not allowed");
+        }
+        checkClientOrGroupActive(loan);
+
+        validateLoanDisbursementDataWithMeetingDate(loan);
+        validateLoanTopUp(loan);
+        LocalDate icReviewOn = command.localDateValueOfParameterNamed(LoanApiConstants.icReviewOnDateParameterName);
+        // Ic Review Decision Level One should not be before other stages below it like Collateral Review , Due Diligence and Review Application
+        if (icReviewOn.isBefore(loanDecision.getCollateralReviewOn())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.ic.review.decision.level.one.date.should.be.after.collateral.review.date",
+                    "Approve IC ReviewDecision Level One on  date" + icReviewOn + " should be after Collateral Review Approved date "
+                            + loanDecision.getCollateralReviewOn());
+        }
+        if (icReviewOn.isBefore(loanDecision.getDueDiligenceOn())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.ic.review.decision.level.one.date.should.be.after.Due.Diligence.date",
+                    "Approve IC ReviewDecision Level One on date" + icReviewOn + " should be after Loan Due Diligence Approved date "
+                            + loanDecision.getDueDiligenceOn());
+        }
+        if (icReviewOn.isBefore(loanDecision.getReviewApplicationOn())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.ic.review.decision.level.one.date.should.be.after.review.application.date",
+                    "Approve IC ReviewDecision Level One on date" + icReviewOn + " should be after Loan Review Application Approved date "
+                            + loanDecision.getReviewApplicationOn());
+        }
+        // Collateral Review date should not be before loan submission date
+        if (icReviewOn.isBefore(loan.getSubmittedOnDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.ic.review.decision.level.one.date.should.be.after.submission.date",
+                    "Approve IC ReviewDecision Level One on date " + icReviewOn + " should be after Loan submission date "
+                            + loan.getSubmittedOnDate());
+        }
+
+        if (!loan.status().isSubmittedAndPendingApproval()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.current.status.is.invalid",
+                    "Loan Account current status is invalid. Expected" + loan.status().getCode() + " but found " + loan.status().getCode());
+        }
+        if (!LoanDecisionState.fromInt(loan.getLoanDecisionState()).isCollateralReview()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.decision.state.is.invalid",
+                    "Loan Account Decision state is invalid. Expected" + LoanDecisionState.COLLATERAL_REVIEW.getValue() + " but found "
                             + loan.getLoanDecisionState());
         }
         if (!loan.getLoanDecisionState().equals(loanDecision.getLoanDecisionState())) {
