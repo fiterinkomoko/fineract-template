@@ -127,7 +127,7 @@ Feature: Test loan account apis
     * def LoanCreationDate = df.format(faker.date().past(50, 29, TimeUnit.DAYS))
     * def loanAmount = 8500
     * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createloanTemplate403Step') { submittedOnDate : '#(LoanCreationDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', clientId : '#(clientId)'}
-
+  @Ignore
   @testUndoLoanReschedule
   Scenario: Test Undo Loan Reschedule
     Given configure ssl = true

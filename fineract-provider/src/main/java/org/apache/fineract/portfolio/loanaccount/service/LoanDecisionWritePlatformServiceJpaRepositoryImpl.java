@@ -48,14 +48,14 @@ import org.apache.fineract.portfolio.loanaccount.api.LoanApprovalMatrixConstants
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanApprovalMatrix;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanApprovalMatrixRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagementRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDecision;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDecisionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDecisionState;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDueDiligenceInfo;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDueDiligenceInfoRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagementRepository;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleAssembler;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanDecisionTransitionApiJsonValidator;
 import org.apache.fineract.portfolio.note.domain.Note;
@@ -329,42 +329,33 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
 
         validateIcReviewDecisionLevelOneBusinessRule(command, loan, loanDecision);
-        LoanApprovalMatrix matrixCurrency = this.loanApprovalMatrixRepository.findLoanApprovalMatrixByCurrency(loan.getCurrencyCode());
+        LoanApprovalMatrix approvalMatrix = this.loanApprovalMatrixRepository.findLoanApprovalMatrixByCurrency(loan.getCurrencyCode());
 
-        if(matrixCurrency == null){
-            throw new GeneralPlatformDomainRuleException("error.msg.loan.approval.matrix.with.this.currency.does.not.exist.", String
-                    .format("Loan Approval Matrix with Currency [ %s ] doesn't exist. Approval matrix is expected to continue ", loan.getCurrencyCode()));
+        if (approvalMatrix == null) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.approval.matrix.with.this.currency.does.not.exist.",
+                    String.format("Loan Approval Matrix with Currency [ %s ] doesn't exist. Approval matrix is expected to continue ",
+                            loan.getCurrencyCode()));
         }
-        //Get Loan Matrix
-        //Determine which cycle of this Loan Account
-        //Determine the Next Level or stage to review
-        //Add custom Params in Decision Table
+        // Get Loan Matrix
+        // Determine which cycle of this Loan Account
+        // Determine the Next Level or stage to review
+        // Add custom Params in Decision Table
         List<Loan> loanIndividualCounter;
-        if(loan.isIndividualLoan()){
-            //Validate Individual Loan Cycle . . .
+        if (loan.isIndividualLoan()) {
+            // Validate Individual Loan Cycle . . .
             loanIndividualCounter = this.loanRepositoryWrapper.findLoanByClientId(loan.getClientId());
-        }else{
+        } else {
             // Throw Not Support Loan Type
-            throw new GeneralPlatformDomainRuleException("error.msg.invalid.loan.type.not.supported.for.Ic.Review", String
-                    .format("This Loan Type [ %s ] , is not supported for IC Review Operations .", loan.getLoanType()));
+            throw new GeneralPlatformDomainRuleException("error.msg.invalid.loan.type.not.supported.for.Ic.Review",
+                    String.format("This Loan Type [ %s ] , is not supported for IC Review Operations .", loan.getLoanType()));
         }
 
         Boolean isLoanFirstCycle = isLoanFirstCycle(loan, loanIndividualCounter);
         Boolean isLoanUnsecure = isLoanUnSecure(loan);
 
-        //generate the next stage based on loan approval matrix via amounts to be disbursed
-        if(isLoanFirstCycle  && isLoanUnsecure){
-        //Loan is FirstCycle and Unsecure
-        } else if (!isLoanFirstCycle && isLoanUnsecure) {
-        // Loan is not first cycle (Second cycle or plus) and Unsecure
-        } else if (isLoanFirstCycle && !isLoanUnsecure) {
-        // First Cycle and secured Loan
-        } else if (!isLoanFirstCycle && !isLoanUnsecure) {
-        //Second Cycle or plus and secured
-        }else{
-            //throw not sure the Loan state
-        }
-
+        validateLoanAccountToComplyToApprovalMatrix(loan, approvalMatrix, isLoanFirstCycle, isLoanUnsecure);
+        // generate the next stage based on loan approval matrix via amounts to be disbursed
+        determineTheNextDecisionState(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure);
 
         LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelOneFrom(command, currentUser, loanDecision);
         LoanDecision savedObj = loanDecisionRepository.saveAndFlush(loanDecisionObj);
@@ -388,23 +379,118 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                 .withResourceIdAsString(savedObj.getId().toString()).build();
     }
 
-    private Boolean isLoanFirstCycle(Loan loan, List<Loan> loanIndividualCounter) {
-        if(CollectionUtils.isEmpty(loanIndividualCounter)){
-            throw new GeneralPlatformDomainRuleException("error.msg.invalid.loan.counter.not.able.to.detect.this.client's.loan.account/s", String
-                    .format("TThere is no Loan Account/s detected for client Id : [ %s ] , ", loan.getClientId()));
-        } else   if (loanIndividualCounter.size() == 1) {
-            // First Cycle
-            return true;
-        }else {
-            //second and plus
-           return false;
+    private static void determineTheNextDecisionState(Loan loan, LoanDecision loanDecision, LoanApprovalMatrix approvalMatrix,
+            Boolean isLoanFirstCycle, Boolean isLoanUnsecure) {
+        LoanDecisionState expectedNextIcReviewStage = LoanDecisionState.IC_REVIEW_LEVEL_TWO;
+        if (isLoanFirstCycle && isLoanUnsecure) {
+            // Loan is FirstCycle and Unsecure
+            generateTheNextIcReviewStage(loan.getProposedPrincipal(), approvalMatrix.getLevelTwoUnsecuredFirstCycleMaxAmount(),
+                    loan.getNumberOfRepayments(), approvalMatrix.getLevelTwoUnsecuredFirstCycleMinTerm(),
+                    approvalMatrix.getLevelTwoUnsecuredFirstCycleMaxTerm(), loanDecision, expectedNextIcReviewStage);
+
+        } else if (!isLoanFirstCycle && isLoanUnsecure) {
+            // Loan is (Second cycle or plus) and Unsecure
+            generateTheNextIcReviewStage(loan.getProposedPrincipal(), approvalMatrix.getLevelTwoUnsecuredSecondCycleMaxAmount(),
+                    loan.getNumberOfRepayments(), approvalMatrix.getLevelTwoUnsecuredSecondCycleMinTerm(),
+                    approvalMatrix.getLevelTwoUnsecuredSecondCycleMaxTerm(), loanDecision, expectedNextIcReviewStage);
+
+        } else if (isLoanFirstCycle && !isLoanUnsecure) {
+            // First Cycle and secured Loan
+            generateTheNextIcReviewStage(loan.getProposedPrincipal(), approvalMatrix.getLevelTwoSecuredFirstCycleMaxAmount(),
+                    loan.getNumberOfRepayments(), approvalMatrix.getLevelTwoSecuredFirstCycleMinTerm(),
+                    approvalMatrix.getLevelTwoSecuredFirstCycleMaxTerm(), loanDecision, expectedNextIcReviewStage);
+
+        } else if (!isLoanFirstCycle && !isLoanUnsecure) {
+            // Second Cycle or plus and secured
+            generateTheNextIcReviewStage(loan.getProposedPrincipal(), approvalMatrix.getLevelTwoSecuredSecondCycleMaxAmount(),
+                    loan.getNumberOfRepayments(), approvalMatrix.getLevelTwoSecuredSecondCycleMinTerm(),
+                    approvalMatrix.getLevelTwoSecuredSecondCycleMaxTerm(), loanDecision, expectedNextIcReviewStage);
+
+        } else {
+            throw new GeneralPlatformDomainRuleException("error.msg.invalid.loan.decision.engine.can.not.determine.the.next.decision.state",
+                    "The Loan Decision Engine can not determine the next Decision State .");
         }
     }
 
+    private static void generateTheNextIcReviewStage(BigDecimal loanPrincipal, BigDecimal matrixMaxAmount, Integer numberOfRepayment,
+            Integer matrixMinTerm, Integer matrixMaxTerm, LoanDecision loanDecision, LoanDecisionState nextStageIcReview) {
+        if ((loanPrincipal.compareTo(matrixMaxAmount) <= 0) && (numberOfRepayment > matrixMinTerm || numberOfRepayment <= matrixMaxTerm)) {
+            loanDecision.setNextLoanIcReviewDecisionState(nextStageIcReview.getValue());
+        } else {
+            loanDecision.setNextLoanIcReviewDecisionState(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue());
+        }
+    }
+
+    private static void validateLoanAccountToComplyToApprovalMatrix(Loan loan, LoanApprovalMatrix approvalMatrix, Boolean isLoanFirstCycle,
+            Boolean isLoanUnsecure) {
+        if (isLoanFirstCycle && isLoanUnsecure) {
+            // Loan is FirstCycle and Unsecure
+            String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.one.unsecured.first.cycle";
+            String state = "Level One Unsecured first cycle ";
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrix(loan.getProposedPrincipal(),
+                    approvalMatrix.getLevelOneUnsecuredFirstCycleMaxAmount(), loan.getNumberOfRepayments(),
+                    approvalMatrix.getLevelOneUnsecuredFirstCycleMinTerm(), approvalMatrix.getLevelOneUnsecuredFirstCycleMaxTerm(),
+                    errormsg, state);
+
+        } else if (!isLoanFirstCycle && isLoanUnsecure) {
+            // Loan is (Second cycle or plus) and Unsecure
+            String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.one.unsecured.second.cycle plus";
+            String state = "Level One Unsecured second cycle plus ";
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrix(loan.getProposedPrincipal(),
+                    approvalMatrix.getLevelOneUnsecuredSecondCycleMaxAmount(), loan.getNumberOfRepayments(),
+                    approvalMatrix.getLevelOneUnsecuredSecondCycleMinTerm(), approvalMatrix.getLevelOneUnsecuredSecondCycleMaxTerm(),
+                    errormsg, state);
+
+        } else if (isLoanFirstCycle && !isLoanUnsecure) {
+            // First Cycle and secured Loan
+            String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.one.secured.first.cycle";
+            String state = "Level One secured first cycle ";
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrix(loan.getProposedPrincipal(),
+                    approvalMatrix.getLevelOneSecuredFirstCycleMaxAmount(), loan.getNumberOfRepayments(),
+                    approvalMatrix.getLevelOneSecuredFirstCycleMinTerm(), approvalMatrix.getLevelOneSecuredFirstCycleMaxTerm(), errormsg,
+                    state);
+
+        } else if (!isLoanFirstCycle && !isLoanUnsecure) {
+            // Second Cycle or plus and secured
+            String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.one.secured.second.cycle plus";
+            String state = "Level One Secured second cycle plus ";
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrix(loan.getProposedPrincipal(),
+                    approvalMatrix.getLevelOneSecuredSecondCycleMaxAmount(), loan.getNumberOfRepayments(),
+                    approvalMatrix.getLevelOneSecuredSecondCycleMinTerm(), approvalMatrix.getLevelOneSecuredSecondCycleMaxTerm(), errormsg,
+                    state);
+        } else {
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.invalid.loan.principal.not.matching.approval.matrix.in.IC.review.Level.one",
+                    String.format("This Loan Account Principal [ %s ] , does not match  IC Review Level One Operations .",
+                            loan.getProposedPrincipal()));
+        }
+    }
+
+    private static void validateLoanAccountCompliancePolicyBasedOnApprovalMatrix(BigDecimal loanPrincipal, BigDecimal matrixMaxAmount,
+            Integer numberOfRepayment, Integer matrixMinTerm, Integer matrixMaxTerm, String errormsg, String stateMsg) {
+        if ((loanPrincipal.compareTo(matrixMaxAmount) > 0) || (numberOfRepayment < matrixMinTerm || numberOfRepayment > matrixMaxTerm)) {
+            throw new GeneralPlatformDomainRuleException(errormsg, String.format(
+                    "This Loan Account Principal [ %s ] vs Approval Matrix Max Amount [%s] , does not qualify for IC-Review  [%s] with Terms Min [%s] Max [%s] Vs Loan Term [%s]",
+                    loanPrincipal, matrixMaxAmount, stateMsg, matrixMinTerm, matrixMaxTerm, numberOfRepayment));
+        }
+    }
+
+    private Boolean isLoanFirstCycle(Loan loan, List<Loan> loanIndividualCounter) {
+        if (CollectionUtils.isEmpty(loanIndividualCounter)) {
+            throw new GeneralPlatformDomainRuleException("error.msg.invalid.loan.counter.not.able.to.detect.this.client's.loan.account/s",
+                    String.format("TThere is no Loan Account/s detected for client Id : [ %s ] , ", loan.getClientId()));
+        } else if (loanIndividualCounter.size() == 1) {
+            // First Cycle
+            return true;
+        } else {
+            // second and plus
+            return false;
+        }
+    }
 
     private Boolean isLoanUnSecure(Loan loan) {
         List<LoanCollateralManagement> collateralManagementList = loanCollateralManagementRepository.findByLoan(loan);
-        if(CollectionUtils.isEmpty(collateralManagementList)){
+        if (CollectionUtils.isEmpty(collateralManagementList)) {
             return true;
         }
         return false;
@@ -609,19 +695,23 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         validateLoanDisbursementDataWithMeetingDate(loan);
         validateLoanTopUp(loan);
         LocalDate icReviewOn = command.localDateValueOfParameterNamed(LoanApiConstants.icReviewOnDateParameterName);
-        // Ic Review Decision Level One should not be before other stages below it like Collateral Review , Due Diligence and Review Application
+        // Ic Review Decision Level One should not be before other stages below it like Collateral Review , Due
+        // Diligence and Review Application
         if (icReviewOn.isBefore(loanDecision.getCollateralReviewOn())) {
-            throw new GeneralPlatformDomainRuleException("error.msg.loan.ic.review.decision.level.one.date.should.be.after.collateral.review.date",
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.loan.ic.review.decision.level.one.date.should.be.after.collateral.review.date",
                     "Approve IC ReviewDecision Level One on  date" + icReviewOn + " should be after Collateral Review Approved date "
                             + loanDecision.getCollateralReviewOn());
         }
         if (icReviewOn.isBefore(loanDecision.getDueDiligenceOn())) {
-            throw new GeneralPlatformDomainRuleException("error.msg.loan.ic.review.decision.level.one.date.should.be.after.Due.Diligence.date",
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.loan.ic.review.decision.level.one.date.should.be.after.Due.Diligence.date",
                     "Approve IC ReviewDecision Level One on date" + icReviewOn + " should be after Loan Due Diligence Approved date "
                             + loanDecision.getDueDiligenceOn());
         }
         if (icReviewOn.isBefore(loanDecision.getReviewApplicationOn())) {
-            throw new GeneralPlatformDomainRuleException("error.msg.loan.ic.review.decision.level.one.date.should.be.after.review.application.date",
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.loan.ic.review.decision.level.one.date.should.be.after.review.application.date",
                     "Approve IC ReviewDecision Level One on date" + icReviewOn + " should be after Loan Review Application Approved date "
                             + loanDecision.getReviewApplicationOn());
         }

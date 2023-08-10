@@ -289,7 +289,8 @@ public class LoanDecisionAssembler {
                 levelFiveSecuredSecondCycleMaxTerm);
     }
 
-    public LoanDecision assembleIcReviewDecisionLevelOneFrom(final JsonCommand command, AppUser currentUser, LoanDecision savedLoanDecision) {
+    public LoanDecision assembleIcReviewDecisionLevelOneFrom(final JsonCommand command, AppUser currentUser,
+            LoanDecision savedLoanDecision) {
 
         LocalDate icReviewOn = command.localDateValueOfParameterNamed(LoanApiConstants.icReviewOnDateParameterName);
 

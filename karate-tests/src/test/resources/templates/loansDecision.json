@@ -23,5 +23,11 @@
     "note": "#(faker.lorem().characters(70))",
     "locale": "en",
     "dateFormat": "#(format)"
+  },
+  "icReview": {
+    "icReviewOn": "#(icReviewOn)",
+    "note": "#(faker.lorem().characters(70))",
+    "locale": "en",
+    "dateFormat": "#(format)"
   }
 }
