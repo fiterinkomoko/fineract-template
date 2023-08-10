@@ -90,6 +90,9 @@ public class LoanDecision extends AbstractAuditableCustom {
     @JoinColumn(name = "ic_review_decision_level_one_by")
     private AppUser icReviewDecisionLevelOneBy;
 
+    @Column(name = "next_loan_ic_review_decision_state")
+    private Integer nextLoanIcReviewDecisionState;
+
     public LoanDecision() {}
 
     public static LoanDecision reviewApplication(Loan loan, Integer loanDecisionState, String reviewApplicationNote,
