@@ -475,12 +475,13 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         }
     }
 
-    private static void validateLoanAccountCompliancePolicyBasedOnApprovalMatrix(BigDecimal loanPrincipal, BigDecimal matrixMaxAmount,
-            Integer numberOfRepayment, Integer matrixMinTerm, Integer matrixMaxTerm, String errormsg, String stateMsg) {
-        if ((loanPrincipal.compareTo(matrixMaxAmount) > 0) || (numberOfRepayment < matrixMinTerm || numberOfRepayment > matrixMaxTerm)) {
-            throw new GeneralPlatformDomainRuleException(errormsg, String.format(
+    private static void validateLoanAccountCompliancePolicyBasedOnApprovalMatrix(BigDecimal loanPrincipal, BigDecimal currentStageMatrixMaxAmount,
+            Integer numberOfRepayment, Integer currentStageMatrixMinTerm, Integer currentStageMatrixMaxTerm, String errorMsg, String stateMsg) {
+        if ((loanPrincipal.compareTo(currentStageMatrixMaxAmount) > 0)
+                || (numberOfRepayment < currentStageMatrixMinTerm || numberOfRepayment > currentStageMatrixMaxTerm)) {
+            throw new GeneralPlatformDomainRuleException(errorMsg, String.format(
                     "This Loan Account Principal [ %s ] vs Approval Matrix Max Amount [%s] , does not qualify for IC-Review  [%s] with Terms Min [%s] Max [%s] Vs Loan Term [%s]",
-                    loanPrincipal, matrixMaxAmount, stateMsg, matrixMinTerm, matrixMaxTerm, numberOfRepayment));
+                    loanPrincipal, currentStageMatrixMaxAmount, stateMsg, currentStageMatrixMinTerm, currentStageMatrixMaxTerm, numberOfRepayment));
         }
     }
 
