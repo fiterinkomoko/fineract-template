@@ -341,9 +341,11 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         // Determine the Next Level or stage to review
         // Add custom Params in Decision Table
         List<Loan> loanIndividualCounter;
-        if (loan.isIndividualLoan()) {
+        if (loan.isIndividualLoan() || loan.isJLGLoan()) {
             // Validate Individual Loan Cycle . . .
-            loanIndividualCounter = this.loanRepositoryWrapper.findLoanByClientId(loan.getClientId());
+            loanIndividualCounter = this.loanRepositoryWrapper.findLoanCounterByClientId(loan.getClientId());
+        } else if (loan.isGroupLoan()) {
+            loanIndividualCounter = this.loanRepositoryWrapper.findLoanCounterByGroupId(loan.getGroupId());
         } else {
             // Throw Not Support Loan Type
             throw new GeneralPlatformDomainRuleException("error.msg.invalid.loan.type.not.supported.for.Ic.Review",
@@ -386,25 +388,29 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
             // Loan is FirstCycle and Unsecure
             generateTheNextIcReviewStage(loan.getProposedPrincipal(), approvalMatrix.getLevelTwoUnsecuredFirstCycleMaxAmount(),
                     loan.getNumberOfRepayments(), approvalMatrix.getLevelTwoUnsecuredFirstCycleMinTerm(),
-                    approvalMatrix.getLevelTwoUnsecuredFirstCycleMaxTerm(), loanDecision, expectedNextIcReviewStage);
+                    approvalMatrix.getLevelTwoUnsecuredFirstCycleMaxTerm(), loanDecision, expectedNextIcReviewStage,
+                    approvalMatrix.getLevelOneUnsecuredFirstCycleMaxAmount());
 
         } else if (!isLoanFirstCycle && isLoanUnsecure) {
             // Loan is (Second cycle or plus) and Unsecure
             generateTheNextIcReviewStage(loan.getProposedPrincipal(), approvalMatrix.getLevelTwoUnsecuredSecondCycleMaxAmount(),
                     loan.getNumberOfRepayments(), approvalMatrix.getLevelTwoUnsecuredSecondCycleMinTerm(),
-                    approvalMatrix.getLevelTwoUnsecuredSecondCycleMaxTerm(), loanDecision, expectedNextIcReviewStage);
+                    approvalMatrix.getLevelTwoUnsecuredSecondCycleMaxTerm(), loanDecision, expectedNextIcReviewStage,
+                    approvalMatrix.getLevelOneUnsecuredSecondCycleMaxAmount());
 
         } else if (isLoanFirstCycle && !isLoanUnsecure) {
             // First Cycle and secured Loan
             generateTheNextIcReviewStage(loan.getProposedPrincipal(), approvalMatrix.getLevelTwoSecuredFirstCycleMaxAmount(),
                     loan.getNumberOfRepayments(), approvalMatrix.getLevelTwoSecuredFirstCycleMinTerm(),
-                    approvalMatrix.getLevelTwoSecuredFirstCycleMaxTerm(), loanDecision, expectedNextIcReviewStage);
+                    approvalMatrix.getLevelTwoSecuredFirstCycleMaxTerm(), loanDecision, expectedNextIcReviewStage,
+                    approvalMatrix.getLevelOneSecuredFirstCycleMaxAmount());
 
         } else if (!isLoanFirstCycle && !isLoanUnsecure) {
             // Second Cycle or plus and secured
             generateTheNextIcReviewStage(loan.getProposedPrincipal(), approvalMatrix.getLevelTwoSecuredSecondCycleMaxAmount(),
                     loan.getNumberOfRepayments(), approvalMatrix.getLevelTwoSecuredSecondCycleMinTerm(),
-                    approvalMatrix.getLevelTwoSecuredSecondCycleMaxTerm(), loanDecision, expectedNextIcReviewStage);
+                    approvalMatrix.getLevelTwoSecuredSecondCycleMaxTerm(), loanDecision, expectedNextIcReviewStage,
+                    approvalMatrix.getLevelOneSecuredSecondCycleMaxAmount());
 
         } else {
             throw new GeneralPlatformDomainRuleException("error.msg.invalid.loan.decision.engine.can.not.determine.the.next.decision.state",
@@ -412,9 +418,12 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         }
     }
 
-    private static void generateTheNextIcReviewStage(BigDecimal loanPrincipal, BigDecimal matrixMaxAmount, Integer numberOfRepayment,
-            Integer matrixMinTerm, Integer matrixMaxTerm, LoanDecision loanDecision, LoanDecisionState nextStageIcReview) {
-        if ((loanPrincipal.compareTo(matrixMaxAmount) <= 0) && (numberOfRepayment > matrixMinTerm || numberOfRepayment <= matrixMaxTerm)) {
+    private static void generateTheNextIcReviewStage(BigDecimal loanPrincipal, BigDecimal nextStageMatrixMaxAmount,
+            Integer numberOfRepayment, Integer nextStageMatrixMinTerm, Integer nextStageMatrixMaxTerm, LoanDecision loanDecision,
+            LoanDecisionState nextStageIcReview, BigDecimal currentStageMaximumLoanAmount) {
+        if ((loanPrincipal.compareTo(nextStageMatrixMaxAmount) <= 0)
+                && (numberOfRepayment > nextStageMatrixMinTerm || numberOfRepayment <= nextStageMatrixMaxTerm)
+                && loanPrincipal.compareTo(currentStageMaximumLoanAmount) >= 0) {
             loanDecision.setNextLoanIcReviewDecisionState(nextStageIcReview.getValue());
         } else {
             loanDecision.setNextLoanIcReviewDecisionState(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue());
@@ -477,9 +486,6 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
     private Boolean isLoanFirstCycle(Loan loan, List<Loan> loanIndividualCounter) {
         if (CollectionUtils.isEmpty(loanIndividualCounter)) {
-            throw new GeneralPlatformDomainRuleException("error.msg.invalid.loan.counter.not.able.to.detect.this.client's.loan.account/s",
-                    String.format("TThere is no Loan Account/s detected for client Id : [ %s ] , ", loan.getClientId()));
-        } else if (loanIndividualCounter.size() == 1) {
             // First Cycle
             return true;
         } else {
