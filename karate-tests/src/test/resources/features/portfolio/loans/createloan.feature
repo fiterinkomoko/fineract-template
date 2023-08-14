@@ -120,7 +120,7 @@ Feature: Test loan account apis
     * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
     * def clientId = result.response.resourceId
     # Principal Amount should not be greater than the maximum principal set on the product
-    * def loanAmount = 8500000
+    * def loanAmount = 85000000000000
     * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createloanTemplate400Step') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', clientId : '#(clientId)'}
 
     # Loan Account can not be created with Date before the client creation

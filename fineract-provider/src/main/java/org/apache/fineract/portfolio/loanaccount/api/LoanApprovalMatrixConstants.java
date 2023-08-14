@@ -100,4 +100,5 @@ public interface LoanApprovalMatrixConstants {
     String levelFiveSecuredSecondCycleMaxAmount = "levelFiveSecuredSecondCycleMaxAmount";
     String levelFiveSecuredSecondCycleMinTerm = "levelFiveSecuredSecondCycleMinTerm";
     String levelFiveSecuredSecondCycleMaxTerm = "levelFiveSecuredSecondCycleMaxTerm";
+    String ADD_MORE_STAGES_TO_A_LOAN_LIFE_CYCLE = "Add-More-Stages-To-A-Loan-Life-Cycle";
 }

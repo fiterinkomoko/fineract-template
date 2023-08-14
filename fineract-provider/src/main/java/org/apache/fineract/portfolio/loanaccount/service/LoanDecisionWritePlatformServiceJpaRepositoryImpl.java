@@ -120,7 +120,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
     private void validateReviewApplicationBusinessRule(JsonCommand command, Loan loan, LoanDecision loanDecision) {
         final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
-                .retrieveGlobalConfiguration("Add-More-Stages-To-A-Loan-Life-Cycle");
+                .retrieveGlobalConfiguration(LoanApprovalMatrixConstants.ADD_MORE_STAGES_TO_A_LOAN_LIFE_CYCLE);
         final Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
 
         if (!isExtendLoanLifeCycleConfig) {
@@ -224,8 +224,8 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
     public CommandProcessingResult createLoanApprovalMatrix(JsonCommand command) {
 
         final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
-                .retrieveGlobalConfiguration("Add-More-Stages-To-A-Loan-Life-Cycle");
-        final Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
+                .retrieveGlobalConfiguration(LoanApprovalMatrixConstants.ADD_MORE_STAGES_TO_A_LOAN_LIFE_CYCLE);
+        Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
 
         if (!isExtendLoanLifeCycleConfig) {
             throw new GeneralPlatformDomainRuleException("error.msg.Add-More-Stages-To-A-Loan-Life-Cycle.is.not.set",
@@ -255,8 +255,8 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
     @Override
     public CommandProcessingResult deleteLoanApprovalMatrix(Long matrixId) {
         final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
-                .retrieveGlobalConfiguration("Add-More-Stages-To-A-Loan-Life-Cycle");
-        final Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
+                .retrieveGlobalConfiguration(LoanApprovalMatrixConstants.ADD_MORE_STAGES_TO_A_LOAN_LIFE_CYCLE);
+        Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
 
         if (!isExtendLoanLifeCycleConfig) {
             throw new GeneralPlatformDomainRuleException("error.msg.Add-More-Stages-To-A-Loan-Life-Cycle.is.not.set",
@@ -278,8 +278,8 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
             this.context.authenticatedUser();
 
             final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
-                    .retrieveGlobalConfiguration("Add-More-Stages-To-A-Loan-Life-Cycle");
-            final Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
+                    .retrieveGlobalConfiguration(LoanApprovalMatrixConstants.ADD_MORE_STAGES_TO_A_LOAN_LIFE_CYCLE);
+            Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
 
             if (!isExtendLoanLifeCycleConfig) {
                 throw new GeneralPlatformDomainRuleException("error.msg.Add-More-Stages-To-A-Loan-Life-Cycle.is.not.set",
@@ -312,9 +312,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                     .withEntityId(loanApprovalMatrix.getId()) //
                     .with(changes) //
                     .build();
-        } catch (final JpaSystemException ex) {
-            return CommandProcessingResult.empty();
-        } catch (final PersistenceException dve) {
+        } catch (JpaSystemException | PersistenceException ex) {
             return CommandProcessingResult.empty();
         }
     }
@@ -352,12 +350,14 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                     String.format("This Loan Type [ %s ] , is not supported for IC Review Operations .", loan.getLoanType()));
         }
 
-        Boolean isLoanFirstCycle = isLoanFirstCycle(loan, loanIndividualCounter);
+        Boolean isLoanFirstCycle = isLoanFirstCycle(loanIndividualCounter);
         Boolean isLoanUnsecure = isLoanUnSecure(loan);
 
-        validateLoanAccountToComplyToApprovalMatrix(loan, approvalMatrix, isLoanFirstCycle, isLoanUnsecure);
+        validateLoanAccountToComplyToApprovalMatrixStage(loan, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
+                LoanDecisionState.IC_REVIEW_LEVEL_ONE);
         // generate the next stage based on loan approval matrix via amounts to be disbursed
-        determineTheNextDecisionState(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure);
+        determineTheNextDecisionStage(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
+                LoanDecisionState.IC_REVIEW_LEVEL_ONE);
 
         LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelOneFrom(command, currentUser, loanDecision);
         LoanDecision savedObj = loanDecisionRepository.saveAndFlush(loanDecisionObj);
@@ -381,7 +381,28 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                 .withResourceIdAsString(savedObj.getId().toString()).build();
     }
 
-    private static void determineTheNextDecisionState(Loan loan, LoanDecision loanDecision, LoanApprovalMatrix approvalMatrix,
+    private static void determineTheNextDecisionStage(Loan loan, LoanDecision loanDecision, LoanApprovalMatrix approvalMatrix,
+            Boolean isLoanFirstCycle, Boolean isLoanUnsecure, LoanDecisionState currentStage) {
+        switch (currentStage) {
+            case IC_REVIEW_LEVEL_ONE:
+                determineTheNextDecisionStateAfterLevelOne(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure);
+            break;
+            case IC_REVIEW_LEVEL_TWO:
+            break;
+            case IC_REVIEW_LEVEL_THREE:
+            break;
+            case IC_REVIEW_LEVEL_FOUR:
+            break;
+            case IC_REVIEW_LEVEL_FIVE:
+            break;
+            default:
+                throw new GeneralPlatformDomainRuleException("error.msg.invalid.loan.decision.stage",
+                        String.format("Invalid Loan Stage detected [%s]", currentStage));
+        }
+
+    }
+
+    private static void determineTheNextDecisionStateAfterLevelOne(Loan loan, LoanDecision loanDecision, LoanApprovalMatrix approvalMatrix,
             Boolean isLoanFirstCycle, Boolean isLoanUnsecure) {
         LoanDecisionState expectedNextIcReviewStage = LoanDecisionState.IC_REVIEW_LEVEL_TWO;
         if (isLoanFirstCycle && isLoanUnsecure) {
@@ -421,22 +442,43 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
     private static void generateTheNextIcReviewStage(BigDecimal loanPrincipal, BigDecimal nextStageMatrixMaxAmount,
             Integer numberOfRepayment, Integer nextStageMatrixMinTerm, Integer nextStageMatrixMaxTerm, LoanDecision loanDecision,
             LoanDecisionState nextStageIcReview, BigDecimal currentStageMaximumLoanAmount) {
-        if ((loanPrincipal.compareTo(nextStageMatrixMaxAmount) <= 0)
-                && (numberOfRepayment > nextStageMatrixMinTerm || numberOfRepayment <= nextStageMatrixMaxTerm)
-                && loanPrincipal.compareTo(currentStageMaximumLoanAmount) >= 0) {
+        if ((loanPrincipal.compareTo(currentStageMaximumLoanAmount.add(BigDecimal.ONE)) >= 0
+                && loanPrincipal.compareTo(nextStageMatrixMaxAmount) <= 0)
+                && (numberOfRepayment > nextStageMatrixMinTerm && numberOfRepayment <= nextStageMatrixMaxTerm)) {
             loanDecision.setNextLoanIcReviewDecisionState(nextStageIcReview.getValue());
         } else {
             loanDecision.setNextLoanIcReviewDecisionState(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue());
         }
     }
 
-    private static void validateLoanAccountToComplyToApprovalMatrix(Loan loan, LoanApprovalMatrix approvalMatrix, Boolean isLoanFirstCycle,
-            Boolean isLoanUnsecure) {
+    private static void validateLoanAccountToComplyToApprovalMatrixStage(Loan loan, LoanApprovalMatrix approvalMatrix,
+            Boolean isLoanFirstCycle, Boolean isLoanUnsecure, LoanDecisionState currentStage) {
+        switch (currentStage) {
+            case IC_REVIEW_LEVEL_ONE:
+                validateLoanAccountToComplyToApprovalMatrixLevelOne(loan, approvalMatrix, isLoanFirstCycle, isLoanUnsecure);
+            break;
+            case IC_REVIEW_LEVEL_TWO:
+            break;
+            case IC_REVIEW_LEVEL_THREE:
+            break;
+            case IC_REVIEW_LEVEL_FOUR:
+            break;
+            case IC_REVIEW_LEVEL_FIVE:
+            break;
+            default:
+                throw new GeneralPlatformDomainRuleException("error.msg.invalid.loan.decision.stage",
+                        String.format("Invalid Loan Stage detected to be validated . Provided Stage [%s]", currentStage));
+        }
+
+    }
+
+    private static void validateLoanAccountToComplyToApprovalMatrixLevelOne(Loan loan, LoanApprovalMatrix approvalMatrix,
+            Boolean isLoanFirstCycle, Boolean isLoanUnsecure) {
         if (isLoanFirstCycle && isLoanUnsecure) {
             // Loan is FirstCycle and Unsecure
             String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.one.unsecured.first.cycle";
             String state = "Level One Unsecured first cycle ";
-            validateLoanAccountCompliancePolicyBasedOnApprovalMatrix(loan.getProposedPrincipal(),
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelOne(loan.getProposedPrincipal(),
                     approvalMatrix.getLevelOneUnsecuredFirstCycleMaxAmount(), loan.getNumberOfRepayments(),
                     approvalMatrix.getLevelOneUnsecuredFirstCycleMinTerm(), approvalMatrix.getLevelOneUnsecuredFirstCycleMaxTerm(),
                     errormsg, state);
@@ -445,7 +487,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
             // Loan is (Second cycle or plus) and Unsecure
             String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.one.unsecured.second.cycle plus";
             String state = "Level One Unsecured second cycle plus ";
-            validateLoanAccountCompliancePolicyBasedOnApprovalMatrix(loan.getProposedPrincipal(),
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelOne(loan.getProposedPrincipal(),
                     approvalMatrix.getLevelOneUnsecuredSecondCycleMaxAmount(), loan.getNumberOfRepayments(),
                     approvalMatrix.getLevelOneUnsecuredSecondCycleMinTerm(), approvalMatrix.getLevelOneUnsecuredSecondCycleMaxTerm(),
                     errormsg, state);
@@ -454,7 +496,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
             // First Cycle and secured Loan
             String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.one.secured.first.cycle";
             String state = "Level One secured first cycle ";
-            validateLoanAccountCompliancePolicyBasedOnApprovalMatrix(loan.getProposedPrincipal(),
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelOne(loan.getProposedPrincipal(),
                     approvalMatrix.getLevelOneSecuredFirstCycleMaxAmount(), loan.getNumberOfRepayments(),
                     approvalMatrix.getLevelOneSecuredFirstCycleMinTerm(), approvalMatrix.getLevelOneSecuredFirstCycleMaxTerm(), errormsg,
                     state);
@@ -463,7 +505,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
             // Second Cycle or plus and secured
             String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.one.secured.second.cycle plus";
             String state = "Level One Secured second cycle plus ";
-            validateLoanAccountCompliancePolicyBasedOnApprovalMatrix(loan.getProposedPrincipal(),
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelOne(loan.getProposedPrincipal(),
                     approvalMatrix.getLevelOneSecuredSecondCycleMaxAmount(), loan.getNumberOfRepayments(),
                     approvalMatrix.getLevelOneSecuredSecondCycleMinTerm(), approvalMatrix.getLevelOneSecuredSecondCycleMaxTerm(), errormsg,
                     state);
@@ -475,37 +517,29 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         }
     }
 
-    private static void validateLoanAccountCompliancePolicyBasedOnApprovalMatrix(BigDecimal loanPrincipal, BigDecimal currentStageMatrixMaxAmount,
-            Integer numberOfRepayment, Integer currentStageMatrixMinTerm, Integer currentStageMatrixMaxTerm, String errorMsg, String stateMsg) {
-        if ((loanPrincipal.compareTo(currentStageMatrixMaxAmount) > 0)
-                || (numberOfRepayment < currentStageMatrixMinTerm || numberOfRepayment > currentStageMatrixMaxTerm)) {
+    private static void validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelOne(BigDecimal loanPrincipal,
+            BigDecimal currentStageMatrixMaxAmount, Integer numberOfRepayment, Integer currentStageMatrixMinTerm,
+            Integer currentStageMatrixMaxTerm, String errorMsg, String stateMsg) {
+        if ((numberOfRepayment < currentStageMatrixMinTerm || numberOfRepayment > currentStageMatrixMaxTerm)) {
             throw new GeneralPlatformDomainRuleException(errorMsg, String.format(
                     "This Loan Account Principal [ %s ] vs Approval Matrix Max Amount [%s] , does not qualify for IC-Review  [%s] with Terms Min [%s] Max [%s] Vs Loan Term [%s]",
-                    loanPrincipal, currentStageMatrixMaxAmount, stateMsg, currentStageMatrixMinTerm, currentStageMatrixMaxTerm, numberOfRepayment));
+                    loanPrincipal, currentStageMatrixMaxAmount, stateMsg, currentStageMatrixMinTerm, currentStageMatrixMaxTerm,
+                    numberOfRepayment));
         }
     }
 
-    private Boolean isLoanFirstCycle(Loan loan, List<Loan> loanIndividualCounter) {
-        if (CollectionUtils.isEmpty(loanIndividualCounter)) {
-            // First Cycle
-            return true;
-        } else {
-            // second and plus
-            return false;
-        }
+    private Boolean isLoanFirstCycle(List<Loan> loanIndividualCounter) {
+        return CollectionUtils.isEmpty(loanIndividualCounter);
     }
 
     private Boolean isLoanUnSecure(Loan loan) {
         List<LoanCollateralManagement> collateralManagementList = loanCollateralManagementRepository.findByLoan(loan);
-        if (CollectionUtils.isEmpty(collateralManagementList)) {
-            return true;
-        }
-        return false;
+        return CollectionUtils.isEmpty(collateralManagementList);
     }
 
     private void validateDueDiligenceBusinessRule(JsonCommand command, Loan loan, LoanDecision loanDecision) {
         final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
-                .retrieveGlobalConfiguration("Add-More-Stages-To-A-Loan-Life-Cycle");
+                .retrieveGlobalConfiguration(LoanApprovalMatrixConstants.ADD_MORE_STAGES_TO_A_LOAN_LIFE_CYCLE);
         final Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
 
         if (!isExtendLoanLifeCycleConfig) {
@@ -561,8 +595,8 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
             final Long loanIdToClose = loan.getTopupLoanDetails().getLoanIdToClose();
             final Loan loanToClose = this.loanRepositoryWrapper.findNonClosedLoanThatBelongsToClient(loanIdToClose, loan.getClientId());
             if (loanToClose == null) {
-                throw new GeneralPlatformDomainRuleException("error.msg.loan.to.be.closed.with.topup.is.not.active",
-                        "Loan to be closed with this topup is not active.");
+                throw new GeneralPlatformDomainRuleException("error.msg.loan.to.be.closed.with.top-up.is.not.active",
+                        "Loan to be closed with this top-up is not active.");
             }
 
             final LocalDate lastUserTransactionOnLoanToClose = loanToClose.getLastUserTransactionDate();
@@ -595,7 +629,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
             if (calendarInstance != null) {
                 calendar = calendarInstance.getCalendar();
             }
-            // final Calendar calendar = calendarInstance.getCalendar();
+
             boolean isSkipRepaymentOnFirstMonthEnabled = this.configurationDomainService.isSkippingMeetingOnFirstDayOfMonthEnabled();
             if (isSkipRepaymentOnFirstMonthEnabled) {
                 isSkipRepaymentOnFirstMonth = this.loanUtilService.isLoanRepaymentsSyncWithMeeting(loan.group(), calendar);
@@ -633,7 +667,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
     private void validateCollateralReviewBusinessRule(JsonCommand command, Loan loan, LoanDecision loanDecision) {
         final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
-                .retrieveGlobalConfiguration("Add-More-Stages-To-A-Loan-Life-Cycle");
+                .retrieveGlobalConfiguration(LoanApprovalMatrixConstants.ADD_MORE_STAGES_TO_A_LOAN_LIFE_CYCLE);
         final Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
 
         if (!isExtendLoanLifeCycleConfig) {
@@ -685,7 +719,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
     private void validateIcReviewDecisionLevelOneBusinessRule(JsonCommand command, Loan loan, LoanDecision loanDecision) {
         final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
-                .retrieveGlobalConfiguration("Add-More-Stages-To-A-Loan-Life-Cycle");
+                .retrieveGlobalConfiguration(LoanApprovalMatrixConstants.ADD_MORE_STAGES_TO_A_LOAN_LIFE_CYCLE);
         final Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
 
         if (!isExtendLoanLifeCycleConfig) {
