@@ -161,3 +161,18 @@ Feature: Create loan stapes
     When method POST
     Then status 200
     Then match $ contains { resourceId: '#notnull' }
+
+  @ignore
+  @createLoanApprovalMatrixWithConfigurablePayLoadStep
+  Scenario: Create Loan Approval Matrix With Configurable PayLoadStep
+    Given configure ssl = true
+    * def matrix = read('classpath:templates/loanApprovalMatrix.json')
+    Given path 'loans/decision/approvalMatrix/createApprovalMatrix'
+    And header Accept = 'application/json'
+    And header Authorization = authToken
+    And header fineract-platform-tenantid = tenantId
+    And request matrix.configurableLoanApprovalMatrix
+    When method POST
+    Then status 200
+    Then match $ contains { resourceId: '#notnull' }
+    Then def matrixId = response.resourceId
