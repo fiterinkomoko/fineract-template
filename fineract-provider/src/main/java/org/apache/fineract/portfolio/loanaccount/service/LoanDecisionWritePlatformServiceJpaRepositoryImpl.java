@@ -539,8 +539,9 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
     private static void generateTheNextIcReviewStage(BigDecimal loanPrincipal, BigDecimal nextStageMatrixMaxAmount,
             Integer numberOfRepayment, Integer nextStageMatrixMinTerm, Integer nextStageMatrixMaxTerm, LoanDecision loanDecision,
             LoanDecisionState nextStageIcReview, BigDecimal currentStageMaximumLoanAmount) {
+
         if ((loanPrincipal.compareTo(currentStageMaximumLoanAmount.add(BigDecimal.ONE)) >= 0
-                && loanPrincipal.compareTo(nextStageMatrixMaxAmount) <= 0)
+                && (loanPrincipal.compareTo(nextStageMatrixMaxAmount) <= 0 || loanPrincipal.compareTo(nextStageMatrixMaxAmount) > 0))
                 && (numberOfRepayment > nextStageMatrixMinTerm && numberOfRepayment <= nextStageMatrixMaxTerm)) {
             loanDecision.setNextLoanIcReviewDecisionState(nextStageIcReview.getValue());
         } else {
