@@ -288,4 +288,21 @@ public class LoanDecisionAssembler {
                 levelFiveSecuredFirstCycleMaxTerm, levelFiveSecuredSecondCycleMaxAmount, levelFiveSecuredSecondCycleMinTerm,
                 levelFiveSecuredSecondCycleMaxTerm);
     }
+
+    public LoanDecision assembleIcReviewDecisionLevelOneFrom(final JsonCommand command, AppUser currentUser,
+            LoanDecision savedLoanDecision) {
+
+        LocalDate icReviewOn = command.localDateValueOfParameterNamed(LoanApiConstants.icReviewOnDateParameterName);
+
+        final String noteText = command.stringValueOfParameterNamed("note");
+
+        LoanDecision loanDecision = savedLoanDecision;
+        loanDecision.setLoanDecisionState(LoanDecisionState.IC_REVIEW_LEVEL_ONE.getValue());
+        loanDecision.setIcReviewDecisionLevelOneNote(noteText);
+        loanDecision.setIcReviewDecisionLevelOneBy(currentUser);
+        loanDecision.setIcReviewDecisionLevelOneOn(icReviewOn);
+        loanDecision.setIcReviewDecisionLevelOneSigned(Boolean.TRUE);
+        loanDecision.setRejectIcReviewDecisionLevelOneSigned(Boolean.FALSE);
+        return loanDecision;
+    }
 }

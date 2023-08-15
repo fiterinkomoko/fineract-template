@@ -131,3 +131,48 @@ Feature: Create loan stapes
     Then status 200
     Then match $ contains { resourceId: '#notnull' }
     Then def matrixId = response.resourceId
+
+
+  @ignore
+  @icReviewDecisionLevelOneShouldFailStage
+  Scenario: IC Review Decision Level One should Fail  Stage
+    Given configure ssl = true
+    * def loansData = read('classpath:templates/loansDecision.json')
+    Given path 'loans/decision/icReviewDecisionLevelOne',loanId
+    And header Accept = 'application/json'
+    And header Authorization = authToken
+    And header fineract-platform-tenantid = tenantId
+    And request loansData.icReview
+    When method POST
+    Then status 403
+    Then match $ contains { developerMessage: '#notnull' }
+
+
+  @ignore
+  @icReviewDecisionLevelOneStage
+  Scenario: IC Review Decision Level One   Stage
+    Given configure ssl = true
+    * def loansData = read('classpath:templates/loansDecision.json')
+    Given path 'loans/decision/icReviewDecisionLevelOne',loanId
+    And header Accept = 'application/json'
+    And header Authorization = authToken
+    And header fineract-platform-tenantid = tenantId
+    And request loansData.icReview
+    When method POST
+    Then status 200
+    Then match $ contains { resourceId: '#notnull' }
+
+  @ignore
+  @createLoanApprovalMatrixWithConfigurablePayLoadStep
+  Scenario: Create Loan Approval Matrix With Configurable PayLoadStep
+    Given configure ssl = true
+    * def matrix = read('classpath:templates/loanApprovalMatrix.json')
+    Given path 'loans/decision/approvalMatrix/createApprovalMatrix'
+    And header Accept = 'application/json'
+    And header Authorization = authToken
+    And header fineract-platform-tenantid = tenantId
+    And request matrix.configurableLoanApprovalMatrix
+    When method POST
+    Then status 200
+    Then match $ contains { resourceId: '#notnull' }
+    Then def matrixId = response.resourceId
