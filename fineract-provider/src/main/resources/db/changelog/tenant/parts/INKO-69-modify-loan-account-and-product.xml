@@ -831,4 +831,83 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="bosco@fiter.io" id="add_permission_ACCEPT_LOANICREVIEWDECISIONLEVELTWO">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_permission where code = 'ACCEPT_LOANICREVIEWDECISIONLEVELTWO';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio" />
+            <column name="code" value="ACCEPT_LOANICREVIEWDECISIONLEVELTWO" />
+            <column name="entity_name" value="LOANICREVIEWDECISIONLEVELTWO" />
+            <column name="action_name" value="ACCEPT" />
+        </insert>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_ic_review_decision_level_two_note_column_to_m_loan_decision_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan_decision" columnName="ic_review_decision_level_two_note"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan_decision">
+            <column name="ic_review_decision_level_two_note" type="varchar(255)" >
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_is_ic_review_decision_level_two_signed_column_to_m_loan_decision_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan_decision" columnName="is_ic_review_decision_level_two_signed"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan_decision">
+            <column name="is_ic_review_decision_level_two_signed"  type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_is_reject_ic_review_decision_level_two_column_to_m_loan_decision_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan_decision" columnName="is_reject_ic_review_decision_level_two"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan_decision">
+            <column name="is_reject_ic_review_decision_level_two"  type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_ic_review_decision_level_two_on_column_to_m_loan_decision_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan_decision" columnName="ic_review_decision_level_two_on"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan_decision">
+            <column name="ic_review_decision_level_two_on"  type="date">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_ic_review_decision_level_two_by_column_to_m_loan_decision_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan_decision" columnName="ic_review_decision_level_two_by"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan_decision">
+            <column name="ic_review_decision_level_two_by"  type="bigint">
+                <constraints nullable="true" foreignKeyName="FK_m_loan_decision-m_appuser-ic_review_decision_level_two_by" references="m_appuser(id)"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
