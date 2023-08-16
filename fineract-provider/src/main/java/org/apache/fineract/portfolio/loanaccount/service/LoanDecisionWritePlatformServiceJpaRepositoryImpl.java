@@ -119,9 +119,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
     }
 
     private void validateReviewApplicationBusinessRule(JsonCommand command, Loan loan, LoanDecision loanDecision) {
-        final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
-                .retrieveGlobalConfiguration(LoanApprovalMatrixConstants.ADD_MORE_STAGES_TO_A_LOAN_LIFE_CYCLE);
-        final Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
+        Boolean isExtendLoanLifeCycleConfig = getExtendLoanLifeCycleConfig().isEnabled();
 
         if (!isExtendLoanLifeCycleConfig) {
             throw new GeneralPlatformDomainRuleException("error.msg.Add-More-Stages-To-A-Loan-Life-Cycle.is.not.set",
@@ -223,10 +221,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
     @Override
     public CommandProcessingResult createLoanApprovalMatrix(JsonCommand command) {
 
-        final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
-                .retrieveGlobalConfiguration(LoanApprovalMatrixConstants.ADD_MORE_STAGES_TO_A_LOAN_LIFE_CYCLE);
-        Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
-
+        Boolean isExtendLoanLifeCycleConfig = getExtendLoanLifeCycleConfig().isEnabled();
         if (!isExtendLoanLifeCycleConfig) {
             throw new GeneralPlatformDomainRuleException("error.msg.Add-More-Stages-To-A-Loan-Life-Cycle.is.not.set",
                     "Add-More-Stages-To-A-Loan-Life-Cycle settings is not set. So this operation is not permitted");
@@ -254,9 +249,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
     @Override
     public CommandProcessingResult deleteLoanApprovalMatrix(Long matrixId) {
-        final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
-                .retrieveGlobalConfiguration(LoanApprovalMatrixConstants.ADD_MORE_STAGES_TO_A_LOAN_LIFE_CYCLE);
-        Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
+        Boolean isExtendLoanLifeCycleConfig = getExtendLoanLifeCycleConfig().isEnabled();
 
         if (!isExtendLoanLifeCycleConfig) {
             throw new GeneralPlatformDomainRuleException("error.msg.Add-More-Stages-To-A-Loan-Life-Cycle.is.not.set",
@@ -277,9 +270,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         try {
             this.context.authenticatedUser();
 
-            final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
-                    .retrieveGlobalConfiguration(LoanApprovalMatrixConstants.ADD_MORE_STAGES_TO_A_LOAN_LIFE_CYCLE);
-            Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
+            Boolean isExtendLoanLifeCycleConfig = getExtendLoanLifeCycleConfig().isEnabled();
 
             if (!isExtendLoanLifeCycleConfig) {
                 throw new GeneralPlatformDomainRuleException("error.msg.Add-More-Stages-To-A-Loan-Life-Cycle.is.not.set",
@@ -315,6 +306,12 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         } catch (JpaSystemException | PersistenceException ex) {
             return CommandProcessingResult.empty();
         }
+    }
+
+    private GlobalConfigurationPropertyData getExtendLoanLifeCycleConfig() {
+        final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
+                .retrieveGlobalConfiguration(LoanApprovalMatrixConstants.ADD_MORE_STAGES_TO_A_LOAN_LIFE_CYCLE);
+        return extendLoanLifeCycleConfig;
     }
 
     @Override
@@ -650,9 +647,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
     }
 
     private void validateDueDiligenceBusinessRule(JsonCommand command, Loan loan, LoanDecision loanDecision) {
-        final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
-                .retrieveGlobalConfiguration(LoanApprovalMatrixConstants.ADD_MORE_STAGES_TO_A_LOAN_LIFE_CYCLE);
-        final Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
+        Boolean isExtendLoanLifeCycleConfig = getExtendLoanLifeCycleConfig().isEnabled();
 
         if (!isExtendLoanLifeCycleConfig) {
             throw new GeneralPlatformDomainRuleException("error.msg.Add-More-Stages-To-A-Loan-Life-Cycle.is.not.set",
@@ -778,9 +773,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
     }
 
     private void validateCollateralReviewBusinessRule(JsonCommand command, Loan loan, LoanDecision loanDecision) {
-        final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
-                .retrieveGlobalConfiguration(LoanApprovalMatrixConstants.ADD_MORE_STAGES_TO_A_LOAN_LIFE_CYCLE);
-        final Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
+        Boolean isExtendLoanLifeCycleConfig = getExtendLoanLifeCycleConfig().isEnabled();
 
         if (!isExtendLoanLifeCycleConfig) {
             throw new GeneralPlatformDomainRuleException("error.msg.Add-More-Stages-To-A-Loan-Life-Cycle.is.not.set",
@@ -830,9 +823,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
     }
 
     private void validateIcReviewDecisionLevelOneBusinessRule(JsonCommand command, Loan loan, LoanDecision loanDecision) {
-        final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
-                .retrieveGlobalConfiguration(LoanApprovalMatrixConstants.ADD_MORE_STAGES_TO_A_LOAN_LIFE_CYCLE);
-        final Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
+        Boolean isExtendLoanLifeCycleConfig = getExtendLoanLifeCycleConfig().isEnabled();
 
         if (!isExtendLoanLifeCycleConfig) {
             throw new GeneralPlatformDomainRuleException("error.msg.Add-More-Stages-To-A-Loan-Life-Cycle.is.not.set",
@@ -891,9 +882,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
     }
 
     private void validateIcReviewDecisionLevelTwoBusinessRule(JsonCommand command, Loan loan, LoanDecision loanDecision) {
-        final GlobalConfigurationPropertyData extendLoanLifeCycleConfig = this.configurationReadPlatformService
-                .retrieveGlobalConfiguration(LoanApprovalMatrixConstants.ADD_MORE_STAGES_TO_A_LOAN_LIFE_CYCLE);
-        final Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
+        Boolean isExtendLoanLifeCycleConfig = getExtendLoanLifeCycleConfig().isEnabled();
 
         if (!isExtendLoanLifeCycleConfig) {
             throw new GeneralPlatformDomainRuleException("error.msg.Add-More-Stages-To-A-Loan-Life-Cycle.is.not.set",
