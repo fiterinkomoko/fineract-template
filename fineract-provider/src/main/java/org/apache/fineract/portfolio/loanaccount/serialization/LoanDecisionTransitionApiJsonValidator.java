@@ -625,30 +625,34 @@ public final class LoanDecisionTransitionApiJsonValidator {
             BigDecimal levelFourUnsecuredFirstCycleMaxAmount, BigDecimal levelFiveUnsecuredFirstCycleMaxAmount) {
         if (levelOneUnsecuredFirstCycleMaxAmount.compareTo(levelTwoUnsecuredFirstCycleMaxAmount) >= 0) {
             throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.max.amount.for.level.one.should.not.be.greater.than.level.two.max.amount",
-                    String.format("Loan maximum amount for level one [%s] should not be greater than for level two [%s] ",
+                    "error.msg.loan.max.amount.for.level.one.unsecure.first.cycle.should.not.be.greater.than.level.two.unsecure.first.cycle.max.amount",
+                    String.format(
+                            "Loan maximum amount for level one [%s]  unsecure first cycle should not be greater than for level two [%s] unsecure first cycle",
                             levelOneUnsecuredFirstCycleMaxAmount, levelTwoUnsecuredFirstCycleMaxAmount));
 
         }
         if (levelTwoUnsecuredFirstCycleMaxAmount.compareTo(levelThreeUnsecuredFirstCycleMaxAmount) >= 0) {
             throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.max.amount.for.level.two.should.not.be.greater.than.level.three.max.amount",
-                    String.format("Loan maximum amount for level two [%s] should not be greater than for level three [%s] ",
+                    "error.msg.loan.max.amount.for.level.two.unsecure.first.cycle.should.not.be.greater.than.level.three.unsecure.first.cycle.max.amount",
+                    String.format(
+                            "Loan maximum amount for level two [%s] unsecure first cycle should not be greater than for level three [%s] unsecure first cycle",
                             levelTwoUnsecuredFirstCycleMaxAmount, levelThreeUnsecuredFirstCycleMaxAmount));
 
         }
 
         if (levelThreeUnsecuredFirstCycleMaxAmount.compareTo(levelFourUnsecuredFirstCycleMaxAmount) >= 0) {
             throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.max.amount.for.level.three.should.not.be.greater.than.level.four.max.amount",
-                    String.format("Loan maximum amount for level three [%s] should not be greater than for level four [%s] ",
+                    "error.msg.loan.max.amount.for.level.three.unsecure.first.cycle.should.not.be.greater.than.level.four.unsecure.first.cycle.max.amount",
+                    String.format(
+                            "Loan maximum amount for level three [%s] unsecure first cycle should not be greater than for level four [%s] unsecure first cycle",
                             levelThreeUnsecuredFirstCycleMaxAmount, levelFourUnsecuredFirstCycleMaxAmount));
 
         }
         if (levelFourUnsecuredFirstCycleMaxAmount.compareTo(levelFiveUnsecuredFirstCycleMaxAmount) > 0) {
             throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.max.amount.for.level.four.should.not.be.greater.than.level.five.max.amount",
-                    String.format("Loan maximum amount for level four [%s] should not be greater than for level five [%s] ",
+                    "error.msg.loan.max.amount.for.level.four.unsecure.first.cycle.should.not.be.greater.than.level.five.unsecure.first.cycle.max.amount",
+                    String.format(
+                            "Loan maximum amount for level four [%s] unsecure first cycle should not be greater than for level five [%s] unsecure first cycle",
                             levelFourUnsecuredFirstCycleMaxAmount, levelFiveUnsecuredFirstCycleMaxAmount));
 
         }
@@ -659,30 +663,34 @@ public final class LoanDecisionTransitionApiJsonValidator {
             BigDecimal levelFourUnsecuredSecondCycleMaxAmount, BigDecimal levelFiveUnsecuredSecondCycleMaxAmount) {
         if (levelOneUnsecuredSecondCycleMaxAmount.compareTo(levelTwoUnsecuredSecondCycleMaxAmount) >= 0) {
             throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.max.amount.for.level.one.should.not.be.greater.than.level.two.max.amount",
-                    String.format("Loan maximum amount for level one [%s] should not be greater than for level two [%s] ",
+                    "error.msg.loan.max.amount.for.level.one.unsecure.second.cycle.should.not.be.greater.than.level.two.unsecure.second.cycle.max.amount",
+                    String.format(
+                            "Loan maximum amount for level one [%s] unsecure Second cycle should not be greater than for level two [%s] unsecure Second cycle",
                             levelOneUnsecuredSecondCycleMaxAmount, levelTwoUnsecuredSecondCycleMaxAmount));
 
         }
         if (levelTwoUnsecuredSecondCycleMaxAmount.compareTo(levelThreeUnsecuredSecondCycleMaxAmount) >= 0) {
             throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.max.amount.for.level.two.should.not.be.greater.than.level.three.max.amount",
-                    String.format("Loan maximum amount for level two [%s] should not be greater than for level three [%s] ",
+                    "error.msg.loan.max.amount.for.level.two.unsecure.second.cycle.should.not.be.greater.than.level.three.unsecure.second.cycle.max.amount",
+                    String.format(
+                            "Loan maximum amount for level two [%s] unsecure Second cycle should not be greater than for level three [%s] unsecure Second cycle",
                             levelTwoUnsecuredSecondCycleMaxAmount, levelThreeUnsecuredSecondCycleMaxAmount));
 
         }
 
         if (levelThreeUnsecuredSecondCycleMaxAmount.compareTo(levelFourUnsecuredSecondCycleMaxAmount) >= 0) {
             throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.max.amount.for.level.three.should.not.be.greater.than.level.four.max.amount",
-                    String.format("Loan maximum amount for level three [%s] should not be greater than for level four [%s] ",
+                    "error.msg.loan.max.amount.for.level.three.unsecure.second.cycle.should.not.be.greater.than.level.four.unsecure.second.cycle.max.amount",
+                    String.format(
+                            "Loan maximum amount for level three [%s] unsecure Second cycle should not be greater than for level four [%s] unsecure Second cycle",
                             levelThreeUnsecuredSecondCycleMaxAmount, levelFourUnsecuredSecondCycleMaxAmount));
 
         }
         if (levelFourUnsecuredSecondCycleMaxAmount.compareTo(levelFiveUnsecuredSecondCycleMaxAmount) > 0) {
             throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.max.amount.for.level.four.should.not.be.greater.than.level.five.max.amount",
-                    String.format("Loan maximum amount for level four [%s] should not be greater than for level five [%s] ",
+                    "error.msg.loan.max.amount.for.level.four.unsecure.second.cycle.should.not.be.greater.than.level.five.unsecure.second.cycle.max.amount",
+                    String.format(
+                            "Loan maximum amount for level four [%s] unsecure Second cycle should not be greater than for level five [%s] unsecure Second cycle ",
                             levelFourUnsecuredSecondCycleMaxAmount, levelFiveUnsecuredSecondCycleMaxAmount));
 
         }
@@ -693,30 +701,34 @@ public final class LoanDecisionTransitionApiJsonValidator {
             BigDecimal levelFourSecuredFirstCycleMaxAmount, BigDecimal levelFiveSecuredFirstCycleMaxAmount) {
         if (levelOneSecuredFirstCycleMaxAmount.compareTo(levelTwoSecuredFirstCycleMaxAmount) >= 0) {
             throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.max.amount.for.level.one.should.not.be.greater.than.level.two.max.amount",
-                    String.format("Loan maximum amount for level one [%s] should not be greater than for level two [%s] ",
+                    "error.msg.loan.max.amount.for.level.one.secure.first.cycle.should.not.be.greater.than.level.two.secure.first.cycle.max.amount",
+                    String.format(
+                            "Loan maximum amount for level one [%s] secure first cycle should not be greater than for level two [%s] secure first cycle",
                             levelOneSecuredFirstCycleMaxAmount, levelTwoSecuredFirstCycleMaxAmount));
 
         }
         if (levelTwoSecuredFirstCycleMaxAmount.compareTo(levelThreeSecuredFirstCycleMaxAmount) >= 0) {
             throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.max.amount.for.level.two.should.not.be.greater.than.level.three.max.amount",
-                    String.format("Loan maximum amount for level two [%s] should not be greater than for level three [%s] ",
+                    "error.msg.loan.max.amount.for.level.two.secure.first.cycle.should.not.be.greater.than.level.three.secure.first.cycle.max.amount",
+                    String.format(
+                            "Loan maximum amount for level two [%s] secure first cycle should not be greater than for level three [%s] secure first cycle",
                             levelTwoSecuredFirstCycleMaxAmount, levelThreeSecuredFirstCycleMaxAmount));
 
         }
 
         if (levelThreeSecuredFirstCycleMaxAmount.compareTo(levelFourSecuredFirstCycleMaxAmount) >= 0) {
             throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.max.amount.for.level.three.should.not.be.greater.than.level.four.max.amount",
-                    String.format("Loan maximum amount for level three [%s] should not be greater than for level four [%s] ",
+                    "error.msg.loan.max.amount.for.level.three.secure.first.cycle.should.not.be.greater.than.level.four.secure.first.cycle.max.amount",
+                    String.format(
+                            "Loan maximum amount for level three [%s] secure first cycle should not be greater than for level four [%s] secure first cycle ",
                             levelThreeSecuredFirstCycleMaxAmount, levelFourSecuredFirstCycleMaxAmount));
 
         }
         if (levelFourSecuredFirstCycleMaxAmount.compareTo(levelFiveSecuredFirstCycleMaxAmount) > 0) {
             throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.max.amount.for.level.four.should.not.be.greater.than.level.five.max.amount",
-                    String.format("Loan maximum amount for level four [%s] should not be greater than for level five [%s] ",
+                    "error.msg.loan.max.amount.for.level.four.secure.first.cycle.should.not.be.greater.than.level.five.secure.first.cycle.max.amount",
+                    String.format(
+                            "Loan maximum amount for level four [%s] secure first cycle should not be greater than for level five [%s] secure first cycle ",
                             levelFourSecuredFirstCycleMaxAmount, levelFiveSecuredFirstCycleMaxAmount));
 
         }
@@ -727,30 +739,34 @@ public final class LoanDecisionTransitionApiJsonValidator {
             BigDecimal levelFourSecuredSecondCycleMaxAmount, BigDecimal levelFiveSecuredSecondCycleMaxAmount) {
         if (levelOneSecuredSecondCycleMaxAmount.compareTo(levelTwoSecuredSecondCycleMaxAmount) >= 0) {
             throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.max.amount.for.level.one.should.not.be.greater.than.level.two.max.amount",
-                    String.format("Loan maximum amount for level one [%s] should not be greater than for level two [%s] ",
+                    "error.msg.loan.max.amount.for.level.one.secure.second.cycle.should.not.be.greater.than.level.two.secure.second.cycle.max.amount",
+                    String.format(
+                            "Loan maximum amount for level one [%s] secure Second cycle should not be greater than for level two [%s] secure Second cycle",
                             levelOneSecuredSecondCycleMaxAmount, levelTwoSecuredSecondCycleMaxAmount));
 
         }
         if (levelTwoSecuredSecondCycleMaxAmount.compareTo(levelThreeSecuredSecondCycleMaxAmount) >= 0) {
             throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.max.amount.for.level.two.should.not.be.greater.than.level.three.max.amount",
-                    String.format("Loan maximum amount for level two [%s] should not be greater than for level three [%s] ",
+                    "error.msg.loan.max.amount.for.level.two.secure.second.cycle.should.not.be.greater.than.level.three.secure.second.cycle.max.amount",
+                    String.format(
+                            "Loan maximum amount for level two [%s] secure Second cycle should not be greater than for level three [%s] secure Second cycle",
                             levelTwoSecuredSecondCycleMaxAmount, levelThreeSecuredSecondCycleMaxAmount));
 
         }
 
         if (levelThreeSecuredSecondCycleMaxAmount.compareTo(levelFourSecuredSecondCycleMaxAmount) >= 0) {
             throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.max.amount.for.level.three.should.not.be.greater.than.level.four.max.amount",
-                    String.format("Loan maximum amount for level three [%s] should not be greater than for level four [%s] ",
+                    "error.msg.loan.max.amount.for.level.three.secure.second.cycle.should.not.be.greater.than.level.four.secure.second.cycle.max.amount",
+                    String.format(
+                            "Loan maximum amount for level three [%s] secure Second cycle should not be greater than for level four [%s] secure Second cycle",
                             levelThreeSecuredSecondCycleMaxAmount, levelFourSecuredSecondCycleMaxAmount));
 
         }
         if (levelFourSecuredSecondCycleMaxAmount.compareTo(levelFiveSecuredSecondCycleMaxAmount) > 0) {
             throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.max.amount.for.level.four.should.not.be.greater.than.level.five.max.amount",
-                    String.format("Loan maximum amount for level four [%s] should not be greater than for level five [%s] ",
+                    "error.msg.loan.max.amount.for.level.four.secure.second.cycle.should.not.be.greater.than.level.five.secure.second.cycle.max.amount",
+                    String.format(
+                            "Loan maximum amount for level four [%s] secure Second cycle should not be greater than for level five [%s] secure Second cycle",
                             levelFourSecuredSecondCycleMaxAmount, levelFiveSecuredSecondCycleMaxAmount));
 
         }
