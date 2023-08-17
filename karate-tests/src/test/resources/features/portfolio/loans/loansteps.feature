@@ -494,3 +494,35 @@ Feature: Create loan stapes
     Then status 200
     Then match $ contains { resourceId: '#notnull' }
     Then def loanId = response.resourceId
+
+  @ignore
+  @createGroupLoanWithConfigurableProductAndLoanTermStep
+  Scenario: Create Group loan account With Configurable Product and Loan Term
+    Given configure ssl = true
+    * def loansData = read('classpath:templates/loans.json')
+    Given path 'loans'
+    And header Accept = 'application/json'
+    And header Content-Type = 'application/json'
+    And header Authorization = authToken
+    And header fineract-platform-tenantid = tenantId
+    And request loansData.groupLoanAccountWithNewProductAndNumberOfRepaymentPayLoad
+    When method POST
+    Then status 200
+    Then match $ contains { resourceId: '#notnull' }
+    Then def loanId = response.resourceId
+
+  @ignore
+  @createJLGLoanWithConfigurableProductAndLoanTermStep
+  Scenario: Create JLG loan account With Configurable Product and Loan Term
+    Given configure ssl = true
+    * def loansData = read('classpath:templates/loans.json')
+    Given path 'loans'
+    And header Accept = 'application/json'
+    And header Content-Type = 'application/json'
+    And header Authorization = authToken
+    And header fineract-platform-tenantid = tenantId
+    And request loansData.jlgLoanAccountWithNewProductAndNumberOfRepaymentPayLoad
+    When method POST
+    Then status 200
+    Then match $ contains { resourceId: '#notnull' }
+    Then def loanId = response.resourceId
