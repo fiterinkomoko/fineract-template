@@ -289,4 +289,18 @@ public class LoanDecisionApiResource {
 
         return this.toApiJsonSerializer.serialize(result);
     }
+
+    @POST
+    @Path("icReviewDecisionLevelFour/{loanId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String acceptIcReviewDecisionLevelFour(@PathParam("loanId") final long loanId, final String apiRequestBodyAsJson) {
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().acceptIcReviewDecisionLevelFour(loanId)
+                .withJson(apiRequestBodyAsJson).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
 }
