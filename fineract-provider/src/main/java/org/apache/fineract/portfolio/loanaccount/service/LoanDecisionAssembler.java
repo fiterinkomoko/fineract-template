@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,9 @@ import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
+import org.apache.fineract.portfolio.loanaccount.api.LoanApprovalMatrixConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanApprovalMatrix;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDecision;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDecisionState;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDueDiligenceInfo;
@@ -116,6 +119,224 @@ public class LoanDecisionAssembler {
         loanDecision.setCollateralReviewOn(collateralReviewOn);
         loanDecision.setCollateralReviewSigned(Boolean.TRUE);
         loanDecision.setRejectCollateralReviewSigned(Boolean.FALSE);
+        return loanDecision;
+    }
+
+    public LoanApprovalMatrix assembleLoanApprovalMatrixFrom(final JsonCommand command) {
+
+        final String currency = command.stringValueOfParameterNamed(LoanApprovalMatrixConstants.currencyParameterName);
+
+        final BigDecimal levelOneUnsecuredFirstCycleMaxAmount = command
+                .bigDecimalValueOfParameterNamed(LoanApprovalMatrixConstants.levelOneUnsecuredFirstCycleMaxAmount);
+        final Integer levelOneUnsecuredFirstCycleMinTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelOneUnsecuredFirstCycleMinTerm);
+        final Integer levelOneUnsecuredFirstCycleMaxTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelOneUnsecuredFirstCycleMaxTerm);
+
+        final BigDecimal levelOneUnsecuredSecondCycleMaxAmount = command
+                .bigDecimalValueOfParameterNamed(LoanApprovalMatrixConstants.levelOneUnsecuredSecondCycleMaxAmount);
+        final Integer levelOneUnsecuredSecondCycleMinTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelOneUnsecuredSecondCycleMinTerm);
+        final Integer levelOneUnsecuredSecondCycleMaxTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelOneUnsecuredSecondCycleMaxTerm);
+
+        final BigDecimal levelOneSecuredFirstCycleMaxAmount = command
+                .bigDecimalValueOfParameterNamed(LoanApprovalMatrixConstants.levelOneSecuredFirstCycleMaxAmount);
+        final Integer levelOneSecuredFirstCycleMinTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelOneSecuredFirstCycleMinTerm);
+        final Integer levelOneSecuredFirstCycleMaxTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelOneSecuredFirstCycleMaxTerm);
+
+        final BigDecimal levelOneSecuredSecondCycleMaxAmount = command
+                .bigDecimalValueOfParameterNamed(LoanApprovalMatrixConstants.levelOneSecuredSecondCycleMaxAmount);
+        final Integer levelOneSecuredSecondCycleMinTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelOneSecuredSecondCycleMinTerm);
+        final Integer levelOneSecuredSecondCycleMaxTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelOneSecuredSecondCycleMaxTerm);
+
+        final BigDecimal levelTwoUnsecuredFirstCycleMaxAmount = command
+                .bigDecimalValueOfParameterNamed(LoanApprovalMatrixConstants.levelTwoUnsecuredFirstCycleMaxAmount);
+        final Integer levelTwoUnsecuredFirstCycleMinTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelTwoUnsecuredFirstCycleMinTerm);
+        final Integer levelTwoUnsecuredFirstCycleMaxTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelTwoUnsecuredFirstCycleMaxTerm);
+
+        final BigDecimal levelTwoUnsecuredSecondCycleMaxAmount = command
+                .bigDecimalValueOfParameterNamed(LoanApprovalMatrixConstants.levelTwoUnsecuredSecondCycleMaxAmount);
+        final Integer levelTwoUnsecuredSecondCycleMinTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelTwoUnsecuredSecondCycleMinTerm);
+        final Integer levelTwoUnsecuredSecondCycleMaxTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelTwoUnsecuredSecondCycleMaxTerm);
+
+        final BigDecimal levelTwoSecuredFirstCycleMaxAmount = command
+                .bigDecimalValueOfParameterNamed(LoanApprovalMatrixConstants.levelTwoSecuredFirstCycleMaxAmount);
+        final Integer levelTwoSecuredFirstCycleMinTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelTwoSecuredFirstCycleMinTerm);
+        final Integer levelTwoSecuredFirstCycleMaxTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelTwoSecuredFirstCycleMaxTerm);
+
+        final BigDecimal levelTwoSecuredSecondCycleMaxAmount = command
+                .bigDecimalValueOfParameterNamed(LoanApprovalMatrixConstants.levelTwoSecuredSecondCycleMaxAmount);
+        final Integer levelTwoSecuredSecondCycleMinTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelTwoSecuredSecondCycleMinTerm);
+        final Integer levelTwoSecuredSecondCycleMaxTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelTwoSecuredSecondCycleMaxTerm);
+
+        final BigDecimal levelThreeUnsecuredFirstCycleMaxAmount = command
+                .bigDecimalValueOfParameterNamed(LoanApprovalMatrixConstants.levelThreeUnsecuredFirstCycleMaxAmount);
+        final Integer levelThreeUnsecuredFirstCycleMinTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelThreeUnsecuredFirstCycleMinTerm);
+        final Integer levelThreeUnsecuredFirstCycleMaxTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelThreeUnsecuredFirstCycleMaxTerm);
+
+        final BigDecimal levelThreeUnsecuredSecondCycleMaxAmount = command
+                .bigDecimalValueOfParameterNamed(LoanApprovalMatrixConstants.levelThreeUnsecuredSecondCycleMaxAmount);
+        final Integer levelThreeUnsecuredSecondCycleMinTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelThreeUnsecuredSecondCycleMinTerm);
+        final Integer levelThreeUnsecuredSecondCycleMaxTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelThreeUnsecuredSecondCycleMaxTerm);
+
+        final BigDecimal levelThreeSecuredFirstCycleMaxAmount = command
+                .bigDecimalValueOfParameterNamed(LoanApprovalMatrixConstants.levelThreeSecuredFirstCycleMaxAmount);
+        final Integer levelThreeSecuredFirstCycleMinTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelThreeSecuredFirstCycleMinTerm);
+        final Integer levelThreeSecuredFirstCycleMaxTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelThreeSecuredFirstCycleMaxTerm);
+
+        final BigDecimal levelThreeSecuredSecondCycleMaxAmount = command
+                .bigDecimalValueOfParameterNamed(LoanApprovalMatrixConstants.levelThreeSecuredSecondCycleMaxAmount);
+        final Integer levelThreeSecuredSecondCycleMinTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelThreeSecuredSecondCycleMinTerm);
+        final Integer levelThreeSecuredSecondCycleMaxTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelThreeSecuredSecondCycleMaxTerm);
+
+        final BigDecimal levelFourUnsecuredFirstCycleMaxAmount = command
+                .bigDecimalValueOfParameterNamed(LoanApprovalMatrixConstants.levelFourUnsecuredFirstCycleMaxAmount);
+        final Integer levelFourUnsecuredFirstCycleMinTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelFourUnsecuredFirstCycleMinTerm);
+        final Integer levelFourUnsecuredFirstCycleMaxTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelFourUnsecuredFirstCycleMaxTerm);
+
+        final BigDecimal levelFourUnsecuredSecondCycleMaxAmount = command
+                .bigDecimalValueOfParameterNamed(LoanApprovalMatrixConstants.levelFourUnsecuredSecondCycleMaxAmount);
+        final Integer levelFourUnsecuredSecondCycleMinTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelFourUnsecuredSecondCycleMinTerm);
+        final Integer levelFourUnsecuredSecondCycleMaxTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelFourUnsecuredSecondCycleMaxTerm);
+
+        final BigDecimal levelFourSecuredFirstCycleMaxAmount = command
+                .bigDecimalValueOfParameterNamed(LoanApprovalMatrixConstants.levelFourSecuredFirstCycleMaxAmount);
+        final Integer levelFourSecuredFirstCycleMinTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelFourSecuredFirstCycleMinTerm);
+        final Integer levelFourSecuredFirstCycleMaxTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelFourSecuredFirstCycleMaxTerm);
+
+        final BigDecimal levelFourSecuredSecondCycleMaxAmount = command
+                .bigDecimalValueOfParameterNamed(LoanApprovalMatrixConstants.levelFourSecuredSecondCycleMaxAmount);
+        final Integer levelFourSecuredSecondCycleMinTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelFourSecuredSecondCycleMinTerm);
+        final Integer levelFourSecuredSecondCycleMaxTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelFourSecuredSecondCycleMaxTerm);
+
+        final BigDecimal levelFiveUnsecuredFirstCycleMaxAmount = command
+                .bigDecimalValueOfParameterNamed(LoanApprovalMatrixConstants.levelFiveUnsecuredFirstCycleMaxAmount);
+        final Integer levelFiveUnsecuredFirstCycleMinTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelFiveUnsecuredFirstCycleMinTerm);
+        final Integer levelFiveUnsecuredFirstCycleMaxTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelFiveUnsecuredFirstCycleMaxTerm);
+
+        final BigDecimal levelFiveUnsecuredSecondCycleMaxAmount = command
+                .bigDecimalValueOfParameterNamed(LoanApprovalMatrixConstants.levelFiveUnsecuredSecondCycleMaxAmount);
+        final Integer levelFiveUnsecuredSecondCycleMinTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelFiveUnsecuredSecondCycleMinTerm);
+        final Integer levelFiveUnsecuredSecondCycleMaxTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelFiveUnsecuredSecondCycleMaxTerm);
+
+        final BigDecimal levelFiveSecuredFirstCycleMaxAmount = command
+                .bigDecimalValueOfParameterNamed(LoanApprovalMatrixConstants.levelFiveSecuredFirstCycleMaxAmount);
+        final Integer levelFiveSecuredFirstCycleMinTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelFiveSecuredFirstCycleMinTerm);
+        final Integer levelFiveSecuredFirstCycleMaxTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelFiveSecuredFirstCycleMaxTerm);
+
+        final BigDecimal levelFiveSecuredSecondCycleMaxAmount = command
+                .bigDecimalValueOfParameterNamed(LoanApprovalMatrixConstants.levelFiveSecuredSecondCycleMaxAmount);
+        final Integer levelFiveSecuredSecondCycleMinTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelFiveSecuredSecondCycleMinTerm);
+        final Integer levelFiveSecuredSecondCycleMaxTerm = command
+                .integerValueOfParameterNamed(LoanApprovalMatrixConstants.levelFiveSecuredSecondCycleMaxTerm);
+
+        return new LoanApprovalMatrix(currency, levelOneUnsecuredFirstCycleMaxAmount, levelOneUnsecuredFirstCycleMinTerm,
+                levelOneUnsecuredFirstCycleMaxTerm, levelOneUnsecuredSecondCycleMaxAmount, levelOneUnsecuredSecondCycleMinTerm,
+                levelOneUnsecuredSecondCycleMaxTerm, levelOneSecuredFirstCycleMaxAmount, levelOneSecuredFirstCycleMinTerm,
+                levelOneSecuredFirstCycleMaxTerm, levelOneSecuredSecondCycleMaxAmount, levelOneSecuredSecondCycleMinTerm,
+                levelOneSecuredSecondCycleMaxTerm, levelTwoUnsecuredFirstCycleMaxAmount, levelTwoUnsecuredFirstCycleMinTerm,
+                levelTwoUnsecuredFirstCycleMaxTerm, levelTwoUnsecuredSecondCycleMaxAmount, levelTwoUnsecuredSecondCycleMinTerm,
+                levelTwoUnsecuredSecondCycleMaxTerm, levelTwoSecuredFirstCycleMaxAmount, levelTwoSecuredFirstCycleMinTerm,
+                levelTwoSecuredFirstCycleMaxTerm, levelTwoSecuredSecondCycleMaxAmount, levelTwoSecuredSecondCycleMinTerm,
+                levelTwoSecuredSecondCycleMaxTerm, levelThreeUnsecuredFirstCycleMaxAmount, levelThreeUnsecuredFirstCycleMinTerm,
+                levelThreeUnsecuredFirstCycleMaxTerm, levelThreeUnsecuredSecondCycleMaxAmount, levelThreeUnsecuredSecondCycleMinTerm,
+                levelThreeUnsecuredSecondCycleMaxTerm, levelThreeSecuredFirstCycleMaxAmount, levelThreeSecuredFirstCycleMinTerm,
+                levelThreeSecuredFirstCycleMaxTerm, levelThreeSecuredSecondCycleMaxAmount, levelThreeSecuredSecondCycleMinTerm,
+                levelThreeSecuredSecondCycleMaxTerm, levelFourUnsecuredFirstCycleMaxAmount, levelFourUnsecuredFirstCycleMinTerm,
+                levelFourUnsecuredFirstCycleMaxTerm, levelFourUnsecuredSecondCycleMaxAmount, levelFourUnsecuredSecondCycleMinTerm,
+                levelFourUnsecuredSecondCycleMaxTerm, levelFourSecuredFirstCycleMaxAmount, levelFourSecuredFirstCycleMinTerm,
+                levelFourSecuredFirstCycleMaxTerm, levelFourSecuredSecondCycleMaxAmount, levelFourSecuredSecondCycleMinTerm,
+                levelFourSecuredSecondCycleMaxTerm, levelFiveUnsecuredFirstCycleMaxAmount, levelFiveUnsecuredFirstCycleMinTerm,
+                levelFiveUnsecuredFirstCycleMaxTerm, levelFiveUnsecuredSecondCycleMaxAmount, levelFiveUnsecuredSecondCycleMinTerm,
+                levelFiveUnsecuredSecondCycleMaxTerm, levelFiveSecuredFirstCycleMaxAmount, levelFiveSecuredFirstCycleMinTerm,
+                levelFiveSecuredFirstCycleMaxTerm, levelFiveSecuredSecondCycleMaxAmount, levelFiveSecuredSecondCycleMinTerm,
+                levelFiveSecuredSecondCycleMaxTerm);
+    }
+
+    public LoanDecision assembleIcReviewDecisionLevelOneFrom(final JsonCommand command, AppUser currentUser,
+            LoanDecision savedLoanDecision) {
+
+        LocalDate icReviewOn = command.localDateValueOfParameterNamed(LoanApiConstants.icReviewOnDateParameterName);
+
+        final String noteText = command.stringValueOfParameterNamed("note");
+
+        LoanDecision loanDecision = savedLoanDecision;
+        loanDecision.setLoanDecisionState(LoanDecisionState.IC_REVIEW_LEVEL_ONE.getValue());
+        loanDecision.setIcReviewDecisionLevelOneNote(noteText);
+        loanDecision.setIcReviewDecisionLevelOneBy(currentUser);
+        loanDecision.setIcReviewDecisionLevelOneOn(icReviewOn);
+        loanDecision.setIcReviewDecisionLevelOneSigned(Boolean.TRUE);
+        loanDecision.setRejectIcReviewDecisionLevelOneSigned(Boolean.FALSE);
+        return loanDecision;
+    }
+
+    public LoanDecision assembleIcReviewDecisionLevelTwoFrom(final JsonCommand command, AppUser currentUser,
+            LoanDecision savedLoanDecision) {
+
+        LocalDate icReviewOn = command.localDateValueOfParameterNamed(LoanApiConstants.icReviewOnDateParameterName);
+
+        final String noteText = command.stringValueOfParameterNamed("note");
+
+        LoanDecision loanDecision = savedLoanDecision;
+        loanDecision.setLoanDecisionState(LoanDecisionState.IC_REVIEW_LEVEL_TWO.getValue());
+        loanDecision.setIcReviewDecisionLevelTwoNote(noteText);
+        loanDecision.setIcReviewDecisionLevelTwoBy(currentUser);
+        loanDecision.setIcReviewDecisionLevelTwoOn(icReviewOn);
+        loanDecision.setIcReviewDecisionLevelTwoSigned(Boolean.TRUE);
+        loanDecision.setRejectIcReviewDecisionLevelTwoSigned(Boolean.FALSE);
+        return loanDecision;
+    }
+
+    public LoanDecision assembleIcReviewDecisionLevelThreeFrom(final JsonCommand command, AppUser currentUser,
+            LoanDecision savedLoanDecision) {
+
+        LocalDate icReviewOn = command.localDateValueOfParameterNamed(LoanApiConstants.icReviewOnDateParameterName);
+
+        final String noteText = command.stringValueOfParameterNamed("note");
+
+        LoanDecision loanDecision = savedLoanDecision;
+        loanDecision.setLoanDecisionState(LoanDecisionState.IC_REVIEW_LEVEL_THREE.getValue());
+        loanDecision.setIcReviewDecisionLevelThreeNote(noteText);
+        loanDecision.setIcReviewDecisionLevelThreeBy(currentUser);
+        loanDecision.setIcReviewDecisionLevelThreeOn(icReviewOn);
+        loanDecision.setIcReviewDecisionLevelThreeSigned(Boolean.TRUE);
+        loanDecision.setRejectIcReviewDecisionLevelThreeSigned(Boolean.FALSE);
         return loanDecision;
     }
 }

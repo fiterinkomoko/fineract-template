@@ -710,7 +710,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " lp.can_use_for_topup as canUseForTopup, " + " l.is_topup as isTopup, " + " topup.closure_loan_id as closureLoanId, "
                     + " l.total_recovered_derived as totalRecovered" + ", topuploan.account_no as closureLoanAccountNo, "
                     + " topup.topup_amount as topupAmount ,l.department_cv_id as departmentId,departmentV.code_value as departmentCode, "
-                    + " ds.loan_decision_state as loanDecisionState " + " from m_loan l" //
+                    + " ds.loan_decision_state as loanDecisionState , ds.next_loan_ic_review_decision_state as nextLoanIcReviewDecisionState  "
+                    + " from m_loan l" //
                     + " join m_product_loan lp on lp.id = l.product_id" //
                     + " left join m_loan_recalculation_details lir on lir.loan_id = l.id " + " join m_currency rc on rc."
                     + sqlGenerator.escape("code") + " = l.currency_code" //
@@ -1045,9 +1046,15 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final Boolean requiresEquityContribution = rs.getBoolean("requiresEquityContribution");
             final BigDecimal equityContributionLoanPercentage = rs.getBigDecimal("equityContributionLoanPercentage");
             final Long loanDecisionStateId = JdbcSupport.getLong(rs, "loanDecisionState");
+            final Long nextLoanIcReviewDecisionStateId = JdbcSupport.getLong(rs, "nextLoanIcReviewDecisionState");
             EnumOptionData loanDecisionStateEnumData = null;
             if (loanDecisionStateId != null) {
                 loanDecisionStateEnumData = LoanEnumerations.loanDecisionState(loanDecisionStateId.intValue());
+            }
+
+            EnumOptionData nextLoanIcReviewDecisionStateEnumData = null;
+            if (nextLoanIcReviewDecisionStateId != null) {
+                nextLoanIcReviewDecisionStateEnumData = LoanEnumerations.loanDecisionState(nextLoanIcReviewDecisionStateId.intValue());
             }
 
             LoanAccountData loanAccountData = LoanAccountData.basicLoanDetails(id, accountNo, status, externalId, clientId, clientAccountNo,
@@ -1070,6 +1077,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             loanAccountData.setEquityContributionLoanPercentage(equityContributionLoanPercentage);
             loanAccountData.setDepartment(department);
             loanAccountData.setLoanDecisionState(loanDecisionStateEnumData);
+            loanAccountData.setNextLoanIcReviewDecisionState(nextLoanIcReviewDecisionStateEnumData);
             return loanAccountData;
         }
     }
@@ -2559,7 +2567,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         final LoanAccountData loanAccountData = retrieveOne(loanId);
 
-        final Collection<CodeValueData> departmentOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("Department");
         final Collection<CodeValueData> surveyLocationOptions = this.codeValueReadPlatformService
                 .retrieveCodeValuesByCode("SurveyLocation");
         final Collection<CodeValueData> programOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("Program");
