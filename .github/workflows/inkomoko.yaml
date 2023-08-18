@@ -41,7 +41,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           touch ~/.ssh/known_hosts
-          ssh-keyscan -t rsa ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -p ${{ secrets.VM_PORT_DEV }} -t rsa ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
 
       - name: Copy file using SCP
         run: |
