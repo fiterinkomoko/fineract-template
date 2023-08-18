@@ -190,3 +190,17 @@ Feature: Create loan stapes
     When method POST
     Then status 200
     Then match $ contains { resourceId: '#notnull' }
+
+  @ignore
+  @icReviewDecisionLevelThreeStage
+  Scenario: IC Review Decision Level Three   Stage
+    Given configure ssl = true
+    * def loansData = read('classpath:templates/loansDecision.json')
+    Given path 'loans/decision/icReviewDecisionLevelThree',loanId
+    And header Accept = 'application/json'
+    And header Authorization = authToken
+    And header fineract-platform-tenantid = tenantId
+    And request loansData.icReview
+    When method POST
+    Then status 200
+    Then match $ contains { resourceId: '#notnull' }

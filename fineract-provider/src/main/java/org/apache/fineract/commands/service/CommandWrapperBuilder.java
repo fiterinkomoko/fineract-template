@@ -3866,4 +3866,13 @@ public class CommandWrapperBuilder {
 
         return this;
     }
+
+    public CommandWrapperBuilder acceptIcReviewDecisionLevelThree(final long loanId) {
+        this.actionName = "ACCEPT";
+        this.entityName = "LOANICREVIEWDECISIONLEVELTHREE";
+        this.href = "/loans/decision/icReviewDecisionLevelThree/" + loanId;
+        this.loanId = loanId;
+
+        return this;
+    }
 }

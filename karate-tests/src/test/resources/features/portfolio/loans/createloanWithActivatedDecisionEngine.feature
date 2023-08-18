@@ -1334,6 +1334,22 @@ Feature: Test loan account apis
     * assert karate.sizeOf(noteLevelOneResponse.notes) == 5
 
 
+            #-Approve Loan Via IC-Review Decision Level Three
+    #-*************************  Level Three  ******************
+    * call read('classpath:features/portfolio/loans/loanDecisionSteps.feature@icReviewDecisionLevelThreeStage') { icReviewOn : '#(submittedOnDate)', loanId : '#(loanId)' }
+     # Assert Actions for Level Three
+    * def levelOneResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findloanbyidWithAllAssociationStep') { loanId : '#(loanId)' }
+    #     Assert that Loan Account has passed IC_REVIEW_LEVEL_THREE Stage
+    * assert levelOneResponse.loanAccount.loanDecisionState.id == 1600
+    * assert levelOneResponse.loanAccount.loanDecisionState.value == 'IC_REVIEW_LEVEL_THREE'
+    * assert levelOneResponse.loanAccount.nextLoanIcReviewDecisionState.id == 1900
+    * assert levelOneResponse.loanAccount.nextLoanIcReviewDecisionState.value == 'PREPARE_AND_SIGN_CONTRACT'
+    * assert levelOneResponse.loanAccount.isExtendLoanLifeCycleConfig == true
+    * assert levelOneResponse.loanAccount.loanDueDiligenceData != null
+    * def noteLevelOneResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findLoanAccountNotesByLoanId') { loanId : '#(loanId)' }
+    * assert karate.sizeOf(noteLevelOneResponse.notes) == 6
+
+
 
          # Delete Loan Approval Matrix created above. We Create a single unique record by currency
     * call read('classpath:features/portfolio/loans/loanDecisionSteps.feature@deleteLoanApprovalMatrixStep') { matrixId : '#(matrixId)'}
@@ -1534,6 +1550,23 @@ Feature: Test loan account apis
 
 
 
+            #-Approve Loan Via IC-Review Decision Level Three
+    #-*************************  Level Three  ******************
+    * call read('classpath:features/portfolio/loans/loanDecisionSteps.feature@icReviewDecisionLevelThreeStage') { icReviewOn : '#(submittedOnDate)', loanId : '#(loanId)' }
+     # Assert Actions for Level Three
+    * def levelOneResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findloanbyidWithAllAssociationStep') { loanId : '#(loanId)' }
+    #     Assert that Loan Account has passed IC_REVIEW_LEVEL_THREE Stage
+    * assert levelOneResponse.loanAccount.loanDecisionState.id == 1600
+    * assert levelOneResponse.loanAccount.loanDecisionState.value == 'IC_REVIEW_LEVEL_THREE'
+    * assert levelOneResponse.loanAccount.nextLoanIcReviewDecisionState.id == 1900
+    * assert levelOneResponse.loanAccount.nextLoanIcReviewDecisionState.value == 'PREPARE_AND_SIGN_CONTRACT'
+    * assert levelOneResponse.loanAccount.isExtendLoanLifeCycleConfig == true
+    * assert levelOneResponse.loanAccount.loanDueDiligenceData != null
+    * def noteLevelOneResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findLoanAccountNotesByLoanId') { loanId : '#(loanId)' }
+    * assert karate.sizeOf(noteLevelOneResponse.notes) == 6
+
+
+
          # Delete Loan Approval Matrix created above. We Create a single unique record by currency
     * call read('classpath:features/portfolio/loans/loanDecisionSteps.feature@deleteLoanApprovalMatrixStep') { matrixId : '#(matrixId)'}
 
@@ -1731,6 +1764,22 @@ Feature: Test loan account apis
     * assert levelOneResponse.loanAccount.loanDueDiligenceData != null
     * def noteLevelOneResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findLoanAccountNotesByLoanId') { loanId : '#(loanId)' }
     * assert karate.sizeOf(noteLevelOneResponse.notes) == 5
+
+
+        #-Approve Loan Via IC-Review Decision Level Three
+    #-*************************  Level Three  ******************
+    * call read('classpath:features/portfolio/loans/loanDecisionSteps.feature@icReviewDecisionLevelThreeStage') { icReviewOn : '#(submittedOnDate)', loanId : '#(loanId)' }
+     # Assert Actions for Level Three
+    * def levelOneResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findloanbyidWithAllAssociationStep') { loanId : '#(loanId)' }
+    #     Assert that Loan Account has passed IC_REVIEW_LEVEL_THREE Stage
+    * assert levelOneResponse.loanAccount.loanDecisionState.id == 1600
+    * assert levelOneResponse.loanAccount.loanDecisionState.value == 'IC_REVIEW_LEVEL_THREE'
+    * assert levelOneResponse.loanAccount.nextLoanIcReviewDecisionState.id == 1900
+    * assert levelOneResponse.loanAccount.nextLoanIcReviewDecisionState.value == 'PREPARE_AND_SIGN_CONTRACT'
+    * assert levelOneResponse.loanAccount.isExtendLoanLifeCycleConfig == true
+    * assert levelOneResponse.loanAccount.loanDueDiligenceData != null
+    * def noteLevelOneResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findLoanAccountNotesByLoanId') { loanId : '#(loanId)' }
+    * assert karate.sizeOf(noteLevelOneResponse.notes) == 6
 
 
 
