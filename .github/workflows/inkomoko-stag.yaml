@@ -10,54 +10,53 @@ on:
         default: 'Staging'  
 
 jobs:
-
-  deploy:
-
-    name: Deploy image to ECS
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out code
-        uses: actions/checkout@v2
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v6
 
-      - uses: kamiazya/setup-graphviz@v1
+      - uses: actions/checkout@v2
 
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Set up JDK 17
+        uses: actions/setup-java@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_inkomoko }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_inkomoko }}
-          aws-region: eu-central-1
+          java-version: 17
 
-      - id: commit
-        uses: pr-mpt/actions-commit-hash@v1
+      - name: Build with Gradles
+        run: ./gradlew --no-daemon -q -x rat -x compileTestJava -x test -x spotlessJavaCheck -x spotlessJava bootJar
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Build, tag, and push image to Amazon ECR
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: fineract
-          IMAGE_TAG: ${{ steps.commit.outputs.short }}
+      - name: List directory contents
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "Listing contents of the directory:"
+          ls -l ./fineract-provider/build/libs/
+
+      - name: Get Shortened Commit SHA
+        id: shortened_sha
+        run: |
+          FULL_SHA=$GITHUB_SHA
+          SHORTENED_SHA=${FULL_SHA:0:8}
+          echo "::set-output name=shortened_sha::$SHORTENED_SHA"
 
 
-      - name: executing remote ssh commands using ssh key
-        env:
-          IMAGE_TAG: ${{ steps.commit.outputs.short }}
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.VM_HOST }}
-          port: ${{ secrets.VM_PORT_STAG }}
-          username: ${{ secrets.VM_USER_STAG }}
-          password: ${{ secrets.VM_KEY_STAG }}
-          script: |
-            export IMAGE_TAG=${{ steps.commit.outputs.short }}
-            ./docker-login.sh
-            cd fineract
-            docker-compose up -d
+      - name: Update known hosts
+        run: |
+          mkdir -p ~/.ssh
+          touch ~/.ssh/known_hosts
+          ssh-keyscan -t rsa ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Copy file using SCP
+        run: |
+          HOST=${{ secrets.VM_HOST }}
+          USER=${{ secrets.VM_USER_STAG }}
+          SOURCE_FILE=./fineract-provider/build/libs/fineract-provider-0.0.0-${{ steps.shortened_sha.outputs.shortened_sha }}.jar
+          DESTINATION_DIR=/home/ubuntu/fineract/
+          echo "${{ secrets.VM_KEY_STAG }}" > key.pem
+          chmod 400 key.pem
+          scp -i key.pem -p ${{ secrets.VM_PORT_STAG }} -o StrictHostKeyChecking=no $SOURCE_FILE ${{ secrets.VM_USER_STAG }}@${{ secrets.VM_HOST }}:$DESTINATION_DIR
+
+
+      - name: Build image on server and deploy
+        run: ssh -i key.pem -p ${{ secrets.VM_PORT_STAG }} -o StrictHostKeyChecking=no -l ${{ secrets.VM_USER_STAG}} ${{ secrets.VM_HOST }} '/home/mifosstaging/fineract_deployment/fineract/build.sh'
