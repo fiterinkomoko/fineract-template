@@ -55,4 +55,4 @@ jobs:
 
 
       - name: Build image on server and deploy
-        run: ssh -i key.pem -p ${{ secrets.VM_PORT_DEV }} - -o StrictHostKeyChecking=no -l ${{ secrets.VM_USER_DEV}} ${{ secrets.VM_HOST }} '/home/mifosdev/fineract_deployment/fineract/build.sh'
+        run: ssh -i key.pem -p ${{ secrets.VM_PORT_DEV }} -o StrictHostKeyChecking=no -l ${{ secrets.VM_USER_DEV}} ${{ secrets.VM_HOST }} '/home/mifosdev/fineract_deployment/fineract/build.sh'
