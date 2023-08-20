@@ -808,12 +808,16 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         final boolean isRepayGreater = payPrincipal.plus(interestPayable).plus(feePayable).plus(penaltyPayable).isGreaterThanZero();
         Money repaymentAmt = isRepayGreater ? payPrincipal.plus(interestPayable).plus(feePayable).plus(penaltyPayable)
                 : Money.of(currency, loan.getSummary().getTotalPrincipalOutstanding());
-        List<Long> transactionIds = new ArrayList<>();// m_loan_transaction_repayment_schedule_mapping
-
-        payment = LoanTransaction.repayment(loan.getOffice(), isRepayGreater ? repaymentAmt : Money.zero(currency), null, foreClosureDate,
-                null);
-        payment.updateLoan(loan);
-        newTransactions.add(payment);
+        List<Long> transactionIds = new ArrayList<>();
+        if (isRepayGreater || isTopup) {
+            payment = LoanTransaction.repayment(loan.getOffice(), isRepayGreater ? repaymentAmt : Money.zero(currency), null,
+                    foreClosureDate, null);
+            payment.updateLoan(loan);
+            newTransactions.add(payment);
+        } else {
+            final String errorMessage = "Loan Interest over paid ";
+            throw new InvalidLoanStateTransitionException("transaction", "loan.interest.over.paid", errorMessage);
+        }
         final ChangedTransactionDetail changedTransactionDetail = loan.handleForeClosureTransactions(payment,
                 defaultLoanLifecycleStateMachine(), null);
 
