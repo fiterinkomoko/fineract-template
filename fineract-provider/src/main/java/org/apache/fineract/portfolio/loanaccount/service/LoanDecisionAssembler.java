@@ -339,4 +339,21 @@ public class LoanDecisionAssembler {
         loanDecision.setRejectIcReviewDecisionLevelThreeSigned(Boolean.FALSE);
         return loanDecision;
     }
+
+    public LoanDecision assembleIcReviewDecisionLevelFourFrom(final JsonCommand command, AppUser currentUser,
+            LoanDecision savedLoanDecision) {
+
+        LocalDate icReviewOn = command.localDateValueOfParameterNamed(LoanApiConstants.icReviewOnDateParameterName);
+
+        final String noteText = command.stringValueOfParameterNamed("note");
+
+        LoanDecision loanDecision = savedLoanDecision;
+        loanDecision.setLoanDecisionState(LoanDecisionState.IC_REVIEW_LEVEL_FOUR.getValue());
+        loanDecision.setIcReviewDecisionLevelFourNote(noteText);
+        loanDecision.setIcReviewDecisionLevelFourBy(currentUser);
+        loanDecision.setIcReviewDecisionLevelFourOn(icReviewOn);
+        loanDecision.setIcReviewDecisionLevelFourSigned(Boolean.TRUE);
+        loanDecision.setRejectIcReviewDecisionLevelFourSigned(Boolean.FALSE);
+        return loanDecision;
+    }
 }
