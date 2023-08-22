@@ -132,6 +132,19 @@ public class LoanDecision extends AbstractAuditableCustom {
     @JoinColumn(name = "ic_review_decision_level_four_by")
     private AppUser icReviewDecisionLevelFourBy;
 
+    // IC review Decision Level Five
+    @Column(name = "ic_review_decision_level_five_note")
+    private String icReviewDecisionLevelFiveNote;
+    @Column(name = "is_ic_review_decision_level_five_signed")
+    private Boolean icReviewDecisionLevelFiveSigned;
+    @Column(name = "is_reject_ic_review_decision_level_five")
+    private Boolean rejectIcReviewDecisionLevelFiveSigned;
+    @Column(name = "ic_review_decision_level_five_on")
+    private LocalDate icReviewDecisionLevelFiveOn;
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "ic_review_decision_level_five_by")
+    private AppUser icReviewDecisionLevelFiveBy;
+
     public LoanDecision() {}
 
     public static LoanDecision reviewApplication(Loan loan, Integer loanDecisionState, String reviewApplicationNote,
@@ -166,5 +179,8 @@ public class LoanDecision extends AbstractAuditableCustom {
         this.rejectIcReviewDecisionLevelFourSigned = Boolean.FALSE;
         this.icReviewDecisionLevelFourSigned = Boolean.FALSE;
         this.rejectIcReviewDecisionLevelFourSigned = Boolean.FALSE;
+        this.rejectIcReviewDecisionLevelFiveSigned = Boolean.FALSE;
+        this.icReviewDecisionLevelFiveSigned = Boolean.FALSE;
+        this.rejectIcReviewDecisionLevelFiveSigned = Boolean.FALSE;
     }
 }
