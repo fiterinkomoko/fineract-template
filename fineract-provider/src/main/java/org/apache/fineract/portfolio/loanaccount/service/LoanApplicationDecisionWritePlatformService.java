@@ -42,4 +42,8 @@ public interface LoanApplicationDecisionWritePlatformService {
     CommandProcessingResult acceptIcReviewDecisionLevelThree(Long loanId, JsonCommand command);
 
     CommandProcessingResult acceptIcReviewDecisionLevelFour(Long loanId, JsonCommand command);
+
+    CommandProcessingResult acceptIcReviewDecisionLevelFive(Long loanId, JsonCommand command);
+
+    CommandProcessingResult acceptPrepareAndSignContract(Long loanId, JsonCommand command);
 }

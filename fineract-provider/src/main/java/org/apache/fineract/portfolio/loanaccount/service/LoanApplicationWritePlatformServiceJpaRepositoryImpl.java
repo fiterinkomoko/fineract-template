@@ -1416,7 +1416,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         final Loan loan = retrieveLoanBy(loanId);
         this.validateActiveLoanCount(loan.getClientId());
-        this.loanDecisionStateUtilService.validateLoanReviewApplicationStateIsFiredBeforeApproval(loan);
+        this.loanDecisionStateUtilService.validateLoanAccountWithExtraLoanDecisionStagesConfiguredGlobally(loan, command);
 
         final JsonArray disbursementDataArray = command.arrayOfParameterNamed(LoanApiConstants.disbursementDataParameterName);
 
