@@ -374,4 +374,20 @@ public class LoanDecisionAssembler {
         loanDecision.setRejectIcReviewDecisionLevelFiveSigned(Boolean.FALSE);
         return loanDecision;
     }
+
+    public LoanDecision assemblePrepareAndSignContractFrom(final JsonCommand command, AppUser currentUser, LoanDecision savedLoanDecision) {
+
+        LocalDate icReviewOn = command.localDateValueOfParameterNamed(LoanApiConstants.icReviewOnDateParameterName);
+
+        final String noteText = command.stringValueOfParameterNamed("note");
+
+        LoanDecision loanDecision = savedLoanDecision;
+        loanDecision.setLoanDecisionState(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue());
+        loanDecision.setPrepareAndSignContractNote(noteText);
+        loanDecision.setPrepareAndSignContractBy(currentUser);
+        loanDecision.setPrepareAndSignContractOn(icReviewOn);
+        loanDecision.setPrepareAndSignContractSigned(Boolean.TRUE);
+        loanDecision.setRejectPrepareAndSignContractSigned(Boolean.FALSE);
+        return loanDecision;
+    }
 }
