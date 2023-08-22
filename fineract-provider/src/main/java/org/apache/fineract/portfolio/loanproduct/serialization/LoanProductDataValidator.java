@@ -118,7 +118,8 @@ public final class LoanProductDataValidator {
             DepositsApiConstants.chartsParamName, LoanProductConstants.advancePaymentInterestForExactDaysInPeriodParamName,
             LoanProductConstants.isBnplLoanProductParamName, LoanProductConstants.requiresEquityContributionParamName,
             LoanProductConstants.equityContributionLoanPercentageParamName, LoanProductConstants.LOAN_PRODUCT_CATEGORY,
-            LoanProductConstants.LOAN_PRODUCT_TYPE, LoanProductConstants.maintainInterestOnLoanTermExtensionParamName));
+            LoanProductConstants.LOAN_PRODUCT_TYPE, LoanProductConstants.maintainInterestOnLoanTermExtensionParamName,
+            LoanProductConstants.IS_ISLAMIC));
 
     private static final String[] supportedloanConfigurableAttributes = { LoanProductConstants.amortizationTypeParamName,
             LoanProductConstants.interestTypeParamName, LoanProductConstants.transactionProcessingStrategyIdParamName,
@@ -702,6 +703,8 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(LoanProductConstants.equityContributionLoanPercentageParamName)
                     .value(equityContributionLoanPercentage).ignoreIfNull().zeroOrPositiveAmount();
         }
+        final Boolean isIslamic = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.IS_ISLAMIC, element);
+        baseDataValidator.reset().parameter(LoanProductConstants.IS_ISLAMIC).value(isIslamic).ignoreIfNull().validateForBooleanValue();
 
         validateBnplValues(baseDataValidator, isBnplLoanProduct, requiresEquityContribution, equityContributionLoanPercentage);
 
@@ -1598,6 +1601,10 @@ public final class LoanProductDataValidator {
                     .extractBigDecimalWithLocaleNamed(LoanProductConstants.equityContributionLoanPercentageParamName, element);
             baseDataValidator.reset().parameter(LoanProductConstants.equityContributionLoanPercentageParamName)
                     .value(equityContributionLoanPercentage).ignoreIfNull().zeroOrPositiveAmount();
+        }
+        if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.IS_ISLAMIC, element)) {
+            final Boolean isIslamic = this.fromApiJsonHelper.extractBooleanNamed(LoanProductConstants.IS_ISLAMIC, element);
+            baseDataValidator.reset().parameter(LoanProductConstants.IS_ISLAMIC).value(isIslamic).ignoreIfNull().validateForBooleanValue();
         }
         // set with persisted value if not coming from API call
         isBnplLoanProduct = isBnplLoanProduct == null ? loanProduct.getBnplLoanProduct() : isBnplLoanProduct;
