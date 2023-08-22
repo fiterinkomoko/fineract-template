@@ -71,7 +71,7 @@ public final class SearchParameters {
 
         final Integer maxLimitAllowed = getCheckedLimit(limit);
         final Long staffId = null;
-        //final String accountNo = null;
+        // final String accountNo = null;
         final Long loanId = null;
         final Long savingsId = null;
 

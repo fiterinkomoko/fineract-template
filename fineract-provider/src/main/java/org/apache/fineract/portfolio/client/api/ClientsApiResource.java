@@ -153,7 +153,7 @@ public class ClientsApiResource {
             @QueryParam("orderBy") @Parameter(description = "orderBy") final String orderBy,
             @QueryParam("sortOrder") @Parameter(description = "sortOrder") final String sortOrder,
             @QueryParam("orphansOnly") @Parameter(description = "orphansOnly") final Boolean orphansOnly,
-                              @QueryParam("accountNo") @Parameter(description = "accountNo") final String accountNo) {
+            @QueryParam("accountNo") @Parameter(description = "accountNo") final String accountNo) {
 
         return this.retrieveAll(uriInfo, sqlSearch, officeId, externalId, displayName, firstname, lastname, status, hierarchy, offset,
                 limit, orderBy, sortOrder, orphansOnly, false, clientType, accountNo);
