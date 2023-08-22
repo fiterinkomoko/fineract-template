@@ -145,6 +145,19 @@ public class LoanDecision extends AbstractAuditableCustom {
     @JoinColumn(name = "ic_review_decision_level_five_by")
     private AppUser icReviewDecisionLevelFiveBy;
 
+    // Prepare and sign contract
+    @Column(name = "prepare_and_sign_contract_note")
+    private String prepareAndSignContractNote;
+    @Column(name = "is_prepare_and_sign_contract_signed")
+    private Boolean prepareAndSignContractSigned;
+    @Column(name = "is_reject_prepare_and_sign_contract")
+    private Boolean rejectPrepareAndSignContractSigned;
+    @Column(name = "prepare_and_sign_contract_on")
+    private LocalDate prepareAndSignContractOn;
+    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "prepare_and_sign_contract_by")
+    private AppUser prepareAndSignContractBy;
+
     public LoanDecision() {}
 
     public static LoanDecision reviewApplication(Loan loan, Integer loanDecisionState, String reviewApplicationNote,
@@ -169,18 +182,15 @@ public class LoanDecision extends AbstractAuditableCustom {
         this.rejectCollateralReviewSigned = Boolean.FALSE;
         this.rejectIcReviewDecisionLevelOneSigned = Boolean.FALSE;
         this.icReviewDecisionLevelOneSigned = Boolean.FALSE;
-        this.rejectIcReviewDecisionLevelOneSigned = Boolean.FALSE;
         this.rejectIcReviewDecisionLevelTwoSigned = Boolean.FALSE;
         this.icReviewDecisionLevelTwoSigned = Boolean.FALSE;
-        this.rejectIcReviewDecisionLevelTwoSigned = Boolean.FALSE;
         this.rejectIcReviewDecisionLevelThreeSigned = Boolean.FALSE;
         this.icReviewDecisionLevelThreeSigned = Boolean.FALSE;
-        this.rejectIcReviewDecisionLevelThreeSigned = Boolean.FALSE;
         this.rejectIcReviewDecisionLevelFourSigned = Boolean.FALSE;
         this.icReviewDecisionLevelFourSigned = Boolean.FALSE;
-        this.rejectIcReviewDecisionLevelFourSigned = Boolean.FALSE;
         this.rejectIcReviewDecisionLevelFiveSigned = Boolean.FALSE;
         this.icReviewDecisionLevelFiveSigned = Boolean.FALSE;
-        this.rejectIcReviewDecisionLevelFiveSigned = Boolean.FALSE;
+        this.rejectPrepareAndSignContractSigned = Boolean.FALSE;
+        this.prepareAndSignContractSigned = Boolean.FALSE;
     }
 }

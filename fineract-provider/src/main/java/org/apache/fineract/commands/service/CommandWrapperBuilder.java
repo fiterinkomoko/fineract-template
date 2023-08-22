@@ -3893,4 +3893,13 @@ public class CommandWrapperBuilder {
 
         return this;
     }
+
+    public CommandWrapperBuilder acceptPrepareAndSignContract(final long loanId) {
+        this.actionName = "ACCEPT";
+        this.entityName = "LOANPREPAREANDSIGNCONTRACT";
+        this.href = "/loans/decision/prepareAndSignContract/" + loanId;
+        this.loanId = loanId;
+
+        return this;
+    }
 }

@@ -1133,6 +1133,21 @@ Feature: Test loan account apis
     * def noteLevelOneResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findLoanAccountNotesByLoanId') { loanId : '#(loanId)' }
     * assert karate.sizeOf(noteLevelOneResponse.notes) == 5
 
+                        #-Approve Loan Via Prepare And Sign Contract
+    #-*************************  Prepare And Sign Contract  ******************
+    * call read('classpath:features/portfolio/loans/loanDecisionSteps.feature@prepareAndSignContractStage') { icReviewOn : '#(submittedOnDate)', loanId : '#(loanId)' }
+     # Assert Actions for Prepare And Sign Contract
+    * def levelOneResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findloanbyidWithAllAssociationStep') { loanId : '#(loanId)' }
+    #     Assert that Loan Account has passed PREPARE_AND_SIGN_CONTRACT Stage
+    * assert levelOneResponse.loanAccount.loanDecisionState.id == 1900
+    * assert levelOneResponse.loanAccount.loanDecisionState.value == 'PREPARE_AND_SIGN_CONTRACT'
+    * assert levelOneResponse.loanAccount.nextLoanIcReviewDecisionState.id == 1900
+    * assert levelOneResponse.loanAccount.nextLoanIcReviewDecisionState.value == 'PREPARE_AND_SIGN_CONTRACT'
+    * assert levelOneResponse.loanAccount.isExtendLoanLifeCycleConfig == true
+    * assert levelOneResponse.loanAccount.loanDueDiligenceData != null
+    * def noteLevelOneResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findLoanAccountNotesByLoanId') { loanId : '#(loanId)' }
+    * assert karate.sizeOf(noteLevelOneResponse.notes) == 6
+
 
 
          # Delete Loan Approval Matrix created above. We Create a single unique record by currency
@@ -1348,6 +1363,20 @@ Feature: Test loan account apis
     * assert levelOneResponse.loanAccount.loanDueDiligenceData != null
     * def noteLevelOneResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findLoanAccountNotesByLoanId') { loanId : '#(loanId)' }
     * assert karate.sizeOf(noteLevelOneResponse.notes) == 6
+                        #-Approve Loan Via Prepare And Sign Contract
+    #-*************************  Prepare And Sign Contract  ******************
+    * call read('classpath:features/portfolio/loans/loanDecisionSteps.feature@prepareAndSignContractStage') { icReviewOn : '#(submittedOnDate)', loanId : '#(loanId)' }
+     # Assert Actions for Prepare And Sign Contract
+    * def levelOneResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findloanbyidWithAllAssociationStep') { loanId : '#(loanId)' }
+    #     Assert that Loan Account has passed PREPARE_AND_SIGN_CONTRACT Stage
+    * assert levelOneResponse.loanAccount.loanDecisionState.id == 1900
+    * assert levelOneResponse.loanAccount.loanDecisionState.value == 'PREPARE_AND_SIGN_CONTRACT'
+    * assert levelOneResponse.loanAccount.nextLoanIcReviewDecisionState.id == 1900
+    * assert levelOneResponse.loanAccount.nextLoanIcReviewDecisionState.value == 'PREPARE_AND_SIGN_CONTRACT'
+    * assert levelOneResponse.loanAccount.isExtendLoanLifeCycleConfig == true
+    * assert levelOneResponse.loanAccount.loanDueDiligenceData != null
+    * def noteLevelOneResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findLoanAccountNotesByLoanId') { loanId : '#(loanId)' }
+    * assert karate.sizeOf(noteLevelOneResponse.notes) == 7
 
 
 
@@ -1565,6 +1594,21 @@ Feature: Test loan account apis
     * def noteLevelOneResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findLoanAccountNotesByLoanId') { loanId : '#(loanId)' }
     * assert karate.sizeOf(noteLevelOneResponse.notes) == 6
 
+                        #-Approve Loan Via Prepare And Sign Contract
+    #-*************************  Prepare And Sign Contract  ******************
+    * call read('classpath:features/portfolio/loans/loanDecisionSteps.feature@prepareAndSignContractStage') { icReviewOn : '#(submittedOnDate)', loanId : '#(loanId)' }
+     # Assert Actions for Prepare And Sign Contract
+    * def levelOneResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findloanbyidWithAllAssociationStep') { loanId : '#(loanId)' }
+    #     Assert that Loan Account has passed PREPARE_AND_SIGN_CONTRACT Stage
+    * assert levelOneResponse.loanAccount.loanDecisionState.id == 1900
+    * assert levelOneResponse.loanAccount.loanDecisionState.value == 'PREPARE_AND_SIGN_CONTRACT'
+    * assert levelOneResponse.loanAccount.nextLoanIcReviewDecisionState.id == 1900
+    * assert levelOneResponse.loanAccount.nextLoanIcReviewDecisionState.value == 'PREPARE_AND_SIGN_CONTRACT'
+    * assert levelOneResponse.loanAccount.isExtendLoanLifeCycleConfig == true
+    * assert levelOneResponse.loanAccount.loanDueDiligenceData != null
+    * def noteLevelOneResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findLoanAccountNotesByLoanId') { loanId : '#(loanId)' }
+    * assert karate.sizeOf(noteLevelOneResponse.notes) == 7
+
 
 
          # Delete Loan Approval Matrix created above. We Create a single unique record by currency
@@ -1780,6 +1824,22 @@ Feature: Test loan account apis
     * assert levelOneResponse.loanAccount.loanDueDiligenceData != null
     * def noteLevelOneResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findLoanAccountNotesByLoanId') { loanId : '#(loanId)' }
     * assert karate.sizeOf(noteLevelOneResponse.notes) == 6
+
+
+                        #-Approve Loan Via Prepare And Sign Contract
+    #-*************************  Prepare And Sign Contract  ******************
+    * call read('classpath:features/portfolio/loans/loanDecisionSteps.feature@prepareAndSignContractStage') { icReviewOn : '#(submittedOnDate)', loanId : '#(loanId)' }
+     # Assert Actions for Prepare And Sign Contract
+    * def levelOneResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findloanbyidWithAllAssociationStep') { loanId : '#(loanId)' }
+    #     Assert that Loan Account has passed PREPARE_AND_SIGN_CONTRACT Stage
+    * assert levelOneResponse.loanAccount.loanDecisionState.id == 1900
+    * assert levelOneResponse.loanAccount.loanDecisionState.value == 'PREPARE_AND_SIGN_CONTRACT'
+    * assert levelOneResponse.loanAccount.nextLoanIcReviewDecisionState.id == 1900
+    * assert levelOneResponse.loanAccount.nextLoanIcReviewDecisionState.value == 'PREPARE_AND_SIGN_CONTRACT'
+    * assert levelOneResponse.loanAccount.isExtendLoanLifeCycleConfig == true
+    * assert levelOneResponse.loanAccount.loanDueDiligenceData != null
+    * def noteLevelOneResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findLoanAccountNotesByLoanId') { loanId : '#(loanId)' }
+    * assert karate.sizeOf(noteLevelOneResponse.notes) == 7
 
 
 
@@ -2028,6 +2088,21 @@ Feature: Test loan account apis
     * assert levelOneResponse.loanAccount.loanDueDiligenceData != null
     * def noteLevelOneResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findLoanAccountNotesByLoanId') { loanId : '#(loanId)' }
     * assert karate.sizeOf(noteLevelOneResponse.notes) == 8
+
+                    #-Approve Loan Via Prepare And Sign Contract
+    #-*************************  Prepare And Sign Contract  ******************
+    * call read('classpath:features/portfolio/loans/loanDecisionSteps.feature@prepareAndSignContractStage') { icReviewOn : '#(submittedOnDate)', loanId : '#(loanId)' }
+     # Assert Actions for Prepare And Sign Contract
+    * def levelOneResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findloanbyidWithAllAssociationStep') { loanId : '#(loanId)' }
+    #     Assert that Loan Account has passed PREPARE_AND_SIGN_CONTRACT Stage
+    * assert levelOneResponse.loanAccount.loanDecisionState.id == 1900
+    * assert levelOneResponse.loanAccount.loanDecisionState.value == 'PREPARE_AND_SIGN_CONTRACT'
+    * assert levelOneResponse.loanAccount.nextLoanIcReviewDecisionState.id == 1900
+    * assert levelOneResponse.loanAccount.nextLoanIcReviewDecisionState.value == 'PREPARE_AND_SIGN_CONTRACT'
+    * assert levelOneResponse.loanAccount.isExtendLoanLifeCycleConfig == true
+    * assert levelOneResponse.loanAccount.loanDueDiligenceData != null
+    * def noteLevelOneResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findLoanAccountNotesByLoanId') { loanId : '#(loanId)' }
+    * assert karate.sizeOf(noteLevelOneResponse.notes) == 9
 
 
 
