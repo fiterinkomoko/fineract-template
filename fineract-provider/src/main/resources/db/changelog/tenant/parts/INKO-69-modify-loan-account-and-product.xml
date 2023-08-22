@@ -1068,4 +1068,163 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="bosco@fiter.io" id="add_permission_ACCEPT_LOANICREVIEWDECISIONLEVELFIVE">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_permission where code = 'ACCEPT_LOANICREVIEWDECISIONLEVELFIVE';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio" />
+            <column name="code" value="ACCEPT_LOANICREVIEWDECISIONLEVELFIVE" />
+            <column name="entity_name" value="LOANICREVIEWDECISIONLEVELFIVE" />
+            <column name="action_name" value="ACCEPT" />
+        </insert>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_ic_review_decision_level_five_note_column_to_m_loan_decision_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan_decision" columnName="ic_review_decision_level_five_note"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan_decision">
+            <column name="ic_review_decision_level_five_note" type="varchar(255)" >
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_is_ic_review_decision_level_five_signed_column_to_m_loan_decision_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan_decision" columnName="is_ic_review_decision_level_five_signed"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan_decision">
+            <column name="is_ic_review_decision_level_five_signed"  type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_is_reject_ic_review_decision_level_five_column_to_m_loan_decision_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan_decision" columnName="is_reject_ic_review_decision_level_five"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan_decision">
+            <column name="is_reject_ic_review_decision_level_five"  type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_ic_review_decision_level_five_on_column_to_m_loan_decision_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan_decision" columnName="ic_review_decision_level_five_on"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan_decision">
+            <column name="ic_review_decision_level_five_on"  type="date">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_ic_review_decision_level_five_by_column_to_m_loan_decision_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan_decision" columnName="ic_review_decision_level_five_by"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan_decision">
+            <column name="ic_review_decision_level_five_by"  type="bigint">
+                <constraints nullable="true" foreignKeyName="FK_m_loan_decision-m_appuser-ic_review_decision_level_five_by" references="m_appuser(id)"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_permission_ACCEPT_LOANPREPAREANDSIGNCONTRACT">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_permission where code = 'ACCEPT_LOANPREPAREANDSIGNCONTRACT';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio" />
+            <column name="code" value="ACCEPT_LOANPREPAREANDSIGNCONTRACT" />
+            <column name="entity_name" value="LOANPREPAREANDSIGNCONTRACT" />
+            <column name="action_name" value="ACCEPT" />
+        </insert>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_prepare_and_sign_contract_note_note_column_to_m_loan_decision_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan_decision" columnName="prepare_and_sign_contract_note"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan_decision">
+            <column name="prepare_and_sign_contract_note" type="varchar(255)" >
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_is_prepare_and_sign_contract_signed_column_to_m_loan_decision_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan_decision" columnName="is_prepare_and_sign_contract_signed"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan_decision">
+            <column name="is_prepare_and_sign_contract_signed"  type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_is_reject_prepare_and_sign_contract_column_to_m_loan_decision_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan_decision" columnName="is_reject_prepare_and_sign_contract"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan_decision">
+            <column name="is_reject_prepare_and_sign_contract"  type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_prepare_and_sign_contract_on_on_column_to_m_loan_decision_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan_decision" columnName="prepare_and_sign_contract_on"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan_decision">
+            <column name="prepare_and_sign_contract_on"  type="date">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_prepare_and_sign_contract_by_by_column_to_m_loan_decision_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan_decision" columnName="prepare_and_sign_contract_by"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan_decision">
+            <column name="prepare_and_sign_contract_by"  type="bigint">
+                <constraints nullable="true" foreignKeyName="FK_m_loan_decision-m_appuser-prepare_and_sign_contract_by" references="m_appuser(id)"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+
 </databaseChangeLog>

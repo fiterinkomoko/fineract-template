@@ -331,7 +331,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
-        this.loanDecisionStateUtilService.validateLoanReviewApplicationStateIsFiredBeforeDisbursal(loan);
+        this.loanDecisionStateUtilService.validateLoanReviewApplicationStateIsFiredBeforeDisbursal(loan, command);
         if (loan.loanProduct().isDisallowExpectedDisbursements()) {
             // create artificial 'tranche/expected disbursal' as current disburse code expects it for multi-disbursal
             // products

@@ -547,6 +547,98 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                 .withResourceIdAsString(savedObj.getId().toString()).build();
     }
 
+    @Override
+    public CommandProcessingResult acceptIcReviewDecisionLevelFive(Long loanId, JsonCommand command) {
+        final AppUser currentUser = getAppUserIfPresent();
+
+        this.loanDecisionTransitionApiJsonValidator.validateIcReviewStage(command.json());
+
+        final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
+        final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
+
+        validateIcReviewDecisionLevelFiveBusinessRule(command, loan, loanDecision);
+        LoanApprovalMatrix approvalMatrix = this.loanApprovalMatrixRepository.findLoanApprovalMatrixByCurrency(loan.getCurrencyCode());
+
+        if (approvalMatrix == null) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.approval.matrix.with.this.currency.does.not.exist.",
+                    String.format("Loan Approval Matrix with Currency [ %s ] doesn't exist. Approval matrix is expected to continue ",
+                            loan.getCurrencyCode()));
+        }
+        // Get Loan Matrix
+        // Determine which cycle of this Loan Account
+        // Determine the Next Level or stage to review
+        // Add custom Params in Decision Table
+        List<Loan> loanIndividualCounter = getLoanCounter(loan);
+
+        Boolean isLoanFirstCycle = isLoanFirstCycle(loanIndividualCounter);
+        Boolean isLoanUnsecure = isLoanUnSecure(loan);
+
+        validateLoanAccountToComplyToApprovalMatrixStage(loan, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
+                LoanDecisionState.IC_REVIEW_LEVEL_FIVE);
+
+        LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelFiveFrom(command, currentUser, loanDecision);
+        LoanDecision savedObj = loanDecisionRepository.saveAndFlush(loanDecisionObj);
+
+        Loan loanObj = loan;
+        loanObj.setLoanDecisionState(LoanDecisionState.IC_REVIEW_LEVEL_FIVE.getValue());
+        this.loanRepositoryWrapper.saveAndFlush(loanObj);
+
+        if (StringUtils.isNotBlank(loanDecisionObj.getIcReviewDecisionLevelFiveNote())) {
+            final Note note = Note.loanNote(loanObj,
+                    "IC Review-Decision Level Five : " + loanDecisionObj.getIcReviewDecisionLevelFiveNote());
+            this.noteRepository.save(note);
+        }
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(savedObj.getId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .withResourceIdAsString(savedObj.getId().toString()).build();
+    }
+
+    @Override
+    public CommandProcessingResult acceptPrepareAndSignContract(Long loanId, JsonCommand command) {
+        final AppUser currentUser = getAppUserIfPresent();
+
+        this.loanDecisionTransitionApiJsonValidator.validateIcReviewStage(command.json());
+
+        final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
+        final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
+
+        validatePrepareAndSignContractBusinessRule(command, loan, loanDecision);
+        LoanApprovalMatrix approvalMatrix = this.loanApprovalMatrixRepository.findLoanApprovalMatrixByCurrency(loan.getCurrencyCode());
+
+        if (approvalMatrix == null) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.approval.matrix.with.this.currency.does.not.exist.",
+                    String.format("Loan Approval Matrix with Currency [ %s ] doesn't exist. Approval matrix is expected to continue ",
+                            loan.getCurrencyCode()));
+        }
+
+        LoanDecision loanDecisionObj = loanDecisionAssembler.assemblePrepareAndSignContractFrom(command, currentUser, loanDecision);
+        LoanDecision savedObj = loanDecisionRepository.saveAndFlush(loanDecisionObj);
+
+        Loan loanObj = loan;
+        loanObj.setLoanDecisionState(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue());
+        this.loanRepositoryWrapper.saveAndFlush(loanObj);
+
+        if (StringUtils.isNotBlank(loanDecisionObj.getPrepareAndSignContractNote())) {
+            final Note note = Note.loanNote(loanObj, "Prepare And Sign Contract : " + loanDecisionObj.getPrepareAndSignContractNote());
+            this.noteRepository.save(note);
+        }
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(savedObj.getId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .withResourceIdAsString(savedObj.getId().toString()).build();
+    }
+
     private static void determineTheNextDecisionStage(Loan loan, LoanDecision loanDecision, LoanApprovalMatrix approvalMatrix,
             Boolean isLoanFirstCycle, Boolean isLoanUnsecure, LoanDecisionState currentStage) {
         switch (currentStage) {
@@ -561,8 +653,6 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
             break;
             case IC_REVIEW_LEVEL_FOUR:
                 determineTheNextDecisionStateAfterLevelFour(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure);
-            break;
-            case IC_REVIEW_LEVEL_FIVE:
             break;
             default:
                 throw new GeneralPlatformDomainRuleException("error.msg.invalid.loan.decision.stage",
@@ -756,6 +846,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                 validateLoanAccountToComplyToApprovalMatrixLevelFour(loan, approvalMatrix, isLoanFirstCycle, isLoanUnsecure);
             break;
             case IC_REVIEW_LEVEL_FIVE:
+                validateLoanAccountToComplyToApprovalMatrixLevelFive(loan, approvalMatrix, isLoanFirstCycle, isLoanUnsecure);
             break;
             default:
                 throw new GeneralPlatformDomainRuleException("error.msg.invalid.loan.decision.stage",
@@ -825,6 +916,19 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
             Integer currentStageMatrixMaxTerm, String errorMsg, String stateMsg, BigDecimal previousStageMatrixMaxAmount) {
         BigDecimal minAmount = previousStageMatrixMaxAmount.add(BigDecimal.ONE);
         if ((loanPrincipal.compareTo(minAmount) < 0)
+                && (numberOfRepayment < currentStageMatrixMinTerm || numberOfRepayment > currentStageMatrixMaxTerm)) {
+            throw new GeneralPlatformDomainRuleException(errorMsg, String.format(
+                    "This Loan Account Principal [ %s ] vs Approval Matrix Min [%s] and Max Amount [%s] , does not qualify for IC-Review  [%s] with Terms Min [%s] Max [%s] Vs Loan Term [%s]",
+                    loanPrincipal, minAmount, currentStageMatrixMaxAmount, stateMsg, currentStageMatrixMinTerm, currentStageMatrixMaxTerm,
+                    numberOfRepayment));
+        }
+    }
+
+    private static void validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelFive(BigDecimal loanPrincipal,
+            BigDecimal currentStageMatrixMaxAmount, Integer numberOfRepayment, Integer currentStageMatrixMinTerm,
+            Integer currentStageMatrixMaxTerm, String errorMsg, String stateMsg, BigDecimal previousStageMatrixMaxAmount) {
+        BigDecimal minAmount = previousStageMatrixMaxAmount.add(BigDecimal.ONE);
+        if ((loanPrincipal.compareTo(minAmount) < 0 || loanPrincipal.compareTo(currentStageMatrixMaxAmount) <= 0)
                 && (numberOfRepayment < currentStageMatrixMinTerm || numberOfRepayment > currentStageMatrixMaxTerm)) {
             throw new GeneralPlatformDomainRuleException(errorMsg, String.format(
                     "This Loan Account Principal [ %s ] vs Approval Matrix Min [%s] and Max Amount [%s] , does not qualify for IC-Review  [%s] with Terms Min [%s] Max [%s] Vs Loan Term [%s]",
@@ -1296,6 +1400,177 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         }
     }
 
+    private void validateIcReviewDecisionLevelFiveBusinessRule(JsonCommand command, Loan loan, LoanDecision loanDecision) {
+        Boolean isExtendLoanLifeCycleConfig = getExtendLoanLifeCycleConfig().isEnabled();
+
+        if (!isExtendLoanLifeCycleConfig) {
+            throw new GeneralPlatformDomainRuleException("error.msg.Add-More-Stages-To-A-Loan-Life-Cycle.is.not.set",
+                    "Add-More-Stages-To-A-Loan-Life-Cycle settings is not set. So this operation is not permitted");
+        }
+
+        if (loanDecision == null) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.account.not.found.in.decision.engine",
+                    "Loan Account not found in decision engine. Operation [IC Review Decision Level Five] is not allowed");
+        }
+        checkClientOrGroupActive(loan);
+
+        validateLoanDisbursementDataWithMeetingDate(loan);
+        validateLoanTopUp(loan);
+        LocalDate icReviewOn = command.localDateValueOfParameterNamed(LoanApiConstants.icReviewOnDateParameterName);
+        // Ic Review Decision Level One should not be before other stages below it like IC Review Decision Level
+        // One,Collateral Review , Due
+        // Diligence and Review Application
+        if (icReviewOn.isBefore(loanDecision.getIcReviewDecisionLevelFourOn())) {
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.loan.ic.review.decision.level.Five.date.should.be.after.Ic.Review.decision.level.Four.date",
+                    "Approve IC ReviewDecision Level Five on  date" + icReviewOn + " should be after IC ReviewDecision Level Four date "
+                            + loanDecision.getIcReviewDecisionLevelFourOn());
+        }
+        if (icReviewOn.isBefore(loanDecision.getIcReviewDecisionLevelThreeOn())) {
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.loan.ic.review.decision.level.Five.date.should.be.after.Ic.Review.decision.level.Three.date",
+                    "Approve IC ReviewDecision Level Five on  date" + icReviewOn + " should be after IC ReviewDecision Level Three date "
+                            + loanDecision.getIcReviewDecisionLevelThreeOn());
+        }
+
+        if (icReviewOn.isBefore(loanDecision.getIcReviewDecisionLevelTwoOn())) {
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.loan.ic.review.decision.level.Five.date.should.be.after.Ic.Review.decision.level.Two.date",
+                    "Approve IC ReviewDecision Level Five on  date" + icReviewOn + " should be after IC ReviewDecision Level two date "
+                            + loanDecision.getIcReviewDecisionLevelTwoOn());
+        }
+        if (icReviewOn.isBefore(loanDecision.getIcReviewDecisionLevelOneOn())) {
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.loan.ic.review.decision.level.Five.date.should.be.after.Ic.Review.decision.level.one.date",
+                    "Approve IC ReviewDecision Level Five on  date" + icReviewOn + " should be after IC ReviewDecision Level One date "
+                            + loanDecision.getIcReviewDecisionLevelOneOn());
+        }
+        if (icReviewOn.isBefore(loanDecision.getCollateralReviewOn())) {
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.loan.ic.review.decision.level.Five.date.should.be.after.collateral.review.date",
+                    "Approve IC ReviewDecision Level Five on  date" + icReviewOn + " should be after Collateral Review Approved date "
+                            + loanDecision.getCollateralReviewOn());
+        }
+        if (icReviewOn.isBefore(loanDecision.getDueDiligenceOn())) {
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.loan.ic.review.decision.level.Five.date.should.be.after.Due.Diligence.date",
+                    "Approve IC ReviewDecision Level Five on date" + icReviewOn + " should be after Loan Due Diligence Approved date "
+                            + loanDecision.getDueDiligenceOn());
+        }
+        if (icReviewOn.isBefore(loanDecision.getReviewApplicationOn())) {
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.loan.ic.review.decision.level.Five.date.should.be.after.review.application.date",
+                    "Approve IC ReviewDecision Level Five on date" + icReviewOn + " should be after Loan Review Application Approved date "
+                            + loanDecision.getReviewApplicationOn());
+        }
+        // Collateral Review date should not be before loan submission date
+        if (icReviewOn.isBefore(loan.getSubmittedOnDate())) {
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.loan.ic.review.decision.level.Five.date.should.be.after.submission.date",
+                    "Approve IC ReviewDecision Level Five on date " + icReviewOn + " should be after Loan submission date "
+                            + loan.getSubmittedOnDate());
+        }
+
+        if (!loan.status().isSubmittedAndPendingApproval()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.current.status.is.invalid",
+                    "Loan Account current status is invalid. Expected" + loan.status().getCode() + " but found " + loan.status().getCode());
+        }
+        if (!LoanDecisionState.fromInt(loan.getLoanDecisionState()).isIcReviewLevelFour()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.decision.state.is.invalid",
+                    "Loan Account Decision state is invalid. Expected " + LoanDecisionState.IC_REVIEW_LEVEL_FOUR.getValue() + " but found "
+                            + loan.getLoanDecisionState());
+        }
+        if (!loan.getLoanDecisionState().equals(loanDecision.getLoanDecisionState())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.decision.state.does.not.reconcile",
+                    "Loan Account Decision state Does not reconcile . Operation is terminated");
+        }
+    }
+
+    private void validatePrepareAndSignContractBusinessRule(JsonCommand command, Loan loan, LoanDecision loanDecision) {
+        Boolean isExtendLoanLifeCycleConfig = getExtendLoanLifeCycleConfig().isEnabled();
+
+        if (!isExtendLoanLifeCycleConfig) {
+            throw new GeneralPlatformDomainRuleException("error.msg.Add-More-Stages-To-A-Loan-Life-Cycle.is.not.set",
+                    "Add-More-Stages-To-A-Loan-Life-Cycle settings is not set. So this operation is not permitted");
+        }
+
+        if (loanDecision == null) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.account.not.found.in.decision.engine",
+                    "Loan Account not found in decision engine. Operation [Prepare And Sign Contract] is not allowed");
+        }
+        checkClientOrGroupActive(loan);
+
+        validateLoanDisbursementDataWithMeetingDate(loan);
+        validateLoanTopUp(loan);
+        LocalDate icReviewOn = command.localDateValueOfParameterNamed(LoanApiConstants.icReviewOnDateParameterName);
+
+        if (loanDecision.getIcReviewDecisionLevelFiveOn() != null && icReviewOn.isBefore(loanDecision.getIcReviewDecisionLevelFiveOn())) {
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.loan.prepare.and.sign.contract.date.should.be.after.Ic.Review.decision.level.Five.date",
+                    "Approve Prepare And Sign Contract on  date" + icReviewOn + " should be after IC ReviewDecision Level Five date "
+                            + loanDecision.getIcReviewDecisionLevelFiveOn());
+        }
+
+        if (loanDecision.getIcReviewDecisionLevelFourOn() != null && icReviewOn.isBefore(loanDecision.getIcReviewDecisionLevelFourOn())) {
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.loan.prepare.and.sign.contract.date.should.be.after.Ic.Review.decision.level.Four.date",
+                    "Approve Prepare And Sign Contract on  date" + icReviewOn + " should be after IC ReviewDecision Level Four date "
+                            + loanDecision.getIcReviewDecisionLevelFourOn());
+        }
+        if (loanDecision.getIcReviewDecisionLevelThreeOn() != null && icReviewOn.isBefore(loanDecision.getIcReviewDecisionLevelThreeOn())) {
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.loan.prepare.and.sign.contract.date.should.be.after.Ic.Review.decision.level.Three.date",
+                    "Approve Prepare And Sign Contract on  date" + icReviewOn + " should be after IC ReviewDecision Level Three date "
+                            + loanDecision.getIcReviewDecisionLevelThreeOn());
+        }
+
+        if (loanDecision.getIcReviewDecisionLevelTwoOn() != null && icReviewOn.isBefore(loanDecision.getIcReviewDecisionLevelTwoOn())) {
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.loan.prepare.and.sign.contract.date.should.be.after.Ic.Review.decision.level.Two.date",
+                    "Approve Prepare And Sign Contract on  date" + icReviewOn + " should be after IC ReviewDecision Level two date "
+                            + loanDecision.getIcReviewDecisionLevelTwoOn());
+        }
+        if (icReviewOn.isBefore(loanDecision.getIcReviewDecisionLevelOneOn())) {
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.loan.prepare.and.sign.contract.date.should.be.after.Ic.Review.decision.level.one.date",
+                    "Approve Prepare And Sign Contract on  date" + icReviewOn + " should be after IC ReviewDecision Level One date "
+                            + loanDecision.getIcReviewDecisionLevelOneOn());
+        }
+        if (icReviewOn.isBefore(loanDecision.getCollateralReviewOn())) {
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.loan.prepare.and.sign.contract.date.should.be.after.collateral.review.date",
+                    "Approve Prepare And Sign Contract on  date" + icReviewOn + " should be after Collateral Review Approved date "
+                            + loanDecision.getCollateralReviewOn());
+        }
+        if (icReviewOn.isBefore(loanDecision.getDueDiligenceOn())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.prepare.and.sign.contract.date.should.be.after.Due.Diligence.date",
+                    "Approve Prepare And Sign Contract on date" + icReviewOn + " should be after Loan Due Diligence Approved date "
+                            + loanDecision.getDueDiligenceOn());
+        }
+        if (icReviewOn.isBefore(loanDecision.getReviewApplicationOn())) {
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.loan.prepare.and.sign.contract.date.should.be.after.review.application.date",
+                    "Approve Prepare And Sign Contract on date" + icReviewOn + " should be after Loan Review Application Approved date "
+                            + loanDecision.getReviewApplicationOn());
+        }
+        // Collateral Review date should not be before loan submission date
+        if (icReviewOn.isBefore(loan.getSubmittedOnDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.prepare.and.sign.contract.date.should.be.after.submission.date",
+                    "Approve Prepare And Sign Contract on date " + icReviewOn + " should be after Loan submission date "
+                            + loan.getSubmittedOnDate());
+        }
+
+        if (!loan.status().isSubmittedAndPendingApproval()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.current.status.is.invalid",
+                    "Loan Account current status is invalid. Expected" + loan.status().getCode() + " but found " + loan.status().getCode());
+        }
+
+        if (!loan.getLoanDecisionState().equals(loanDecision.getLoanDecisionState())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.decision.state.does.not.reconcile",
+                    "Loan Account Decision state Does not reconcile . Operation is terminated");
+        }
+    }
+
     private static void validateLoanAccountToComplyToApprovalMatrixLevelTwo(Loan loan, LoanApprovalMatrix approvalMatrix,
             Boolean isLoanFirstCycle, Boolean isLoanUnsecure) {
         if (isLoanFirstCycle && isLoanUnsecure) {
@@ -1427,6 +1702,51 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
             throw new GeneralPlatformDomainRuleException(
                     "error.msg.invalid.loan.principal.not.matching.approval.matrix.in.IC.review.Level.Four",
                     String.format("This Loan Account Principal [ %s ] , does not match  IC Review Level Four Operations .",
+                            loan.getProposedPrincipal()));
+        }
+    }
+
+    private static void validateLoanAccountToComplyToApprovalMatrixLevelFive(Loan loan, LoanApprovalMatrix approvalMatrix,
+            Boolean isLoanFirstCycle, Boolean isLoanUnsecure) {
+        if (isLoanFirstCycle && isLoanUnsecure) {
+            // Loan is FirstCycle and Unsecure
+            String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.Five.unsecured.first.cycle";
+            String state = "Level Five Unsecured first cycle ";
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelFive(loan.getProposedPrincipal(),
+                    approvalMatrix.getLevelFiveUnsecuredFirstCycleMaxAmount(), loan.getNumberOfRepayments(),
+                    approvalMatrix.getLevelFiveUnsecuredFirstCycleMinTerm(), approvalMatrix.getLevelFiveUnsecuredFirstCycleMaxTerm(),
+                    errormsg, state, approvalMatrix.getLevelFourUnsecuredFirstCycleMaxAmount());
+
+        } else if (!isLoanFirstCycle && isLoanUnsecure) {
+            // Loan is (Second cycle or plus) and Unsecure
+            String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.Five.unsecured.second.cycle plus";
+            String state = "Level Five Unsecured second cycle plus ";
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelFive(loan.getProposedPrincipal(),
+                    approvalMatrix.getLevelFiveUnsecuredSecondCycleMaxAmount(), loan.getNumberOfRepayments(),
+                    approvalMatrix.getLevelFiveUnsecuredSecondCycleMinTerm(), approvalMatrix.getLevelFiveUnsecuredSecondCycleMaxTerm(),
+                    errormsg, state, approvalMatrix.getLevelFourUnsecuredSecondCycleMaxAmount());
+
+        } else if (isLoanFirstCycle && !isLoanUnsecure) {
+            // First Cycle and secured Loan
+            String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.Five.secured.first.cycle";
+            String state = "Level Five secured first cycle ";
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelFive(loan.getProposedPrincipal(),
+                    approvalMatrix.getLevelFiveSecuredFirstCycleMaxAmount(), loan.getNumberOfRepayments(),
+                    approvalMatrix.getLevelFiveSecuredFirstCycleMinTerm(), approvalMatrix.getLevelFiveSecuredFirstCycleMaxTerm(), errormsg,
+                    state, approvalMatrix.getLevelFourSecuredFirstCycleMaxAmount());
+
+        } else if (!isLoanFirstCycle && !isLoanUnsecure) {
+            // Second Cycle or plus and secured
+            String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.Five.secured.second.cycle plus";
+            String state = "Level Five Secured second cycle plus ";
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelFive(loan.getProposedPrincipal(),
+                    approvalMatrix.getLevelFiveSecuredSecondCycleMaxAmount(), loan.getNumberOfRepayments(),
+                    approvalMatrix.getLevelFiveSecuredSecondCycleMinTerm(), approvalMatrix.getLevelFiveSecuredSecondCycleMaxTerm(),
+                    errormsg, state, approvalMatrix.getLevelFourSecuredSecondCycleMaxAmount());
+        } else {
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.invalid.loan.principal.not.matching.approval.matrix.in.IC.review.Level.Five",
+                    String.format("This Loan Account Principal [ %s ] , does not match  IC Review Level Five Operations .",
                             loan.getProposedPrincipal()));
         }
     }
