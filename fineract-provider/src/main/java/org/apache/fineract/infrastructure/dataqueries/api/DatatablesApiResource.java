@@ -233,12 +233,14 @@ public class DatatablesApiResource {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = HashMap.class))) })
     public String getDatatable(@PathParam("datatable") @Parameter(description = "datatable") final String datatable,
             @PathParam("apptableId") @Parameter(description = "apptableId") final Long apptableId,
-            @QueryParam("order") @Parameter(description = "order") final String order, @Context final UriInfo uriInfo) {
+            @QueryParam("order") @Parameter(description = "order") final String order, @Context final UriInfo uriInfo,
+                               @QueryParam("columnFilter") @Parameter(description = "columnFilter") final String columnFilter,
+                               @QueryParam("valueFilter") @Parameter(description = "valueFilter") final String valueFilter) {
 
         this.context.authenticatedUser().validateHasDatatableReadPermission(datatable);
 
         final GenericResultsetData results = this.readWriteNonCoreDataService.retrieveDataTableGenericResultSet(datatable, apptableId,
-                order, null);
+                order, null, columnFilter, valueFilter);
 
         String json = "";
         final boolean genericResultSet = ApiParameterHelper.genericResultSet(uriInfo.getQueryParameters());
@@ -264,7 +266,7 @@ public class DatatablesApiResource {
         this.context.authenticatedUser().validateHasDatatableReadPermission(datatable);
 
         final GenericResultsetData results = this.readWriteNonCoreDataService.retrieveDataTableGenericResultSet(datatable, apptableId,
-                order, datatableId);
+                order, datatableId, null, null);
 
         String json = "";
         if (genericResultSet) {
