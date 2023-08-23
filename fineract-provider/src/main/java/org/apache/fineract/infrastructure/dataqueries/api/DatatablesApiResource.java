@@ -226,9 +226,11 @@ public class DatatablesApiResource {
             + "Gets the entries (if they exist) for data tables that are one to many with the application table.\n" + "\n"
             + "Note: The 'fields' parameter is not available for datatables.\n" + "\n" + "ARGUMENTS\n"
             + "orderoptional Specifies the order in which data is returned.genericResultSetoptional, defaults to false If 'true' an optimised JSON format is returned suitable for tabular display of data. This format is used by the default data tables UI functionality.\n"
+            + "query param columnFilter specifies which datatable column to filter by and valueFilter is the value in that column\n"
             + "Example Requests:\n" + "\n" + "datatables/extra_client_details/1\n" + "\n" + "\n"
             + "datatables/extra_family_details/1?order=`Date of Birth` desc\n" + "\n" + "\n"
-            + "datatables/extra_client_details/1?genericResultSet=true")
+            + "datatables/extra_client_details/1?genericResultSet=true"
+            + "datatables/Client Address/2?columnFilter=COUNTRY_cd_Client country&valueFilter=248\n" + "\n" + "\n")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = HashMap.class))) })
     public String getDatatable(@PathParam("datatable") @Parameter(description = "datatable") final String datatable,
