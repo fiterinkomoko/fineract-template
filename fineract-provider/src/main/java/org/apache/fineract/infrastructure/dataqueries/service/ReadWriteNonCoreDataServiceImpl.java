@@ -39,7 +39,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 import javax.persistence.PersistenceException;
-
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -1342,15 +1341,18 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         return new GenericResultsetData(columnHeaders, result);
     }
 
-    private String buildColumnFilterWhereClause(String whereClause, String columnFilter, String valueFilter, final List<ResultsetColumnHeaderData> columnHeaders){
-        if(StringUtils.isNotBlank(columnFilter) && StringUtils.isNotBlank(valueFilter) && columnHeaders != null && !columnHeaders.isEmpty()){
+    private String buildColumnFilterWhereClause(String whereClause, String columnFilter, String valueFilter,
+            final List<ResultsetColumnHeaderData> columnHeaders) {
+        if (StringUtils.isNotBlank(columnFilter) && StringUtils.isNotBlank(valueFilter) && columnHeaders != null
+                && !columnHeaders.isEmpty()) {
             // verify colum exists and get data type
-            ResultsetColumnHeaderData columnHeader = columnHeaders.stream().filter(header -> header.getColumnName().equals(columnFilter)).findFirst()
+            ResultsetColumnHeaderData columnHeader = columnHeaders.stream().filter(header -> header.getColumnName().equals(columnFilter))
+                    .findFirst()
                     .orElseThrow(() -> new DatatableSystemErrorException("System Error: Column Filter does not exist on datatable"));
 
             StringBuilder append = new StringBuilder(whereClause);
             append.append(" and ");
-            append.append( sqlGenerator.escape(columnFilter) + " = ");
+            append.append(sqlGenerator.escape(columnFilter) + " = ");
             if (columnHeader.getColumnType().equals("DECIMAL")) {
                 append.append(new BigDecimal(valueFilter));
             } else if (columnHeader.getColumnType().equals("INTEGER")) {
@@ -1367,7 +1369,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                     append.append(valueFilter);
                 }
             }
-             whereClause = append.toString();
+            whereClause = append.toString();
         }
 
         return whereClause;

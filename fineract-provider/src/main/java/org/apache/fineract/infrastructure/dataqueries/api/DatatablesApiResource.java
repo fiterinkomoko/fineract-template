@@ -234,8 +234,8 @@ public class DatatablesApiResource {
     public String getDatatable(@PathParam("datatable") @Parameter(description = "datatable") final String datatable,
             @PathParam("apptableId") @Parameter(description = "apptableId") final Long apptableId,
             @QueryParam("order") @Parameter(description = "order") final String order, @Context final UriInfo uriInfo,
-                               @QueryParam("columnFilter") @Parameter(description = "columnFilter") final String columnFilter,
-                               @QueryParam("valueFilter") @Parameter(description = "valueFilter") final String valueFilter) {
+            @QueryParam("columnFilter") @Parameter(description = "columnFilter") final String columnFilter,
+            @QueryParam("valueFilter") @Parameter(description = "valueFilter") final String valueFilter) {
 
         this.context.authenticatedUser().validateHasDatatableReadPermission(datatable);
 
