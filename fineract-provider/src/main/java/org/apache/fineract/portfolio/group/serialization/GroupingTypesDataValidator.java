@@ -358,11 +358,9 @@ public final class GroupingTypesDataValidator {
         final String name = this.fromApiJsonHelper.extractStringNamed(GroupingTypesApiConstants.nameParamName, element);
         baseDataValidator.reset().parameter(GroupingTypesApiConstants.nameParamName).value(name).notNull().notExceedingLengthOf(100);
 
-        if (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.externalIdParamName, element)) {
-            final String externalId = this.fromApiJsonHelper.extractStringNamed(GroupingTypesApiConstants.externalIdParamName, element);
-            baseDataValidator.reset().parameter(GroupingTypesApiConstants.externalIdParamName).value(externalId).notNull()
-                    .notExceedingLengthOf(100);
-        }
+        final String externalId = this.fromApiJsonHelper.extractStringNamed(GroupingTypesApiConstants.externalIdParamName, element);
+        baseDataValidator.reset().parameter(GroupingTypesApiConstants.externalIdParamName).value(externalId).notNull()
+                .notExceedingLengthOf(100);
 
         if (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.officeIdParamName, element)) {
             final Long officeId = this.fromApiJsonHelper.extractLongNamed(GroupingTypesApiConstants.officeIdParamName, element);
