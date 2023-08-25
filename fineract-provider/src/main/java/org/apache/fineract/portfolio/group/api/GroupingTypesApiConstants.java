@@ -82,6 +82,7 @@ public final class GroupingTypesApiConstants {
     public static final String totalOverdue = "totalOverdue";
     public static final String totaldue = "totaldue";
     public static final String installmentDue = "installmentDue";
+    public static final String representativeIdParamName = "representativeId";
 
     // group close parameters
     public static final String closureDateParamName = "closureDate";

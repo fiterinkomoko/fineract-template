@@ -284,6 +284,9 @@ public final class GroupingTypesDataValidator {
             final JsonArray datatables = this.fromApiJsonHelper.extractJsonArrayNamed(GroupingTypesApiConstants.datatables, element);
             baseDataValidator.reset().parameter(GroupingTypesApiConstants.datatables).value(datatables).notNull().jsonArrayNotEmpty();
         }
+        final Long representativeId = this.fromApiJsonHelper.extractLongNamed(GroupingTypesApiConstants.representativeIdParamName, element);
+        baseDataValidator.reset().parameter(GroupingTypesApiConstants.representativeIdParamName).value(representativeId).notNull()
+                .integerGreaterThanZero();
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

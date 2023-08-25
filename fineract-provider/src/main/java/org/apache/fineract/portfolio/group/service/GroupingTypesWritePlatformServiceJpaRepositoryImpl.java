@@ -160,8 +160,15 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                 submittedOnDate = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.submittedOnDateParamName);
             }
 
+            Client representative = null;
+            final Long representativeId = command.longValueOfParameterNamed(GroupingTypesApiConstants.representativeIdParamName);
+            if (representativeId != null) {
+                representative = this.clientRepositoryWrapper.findOneWithNotFoundDetection(representativeId);
+            }
+
             final Group newGroup = Group.newGroup(groupOffice, staff, parentGroup, groupLevel, name, externalId, active, activationDate,
                     clientMembers, groupMembers, submittedOnDate, currentUser, accountNo);
+            newGroup.setRepresentative(representative);
 
             boolean rollbackTransaction = false;
             if (newGroup.isActive()) {
@@ -696,6 +703,9 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     throw new InvalidOfficeException("client", "attach.to.group", errorMessage, clientId, groupOfficeId);
                 }
                 clientMembers.add(client);
+                final Long representativeId = command.longValueOfParameterNamed(GroupingTypesApiConstants.representativeIdParamName);
+                if (representativeId != null && !representativeId.equals(id)) {
+                }
             }
         }
 

@@ -25,17 +25,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -139,6 +130,10 @@ public final class Group extends AbstractPersistableCustom {
 
     @OneToMany(mappedBy = "group")
     private List<GroupLoanIndividualMonitoringAccount> glimLoan;
+
+    @OneToOne()
+    @JoinColumn(name = "representative_id")
+    private Client representative;
 
     // JPA default constructor for entity
     Group() {
@@ -765,4 +760,11 @@ public final class Group extends AbstractPersistableCustom {
         this.groupMembers = groupMembers;
     }
 
+    public Client getRepresentative() {
+        return representative;
+    }
+
+    public void setRepresentative(Client representative) {
+        this.representative = representative;
+    }
 }
