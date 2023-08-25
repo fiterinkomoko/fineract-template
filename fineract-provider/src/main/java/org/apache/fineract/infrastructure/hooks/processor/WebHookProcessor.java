@@ -75,9 +75,9 @@ public class WebHookProcessor implements HookProcessor {
                     Long loanId = Long.parseLong(String.valueOf(responseMap.get("loanId")));
                     Loan loan = loanRepository.findOneWithNotFoundDetection(loanId);
                     payLoadMap.put("loan", loan);
-                } else {
-                    payLoadMap.put("loanId", responseMap.get("loanId"));
                 }
+                payLoadMap.put("loanId", responseMap.get("loanId"));
+
             }
             if (responseMap.get("clientId") != null) {
                 clientId = Long.parseLong(String.valueOf(responseMap.get("clientId")));
