@@ -3055,4 +3055,32 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(),
                 new Object[] { searchParameters.getStartDueDate(), searchParameters.getEndDueDate() }, mapper);
     }
+
+    @Override
+    public Collection<LoanAccountData> getAllLoansPendingDecisionEngine(Integer loanDecisionState) {
+        this.context.authenticatedUser();
+        final LoanMapper rm = new LoanMapper(sqlGenerator);
+        final StringBuilder sqlBuilder = new StringBuilder(200);
+
+        final String sql = "select " + rm.loanSchema();
+        sqlBuilder.append(sql);
+        sqlBuilder.append(" where l.loan_status_id=100  ");
+        if (loanDecisionState == 100) {
+            sqlBuilder.append(" and l.loan_decision_state is null and ds.next_loan_ic_review_decision_state is null ");
+        } else if (loanDecisionState == 1000 || loanDecisionState == 1200) {
+            sqlBuilder.append(" and l.loan_decision_state is not null and l.loan_decision_state = ? ");
+        } else {
+            // when loan is in IC Review
+            sqlBuilder.append(" and l.loan_decision_state is not null and ds.next_loan_ic_review_decision_state = ?");
+        }
+        sqlBuilder.append(" order by l.id ASC ");
+
+        if (loanDecisionState == 100) {
+            return this.jdbcTemplate.query(sqlBuilder.toString(), rm); // NOSONAR
+        } else {
+            return this.jdbcTemplate.query(sqlBuilder.toString(), rm, loanDecisionState); // NOSONAR
+        }
+
+    }
+
 }
