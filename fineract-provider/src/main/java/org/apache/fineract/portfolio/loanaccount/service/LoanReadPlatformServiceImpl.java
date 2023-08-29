@@ -40,6 +40,7 @@ import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.filters.FilterConstraint;
@@ -178,6 +179,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService;
 
     private final SearchReadPlatformService searchReadPlatformService;
+    private final ConfigurationReadPlatformService configurationReadPlatformService;
     private final LoanDueDiligenceInfoRepository loanDueDiligenceInfoRepository;
 
     @Autowired
@@ -195,7 +197,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService,
             final AccountDetailsReadPlatformService accountDetailsReadPlatformService, final LoanRepositoryWrapper loanRepositoryWrapper,
             final ColumnValidator columnValidator, DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper,
-            SearchReadPlatformService searchReadPlatformService, final LoanDueDiligenceInfoRepository loanDueDiligenceInfoRepository) {
+            SearchReadPlatformService searchReadPlatformService, final LoanDueDiligenceInfoRepository loanDueDiligenceInfoRepository,
+            final ConfigurationReadPlatformService configurationReadPlatformService) {
         this.context = context;
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
@@ -223,6 +226,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         this.portfolioAccountReadPlatformService = portfolioAccountReadPlatformService;
         this.searchReadPlatformService = searchReadPlatformService;
         this.loanDueDiligenceInfoRepository = loanDueDiligenceInfoRepository;
+        this.configurationReadPlatformService = configurationReadPlatformService;
     }
 
     @Override
@@ -330,6 +334,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     public Page<LoanAccountData> retrieveAll(final SearchParameters searchParameters) {
 
         final AppUser currentUser = this.context.authenticatedUser();
+        Boolean isExtendLoanLifeCycleConfig = configurationReadPlatformService
+                .retrieveGlobalConfiguration("Add-More-Stages-To-A-Loan-Life-Cycle").isEnabled();
+
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String hierarchySearchString = hierarchy + "%";
 
@@ -344,7 +351,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         // but that at present is an edge case
         sqlBuilder.append(" join m_office o on (o.id = c.office_id or o.id = g.office_id) ");
         sqlBuilder.append(" left join m_office transferToOffice on transferToOffice.id = c.transfer_to_office_id ");
-        sqlBuilder.append(" where ( o.hierarchy like ? or transferToOffice.hierarchy like ?)");
+        sqlBuilder.append(" where ( o.hierarchy like ? or transferToOffice.hierarchy like ?) ");
+
+        if (isExtendLoanLifeCycleConfig) {
+            sqlBuilder.append(
+                    " and l.loan_decision_state is not null and ds.next_loan_ic_review_decision_state = 1900 and l.loan_decision_state = 1900 ");
+        }
 
         int arrayPos = 2;
         List<Object> extraCriterias = new ArrayList<>();
