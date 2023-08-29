@@ -3067,8 +3067,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         sqlBuilder.append(" where l.loan_status_id=100  ");
         if (loanDecisionState == 100) {
             sqlBuilder.append(" and l.loan_decision_state is null and ds.next_loan_ic_review_decision_state is null ");
-        } else if (loanDecisionState == 1000 || loanDecisionState == 1200) {
+        } else if (loanDecisionState == 1000 || loanDecisionState == 1200 || loanDecisionState == 1300) {
             sqlBuilder.append(" and l.loan_decision_state is not null and l.loan_decision_state = ? ");
+        } else if (loanDecisionState == 1900) {
+            // Return Loan Accounts that are prepare and sign Contract stage only
+            sqlBuilder.append(
+                    " and l.loan_decision_state is not null and ds.next_loan_ic_review_decision_state = ? and l.loan_decision_state != 1900 ");
         } else {
             // when loan is in IC Review
             sqlBuilder.append(" and l.loan_decision_state is not null and ds.next_loan_ic_review_decision_state = ?");
