@@ -165,6 +165,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             if (representativeId != null) {
                 representative = this.clientRepositoryWrapper.findOneWithNotFoundDetection(representativeId);
             }
+            validateThatGroupRepresentativeIsAMemberOfThisGroup(clientMembers, representativeId);
 
             final Group newGroup = Group.newGroup(groupOffice, staff, parentGroup, groupLevel, name, externalId, active, activationDate,
                     clientMembers, groupMembers, submittedOnDate, currentUser, accountNo);
@@ -233,6 +234,15 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             handleGroupDataIntegrityIssues(command, throwable, dve, groupingType);
             return CommandProcessingResult.empty();
         }
+    }
+
+    public void validateThatGroupRepresentativeIsAMemberOfThisGroup(Set<Client> clientMembers, Long representativeId) {
+        clientMembers.stream().filter(client -> client.getId().equals(representativeId)) // Assuming getId() retrieves
+                                                                                         // the ID of the client
+                .findFirst() // Get the first matching client
+                .orElseThrow(() -> new GeneralPlatformDomainRuleException("error.representative.is.not.a.group.member",
+                        String.format("Representative [%s]  is not a group member: ", representativeId)));
+
     }
 
     private void generateAccountNumberIfRequired(Group newGroup) {
@@ -703,9 +713,6 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     throw new InvalidOfficeException("client", "attach.to.group", errorMessage, clientId, groupOfficeId);
                 }
                 clientMembers.add(client);
-                final Long representativeId = command.longValueOfParameterNamed(GroupingTypesApiConstants.representativeIdParamName);
-                if (representativeId != null && !representativeId.equals(id)) {
-                }
             }
         }
 
