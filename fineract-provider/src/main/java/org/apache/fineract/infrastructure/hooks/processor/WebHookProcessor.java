@@ -78,18 +78,20 @@ public class WebHookProcessor implements HookProcessor {
             if (responseMap.get("errors") instanceof List && ((List) responseMap.get("errors")).size() > 0) {
                 return;
             }
+            for (Map.Entry<String, Object> entry : responseMap.entrySet()) {
+                payLoadMap.put(entry.getKey(), entry.getValue());
+            }
+
             if (responseMap.get("loanId") != null) {
                 if (!"DELETE".equals(actionName)) {
                     Long loanId = Long.parseLong(String.valueOf(responseMap.get("loanId")));
                     Loan loan = loanRepository.findOneWithNotFoundDetection(loanId);
                     payLoadMap.put("loan", loan);
                 }
-                payLoadMap.put("loanId", responseMap.get("loanId"));
 
             }
             if (responseMap.get("clientId") != null) {
                 clientId = Long.parseLong(String.valueOf(responseMap.get("clientId")));
-                payLoadMap.put("clientId", clientId);
             }
             if (responseMap.get("savingsId") != null) {
                 savingsAccountId = Long.parseLong(String.valueOf(responseMap.get("savingsId")));
@@ -176,6 +178,7 @@ public class WebHookProcessor implements HookProcessor {
             }
         }
         final String compilePayLoad = compilePayLoad(hook.getUgdTemplate(), payLoadMap);
+        url = getValueFromPayLoad(url, payLoadMap);
         sendRequest(url, contentType, compilePayLoad, entityName, actionName, context, basicAuthCreds, apiKey, apiKeyValue);
     }
 
