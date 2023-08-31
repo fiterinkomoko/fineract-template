@@ -58,7 +58,9 @@ public final class AllGroupTypesDataMapper implements RowMapper<GroupGeneralData
         sqlBuilder.append("acu.lastname as activatedByLastname, ");
 
         sqlBuilder.append("g.hierarchy as hierarchy, ");
-        sqlBuilder.append("g.level_id as groupLevel ");
+        sqlBuilder.append("g.level_id as groupLevel, ");
+        sqlBuilder.append("rep.id as representativeId, ");
+        sqlBuilder.append("rep.display_name as representativeName ");
         sqlBuilder.append("from m_group g ");
         sqlBuilder.append("join m_office o on o.id = g.office_id ");
         sqlBuilder.append("left join m_staff s on s.id = g.staff_id ");
@@ -66,6 +68,7 @@ public final class AllGroupTypesDataMapper implements RowMapper<GroupGeneralData
         sqlBuilder.append("left join m_appuser sbu on sbu.id = g.submittedon_userid ");
         sqlBuilder.append("left join m_appuser acu on acu.id = g.activatedon_userid ");
         sqlBuilder.append("left join m_appuser clu on clu.id = g.closedon_userid ");
+        sqlBuilder.append("left join m_client rep on rep.id = g.representative_id ");
 
         this.schemaSql = sqlBuilder.toString();
     }
@@ -109,11 +112,14 @@ public final class AllGroupTypesDataMapper implements RowMapper<GroupGeneralData
         final String activatedByFirstname = rs.getString("activatedByFirstname");
         final String activatedByLastname = rs.getString("activatedByLastname");
 
+        final Long representativeId = JdbcSupport.getLong(rs, "representativeId");
+        final String representativeName = rs.getString("representativeName");
+
         final GroupTimelineData timeline = new GroupTimelineData(submittedOnDate, submittedByUsername, submittedByFirstname,
                 submittedByLastname, activationDate, activatedByUsername, activatedByFirstname, activatedByLastname, closedOnDate,
                 closedByUsername, closedByFirstname, closedByLastname);
 
         return GroupGeneralData.instance(id, accountNo, name, externalId, status, activationDate, officeId, officeName, centerId,
-                centerName, staffId, staffName, hierarchy, groupLevel, timeline);
+                centerName, staffId, staffName, hierarchy, groupLevel, timeline, representativeId, representativeName);
     }
 }
