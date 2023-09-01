@@ -245,6 +245,15 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
     }
 
+    public void validateThatGroupRepresentativeShouldNotBeRemovedFromGroup(Set<Client> clientMembers, Long representativeId) {
+        boolean isRepresentativeMember = clientMembers.stream().anyMatch(client -> client.getId().equals(representativeId));
+
+        if (isRepresentativeMember) {
+            throw new GeneralPlatformDomainRuleException("error.representative.should.not.be.removed.from.group",
+                    String.format("Representative [%s] should not be removed from Group: ", representativeId));
+        }
+    }
+
     private void generateAccountNumberIfRequired(Group newGroup) {
         if (newGroup.isAccountNumberRequiresAutoGeneration()) {
             EntityAccountType entityAccountType = null;
@@ -823,6 +832,11 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         // check if any client has got group loans
         checkForActiveJLGLoans(groupForUpdate.getId(), clientMembers);
         validateForJLGSavings(groupForUpdate.getId(), clientMembers);
+
+        if (groupForUpdate.getRepresentative() != null) {
+            validateThatGroupRepresentativeShouldNotBeRemovedFromGroup(clientMembers, groupForUpdate.getRepresentative().getId());
+        }
+
         final Map<String, Object> actualChanges = new HashMap<>();
 
         final List<String> changes = groupForUpdate.disassociateClients(clientMembers);
