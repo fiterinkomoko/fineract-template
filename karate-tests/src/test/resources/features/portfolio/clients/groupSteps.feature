@@ -20,3 +20,17 @@ Feature: Group creations steps
     Then status 200
     Then match $ contains { resourceId: '#notnull' }
     Then def groupId = response.resourceId
+
+  @ignore
+  @findGroupByIdStep
+  Scenario: Find Group By Id Step
+    Given configure ssl = true
+    Given path 'groups', groupId
+    And header Accept = 'application/json'
+    And header Authorization = authToken
+    And header fineract-platform-tenantid = tenantId
+    When method GET
+    Then status 200
+    Then match $ contains { representativeId: '#notnull', representativeName : '#notnull' }
+    Then def group = response
+

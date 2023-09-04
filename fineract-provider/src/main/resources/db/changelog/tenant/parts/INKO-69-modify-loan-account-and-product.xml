@@ -1226,5 +1226,32 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="bosco@fiter.io" id="add_representative_id_to_table_m_group">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_group" columnName="representative_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_group">
+            <column name="representative_id"  type="bigint">
+                <constraints nullable="true" foreignKeyName="FK_m_group-m_client-representative_id" references="m_client(id)"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+
+    <changeSet author="bosco@fiter.io" id="add_permission_UPDATEREPRESENTATIVE_GROUP">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_permission where code = 'UPDATEREPRESENTATIVE_GROUP';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio" />
+            <column name="code" value="UPDATEREPRESENTATIVE_GROUP" />
+            <column name="entity_name" value="GROUP" />
+            <column name="action_name" value="UPDATEREPRESENTATIVE" />
+        </insert>
+    </changeSet>
 
 </databaseChangeLog>

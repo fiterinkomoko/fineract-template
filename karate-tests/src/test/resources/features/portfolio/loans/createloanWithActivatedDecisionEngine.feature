@@ -1879,8 +1879,8 @@ Feature: Test loan account apis
 
     * def result = call read('classpath:features/portfolio/clients/groupSteps.feature@createGroupStep') { groupCreationDate : '#(submittedOnDate)',clientId_1 : '#(clientId_1)',clientId_2 : '#(clientId_2)' }
     * def groupId = result.groupId
-
-
+    # Validate group Object
+    * def response = call read('classpath:features/portfolio/clients/groupSteps.feature@findGroupByIdStep') { groupId : '#(groupId)'}
 
     * def loanAmount = 300000
     * def loanTerm = 4
