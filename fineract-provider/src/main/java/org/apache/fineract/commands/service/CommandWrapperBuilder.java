@@ -3902,4 +3902,13 @@ public class CommandWrapperBuilder {
 
         return this;
     }
+
+    public CommandWrapperBuilder updateGroupRepresentative(final Long groupId) {
+        this.actionName = "UPDATEREPRESENTATIVE";
+        this.entityName = "GROUP";
+        this.entityId = groupId;
+        this.groupId = groupId;
+        this.href = "/groups/" + groupId + "?command=updateGroupRepresentative";
+        return this;
+    }
 }

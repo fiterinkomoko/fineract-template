@@ -821,6 +821,32 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                 .build();
     }
 
+    @Override
+    public CommandProcessingResult updateGroupRepresentative(Long groupId, JsonCommand command) {
+        this.fromApiJsonDeserializer.validateForUpdateGroupRepresentative(command);
+
+        Client representative = null;
+        final Long representativeId = command.longValueOfParameterNamed(GroupingTypesApiConstants.REPRESENTATIVE_ID);
+        if (representativeId != null) {
+            representative = this.clientRepositoryWrapper.findOneWithNotFoundDetection(representativeId);
+        }
+
+        final Group groupForUpdate = this.groupRepository.findOneWithNotFoundDetection(groupId);
+        Set<Client> clients = groupForUpdate.getClientMembers();
+
+        validateThatGroupRepresentativeIsAMemberOfThisGroup(clients, representativeId);
+        groupForUpdate.setRepresentative(representative);
+
+        this.groupRepository.saveAndFlush(groupForUpdate);
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withOfficeId(groupForUpdate.officeId()) //
+                .withGroupId(groupForUpdate.getId()) //
+                .withEntityId(representativeId) //
+                .build();
+    }
+
     @Transactional
     @Override
     public CommandProcessingResult disassociateClientsFromGroup(final Long groupId, final JsonCommand command) {

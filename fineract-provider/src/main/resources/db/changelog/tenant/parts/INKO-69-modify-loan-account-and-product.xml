@@ -1239,4 +1239,19 @@
         </addColumn>
     </changeSet>
 
+
+    <changeSet author="bosco@fiter.io" id="add_permission_UPDATEREPRESENTATIVE_GROUP">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_permission where code = 'UPDATEREPRESENTATIVE_GROUP';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio" />
+            <column name="code" value="UPDATEREPRESENTATIVE_GROUP" />
+            <column name="entity_name" value="GROUP" />
+            <column name="action_name" value="UPDATEREPRESENTATIVE" />
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>
