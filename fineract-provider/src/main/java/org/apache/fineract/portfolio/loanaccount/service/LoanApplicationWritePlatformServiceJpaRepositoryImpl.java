@@ -113,6 +113,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanDecisionState;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -152,6 +153,7 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.service.GSIMReadPlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -1683,24 +1685,41 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         final AppUser currentUser = getAppUserIfPresent();
 
         this.loanApplicationTransitionApiJsonValidator.validateRejection(command.json());
-
+        Boolean isExtendLoanLifeCycleConfig = loanDecisionStateUtilService.isExtendLoanLifeCycleConfig();
         final Loan loan = retrieveLoanBy(loanId);
 
         checkClientOrGroupActive(loan);
 
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(loanId, EntityTables.LOAN.getName(),
                 StatusEnum.REJECTED.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
-
-        final Map<String, Object> changes = loan.loanApplicationRejection(currentUser, command, defaultLoanLifecycleStateMachine());
-        if (!changes.isEmpty()) {
-            this.loanRepositoryWrapper.saveAndFlush(loan);
-
-            final String noteText = command.stringValueOfParameterNamed("note");
-            if (StringUtils.isNotBlank(noteText)) {
-                final Note note = Note.loanNote(loan, noteText);
-                this.noteRepository.save(note);
+        Map<String, Object> changes = new HashMap<>();
+        if ((isExtendLoanLifeCycleConfig && loan.isSubmittedAndPendingApproval() && loan.getLoanDecisionState() != null
+                && loanDecisionStateUtilService.isLoanAccountInICReview(LoanDecisionState.fromInt(loan.getLoanDecisionState())))) {
+            // intercept the reject module and transition the loan to other stages
+            switch (LoanDecisionState.fromInt(loan.getLoanDecisionState())) {
+                case COLLATERAL_REVIEW:
+                    System.out.println(" Am rejecting this Loan Account and transitioning it to IC Approval . .One . . ");
+                break;
+                case IC_REVIEW_LEVEL_ONE:
+                    System.out.println(" Am rejecting this Loan Account and transitioning it to IC Approval Level Two . . . . ");
+                break;
+                case IC_REVIEW_LEVEL_TWO:
+                    System.out.println(" Am rejecting this Loan Account and transitioning it to IC Approval Level Three . . . . ");
+                break;
+                case IC_REVIEW_LEVEL_THREE:
+                    System.out.println(" Am rejecting this Loan Account and transitioning it to IC Approval Level Four . . . . ");
+                break;
+                case IC_REVIEW_LEVEL_FOUR:
+                    System.out.println(" Am rejecting this Loan Account and transitioning it to IC Approval Level Five . . . . ");
+                break;
+                default:
+                    System.out.println(" Not sure. Resulted to default. ");
+                break;
             }
+        } else {
+            changes = rejectLoanAccountParentStatus(command, currentUser, loan);
         }
+
         businessEventNotifierService.notifyPostBusinessEvent(new LoanRejectedBusinessEvent(loan));
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -1711,6 +1730,21 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 .withLoanId(loanId) //
                 .with(changes) //
                 .build();
+    }
+
+    @NotNull
+    private Map<String, Object> rejectLoanAccountParentStatus(JsonCommand command, AppUser currentUser, Loan loan) {
+        Map<String, Object> changes;
+        changes = loan.loanApplicationRejection(currentUser, command, defaultLoanLifecycleStateMachine());
+        if (!changes.isEmpty()) {
+            final String noteText = command.stringValueOfParameterNamed("note");
+            this.loanRepositoryWrapper.saveAndFlush(loan);
+            if (StringUtils.isNotBlank(noteText)) {
+                final Note note = Note.loanNote(loan, noteText);
+                this.noteRepository.save(note);
+            }
+        }
+        return changes;
     }
 
     @Transactional
