@@ -24,7 +24,6 @@ import java.util.Map;
 import javax.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -37,7 +36,6 @@ import org.apache.fineract.portfolio.loanaccount.api.LoanApprovalMatrixConstants
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanApprovalMatrix;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanApprovalMatrixRepository;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagementRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDecision;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDecisionRepository;
@@ -302,7 +300,9 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
         final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
 
-        loanDecisionStateUtilService.validateIcReviewDecisionLevelOneBusinessRule(command, loan, loanDecision);
+        LocalDate icReviewOn = command.localDateValueOfParameterNamed(LoanApiConstants.icReviewOnDateParameterName);
+
+        loanDecisionStateUtilService.validateIcReviewDecisionLevelOneBusinessRule(command, loan, loanDecision, icReviewOn);
         LoanApprovalMatrix approvalMatrix = this.loanApprovalMatrixRepository.findLoanApprovalMatrixByCurrency(loan.getCurrencyCode());
 
         if (approvalMatrix == null) {
@@ -314,10 +314,10 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         // Determine which cycle of this Loan Account
         // Determine the Next Level or stage to review
         // Add custom Params in Decision Table
-        List<Loan> loanIndividualCounter = getLoanCounter(loan);
+        List<Loan> loanIndividualCounter = loanDecisionStateUtilService.getLoanCounter(loan);
 
-        Boolean isLoanFirstCycle = isLoanFirstCycle(loanIndividualCounter);
-        Boolean isLoanUnsecure = isLoanUnSecure(loan);
+        Boolean isLoanFirstCycle = loanDecisionStateUtilService.isLoanFirstCycle(loanIndividualCounter);
+        Boolean isLoanUnsecure = loanDecisionStateUtilService.isLoanUnSecure(loan);
 
         loanDecisionStateUtilService.validateLoanAccountToComplyToApprovalMatrixStage(loan, approvalMatrix, isLoanFirstCycle,
                 isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_ONE);
@@ -325,7 +325,8 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         loanDecisionStateUtilService.determineTheNextDecisionStage(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
                 LoanDecisionState.IC_REVIEW_LEVEL_ONE);
 
-        LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelOneFrom(command, currentUser, loanDecision);
+        LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelOneFrom(command, currentUser, loanDecision, false,
+                icReviewOn);
         LoanDecision savedObj = loanDecisionRepository.saveAndFlush(loanDecisionObj);
 
         Loan loanObj = loan;
@@ -333,7 +334,8 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         this.loanRepositoryWrapper.saveAndFlush(loanObj);
 
         if (StringUtils.isNotBlank(loanDecisionObj.getIcReviewDecisionLevelOneNote())) {
-            final Note note = Note.loanNote(loanObj, "IC Review-Decision Level One : " + loanDecisionObj.getIcReviewDecisionLevelOneNote());
+            final Note note = Note.loanNote(loanObj,
+                    "Approve IC Review-Decision Level One : " + loanDecisionObj.getIcReviewDecisionLevelOneNote());
             this.noteRepository.save(note);
         }
 
@@ -345,21 +347,6 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                 .withGroupId(loan.getGroupId()) //
                 .withLoanId(loanId) //
                 .withResourceIdAsString(savedObj.getId().toString()).build();
-    }
-
-    private List<Loan> getLoanCounter(Loan loan) {
-        List<Loan> loanIndividualCounter;
-        if (loan.isIndividualLoan() || loan.isJLGLoan()) {
-            // Validate Individual Loan Cycle . . .
-            loanIndividualCounter = this.loanRepositoryWrapper.findLoanCounterByClientId(loan.getClientId());
-        } else if (loan.isGroupLoan()) {
-            loanIndividualCounter = this.loanRepositoryWrapper.findLoanCounterByGroupId(loan.getGroupId());
-        } else {
-            // Throw Not Support Loan Type
-            throw new GeneralPlatformDomainRuleException("error.msg.invalid.loan.type.not.supported.for.Ic.Review",
-                    String.format("This Loan Type [ %s ] , is not supported for IC Review Operations .", loan.getLoanType()));
-        }
-        return loanIndividualCounter;
     }
 
     @Override
@@ -383,10 +370,10 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         // Determine which cycle of this Loan Account
         // Determine the Next Level or stage to review
         // Add custom Params in Decision Table
-        List<Loan> loanIndividualCounter = getLoanCounter(loan);
+        List<Loan> loanIndividualCounter = loanDecisionStateUtilService.getLoanCounter(loan);
 
-        Boolean isLoanFirstCycle = isLoanFirstCycle(loanIndividualCounter);
-        Boolean isLoanUnsecure = isLoanUnSecure(loan);
+        Boolean isLoanFirstCycle = loanDecisionStateUtilService.isLoanFirstCycle(loanIndividualCounter);
+        Boolean isLoanUnsecure = loanDecisionStateUtilService.isLoanUnSecure(loan);
 
         loanDecisionStateUtilService.validateLoanAccountToComplyToApprovalMatrixStage(loan, approvalMatrix, isLoanFirstCycle,
                 isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_TWO);
@@ -437,10 +424,10 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         // Determine which cycle of this Loan Account
         // Determine the Next Level or stage to review
         // Add custom Params in Decision Table
-        List<Loan> loanIndividualCounter = getLoanCounter(loan);
+        List<Loan> loanIndividualCounter = loanDecisionStateUtilService.getLoanCounter(loan);
 
-        Boolean isLoanFirstCycle = isLoanFirstCycle(loanIndividualCounter);
-        Boolean isLoanUnsecure = isLoanUnSecure(loan);
+        Boolean isLoanFirstCycle = loanDecisionStateUtilService.isLoanFirstCycle(loanIndividualCounter);
+        Boolean isLoanUnsecure = loanDecisionStateUtilService.isLoanUnSecure(loan);
 
         loanDecisionStateUtilService.validateLoanAccountToComplyToApprovalMatrixStage(loan, approvalMatrix, isLoanFirstCycle,
                 isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_THREE);
@@ -492,10 +479,10 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         // Determine which cycle of this Loan Account
         // Determine the Next Level or stage to review
         // Add custom Params in Decision Table
-        List<Loan> loanIndividualCounter = getLoanCounter(loan);
+        List<Loan> loanIndividualCounter = loanDecisionStateUtilService.getLoanCounter(loan);
 
-        Boolean isLoanFirstCycle = isLoanFirstCycle(loanIndividualCounter);
-        Boolean isLoanUnsecure = isLoanUnSecure(loan);
+        Boolean isLoanFirstCycle = loanDecisionStateUtilService.isLoanFirstCycle(loanIndividualCounter);
+        Boolean isLoanUnsecure = loanDecisionStateUtilService.isLoanUnSecure(loan);
 
         loanDecisionStateUtilService.validateLoanAccountToComplyToApprovalMatrixStage(loan, approvalMatrix, isLoanFirstCycle,
                 isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_FOUR);
@@ -547,10 +534,10 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         // Determine which cycle of this Loan Account
         // Determine the Next Level or stage to review
         // Add custom Params in Decision Table
-        List<Loan> loanIndividualCounter = getLoanCounter(loan);
+        List<Loan> loanIndividualCounter = loanDecisionStateUtilService.getLoanCounter(loan);
 
-        Boolean isLoanFirstCycle = isLoanFirstCycle(loanIndividualCounter);
-        Boolean isLoanUnsecure = isLoanUnSecure(loan);
+        Boolean isLoanFirstCycle = loanDecisionStateUtilService.isLoanFirstCycle(loanIndividualCounter);
+        Boolean isLoanUnsecure = loanDecisionStateUtilService.isLoanUnSecure(loan);
 
         loanDecisionStateUtilService.validateLoanAccountToComplyToApprovalMatrixStage(loan, approvalMatrix, isLoanFirstCycle,
                 isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_FIVE);
@@ -616,15 +603,6 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                 .withGroupId(loan.getGroupId()) //
                 .withLoanId(loanId) //
                 .withResourceIdAsString(savedObj.getId().toString()).build();
-    }
-
-    private Boolean isLoanFirstCycle(List<Loan> loanIndividualCounter) {
-        return CollectionUtils.isEmpty(loanIndividualCounter);
-    }
-
-    private Boolean isLoanUnSecure(Loan loan) {
-        List<LoanCollateralManagement> collateralManagementList = loanCollateralManagementRepository.findByLoan(loan);
-        return CollectionUtils.isEmpty(collateralManagementList);
     }
 
     private void validateDueDiligenceBusinessRule(JsonCommand command, Loan loan, LoanDecision loanDecision) {

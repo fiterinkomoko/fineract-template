@@ -20,7 +20,9 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
@@ -38,6 +40,8 @@ import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApprovalMatrixConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanApprovalMatrix;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagementRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDecision;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDecisionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDecisionState;
@@ -58,6 +62,7 @@ public class LoanDecisionStateUtilService {
     private final LoanScheduleAssembler loanScheduleAssembler;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final LoanReadPlatformService loanReadPlatformService;
+    private final LoanCollateralManagementRepository loanCollateralManagementRepository;
 
     public void validateLoanAccountWithExtraLoanDecisionStagesConfiguredGlobally(Loan loan, final JsonCommand command) {
         final Boolean isExtendLoanLifeCycleConfig = isExtendLoanLifeCycleConfig();
@@ -598,7 +603,8 @@ public class LoanDecisionStateUtilService {
         }
     }
 
-    public void validateIcReviewDecisionLevelOneBusinessRule(JsonCommand command, Loan loan, LoanDecision loanDecision) {
+    public void validateIcReviewDecisionLevelOneBusinessRule(JsonCommand command, Loan loan, LoanDecision loanDecision,
+            LocalDate icReviewOn) {
         Boolean isExtendLoanLifeCycleConfig = getExtendLoanLifeCycleConfig().isEnabled();
 
         if (!isExtendLoanLifeCycleConfig) {
@@ -614,7 +620,6 @@ public class LoanDecisionStateUtilService {
 
         validateLoanDisbursementDataWithMeetingDate(loan);
         validateLoanTopUp(loan);
-        LocalDate icReviewOn = command.localDateValueOfParameterNamed(LoanApiConstants.icReviewOnDateParameterName);
         // Ic Review Decision Level One should not be before other stages below it like Collateral Review , Due
         // Diligence and Review Application
         if (icReviewOn.isBefore(loanDecision.getCollateralReviewOn())) {
@@ -1311,4 +1316,27 @@ public class LoanDecisionStateUtilService {
         }
     }
 
+    public Boolean isLoanFirstCycle(List<Loan> loanIndividualCounter) {
+        return CollectionUtils.isEmpty(loanIndividualCounter);
+    }
+
+    public Boolean isLoanUnSecure(Loan loan) {
+        List<LoanCollateralManagement> collateralManagementList = loanCollateralManagementRepository.findByLoan(loan);
+        return CollectionUtils.isEmpty(collateralManagementList);
+    }
+
+    public List<Loan> getLoanCounter(Loan loan) {
+        List<Loan> loanIndividualCounter;
+        if (loan.isIndividualLoan() || loan.isJLGLoan()) {
+            // Validate Individual Loan Cycle . . .
+            loanIndividualCounter = this.loanRepositoryWrapper.findLoanCounterByClientId(loan.getClientId());
+        } else if (loan.isGroupLoan()) {
+            loanIndividualCounter = this.loanRepositoryWrapper.findLoanCounterByGroupId(loan.getGroupId());
+        } else {
+            // Throw Not Support Loan Type
+            throw new GeneralPlatformDomainRuleException("error.msg.invalid.loan.type.not.supported.for.Ic.Review",
+                    String.format("This Loan Type [ %s ] , is not supported for IC Review Operations .", loan.getLoanType()));
+        }
+        return loanIndividualCounter;
+    }
 }
