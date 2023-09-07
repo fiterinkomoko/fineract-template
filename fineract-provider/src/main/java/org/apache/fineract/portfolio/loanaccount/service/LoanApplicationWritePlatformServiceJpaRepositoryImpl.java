@@ -1712,7 +1712,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     changes = rejectLoanAccountForIcReviewLevelTwo(command, currentUser, loan, changes);
                 break;
                 case IC_REVIEW_LEVEL_TWO:
-                    System.out.println(" Am rejecting this Loan Account and transitioning it to IC Approval Level Three . . . . ");
+                    changes = rejectLoanAccountForIcReviewLevelThree(command, currentUser, loan, changes);
                 break;
                 case IC_REVIEW_LEVEL_THREE:
                     System.out.println(" Am rejecting this Loan Account and transitioning it to IC Approval Level Four . . . . ");
@@ -1738,6 +1738,54 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 .withLoanId(loanId) //
                 .with(changes) //
                 .build();
+    }
+
+    private Map<String, Object> rejectLoanAccountForIcReviewLevelThree(JsonCommand command, AppUser currentUser, Loan loan,
+            Map<String, Object> changes) {
+        final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
+        LocalDate rejectedOnDate = command.localDateValueOfParameterNamed("rejectedOnDate");
+
+        loanDecisionStateUtilService.validateIcReviewDecisionLevelThreeBusinessRule(command, loan, loanDecision, rejectedOnDate);
+        LoanApprovalMatrix approvalMatrix = this.loanApprovalMatrixRepository.findLoanApprovalMatrixByCurrency(loan.getCurrencyCode());
+
+        if (approvalMatrix == null) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.approval.matrix.with.this.currency.does.not.exist.",
+                    String.format("Loan Approval Matrix with Currency [ %s ] doesn't exist. Approval matrix is expected to continue ",
+                            loan.getCurrencyCode()));
+        }
+        // Get Loan Matrix
+        // Determine which cycle of this Loan Account
+        // Determine the Next Level or stage to review
+        // Add custom Params in Decision Table
+        List<Loan> loanIndividualCounter = loanDecisionStateUtilService.getLoanCounter(loan);
+
+        Boolean isLoanFirstCycle = loanDecisionStateUtilService.isLoanFirstCycle(loanIndividualCounter);
+        Boolean isLoanUnsecure = loanDecisionStateUtilService.isLoanUnSecure(loan);
+
+        loanDecisionStateUtilService.validateLoanAccountToComplyToApprovalMatrixStage(loan, approvalMatrix, isLoanFirstCycle,
+                isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_THREE);
+        // generate the next stage based on loan approval matrix via amounts to be disbursed
+        loanDecisionStateUtilService.determineTheNextDecisionStage(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
+                LoanDecisionState.IC_REVIEW_LEVEL_THREE);
+
+        LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelThreeFrom(command, currentUser, loanDecision,
+                Boolean.TRUE, rejectedOnDate);
+        loanDecisionRepository.saveAndFlush(loanDecisionObj);
+
+        Loan loanObj = loan;
+        loanObj.setLoanDecisionState(LoanDecisionState.IC_REVIEW_LEVEL_THREE.getValue());
+        this.loanRepositoryWrapper.saveAndFlush(loanObj);
+
+        if (StringUtils.isNotBlank(loanDecisionObj.getIcReviewDecisionLevelThreeNote())) {
+            final Note note = Note.loanNote(loanObj,
+                    "Reject IC Review-Decision Level Three : " + loanDecisionObj.getIcReviewDecisionLevelThreeNote());
+            this.noteRepository.save(note);
+        }
+        // If the next state is outside the IC Review, then reject the loan account completely
+        if (loanDecisionObj.getNextLoanIcReviewDecisionState().equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())) {
+            changes = rejectLoanAccountParentStatus(command, currentUser, loan);
+        }
+        return changes;
     }
 
     private Map<String, Object> rejectLoanAccountForIcReviewLevelTwo(JsonCommand command, AppUser currentUser, Loan loan,

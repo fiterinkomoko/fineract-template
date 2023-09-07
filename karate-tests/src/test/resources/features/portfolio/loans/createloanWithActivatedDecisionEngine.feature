@@ -2780,9 +2780,9 @@ Feature: Test loan account apis
     * assert karate.sizeOf(noteLevelOneResponse.notes) == 5
 
 
-        #-Approve Loan Via IC-Review Decision Level Three
-    #-*************************  Level Three  ******************
-    * call read('classpath:features/portfolio/loans/loanDecisionSteps.feature@icReviewDecisionLevelThreeStage') { icReviewOn : '#(submittedOnDate)', loanId : '#(loanId)' }
+        #-REJECT Loan Via IC-Review Decision Level Three
+    #-*************************  REJECT Level Three  ******************
+    * call read('classpath:features/portfolio/loans/loansteps.feature@rejectedLoanAccountStep') { submittedOnDate : '#(submittedOnDate)', loanId : '#(loanId)' }
      # Assert Actions for Level Three
     * def levelOneResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findloanbyidWithAllAssociationStep') { loanId : '#(loanId)' }
     #     Assert that Loan Account has passed IC_REVIEW_LEVEL_THREE Stage
