@@ -2797,9 +2797,9 @@ Feature: Test loan account apis
 
 
 
-            #-Approve Loan Via IC-Review Decision Level Four
-    #-*************************  Level Four  ******************
-    * call read('classpath:features/portfolio/loans/loanDecisionSteps.feature@icReviewDecisionLevelFourStage') { icReviewOn : '#(submittedOnDate)', loanId : '#(loanId)' }
+            #-REJECT Loan Via IC-Review Decision Level Four
+    #-*************************  REJECT Level Four  ******************
+    * call read('classpath:features/portfolio/loans/loansteps.feature@rejectedLoanAccountStep') { submittedOnDate : '#(submittedOnDate)', loanId : '#(loanId)' }
      # Assert Actions for Level Four
     * def levelOneResponse = call read('classpath:features/portfolio/loans/loansteps.feature@findloanbyidWithAllAssociationStep') { loanId : '#(loanId)' }
     #     Assert that Loan Account has passed IC_REVIEW_LEVEL_FOUR Stage

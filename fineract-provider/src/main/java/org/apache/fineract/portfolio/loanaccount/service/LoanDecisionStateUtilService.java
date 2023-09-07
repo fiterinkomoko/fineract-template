@@ -801,7 +801,8 @@ public class LoanDecisionStateUtilService {
         }
     }
 
-    public void validateIcReviewDecisionLevelFourBusinessRule(JsonCommand command, Loan loan, LoanDecision loanDecision) {
+    public void validateIcReviewDecisionLevelFourBusinessRule(JsonCommand command, Loan loan, LoanDecision loanDecision,
+            LocalDate icReviewOn) {
         Boolean isExtendLoanLifeCycleConfig = getExtendLoanLifeCycleConfig().isEnabled();
 
         if (!isExtendLoanLifeCycleConfig) {
@@ -817,7 +818,6 @@ public class LoanDecisionStateUtilService {
 
         validateLoanDisbursementDataWithMeetingDate(loan);
         validateLoanTopUp(loan);
-        LocalDate icReviewOn = command.localDateValueOfParameterNamed(LoanApiConstants.icReviewOnDateParameterName);
         // Ic Review Decision Level One should not be before other stages below it like IC Review Decision Level
         // One,Collateral Review , Due
         // Diligence and Review Application

@@ -469,8 +469,9 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
         final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
+        LocalDate icReviewOn = command.localDateValueOfParameterNamed(LoanApiConstants.icReviewOnDateParameterName);
 
-        loanDecisionStateUtilService.validateIcReviewDecisionLevelFourBusinessRule(command, loan, loanDecision);
+        loanDecisionStateUtilService.validateIcReviewDecisionLevelFourBusinessRule(command, loan, loanDecision, icReviewOn);
         LoanApprovalMatrix approvalMatrix = this.loanApprovalMatrixRepository.findLoanApprovalMatrixByCurrency(loan.getCurrencyCode());
 
         if (approvalMatrix == null) {
@@ -493,7 +494,8 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         loanDecisionStateUtilService.determineTheNextDecisionStage(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
                 LoanDecisionState.IC_REVIEW_LEVEL_FOUR);
 
-        LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelFourFrom(command, currentUser, loanDecision);
+        LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelFourFrom(command, currentUser, loanDecision,
+                Boolean.FALSE, icReviewOn);
         LoanDecision savedObj = loanDecisionRepository.saveAndFlush(loanDecisionObj);
 
         Loan loanObj = loan;
