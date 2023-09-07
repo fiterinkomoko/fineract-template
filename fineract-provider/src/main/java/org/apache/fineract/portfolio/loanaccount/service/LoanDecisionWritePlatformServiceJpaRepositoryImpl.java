@@ -391,7 +391,8 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         this.loanRepositoryWrapper.saveAndFlush(loanObj);
 
         if (StringUtils.isNotBlank(loanDecisionObj.getIcReviewDecisionLevelTwoNote())) {
-            final Note note = Note.loanNote(loanObj, "IC Review-Decision Level Two : " + loanDecisionObj.getIcReviewDecisionLevelTwoNote());
+            final Note note = Note.loanNote(loanObj,
+                    "Approve IC Review-Decision Level Two : " + loanDecisionObj.getIcReviewDecisionLevelTwoNote());
             this.noteRepository.save(note);
         }
 
@@ -447,7 +448,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         if (StringUtils.isNotBlank(loanDecisionObj.getIcReviewDecisionLevelThreeNote())) {
             final Note note = Note.loanNote(loanObj,
-                    "IC Review-Decision Level Three : " + loanDecisionObj.getIcReviewDecisionLevelThreeNote());
+                    "Approve IC Review-Decision Level Three : " + loanDecisionObj.getIcReviewDecisionLevelThreeNote());
             this.noteRepository.save(note);
         }
 
@@ -504,7 +505,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         if (StringUtils.isNotBlank(loanDecisionObj.getIcReviewDecisionLevelFourNote())) {
             final Note note = Note.loanNote(loanObj,
-                    "IC Review-Decision Level Four : " + loanDecisionObj.getIcReviewDecisionLevelFourNote());
+                    "Approve IC Review-Decision Level Four : " + loanDecisionObj.getIcReviewDecisionLevelFourNote());
             this.noteRepository.save(note);
         }
 
@@ -558,7 +559,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         if (StringUtils.isNotBlank(loanDecisionObj.getIcReviewDecisionLevelFiveNote())) {
             final Note note = Note.loanNote(loanObj,
-                    "IC Review-Decision Level Five : " + loanDecisionObj.getIcReviewDecisionLevelFiveNote());
+                    "Approve IC Review-Decision Level Five : " + loanDecisionObj.getIcReviewDecisionLevelFiveNote());
             this.noteRepository.save(note);
         }
 
