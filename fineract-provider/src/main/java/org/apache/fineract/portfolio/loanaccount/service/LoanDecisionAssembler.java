@@ -313,20 +313,26 @@ public class LoanDecisionAssembler {
         }
     }
 
-    public LoanDecision assembleIcReviewDecisionLevelTwoFrom(final JsonCommand command, AppUser currentUser,
-            LoanDecision savedLoanDecision) {
-
-        LocalDate icReviewOn = command.localDateValueOfParameterNamed(LoanApiConstants.icReviewOnDateParameterName);
+    public LoanDecision assembleIcReviewDecisionLevelTwoFrom(final JsonCommand command, AppUser currentUser, LoanDecision savedLoanDecision,
+            Boolean isReject, LocalDate icReviewOn) {
 
         final String noteText = command.stringValueOfParameterNamed("note");
-
         LoanDecision loanDecision = savedLoanDecision;
-        loanDecision.setLoanDecisionState(LoanDecisionState.IC_REVIEW_LEVEL_TWO.getValue());
+
         loanDecision.setIcReviewDecisionLevelTwoNote(noteText);
         loanDecision.setIcReviewDecisionLevelTwoBy(currentUser);
         loanDecision.setIcReviewDecisionLevelTwoOn(icReviewOn);
-        loanDecision.setIcReviewDecisionLevelTwoSigned(Boolean.TRUE);
-        loanDecision.setRejectIcReviewDecisionLevelTwoSigned(Boolean.FALSE);
+
+        if (isReject) {
+            loanDecision.setLoanDecisionState(LoanDecisionState.IC_REVIEW_LEVEL_TWO.getValue());
+            loanDecision.setIcReviewDecisionLevelTwoSigned(Boolean.FALSE);
+            loanDecision.setRejectIcReviewDecisionLevelTwoSigned(Boolean.TRUE);
+        } else {
+            loanDecision.setLoanDecisionState(LoanDecisionState.IC_REVIEW_LEVEL_TWO.getValue());
+            loanDecision.setIcReviewDecisionLevelTwoSigned(Boolean.TRUE);
+            loanDecision.setRejectIcReviewDecisionLevelTwoSigned(Boolean.FALSE);
+        }
+
         return loanDecision;
     }
 

@@ -643,7 +643,7 @@ public class LoanDecisionStateUtilService {
         // Collateral Review date should not be before loan submission date
         if (icReviewOn.isBefore(loan.getSubmittedOnDate())) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.ic.review.decision.level.one.date.should.be.after.submission.date",
-                    "Approve IC ReviewDecision Level One on date " + icReviewOn + " should be after Loan submission date "
+                    "Approve IC Review Decision Level One on date " + icReviewOn + " should be after Loan submission date "
                             + loan.getSubmittedOnDate());
         }
 
@@ -662,7 +662,8 @@ public class LoanDecisionStateUtilService {
         }
     }
 
-    public void validateIcReviewDecisionLevelTwoBusinessRule(JsonCommand command, Loan loan, LoanDecision loanDecision) {
+    public void validateIcReviewDecisionLevelTwoBusinessRule(JsonCommand command, Loan loan, LoanDecision loanDecision,
+            LocalDate icReviewOn) {
         Boolean isExtendLoanLifeCycleConfig = getExtendLoanLifeCycleConfig().isEnabled();
 
         if (!isExtendLoanLifeCycleConfig) {
@@ -678,7 +679,6 @@ public class LoanDecisionStateUtilService {
 
         validateLoanDisbursementDataWithMeetingDate(loan);
         validateLoanTopUp(loan);
-        LocalDate icReviewOn = command.localDateValueOfParameterNamed(LoanApiConstants.icReviewOnDateParameterName);
         // Ic Review Decision Level One should not be before other stages below it like IC Review Decision Level
         // One,Collateral Review , Due
         // Diligence and Review Application
