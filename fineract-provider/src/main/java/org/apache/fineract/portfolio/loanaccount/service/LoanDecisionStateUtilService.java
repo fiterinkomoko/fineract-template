@@ -162,7 +162,7 @@ public class LoanDecisionStateUtilService {
 
             if (loanDecision == null) {
                 throw new GeneralPlatformDomainRuleException(
-                        "error.msg.loan.account.should.extend.decision.engine.to.review.Loan.application",
+                        "error.msg.loan.account.should.extend.decision.engine.to.review.Loan.application.to.be.disbursed",
                         "Loan Account is not permitted for Disbursement since new workflow [Add-More-Stages-To-A-Loan-Life-Cycle] is activated and next stage is [Review Application]");
             }
             if (loanDecision != null && !loanDecision.getReviewApplicationSigned()) {
@@ -1327,7 +1327,7 @@ public class LoanDecisionStateUtilService {
 
     public List<Loan> getLoanCounter(Loan loan) {
         List<Loan> loanIndividualCounter;
-        if (loan.isIndividualLoan() || loan.isJLGLoan()) {
+        if (loan.isIndividualLoan() || loan.isJLGLoan() || loan.isGLIMLoan()) {
             // Validate Individual Loan Cycle . . .
             loanIndividualCounter = this.loanRepositoryWrapper.findLoanCounterByClientId(loan.getClientId());
         } else if (loan.isGroupLoan()) {

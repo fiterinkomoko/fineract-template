@@ -191,6 +191,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepositor
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.exception.DateMismatchException;
 import org.apache.fineract.portfolio.loanaccount.exception.ExceedingTrancheCountException;
+import org.apache.fineract.portfolio.loanaccount.exception.GLIMLoanCannotBeDisbursedDirectlyException;
 import org.apache.fineract.portfolio.loanaccount.exception.InstallmentNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanTransactionTypeException;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidPaidInAdvanceAmountException;
@@ -298,12 +299,18 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Override
     public CommandProcessingResult disburseGLIMLoan(final Long loanId, final JsonCommand command) {
         final Long parentLoanId = loanId;
+        Boolean isExtendLoanLifeCycleConfig = loanDecisionStateUtilService.isExtendLoanLifeCycleConfig();
+
         GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(parentLoanId).orElseThrow();
         List<Loan> childLoans = this.loanRepository.findByGlimId(loanId);
         CommandProcessingResult result = null;
         int count = 0;
         for (Loan loan : childLoans) {
-            result = disburseLoan(loan.getId(), command, false);
+            if (isExtendLoanLifeCycleConfig) {
+                result = disburseLoanApplicationAssociatedToGLIM(loan.getId(), command, false);
+            } else {
+                result = disburseLoan(loan.getId(), command, false, Boolean.TRUE);
+            }
             if (result.getLoanId() != null) {
                 count++;
                 // if all the child loans are approved, mark the parent loan as
@@ -319,7 +326,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Transactional
     @Override
-    public CommandProcessingResult disburseLoan(final Long loanId, final JsonCommand command, Boolean isAccountTransfer) {
+    public CommandProcessingResult disburseLoan(final Long loanId, final JsonCommand command, Boolean isAccountTransfer,
+            Boolean isGlimBulkDisbursement) {
 
         final AppUser currentUser = getAppUserIfPresent();
 
@@ -331,6 +339,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final Boolean isExtendLoanLifeCycleConfig = this.loanDecisionStateUtilService.isExtendLoanLifeCycleConfig();
+
+        // block loan Disbursement if loan is associated to GLIM and is direct Disbursement not passing through bulk
+        // GLIM Operation call
+        if (isExtendLoanLifeCycleConfig && loan.getLoanType().equals(AccountType.GLIM.getValue()) && !isGlimBulkDisbursement) {
+            throw new GLIMLoanCannotBeDisbursedDirectlyException(loanId);
+        }
+
         this.loanDecisionStateUtilService.validateLoanReviewApplicationStateIsFiredBeforeDisbursal(loan, command);
         if (loan.loanProduct().isDisallowExpectedDisbursements()) {
             // create artificial 'tranche/expected disbursal' as current disburse code expects it for multi-disbursal
@@ -568,6 +584,21 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .withLoanId(loanId) //
                 .with(changes) //
                 .build();
+    }
+
+    public CommandProcessingResult disburseLoanApplicationAssociatedToGLIM(final Long loanId, final JsonCommand command,
+            Boolean isAccountTransfer) {
+        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        if (loan.status().isRejected()) {
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withOfficeId(loan.getOfficeId()) //
+                    .withClientId(loan.getClientId()) //
+                    .withGroupId(loan.getGroupId()) //
+                    .withLoanId(loanId) //
+                    .build();
+        }
+        return disburseLoan(loan.getId(), command, isAccountTransfer, Boolean.TRUE);
     }
 
     private void addOverdueChargeToLoanAccountInArrears(Long loanId) {

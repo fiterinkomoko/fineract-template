@@ -59,6 +59,8 @@ public final class GroupLoanIndividualMonitoringAccount extends AbstractPersista
 
     @Column(name = "application_id", nullable = true)
     private BigDecimal applicationId;
+    @Column(name = "actual_principal_amount")
+    private BigDecimal actualPrincipalAmount;
 
     private GroupLoanIndividualMonitoringAccount() {}
 
