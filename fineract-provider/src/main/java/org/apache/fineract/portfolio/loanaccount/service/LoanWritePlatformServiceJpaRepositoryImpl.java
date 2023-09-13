@@ -315,13 +315,28 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 count++;
                 // if all the child loans are approved, mark the parent loan as
                 // approved
+
                 if (count == parentLoan.getChildAccountsCount()) {
                     parentLoan.setLoanStatus(LoanStatus.ACTIVE.getValue());
                     glimRepository.save(parentLoan);
                 }
             }
         }
+        updateGlimActualPrincipal(loanId, parentLoan, LoanStatus.ACTIVE.getValue());
         return result;
+    }
+
+    private void updateGlimActualPrincipal(Long loanId, GroupLoanIndividualMonitoringAccount parentLoan, Integer loanStatus) {
+        List<Loan> activeChild = this.loanRepository.findLoanByGlimIdAndLoanStatus(loanId, loanStatus);
+        if (!CollectionUtils.isEmpty(activeChild)) {
+            BigDecimal sum = activeChild.stream().map(Loan::getApprovedPrincipal) // Get the principal amount for each
+                                                                                  // loan
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            parentLoan.setActualPrincipalAmount(sum);
+            glimRepository.save(parentLoan);
+
+        }
     }
 
     @Transactional

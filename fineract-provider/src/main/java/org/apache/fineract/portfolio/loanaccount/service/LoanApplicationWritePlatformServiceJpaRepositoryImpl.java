@@ -402,7 +402,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                             newLoanApplication.updateAccountNo(accountNumber + "1");
                             glimAccountInfoWritePlatformService.addGLIMAccountInfo(accountNumber, group,
                                     command.bigDecimalValueOfParameterNamedDefaultToNullIfZero("totalLoan"), Long.valueOf(1), true,
-                                    LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), applicationId);
+                                    LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), applicationId,
+                                    command.bigDecimalValueOfParameterNamedDefaultToNullIfZero("totalLoan"));
                             newLoanApplication.setGlim(glimRepository.findOneByAccountNumber(accountNumber));
                             this.loanRepositoryWrapper.save(newLoanApplication);
 
@@ -414,7 +415,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                             newLoanApplication.updateAccountNo(accountNumber + "1");
                             glimAccountInfoWritePlatformService.addGLIMAccountInfo(accountNumber, group,
                                     command.bigDecimalValueOfParameterNamedDefaultToNullIfZero("totalLoan"), Long.valueOf(1), true,
-                                    LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), applicationId);
+                                    LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), applicationId,
+                                    command.bigDecimalValueOfParameterNamedDefaultToNullIfZero("totalLoan"));
                             newLoanApplication.setGlim(glimRepository.findOneByAccountNumber(accountNumber));
                             this.loanRepositoryWrapper.save(newLoanApplication);
 
@@ -441,7 +443,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                             newLoanApplication.updateAccountNo(accountNumber + "1");
                             glimAccountInfoWritePlatformService.addGLIMAccountInfo(accountNumber, group,
                                     command.bigDecimalValueOfParameterNamedDefaultToNullIfZero("totalLoan"), Long.valueOf(1), true,
-                                    LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), applicationId);
+                                    LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), applicationId,
+                                    command.bigDecimalValueOfParameterNamedDefaultToNullIfZero("totalLoan"));
                             newLoanApplication.setGlim(glimRepository.findOneByAccountNumber(accountNumber));
                             this.loanRepositoryWrapper.save(newLoanApplication);
 
@@ -1414,10 +1417,24 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 }
 
             }
+            updateGlimActualPrincipal(loanId, parentLoan, LoanStatus.APPROVED.getValue());
 
         }
 
         return result;
+    }
+
+    private void updateGlimActualPrincipal(Long loanId, GroupLoanIndividualMonitoringAccount parentLoan, Integer loanStatus) {
+        List<Loan> activeChild = this.loanRepository.findLoanByGlimIdAndLoanStatus(loanId, loanStatus);
+        if (!CollectionUtils.isEmpty(activeChild)) {
+            BigDecimal sum = activeChild.stream().map(Loan::getApprovedPrincipal) // Get the principal amount for each
+                                                                                  // loan
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            parentLoan.setActualPrincipalAmount(sum);
+            glimRepository.save(parentLoan);
+
+        }
     }
 
     @Transactional
