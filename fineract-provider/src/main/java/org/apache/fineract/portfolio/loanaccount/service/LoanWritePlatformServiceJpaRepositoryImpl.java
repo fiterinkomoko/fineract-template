@@ -322,16 +322,16 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 }
             }
         }
-        updateGlimActualPrincipal(loanId, parentLoan, LoanStatus.ACTIVE.getValue());
+        updateGlimActualPrincipal(parentLoan);
         return result;
     }
 
-    private void updateGlimActualPrincipal(Long loanId, GroupLoanIndividualMonitoringAccount parentLoan, Integer loanStatus) {
-        List<Loan> activeChild = this.loanRepository.findLoanByGlimIdAndLoanStatus(loanId, loanStatus);
+    private void updateGlimActualPrincipal(GroupLoanIndividualMonitoringAccount parentLoan) {
+        final Collection<Integer> loanStatuses = new ArrayList<>(Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),
+                LoanStatus.APPROVED.getValue(), LoanStatus.ACTIVE.getValue()));
+        List<Loan> activeChild = this.loanRepository.findLoanByGlimIdAndLoanStatus(parentLoan.getId(), loanStatuses);
         if (!CollectionUtils.isEmpty(activeChild)) {
-            BigDecimal sum = activeChild.stream().map(Loan::getApprovedPrincipal) // Get the principal amount for each
-                                                                                  // loan
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal sum = activeChild.stream().map(Loan::getApprovedPrincipal).reduce(BigDecimal.ZERO, BigDecimal::add);
 
             parentLoan.setActualPrincipalAmount(sum);
             glimRepository.save(parentLoan);

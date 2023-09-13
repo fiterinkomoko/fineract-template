@@ -1417,23 +1417,26 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 }
 
             }
-            updateGlimActualPrincipal(loanId, parentLoan, LoanStatus.APPROVED.getValue());
+            updateGlimActualPrincipal(parentLoan);
 
         }
 
         return result;
     }
 
-    private void updateGlimActualPrincipal(Long loanId, GroupLoanIndividualMonitoringAccount parentLoan, Integer loanStatus) {
-        List<Loan> activeChild = this.loanRepository.findLoanByGlimIdAndLoanStatus(loanId, loanStatus);
+    private void updateGlimActualPrincipal(GroupLoanIndividualMonitoringAccount parentLoan) {
+        final Collection<Integer> loanStatuses = new ArrayList<>(Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),
+                LoanStatus.APPROVED.getValue(), LoanStatus.ACTIVE.getValue()));
+        List<Loan> activeChild = this.loanRepository.findLoanByGlimIdAndLoanStatus(parentLoan.getId(), loanStatuses);
+
         if (!CollectionUtils.isEmpty(activeChild)) {
-            BigDecimal sum = activeChild.stream().map(Loan::getApprovedPrincipal) // Get the principal amount for each
-                                                                                  // loan
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal sum = activeChild.stream().map(Loan::getProposedPrincipal).reduce(BigDecimal.ZERO, BigDecimal::add);
 
             parentLoan.setActualPrincipalAmount(sum);
             glimRepository.save(parentLoan);
-
+        } else {
+            parentLoan.setActualPrincipalAmount(BigDecimal.ZERO);
+            glimRepository.save(parentLoan);
         }
     }
 
@@ -1759,6 +1762,11 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             }
         } else {
             changes = rejectLoanAccountParentStatus(command, currentUser, loan);
+        }
+        // update GLIM Account on actual Amounts
+        if (loan.getLoanType().equals(AccountType.GLIM.getValue())) {
+            GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(loan.getGlimId()).orElseThrow();
+            updateGlimActualPrincipal(parentLoan);
         }
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanRejectedBusinessEvent(loan));
