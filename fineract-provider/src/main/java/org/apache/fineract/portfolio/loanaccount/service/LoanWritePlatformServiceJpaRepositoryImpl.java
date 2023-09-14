@@ -1048,6 +1048,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loanRepositoryWrapper.updateRedrawAmount(loan, currentUser, loanId, loan.getTotalOverpaid(), true, transactionDate,
                     paymentDetail);
         }
+        if (loan.isGLIMLoan() && loan.getGlimId() != null) {
+            loan.setLastRepaymentDate(transactionDate);
+            loan.setLastRepaymentAmount(transactionAmount);
+            loanRepositoryWrapper.saveAndFlush(loan);
+        }
         return commandProcessingResultBuilder.withCommandId(command.commandId()) //
                 .withLoanId(loanId) //
                 .with(changes) //

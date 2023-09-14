@@ -22,9 +22,11 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.accountdetails.data.LoanAccountSummaryData;
 import org.apache.fineract.portfolio.accountdetails.service.AccountDetailsReadPlatformService;
@@ -222,10 +224,12 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
     private static final class GLIMRepaymentMapper implements RowMapper<GlimRepaymentTemplate> {
 
         public String schema() {
-            return "glim.id as glimId,loan.group_id as groupId,client.id as clientId,glim.account_number as parentLoanAccountNo,"
+            return " glim.id as glimId,loan.group_id as groupId,client.id as clientId,glim.account_number as parentLoanAccountNo,"
                     + "glim.principal_amount as parentPrincipalAmount,loan.id as childLoanId,loan.account_no as childLoanAccountNo,loan.approved_principal as childPrincipalAmount,"
-                    + "client.display_name as clientName , glim.actual_principal_amount as actualPrincipalAmount from glim_accounts glim left join m_loan loan on loan.glim_id=glim.id "
-                    + "left join m_client client on client.id=loan.client_id";
+                    + "client.display_name as clientName , glim.actual_principal_amount as actualPrincipalAmount, "
+                    + " loan.total_outstanding_derived as outStandingAmount,loan.last_repayment_date as lastRepaymentDate,loan.last_repayment_amount as lastRepaymentAmount "
+                    + " from glim_accounts glim left join m_loan loan on loan.glim_id=glim.id "
+                    + " left join m_client client on client.id=loan.client_id";
         }
 
         @Override
@@ -245,13 +249,17 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
 
             final BigDecimal parentPrincipalAmount = rs.getBigDecimal("parentPrincipalAmount");
             final BigDecimal actualPrincipalAmount = rs.getBigDecimal("actualPrincipalAmount");
+            final BigDecimal lastRepaymentAmount = rs.getBigDecimal("lastRepaymentAmount");
+            final BigDecimal outStandingAmount = rs.getBigDecimal("outStandingAmount");
+            final LocalDate lastRepaymentDate = JdbcSupport.getLocalDate(rs, "lastRepaymentDate");
 
             final String childLoanAccountNo = rs.getString("childLoanAccountNo");
 
             final BigDecimal childPrincipalAmount = rs.getBigDecimal("childPrincipalAmount");
 
             return GlimRepaymentTemplate.getInstance(glimId, groupId, clientId, clientName, childLoanId, parentLoanAccountNo,
-                    parentPrincipalAmount, childLoanAccountNo, childPrincipalAmount, actualPrincipalAmount);
+                    parentPrincipalAmount, childLoanAccountNo, childPrincipalAmount, actualPrincipalAmount, lastRepaymentAmount,
+                    outStandingAmount, lastRepaymentDate);
 
         }
     }
