@@ -1225,6 +1225,17 @@
             </column>
         </addColumn>
     </changeSet>
-
+    <changeSet author="bosco@fiter.io" id="add_actual_principal_amount_column_to_glim_accounts_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="glim_accounts" columnName="actual_principal_amount"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="glim_accounts">
+            <column name="actual_principal_amount" type="decimal(19,6)" >
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>

@@ -40,10 +40,11 @@ public final class GlimRepaymentTemplate {
     private final String childLoanAccountNo;
 
     private final BigDecimal childPrincipalAmount;
+    private final BigDecimal actualPrincipalAmount;
 
     private GlimRepaymentTemplate(final BigDecimal glimId, final BigDecimal groupId, final BigDecimal clientId, final String clientName,
             final BigDecimal childLoanId, final String parentAccountNo, final BigDecimal parentPrincipalAmount,
-            final String childLoanAccountNo, final BigDecimal childPrincipalAmount) {
+            final String childLoanAccountNo, final BigDecimal childPrincipalAmount, final BigDecimal actualPrincipalAmount) {
         this.glimId = glimId;
         this.groupId = groupId;
         this.clientId = clientId;
@@ -53,13 +54,14 @@ public final class GlimRepaymentTemplate {
         this.parentPrincipalAmount = parentPrincipalAmount;
         this.childLoanAccountNo = childLoanAccountNo;
         this.childPrincipalAmount = childPrincipalAmount;
+        this.actualPrincipalAmount = actualPrincipalAmount;
     }
 
     public static GlimRepaymentTemplate getInstance(final BigDecimal glimId, final BigDecimal groupId, final BigDecimal clientId,
             final String clientName, final BigDecimal childLoanId, final String parentAccountNo, final BigDecimal parentPrincipalAmount,
-            final String childLoanAccountNo, final BigDecimal childPrincipalAmount) {
+            final String childLoanAccountNo, final BigDecimal childPrincipalAmount, final BigDecimal actualPrincipalAmount) {
         return new GlimRepaymentTemplate(glimId, groupId, clientId, clientName, childLoanId, parentAccountNo, parentPrincipalAmount,
-                childLoanAccountNo, childPrincipalAmount);
+                childLoanAccountNo, childPrincipalAmount, actualPrincipalAmount);
     }
 
     public BigDecimal getGlimId() {
@@ -98,4 +100,7 @@ public final class GlimRepaymentTemplate {
         return childPrincipalAmount;
     }
 
+    public BigDecimal getActualPrincipalAmount() {
+        return actualPrincipalAmount;
+    }
 }

@@ -57,7 +57,7 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
 
         public String schema() {
             return "glim.id as glimId,ln.group_id as groupId,glim.account_number as accountNumber, ln.account_no as childAccountNumber,ln.principal_amount as childPrincipalAmount,glim.principal_amount as parentPrincipalAmount,glim.child_accounts_count as childAccountsCount,"
-                    + "glim.loan_status_id as loanStatus from glim_accounts glim,m_loan ln where glim.id=ln.glim_id";
+                    + "glim.loan_status_id as loanStatus , glim.actual_principal_amount as actualPrincipalAmount from glim_accounts glim,m_loan ln where glim.id=ln.glim_id";
         }
 
         @Override
@@ -75,13 +75,14 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
             final Long childAccountsCount = rs.getLong("childAccountsCount");
 
             final BigDecimal parentPrincipalAmount = rs.getBigDecimal("parentPrincipalAmount");
+            final BigDecimal actualPrincipalAmount = rs.getBigDecimal("actualPrincipalAmount");
 
             final BigDecimal childPrincipalAmount = rs.getBigDecimal("childPrincipalAmount");
 
             final String loanStatus = LoanStatus.fromInt((int) rs.getLong("loanStatus")).toString();
 
             return GroupLoanIndividualMonitoringAccountData.getInstance(glimId, groupId, accountNumber, childAccountNumber,
-                    childPrincipalAmount, parentPrincipalAmount, childAccountsCount, loanStatus);
+                    childPrincipalAmount, parentPrincipalAmount, childAccountsCount, loanStatus, actualPrincipalAmount);
 
         }
     }
@@ -128,7 +129,7 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
     }
 
     @Override
-    public Collection<GroupLoanIndividualMonitoringAccountData> findGlimAccountByGroupIdandAccountNo(String groupId, String accountNo) {
+    public Collection<GroupLoanIndividualMonitoringAccountData> findGlimAccountByGroupIdandAccountNo(Long groupId, String accountNo) {
         this.context.authenticatedUser();
 
         GLIMMapper rm = new GLIMMapper();
@@ -152,8 +153,9 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
 
             List<LoanAccountSummaryData> childLoans = accountDetailsReadPlatforService
                     .retrieveLoanAccountDetailsByGroupIdAndGlimAccountNumber(groupId, glimAccount.getAccountNumber());
-            glimAccounts.add(new GLIMContainer(glimAccount.getGlimId(), glimAccount.getGroupId(), glimAccount.getAccountNumber(),
-                    childLoans, glimAccount.getParentPrincipalAmount(), glimAccount.getLoanStatus()));
+            glimAccounts
+                    .add(new GLIMContainer(glimAccount.getGlimId(), glimAccount.getGroupId(), glimAccount.getAccountNumber(), childLoans,
+                            glimAccount.getParentPrincipalAmount(), glimAccount.getLoanStatus(), glimAccount.getActualPrincipalAmount()));
         }
 
         return glimAccounts;
@@ -162,19 +164,16 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
     @Override
     public Collection<GLIMContainer> findGlimAccountbyGroupAndAccount(Long groupId, String accountNo) {
         this.context.authenticatedUser();
-        Collection<GroupLoanIndividualMonitoringAccountData> glimInfo = findGlimAccountByGroupIdandAccountNo(groupId + "", accountNo + "");
-
-        // List<LoanAccountSummaryData> glimAccounts =
-        // retrieveLoanAccountDetails(loanWhereClauseForGroupAndLoanType, new
-        // Object[] { groupId });
+        Collection<GroupLoanIndividualMonitoringAccountData> glimInfo = findGlimAccountByGroupIdandAccountNo(groupId, accountNo);
 
         List<GLIMContainer> glimAccounts = new ArrayList<GLIMContainer>();
         for (GroupLoanIndividualMonitoringAccountData glimAccount : glimInfo) {
 
             List<LoanAccountSummaryData> childLoans = accountDetailsReadPlatforService
                     .retrieveLoanAccountDetailsByGroupIdAndGlimAccountNumber(groupId, glimAccount.getAccountNumber());
-            glimAccounts.add(new GLIMContainer(glimAccount.getGlimId(), glimAccount.getGroupId(), glimAccount.getAccountNumber(),
-                    childLoans, glimAccount.getParentPrincipalAmount(), glimAccount.getLoanStatus()));
+            glimAccounts
+                    .add(new GLIMContainer(glimAccount.getGlimId(), glimAccount.getGroupId(), glimAccount.getAccountNumber(), childLoans,
+                            glimAccount.getParentPrincipalAmount(), glimAccount.getLoanStatus(), glimAccount.getActualPrincipalAmount()));
         }
 
         return glimAccounts;
@@ -196,7 +195,7 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
 
         public String schema() {
             return "glim.id as glimId,glim.group_id as groupId,glim.account_number as accountNumber,glim.principal_amount as principalAmount,glim.child_accounts_count as childAccountsCount,"
-                    + "glim.loan_status_id as loanStatus from glim_accounts glim";
+                    + "glim.loan_status_id as loanStatus , glim.actual_principal_amount as actualPrincipalAmount from glim_accounts glim";
         }
 
         @Override
@@ -210,10 +209,12 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
             final String accountNumber = rs.getString("accountNumber");
 
             final BigDecimal principalAmount = rs.getBigDecimal("principalAmount");
+            final BigDecimal actualPrincipalAmount = rs.getBigDecimal("actualPrincipalAmount");
 
             final String loanStatus = LoanStatus.fromInt((int) rs.getLong("loanStatus")).toString();
 
-            return GroupLoanIndividualMonitoringAccountData.getInstance1(glimId, groupId, accountNumber, principalAmount, loanStatus);
+            return GroupLoanIndividualMonitoringAccountData.getInstance1(glimId, groupId, accountNumber, principalAmount, loanStatus,
+                    actualPrincipalAmount);
 
         }
     }
@@ -223,7 +224,7 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
         public String schema() {
             return "glim.id as glimId,loan.group_id as groupId,client.id as clientId,glim.account_number as parentLoanAccountNo,"
                     + "glim.principal_amount as parentPrincipalAmount,loan.id as childLoanId,loan.account_no as childLoanAccountNo,loan.approved_principal as childPrincipalAmount,"
-                    + "client.display_name as clientName from glim_accounts glim left join m_loan loan on loan.glim_id=glim.id "
+                    + "client.display_name as clientName , glim.actual_principal_amount as actualPrincipalAmount from glim_accounts glim left join m_loan loan on loan.glim_id=glim.id "
                     + "left join m_client client on client.id=loan.client_id";
         }
 
@@ -243,13 +244,14 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
             final String parentLoanAccountNo = rs.getString("parentLoanAccountNo");
 
             final BigDecimal parentPrincipalAmount = rs.getBigDecimal("parentPrincipalAmount");
+            final BigDecimal actualPrincipalAmount = rs.getBigDecimal("actualPrincipalAmount");
 
             final String childLoanAccountNo = rs.getString("childLoanAccountNo");
 
             final BigDecimal childPrincipalAmount = rs.getBigDecimal("childPrincipalAmount");
 
             return GlimRepaymentTemplate.getInstance(glimId, groupId, clientId, clientName, childLoanId, parentLoanAccountNo,
-                    parentPrincipalAmount, childLoanAccountNo, childPrincipalAmount);
+                    parentPrincipalAmount, childLoanAccountNo, childPrincipalAmount, actualPrincipalAmount);
 
         }
     }

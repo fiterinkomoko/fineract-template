@@ -128,6 +128,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTopupDetails;
+import org.apache.fineract.portfolio.loanaccount.exception.GLIMLoanCannotBeApprovedException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationDateException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified;
@@ -401,7 +402,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                             newLoanApplication.updateAccountNo(accountNumber + "1");
                             glimAccountInfoWritePlatformService.addGLIMAccountInfo(accountNumber, group,
                                     command.bigDecimalValueOfParameterNamedDefaultToNullIfZero("totalLoan"), Long.valueOf(1), true,
-                                    LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), applicationId);
+                                    LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), applicationId,
+                                    command.bigDecimalValueOfParameterNamedDefaultToNullIfZero("totalLoan"));
                             newLoanApplication.setGlim(glimRepository.findOneByAccountNumber(accountNumber));
                             this.loanRepositoryWrapper.save(newLoanApplication);
 
@@ -413,7 +415,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                             newLoanApplication.updateAccountNo(accountNumber + "1");
                             glimAccountInfoWritePlatformService.addGLIMAccountInfo(accountNumber, group,
                                     command.bigDecimalValueOfParameterNamedDefaultToNullIfZero("totalLoan"), Long.valueOf(1), true,
-                                    LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), applicationId);
+                                    LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), applicationId,
+                                    command.bigDecimalValueOfParameterNamedDefaultToNullIfZero("totalLoan"));
                             newLoanApplication.setGlim(glimRepository.findOneByAccountNumber(accountNumber));
                             this.loanRepositoryWrapper.save(newLoanApplication);
 
@@ -440,7 +443,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                             newLoanApplication.updateAccountNo(accountNumber + "1");
                             glimAccountInfoWritePlatformService.addGLIMAccountInfo(accountNumber, group,
                                     command.bigDecimalValueOfParameterNamedDefaultToNullIfZero("totalLoan"), Long.valueOf(1), true,
-                                    LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), applicationId);
+                                    LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), applicationId,
+                                    command.bigDecimalValueOfParameterNamedDefaultToNullIfZero("totalLoan"));
                             newLoanApplication.setGlim(glimRepository.findOneByAccountNumber(accountNumber));
                             this.loanRepositoryWrapper.save(newLoanApplication);
 
@@ -1371,6 +1375,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Transactional
     @Override
     public CommandProcessingResult approveGLIMLoanAppication(final Long loanId, final JsonCommand command) {
+        Boolean isExtendLoanLifeCycleConfig = loanDecisionStateUtilService.isExtendLoanLifeCycleConfig();
 
         final Long parentLoanId = loanId;
         GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(parentLoanId).orElseThrow();
@@ -1395,9 +1400,13 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             childCommand = JsonCommand.fromExistingCommand(command, approvals);
 
-            result = approveApplication(childLoanId[j++], childCommand);
+            if (isExtendLoanLifeCycleConfig) {
+                result = approveLoanApplicationAssociatedToGLIM(childLoanId[j++], childCommand);
+            } else {
+                result = approveApplication(childLoanId[j++], childCommand, Boolean.FALSE);
+            }
 
-            if (result.getLoanId() != null) {
+            if (result != null && result.getLoanId() != null) {
                 count++;
                 // if all the child loans are approved, mark the parent loan as
                 // approved
@@ -1408,15 +1417,32 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 }
 
             }
+            updateGlimActualPrincipal(parentLoan);
 
         }
 
         return result;
     }
 
+    private void updateGlimActualPrincipal(GroupLoanIndividualMonitoringAccount parentLoan) {
+        final Collection<Integer> loanStatuses = new ArrayList<>(Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),
+                LoanStatus.APPROVED.getValue(), LoanStatus.ACTIVE.getValue()));
+        List<Loan> activeChild = this.loanRepository.findLoanByGlimIdAndLoanStatus(parentLoan.getId(), loanStatuses);
+
+        if (!CollectionUtils.isEmpty(activeChild)) {
+            BigDecimal sum = activeChild.stream().map(Loan::getProposedPrincipal).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            parentLoan.setActualPrincipalAmount(sum);
+            glimRepository.save(parentLoan);
+        } else {
+            parentLoan.setActualPrincipalAmount(BigDecimal.ZERO);
+            glimRepository.save(parentLoan);
+        }
+    }
+
     @Transactional
     @Override
-    public CommandProcessingResult approveApplication(final Long loanId, final JsonCommand command) {
+    public CommandProcessingResult approveApplication(final Long loanId, final JsonCommand command, Boolean isGlimBulkApproval) {
 
         final AppUser currentUser = getAppUserIfPresent();
         LocalDate expectedDisbursementDate = null;
@@ -1424,6 +1450,15 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.loanApplicationTransitionApiJsonValidator.validateApproval(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);
+
+        final Boolean isExtendLoanLifeCycleConfig = this.loanDecisionStateUtilService.isExtendLoanLifeCycleConfig();
+
+        // block loan approval if loan is associated to GLIM and is direct Approval not passing through bulk GLIM
+        // Operation call
+        if (isExtendLoanLifeCycleConfig && loan.getLoanType().equals(AccountType.GLIM.getValue()) && !isGlimBulkApproval) {
+            throw new GLIMLoanCannotBeApprovedException(loanId);
+        }
+
         this.validateActiveLoanCount(loan.getClientId());
         this.loanDecisionStateUtilService.validateLoanAccountWithExtraLoanDecisionStagesConfiguredGlobally(loan, command);
 
@@ -1727,6 +1762,11 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             }
         } else {
             changes = rejectLoanAccountParentStatus(command, currentUser, loan);
+        }
+        // update GLIM Account on actual Amounts
+        if (loan.getLoanType().equals(AccountType.GLIM.getValue())) {
+            GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(loan.getGlimId()).orElseThrow();
+            updateGlimActualPrincipal(parentLoan);
         }
 
         businessEventNotifierService.notifyPostBusinessEvent(new LoanRejectedBusinessEvent(loan));
@@ -2215,6 +2255,22 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         final var transactionDate = command.localDateValueOfParameterNamed(LoanApiConstants.transactionDateParamName);
         loanRepositoryWrapper.updateRedrawAmount(loan, user, loanId, transactionAmount, true, transactionDate, null);
         return new CommandProcessingResultBuilder().withEntityId(loanId).withLoanId(loanId).build();
+    }
+
+    @Transactional
+    private CommandProcessingResult approveLoanApplicationAssociatedToGLIM(final Long loanId, final JsonCommand command) {
+        final Loan loan = retrieveLoanBy(loanId);
+        if (loan.status().isRejected()) {
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(loan.getId()) //
+                    .withOfficeId(loan.getOfficeId()) //
+                    .withClientId(loan.getClientId()) //
+                    .withGroupId(loan.getGroupId()) //
+                    .withLoanId(loanId).build();
+        }
+        return approveApplication(loanId, command, Boolean.TRUE);
+
     }
 
 }

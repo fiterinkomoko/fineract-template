@@ -4864,6 +4864,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return AccountType.fromInt(this.loanType).isJLGAccount();
     }
 
+    public boolean isGLIMLoan() {
+        return AccountType.fromInt(this.loanType).isGLIMAccount();
+    }
+
     public void updateInterestRateFrequencyType() {
         this.loanRepaymentScheduleDetail.updatenterestPeriodFrequencyType(this.loanProduct.getInterestPeriodFrequencyType());
     }

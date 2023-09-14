@@ -16,21 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.fineract.portfolio.loanaccount.exception;
 
-package org.apache.fineract.portfolio.loanaccount.service;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-import java.math.BigDecimal;
-import org.apache.fineract.portfolio.group.domain.Group;
-import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount;
+public class GLIMLoanCannotBeApprovedException extends AbstractPlatformDomainRuleException {
 
-public interface GLIMAccountInfoWritePlatformService {
-
-    void setIsAcceptingChild(GroupLoanIndividualMonitoringAccount glimAccount);
-
-    void resetIsAcceptingChild(GroupLoanIndividualMonitoringAccount glimAccount);
-
-    void incrementChildAccountCount(GroupLoanIndividualMonitoringAccount glimAccount);
-
-    void addGLIMAccountInfo(String accountNumber, Group group, BigDecimal principalAmount, Long childAccountsCount,
-            Boolean isAcceptingChild, Integer loanStatus, BigDecimal applicationId, BigDecimal actualPrincipalAmount);
+    public GLIMLoanCannotBeApprovedException(final Long id) {
+        super("error.msg.glim.loan.cannot.be.approved.directly",
+                "GLIM Loan [ " + id + " ] cannot be approved directly. Please approve the GLIM Account associated to this loan", id);
+    }
 }
