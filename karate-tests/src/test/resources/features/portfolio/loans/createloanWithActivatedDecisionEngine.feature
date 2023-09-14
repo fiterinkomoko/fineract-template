@@ -3119,4 +3119,55 @@ Feature: Test loan account apis
     Then print 'Configuration ID ==> ', configurationId
     * def configResponse = call read('classpath:features/portfolio/configuration/configurationsteps.feature@disable_global_config') { configurationsId : '#(configurationId)' }
     Then print 'Configuration Response ==> ', configResponse
+  @Ignore
+  @testThatICanCreateGLIMLoanAccountAndTransitionToAdvanceStages_3_000_500
+  Scenario: Test That I Can Create GLIM Loan Account And TransitionToAdvancedStages_3_000_500
 
+    #- Create and disburse Loan Account before enable ---- [---Add-More-Stages-To-A-Loan-Life-Cycle---] to simulate second cycle Unsecured
+
+
+    * def chargeAmount = 100;
+    # Create Flat Overdue Charge
+    * def charges = call read('classpath:features/portfolio/products/LoanProductSteps.feature@createFlatOverdueChargeWithOutFrequencySteps') { chargeAmount : '#(chargeAmount)' }
+    * def chargeId = charges.chargeId
+
+        # Create Loan Product With Flat Overdue Charge
+    * def loanProduct = call read('classpath:features/portfolio/products/LoanProductSteps.feature@createLoanProductWithOverdueChargeAndCanAccommodateLargeMoneyAndSchedulesSteps') { chargeId : '#(chargeId)' }
+    * def loanProductId = loanProduct.loanProductId
+
+
+    * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
+
+    #Client One
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def clientId_1 = result.response.resourceId
+    # Client Two
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def clientId_2 = result.response.resourceId
+
+
+    * def result = call read('classpath:features/portfolio/clients/groupSteps.feature@createGroupStep') { groupCreationDate : '#(submittedOnDate)',clientId_1 : '#(clientId_1)',clientId_2 : '#(clientId_2)' }
+    * def groupId = result.groupId
+
+
+    #- Create a GLIM Account
+    * def loanAmount = 300000
+    * def totalLoanAmount = 600000
+    * def loanTerm = 4
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createGLIMLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', loanTerm : '#(loanTerm)', clientId_1 : '#(clientId_1)', clientId_2 : '#(clientId_2)', totalLoanAmount : '#(totalLoanAmount)' }
+    * def loanId = loan.loanId
+
+
+
+
+
+
+
+
+         # Delete Loan Approval Matrix created above. We Create a single unique record by currency
+    * call read('classpath:features/portfolio/loans/loanDecisionSteps.feature@deleteLoanApprovalMatrixStep') { matrixId : '#(matrixId)'}
+
+    #- Disable configuration  ---Add-More-Stages-To-A-Loan-Life-Cycle---
+    Then print 'Configuration ID ==> ', configurationId
+    * def configResponse = call read('classpath:features/portfolio/configuration/configurationsteps.feature@disable_global_config') { configurationsId : '#(configurationId)' }
+    Then print 'Configuration Response ==> ', configResponse
