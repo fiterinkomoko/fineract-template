@@ -82,6 +82,7 @@ public final class GroupingTypesApiConstants {
     public static final String totalOverdue = "totalOverdue";
     public static final String totaldue = "totaldue";
     public static final String installmentDue = "installmentDue";
+    public static final String representativeIdParamName = "representativeId";
 
     // group close parameters
     public static final String closureDateParamName = "closureDate";
@@ -91,6 +92,8 @@ public final class GroupingTypesApiConstants {
     public static final String meetingFallCenters = "meetingFallCenters";
 
     public static final String datatables = "datatables";
+    public static final String REPRESENTATIVE_ID = "representativeId";
+    public static final String REPRESENTATIVE_NAME = "representativeName";
 
     /**
      * These parameters will match the class level parameters of {@link CenterData}. Where possible, we try to get
@@ -105,10 +108,10 @@ public final class GroupingTypesApiConstants {
             externalIdParamName, officeIdParamName, officeNameParamName, staffIdParamName, staffNameParamName, hierarchyParamName,
             officeOptionsParamName, staffOptionsParamName, clientOptionsParamName, datatables));
 
-    static final Set<String> GROUP_RESPONSE_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(idParamName, nameParamName, externalIdParamName, officeIdParamName, officeNameParamName, "parentId", "parentName",
-                    staffIdParamName, staffNameParamName, hierarchyParamName, officeOptionsParamName, statusParamName, activeParamName,
-                    activationDateParamName, staffOptionsParamName, clientOptionsParamName, timeLine, datatables));
+    static final Set<String> GROUP_RESPONSE_DATA_PARAMETERS = new HashSet<>(Arrays.asList(idParamName, nameParamName, externalIdParamName,
+            officeIdParamName, officeNameParamName, "parentId", "parentName", staffIdParamName, staffNameParamName, hierarchyParamName,
+            officeOptionsParamName, statusParamName, activeParamName, activationDateParamName, staffOptionsParamName,
+            clientOptionsParamName, timeLine, datatables, REPRESENTATIVE_ID, REPRESENTATIVE_NAME));
 
     static final Set<String> COLLECTIONSHEET_DATA_PARAMETERS = new HashSet<>(Arrays.asList("dueDate", "loanProducts", "groups"));
 
