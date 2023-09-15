@@ -20,6 +20,7 @@
 package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public final class GlimRepaymentTemplate {
 
@@ -41,10 +42,14 @@ public final class GlimRepaymentTemplate {
 
     private final BigDecimal childPrincipalAmount;
     private final BigDecimal actualPrincipalAmount;
+    private final BigDecimal lastRepaymentAmount;
+    private final BigDecimal outStandingAmount;
+    private final LocalDate lastRepaymentDate;
 
     private GlimRepaymentTemplate(final BigDecimal glimId, final BigDecimal groupId, final BigDecimal clientId, final String clientName,
             final BigDecimal childLoanId, final String parentAccountNo, final BigDecimal parentPrincipalAmount,
-            final String childLoanAccountNo, final BigDecimal childPrincipalAmount, final BigDecimal actualPrincipalAmount) {
+            final String childLoanAccountNo, final BigDecimal childPrincipalAmount, final BigDecimal actualPrincipalAmount,
+            final BigDecimal lastRepaymentAmount, final BigDecimal outStandingAmount, final LocalDate lastRepaymentDate) {
         this.glimId = glimId;
         this.groupId = groupId;
         this.clientId = clientId;
@@ -55,13 +60,17 @@ public final class GlimRepaymentTemplate {
         this.childLoanAccountNo = childLoanAccountNo;
         this.childPrincipalAmount = childPrincipalAmount;
         this.actualPrincipalAmount = actualPrincipalAmount;
+        this.lastRepaymentAmount = lastRepaymentAmount;
+        this.outStandingAmount = outStandingAmount;
+        this.lastRepaymentDate = lastRepaymentDate;
     }
 
     public static GlimRepaymentTemplate getInstance(final BigDecimal glimId, final BigDecimal groupId, final BigDecimal clientId,
             final String clientName, final BigDecimal childLoanId, final String parentAccountNo, final BigDecimal parentPrincipalAmount,
-            final String childLoanAccountNo, final BigDecimal childPrincipalAmount, final BigDecimal actualPrincipalAmount) {
+            final String childLoanAccountNo, final BigDecimal childPrincipalAmount, final BigDecimal actualPrincipalAmount,
+            final BigDecimal lastRepaymentAmount, final BigDecimal outStandingAmount, final LocalDate lastRepaymentDate) {
         return new GlimRepaymentTemplate(glimId, groupId, clientId, clientName, childLoanId, parentAccountNo, parentPrincipalAmount,
-                childLoanAccountNo, childPrincipalAmount, actualPrincipalAmount);
+                childLoanAccountNo, childPrincipalAmount, actualPrincipalAmount, lastRepaymentAmount, outStandingAmount, lastRepaymentDate);
     }
 
     public BigDecimal getGlimId() {
@@ -100,7 +109,4 @@ public final class GlimRepaymentTemplate {
         return childPrincipalAmount;
     }
 
-    public BigDecimal getActualPrincipalAmount() {
-        return actualPrincipalAmount;
-    }
 }
