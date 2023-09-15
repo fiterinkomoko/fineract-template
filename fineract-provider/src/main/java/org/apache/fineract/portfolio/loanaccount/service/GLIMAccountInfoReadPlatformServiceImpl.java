@@ -182,14 +182,20 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
     }
 
     @Override
-    public Collection<GlimRepaymentTemplate> findglimRepaymentTemplate(final Long glimId) {
+    public Collection<GlimRepaymentTemplate> findglimRepaymentTemplate(final Long glimId, final Boolean isRepayment) {
         this.context.authenticatedUser();
 
         GLIMRepaymentMapper rm = new GLIMRepaymentMapper();
+        final StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("select ");
+        sqlBuilder.append(rm.schema());
+        sqlBuilder.append(" where glim.id=? ");
 
-        final String sql = "select " + rm.schema() + " where glim.id=?";
+        if (isRepayment) {
+            sqlBuilder.append(" and loan.loan_status_id = 300 ");
+        }
 
-        return this.jdbcTemplate.query(sql, rm, glimId); // NOSONAR
+        return this.jdbcTemplate.query(sqlBuilder.toString(), rm, glimId); // NOSONAR
 
     }
 
