@@ -129,4 +129,8 @@ public final class GlimRepaymentTemplate {
     public void setInArrears(Boolean inArrears) {
         this.inArrears = inArrears;
     }
+
+    public LoanStatusEnumData getLoanStatus() {
+        return loanStatus;
+    }
 }

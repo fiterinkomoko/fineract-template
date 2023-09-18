@@ -123,6 +123,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.data.PaidInAdvanceData;
 import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTemplateTypeRequiredException;
 import org.apache.fineract.portfolio.loanaccount.exception.NotSupportedLoanTemplateTypeException;
@@ -1064,9 +1065,12 @@ public class LoansApiResource {
                 isRepayment);
         if (!CollectionUtils.isEmpty(glimRepaymentTemplate)) {
             for (GlimRepaymentTemplate template : glimRepaymentTemplate) {
-                LoanTransactionData transactionData = this.loanReadPlatformService
-                        .retrieveLoanTransactionTemplate(template.getChildLoanId().longValue());
-                template.setNextRepaymentAmount(transactionData.getAmount());
+                if (template.getLoanStatus() != null && template.getLoanStatus().id().equals(LoanStatus.ACTIVE.getValue())) {
+                    LoanTransactionData transactionData = this.loanReadPlatformService
+                            .retrieveLoanTransactionTemplate(template.getChildLoanId().longValue());
+                    template.setNextRepaymentAmount(transactionData.getAmount());
+                }
+
             }
         }
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
