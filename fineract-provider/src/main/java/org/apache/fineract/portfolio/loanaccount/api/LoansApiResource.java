@@ -1062,6 +1062,13 @@ public class LoansApiResource {
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
         Collection<GlimRepaymentTemplate> glimRepaymentTemplate = this.glimAccountInfoReadPlatformService.findglimRepaymentTemplate(glimId,
                 isRepayment);
+        if (!CollectionUtils.isEmpty(glimRepaymentTemplate)) {
+            for (GlimRepaymentTemplate template : glimRepaymentTemplate) {
+                LoanTransactionData transactionData = this.loanReadPlatformService
+                        .retrieveLoanTransactionTemplate(template.getChildLoanId().longValue());
+                template.setNextRepaymentAmount(transactionData.getAmount());
+            }
+        }
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.glimTemplateToApiJsonSerializer.serialize(settings, glimRepaymentTemplate, this.glimAccountsDataParameters);
     }

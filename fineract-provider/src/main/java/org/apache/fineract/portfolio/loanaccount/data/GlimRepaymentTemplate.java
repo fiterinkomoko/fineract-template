@@ -44,6 +44,7 @@ public final class GlimRepaymentTemplate {
     private final BigDecimal actualPrincipalAmount;
     private final BigDecimal lastRepaymentAmount;
     private final BigDecimal outStandingAmount;
+    private BigDecimal nextRepaymentAmount;
     private final LocalDate lastRepaymentDate;
 
     private GlimRepaymentTemplate(final BigDecimal glimId, final BigDecimal groupId, final BigDecimal clientId, final String clientName,
@@ -109,4 +110,7 @@ public final class GlimRepaymentTemplate {
         return childPrincipalAmount;
     }
 
+    public void setNextRepaymentAmount(BigDecimal nextRepaymentAmount) {
+        this.nextRepaymentAmount = nextRepaymentAmount;
+    }
 }
