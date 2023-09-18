@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 
 public final class GlimRepaymentTemplate {
 
@@ -46,6 +47,9 @@ public final class GlimRepaymentTemplate {
     private final BigDecimal outStandingAmount;
     private BigDecimal nextRepaymentAmount;
     private final LocalDate lastRepaymentDate;
+    private EnumOptionData loanDecisionStateEnumData;
+    private LoanStatusEnumData loanStatus;
+    private Boolean inArrears;
 
     private GlimRepaymentTemplate(final BigDecimal glimId, final BigDecimal groupId, final BigDecimal clientId, final String clientName,
             final BigDecimal childLoanId, final String parentAccountNo, final BigDecimal parentPrincipalAmount,
@@ -112,5 +116,17 @@ public final class GlimRepaymentTemplate {
 
     public void setNextRepaymentAmount(BigDecimal nextRepaymentAmount) {
         this.nextRepaymentAmount = nextRepaymentAmount;
+    }
+
+    public void setLoanDecisionStateEnumData(EnumOptionData loanDecisionStateEnumData) {
+        this.loanDecisionStateEnumData = loanDecisionStateEnumData;
+    }
+
+    public void setLoanStatus(LoanStatusEnumData loanStatus) {
+        this.loanStatus = loanStatus;
+    }
+
+    public void setInArrears(Boolean inArrears) {
+        this.inArrears = inArrears;
     }
 }

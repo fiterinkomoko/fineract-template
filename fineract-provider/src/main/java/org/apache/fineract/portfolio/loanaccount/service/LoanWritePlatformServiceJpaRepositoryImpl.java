@@ -960,6 +960,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Long parentLoanId = loanId;
 
         glimRepository.findById(parentLoanId).orElseThrow();
+        validateLoanRepaymentAmountsMustMatch(command);
 
         JsonArray repayments = command.arrayOfParameterNamed("formDataArray");
         JsonCommand childCommand = null;
@@ -978,6 +979,23 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             result = makeLoanRepayment(LoanTransactionType.REPAYMENT, childLoanId[j++], childCommand, false, false);
         }
         return result;
+    }
+
+    private static void validateLoanRepaymentAmountsMustMatch(JsonCommand command) {
+        final BigDecimal totalTransactionAmount = command.bigDecimalValueOfParameterNamed("totalTransactionAmount");
+        final BigDecimal derivedTotalTransactionAmount = command.bigDecimalValueOfParameterNamed("derivedTotalTransactionAmount");
+        if (totalTransactionAmount == null) {
+            throw new GeneralPlatformDomainRuleException("error.msg.totalTransactionAmount.is.required",
+                    "Field totalTransactionAmount is required ");
+        }
+        if (derivedTotalTransactionAmount == null) {
+            throw new GeneralPlatformDomainRuleException("error.msg.derivedTotalTransactionAmount.is.required",
+                    "Field derivedTotalTransactionAmount is required ");
+        }
+        if (totalTransactionAmount.compareTo(derivedTotalTransactionAmount) != 0) {
+            throw new GeneralPlatformDomainRuleException("error.msg.transactionAmount.not.equal.to.derivedTransactionAmount",
+                    "Transaction amount is not equal to derived transaction amount");
+        }
     }
 
     @Transactional
