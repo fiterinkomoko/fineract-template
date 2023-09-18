@@ -1065,7 +1065,8 @@ public class LoansApiResource {
                 isRepayment);
         if (!CollectionUtils.isEmpty(glimRepaymentTemplate)) {
             for (GlimRepaymentTemplate template : glimRepaymentTemplate) {
-                if (template.getLoanStatus() != null && template.getLoanStatus().id().equals(LoanStatus.ACTIVE.getValue())) {
+
+                if (template.getLoanStatus() != null && template.getLoanStatus().id().intValue() == LoanStatus.ACTIVE.getValue()) {
                     LoanTransactionData transactionData = this.loanReadPlatformService
                             .retrieveLoanTransactionTemplate(template.getChildLoanId().longValue());
                     template.setNextRepaymentAmount(transactionData.getAmount());
