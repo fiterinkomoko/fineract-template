@@ -40,5 +40,5 @@ public interface GLIMAccountInfoReadPlatformService {
 
     Collection<GroupLoanIndividualMonitoringAccountData> findGlimAccountsByGLIMId(Long glimId);
 
-    Collection<GlimRepaymentTemplate> findglimRepaymentTemplate(Long glimId);
+    Collection<GlimRepaymentTemplate> findglimRepaymentTemplate(Long glimId, final Boolean isRepayment);
 }

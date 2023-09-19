@@ -26,6 +26,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.accountdetails.data.LoanAccountSummaryData;
@@ -33,7 +34,9 @@ import org.apache.fineract.portfolio.accountdetails.service.AccountDetailsReadPl
 import org.apache.fineract.portfolio.loanaccount.data.GLIMContainer;
 import org.apache.fineract.portfolio.loanaccount.data.GlimRepaymentTemplate;
 import org.apache.fineract.portfolio.loanaccount.data.GroupLoanIndividualMonitoringAccountData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -182,14 +185,20 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
     }
 
     @Override
-    public Collection<GlimRepaymentTemplate> findglimRepaymentTemplate(final Long glimId) {
+    public Collection<GlimRepaymentTemplate> findglimRepaymentTemplate(final Long glimId, final Boolean isRepayment) {
         this.context.authenticatedUser();
 
         GLIMRepaymentMapper rm = new GLIMRepaymentMapper();
+        final StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("select ");
+        sqlBuilder.append(rm.schema());
+        sqlBuilder.append(" where glim.id=? ");
 
-        final String sql = "select " + rm.schema() + " where glim.id=?";
+        if (isRepayment) {
+            sqlBuilder.append(" and loan.loan_status_id = 300 ");
+        }
 
-        return this.jdbcTemplate.query(sql, rm, glimId); // NOSONAR
+        return this.jdbcTemplate.query(sqlBuilder.toString(), rm, glimId); // NOSONAR
 
     }
 
@@ -227,9 +236,12 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
             return " glim.id as glimId,loan.group_id as groupId,client.id as clientId,glim.account_number as parentLoanAccountNo,"
                     + "glim.principal_amount as parentPrincipalAmount,loan.id as childLoanId,loan.account_no as childLoanAccountNo,loan.approved_principal as childPrincipalAmount,"
                     + "client.display_name as clientName , glim.actual_principal_amount as actualPrincipalAmount, "
-                    + " loan.total_outstanding_derived as outStandingAmount,loan.last_repayment_date as lastRepaymentDate,loan.last_repayment_amount as lastRepaymentAmount "
+                    + " loan.total_outstanding_derived as outStandingAmount,loan.last_repayment_date as lastRepaymentDate,loan.last_repayment_amount as lastRepaymentAmount,  "
+                    + " loan.loan_status_id as statusId,ds.loan_decision_state as loanDecisionState ,la.overdue_since_date_derived as overdueSinceDate "
                     + " from glim_accounts glim left join m_loan loan on loan.glim_id=glim.id "
-                    + " left join m_client client on client.id=loan.client_id";
+                    + " left join m_client client on client.id=loan.client_id "
+                    + " left join m_loan_decision as ds on loan.id = ds.loan_id "
+                    + " left join m_loan_arrears_aging la on la.loan_id = loan.id ";
         }
 
         @Override
@@ -256,11 +268,28 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
             final String childLoanAccountNo = rs.getString("childLoanAccountNo");
 
             final BigDecimal childPrincipalAmount = rs.getBigDecimal("childPrincipalAmount");
+            final Integer loanStatusId = JdbcSupport.getInteger(rs, "statusId");
+            final LoanStatusEnumData loanStatus = LoanEnumerations.status(loanStatusId);
 
-            return GlimRepaymentTemplate.getInstance(glimId, groupId, clientId, clientName, childLoanId, parentLoanAccountNo,
-                    parentPrincipalAmount, childLoanAccountNo, childPrincipalAmount, actualPrincipalAmount, lastRepaymentAmount,
-                    outStandingAmount, lastRepaymentDate);
+            final Long loanDecisionStateId = JdbcSupport.getLong(rs, "loanDecisionState");
+            EnumOptionData loanDecisionStateEnumData = null;
+            if (loanDecisionStateId != null) {
+                loanDecisionStateEnumData = LoanEnumerations.loanDecisionState(loanDecisionStateId.intValue());
+            }
+            final LocalDate overdueSinceDate = JdbcSupport.getLocalDate(rs, "overdueSinceDate");
+            Boolean inArrears = true;
+            if (overdueSinceDate == null) {
+                inArrears = false;
+            }
 
+            GlimRepaymentTemplate glimRepaymentTemplate = GlimRepaymentTemplate.getInstance(glimId, groupId, clientId, clientName,
+                    childLoanId, parentLoanAccountNo, parentPrincipalAmount, childLoanAccountNo, childPrincipalAmount,
+                    actualPrincipalAmount, lastRepaymentAmount, outStandingAmount, lastRepaymentDate);
+            glimRepaymentTemplate.setLoanStatus(loanStatus);
+            glimRepaymentTemplate.setLoanDecisionStateEnumData(loanDecisionStateEnumData);
+            glimRepaymentTemplate.setInArrears(inArrears);
+
+            return glimRepaymentTemplate;
         }
     }
 
