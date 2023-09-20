@@ -422,6 +422,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     private BigDecimal lastRepaymentAmount;
     @Column(name = "last_repayment_date")
     private LocalDate lastRepaymentDate;
+    @Column(name = "kiva_id")
+    private String kivaId;
 
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,

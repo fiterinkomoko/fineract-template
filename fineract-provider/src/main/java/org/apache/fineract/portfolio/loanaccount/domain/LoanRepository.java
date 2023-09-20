@@ -70,6 +70,7 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     String FIND_NON_CLOSED_BY_ACCOUNT_NUMBER = "select loan from Loan loan where loan.accountNumber = :accountNumber and loan.loanStatus in (100,200,300,303,304)";
 
     String FIND_NON_CLOSED_LOAN_THAT_BELONGS_TO_CLIENT = "select loan from Loan loan where loan.id = :loanId and loan.loanStatus = 300 and loan.client.id = :clientId";
+    String FIND_LOAN_ACCOUNTS_TO_BE_POSTED_TO_KIVA = "select loan from Loan loan where loan.kivaId IS NULL and loan.loanStatus = 300 and loan.fund.name = 'Kiva'";
 
     String FIND_BY_ACCOUNT_NUMBER = "select loan from Loan loan where loan.accountNumber = :accountNumber";
 
@@ -171,5 +172,8 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     @Query("select loan from Loan loan where loan.group.id = :groupId and loan.loanStatus in (300,600,601,602,700) and loan.loanType = 2 ")
     List<Loan> findLoanCounterByGroupId(@Param("groupId") Long groupId);
+
+    @Query(FIND_LOAN_ACCOUNTS_TO_BE_POSTED_TO_KIVA)
+    List<Loan> findLoanAccountsToBePostedToKiva();
 
 }
