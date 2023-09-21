@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -50,8 +49,7 @@ import org.springframework.stereotype.Service;
 public class KivaLoanServiceImpl implements KivaLoanService {
 
     private static final Logger LOG = LoggerFactory.getLogger(KivaLoanServiceImpl.class);
-
-    private static final SecureRandom RANDOM = new SecureRandom();
+    public static final String FORM_URL_ENCODED = "application/x-www-form-urlencoded";
 
     private final LoanRepository loanRepository;
     @Autowired
@@ -68,25 +66,24 @@ public class KivaLoanServiceImpl implements KivaLoanService {
     }
 
     private String authenticateToKiva() {
-        HttpUrl.Builder urlBuilder = HttpUrl.parse("https://auth-stage.dk1.kiva.org/oauth/token").newBuilder();
+        HttpUrl.Builder urlBuilder = HttpUrl.parse(getConfigProperty("fineract.integrations.kiva.oAuthUrl")).newBuilder();
         String url = urlBuilder.build().toString();
-        // String requestBody = "grant_type=client_credentials&scope=create:loan_draft
-        // read:loans&audience=https://partner-api-stage.dk1.kiva.org&client_id=ovMOzQdBV3j94wEZuVo152leYJqgp6kyr&client_secret=wFgTfrmoG8MbsHRQ9AKE7ltPVPfRUDyblDH3Cp_cuYMpHeMe2ETo1EyBBN_7c_qnnM";
+
         StringBuilder requestBody = new StringBuilder();
 
-        requestBody.append("grant_type=" + this.env.getProperty("fineract.integrations.kiva.grantType&"));
-        requestBody.append("scope=" + this.env.getProperty("fineract.integrations.kiva.scope&"));
-        requestBody.append("audience=" + this.env.getProperty("fineract.integrations.kiva.audience&"));
-        requestBody.append("client_id=" + this.env.getProperty("fineract.integrations.kiva.clientId&"));
-        requestBody.append("client_secret=" + this.env.getProperty("fineract.integrations.kiva.clientSecret"));
+        requestBody.append("grant_type=" + getConfigProperty("fineract.integrations.kiva.grantType"));
+        requestBody.append("&scope=" + getConfigProperty("fineract.integrations.kiva.scope"));
+        requestBody.append("&audience=" + getConfigProperty("fineract.integrations.kiva.audience"));
+        requestBody.append("&client_id=" + getConfigProperty("fineract.integrations.kiva.clientId"));
+        requestBody.append("&client_secret=" + getConfigProperty("fineract.integrations.kiva.clientSecret"));
+
 
         OkHttpClient client = new OkHttpClient();
         Response response = null;
-        String body = requestBody.toString();
-        System.out.println("Body = = > " + body);
-        RequestBody formBody = RequestBody.create(MediaType.parse("application/x-www-form-urlencoded"), body);
 
-        Request request = new Request.Builder().url(url).header("Content-Type", "application/x-www-form-urlencoded").post(formBody).build();
+        RequestBody formBody = RequestBody.create(MediaType.parse(FORM_URL_ENCODED), requestBody.toString());
+
+        Request request = new Request.Builder().url(url).header("Content-Type", FORM_URL_ENCODED).post(formBody).build();
 
         List<Throwable> exceptions = new ArrayList<>();
 
@@ -123,6 +120,9 @@ public class KivaLoanServiceImpl implements KivaLoanService {
 
     private void handleAPIIntegrityIssues(String httpResponse) {
         throw new PlatformDataIntegrityException(httpResponse, httpResponse);
+    }
+    private String getConfigProperty(String propertyName) {
+        return this.env.getProperty(propertyName);
     }
 
 }
