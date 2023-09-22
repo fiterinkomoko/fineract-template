@@ -60,7 +60,8 @@ public class KivaLoanServiceImpl implements KivaLoanService {
 
     private static final Logger LOG = LoggerFactory.getLogger(KivaLoanServiceImpl.class);
     public static final String FORM_URL_ENCODED = "application/x-www-form-urlencoded";
-    public static final Long THEME_TYPE_ID = 263L;
+    public static final String FORM_URL_CONTENT_TYPE = "Content-Type";
+    public static final Integer THEME_TYPE_ID = 228;
     public static final Long ACTIVITY_ID = 110L;
     public static final Integer DESCRIPTION_LANGUAGE_ID = 1;
 
@@ -86,14 +87,15 @@ public class KivaLoanServiceImpl implements KivaLoanService {
         for (Loan loan : loanList) {
             String loanToKiva = loanPayloadToKivaMapper(kivaLoanAccountSchedules, kivaLoanAccounts, notPictured, loan);
             LOG.info("Loan Account To be Sent to Kiva : =GSON = >  " + loanToKiva);
-
+            postLoanToKiva(accessToken, loanToKiva);
         }
     }
 
     private String loanPayloadToKivaMapper(List<KivaLoanAccountSchedule> kivaLoanAccountSchedules, List<KivaLoanAccount> kivaLoanAccounts,
             List<Boolean> notPictured, Loan loan) {
         Client client = loan.getClient();
-        String gender = (client.gender() != null) ? client.gender().label() : "";
+        String gender = (client.gender() != null) ? client.gender().label() : "unknown";
+        String loanPurpose = (loan.getLoanPurpose() != null) ? loan.getLoanPurpose().label() : "Not Defined";
 
         KivaLoanAccount loanAccount = new KivaLoanAccount(loan.getNetDisbursalAmount(), client.getId().toString(), client.getFirstname(),
                 gender, client.getLastname(), loan.getId().toString());
@@ -108,10 +110,10 @@ public class KivaLoanServiceImpl implements KivaLoanService {
 
         // build final object
         LoanDetailToKivaData loanDetailToKivaData = new LoanDetailToKivaData(ACTIVITY_ID, Boolean.TRUE, loan.getCurrencyCode(),
-                "Loan From Fineract", DESCRIPTION_LANGUAGE_ID, Date.valueOf(loan.getDisbursementDate()), "",
+                "Loan From Fineract", DESCRIPTION_LANGUAGE_ID, Date.valueOf(loan.getDisbursementDate()), " ",
                 "https://res.cloudinary.com/dile4yok6/image/upload/v1636108796/image-5_usok73.png", client.getId().toString(),
-                generateInternalLoanId(loan.getDisbursementDate(), loan.getId()), "", "", THEME_TYPE_ID, kivaLoanAccounts,
-                kivaLoanAccountSchedules, notPictured);
+                generateInternalLoanId(loan.getDisbursementDate(), loan.getId()), loanPurpose, "Kakuma Town: Kenya", THEME_TYPE_ID,
+                kivaLoanAccounts, kivaLoanAccountSchedules, notPictured);
 
         Gson gson = new GsonBuilder().registerTypeAdapter(Date.class, new KivaDateSerializerApi()).create();
 
@@ -181,6 +183,45 @@ public class KivaLoanServiceImpl implements KivaLoanService {
     private String generateInternalLoanId(LocalDate disbursementDate, Long loanId) {
         Integer year = disbursementDate.getYear();
         return "LOAN/" + loanId + "/" + year;
+    }
+
+    private void postLoanToKiva(String accessToken, String loanToKiva) {
+        HttpUrl.Builder urlBuilder = HttpUrl.parse(getConfigProperty("fineract.integrations.kiva.postLoanDraftUrl")).newBuilder();
+        String url = urlBuilder.build().toString();
+
+        OkHttpClient client = new OkHttpClient();
+        Response response = null;
+
+        RequestBody formBody = RequestBody.create(MediaType.parse(FORM_URL_CONTENT_TYPE), loanToKiva);
+
+        Request request = new Request.Builder().url(url).header("Authorization", "Bearer " + accessToken).post(formBody).build();
+
+        List<Throwable> exceptions = new ArrayList<>();
+
+        try {
+            response = client.newCall(request).execute();
+            String resObject = response.body().string();
+            if (response.isSuccessful()) {
+
+                log.info("Loan Account Posted to Kiva Response :=>" + resObject);
+
+            } else {
+                log.error("Post Loan to KIVA failed with Message:", resObject);
+
+                handleAPIIntegrityIssues(resObject);
+
+            }
+        } catch (Exception e) {
+            log.error("Post Loan to KIVA has failed", e);
+            exceptions.add(e);
+        }
+        if (!CollectionUtils.isEmpty(exceptions)) {
+            try {
+                throw new JobExecutionException(exceptions);
+            } catch (JobExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
 }

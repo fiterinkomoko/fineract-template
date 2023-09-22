@@ -7029,4 +7029,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     public void setLastRepaymentDate(LocalDate lastRepaymentDate) {
         this.lastRepaymentDate = lastRepaymentDate;
     }
+
+    public CodeValue getLoanPurpose() {
+        return loanPurpose;
+    }
 }

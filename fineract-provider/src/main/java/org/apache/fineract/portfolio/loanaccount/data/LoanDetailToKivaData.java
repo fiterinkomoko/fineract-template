@@ -37,14 +37,14 @@ public class LoanDetailToKivaData {
     private String internal_loan_id;
     private String loanuse;
     private String location;
-    private Long theme_type_id;
+    private Integer theme_type_id;
     private List<KivaLoanAccount> entreps;
     private List<KivaLoanAccountSchedule> schedule;
     private List<Boolean> not_pictured;
 
     public LoanDetailToKivaData(Long activity_id, Boolean client_waiver_signed, String currency, String description,
             Integer description_language_id, Date disburse_time, String group_name, String image_url, String internal_client_id,
-            String internal_loan_id, String loanuse, String location, Long theme_type_id, List<KivaLoanAccount> entreps,
+            String internal_loan_id, String loanuse, String location, Integer theme_type_id, List<KivaLoanAccount> entreps,
             List<KivaLoanAccountSchedule> schedule, List<Boolean> not_pictured) {
         this.activity_id = activity_id;
         this.client_waiver_signed = client_waiver_signed;
