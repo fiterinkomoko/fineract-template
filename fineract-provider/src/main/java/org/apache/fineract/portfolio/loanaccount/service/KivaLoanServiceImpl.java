@@ -40,6 +40,7 @@ import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.portfolio.common.domain.KivaLoanDepartmentThemeTypeMapper;
 import org.apache.fineract.portfolio.loanaccount.data.KivaLoanAccount;
 import org.apache.fineract.portfolio.loanaccount.data.KivaLoanAccountSchedule;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDetailToKivaData;
@@ -47,6 +48,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.serialization.KivaDateSerializerApi;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +63,6 @@ public class KivaLoanServiceImpl implements KivaLoanService {
     private static final Logger LOG = LoggerFactory.getLogger(KivaLoanServiceImpl.class);
     public static final String FORM_URL_ENCODED = "application/x-www-form-urlencoded";
     public static final String FORM_URL_CONTENT_TYPE = "Content-Type";
-    public static final Integer THEME_TYPE_ID = 228;
     public static final Long ACTIVITY_ID = 110L;
     public static final Integer DESCRIPTION_LANGUAGE_ID = 1;
 
@@ -96,9 +97,10 @@ public class KivaLoanServiceImpl implements KivaLoanService {
         Client client = loan.getClient();
         String gender = (client.gender() != null) ? client.gender().label() : "unknown";
         String loanPurpose = (loan.getLoanPurpose() != null) ? loan.getLoanPurpose().label() : "Not Defined";
+        String clientKivaId = (client.getExternalId() != null) ? client.getExternalId() : client.getId().toString();
 
-        KivaLoanAccount loanAccount = new KivaLoanAccount(loan.getNetDisbursalAmount(), client.getId().toString(), client.getFirstname(),
-                gender, client.getLastname(), loan.getId().toString());
+        KivaLoanAccount loanAccount = new KivaLoanAccount(loan.getNetDisbursalAmount(), clientKivaId, client.getFirstname(), gender,
+                client.getLastname(), getLoanKivaId(loan));
         kivaLoanAccounts.add(loanAccount);
 
         for (LoanRepaymentScheduleInstallment scheduleInstallment : loan.getRepaymentScheduleInstallments()) {
@@ -110,14 +112,23 @@ public class KivaLoanServiceImpl implements KivaLoanService {
 
         // build final object
         LoanDetailToKivaData loanDetailToKivaData = new LoanDetailToKivaData(ACTIVITY_ID, Boolean.TRUE, loan.getCurrencyCode(),
-                "Loan From Fineract", DESCRIPTION_LANGUAGE_ID, Date.valueOf(loan.getDisbursementDate()), " ",
+                loan.getDescription(), DESCRIPTION_LANGUAGE_ID, Date.valueOf(loan.getDisbursementDate()), " ",
                 "https://res.cloudinary.com/dile4yok6/image/upload/v1636108796/image-5_usok73.png", client.getId().toString(),
-                generateInternalLoanId(loan.getDisbursementDate(), loan.getId()), loanPurpose, "Kakuma Town: Kenya", THEME_TYPE_ID,
-                kivaLoanAccounts, kivaLoanAccountSchedules, notPictured);
+                generateInternalLoanId(loan.getDisbursementDate(), loan.getId()), loanPurpose, "Kakuma Town: Kenya",
+                getKivaLoanDepartmentThemeType(loan), kivaLoanAccounts, kivaLoanAccountSchedules, notPictured);
 
         Gson gson = new GsonBuilder().registerTypeAdapter(Date.class, new KivaDateSerializerApi()).create();
 
         return gson.toJson(loanDetailToKivaData);
+    }
+
+    @NotNull
+    private static Integer getKivaLoanDepartmentThemeType(Loan loan) {
+        return KivaLoanDepartmentThemeTypeMapper.toInt(loan.getDepartment().label()).intValue();
+    }
+
+    private String getLoanKivaId(Loan loan) {
+        return (loan.getKivaId() != null) ? loan.getKivaId() : loan.getExternalId();
     }
 
     private String authenticateToKiva() {

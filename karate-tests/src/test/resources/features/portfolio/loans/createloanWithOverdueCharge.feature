@@ -2,6 +2,13 @@ Feature: Test loan account apis
   Background:
     * callonce read('classpath:features/base.feature')
     * url baseUrl
+     #-Get code and code values for LoanPurpose
+    *  def LoanPurposeCode = 'LoanPurpose'
+    *  def LoanPurposeResponse = call read('classpath:features/system/codes/codesStep.feature@fetchCodeByNameStep') { codeName : '#(LoanPurposeCode)' }
+    *  def LoanPurposeCode = LoanPurposeResponse.codeName.id
+       #- Fetch codeValue for LoanPurpose
+    * def codeValueResCT = call read('classpath:features/system/codes/codeValuesStep.feature@fetchCodeValuesStep'){ codeId : '#(LoanPurposeCode)' }
+    * def LoanPurposeCodeId = codeValueResCT.listOfCodeValues[0].id
 
   @testThatICanCreateLoanAccountWithFlatOverdueChargesAndDisburseByCash
   Scenario: Test That I Can Create Loan Account With Flat Overdue Charges and disburse it by Cash
@@ -32,7 +39,7 @@ Feature: Test loan account apis
 
 
     * def loanAmount = 8500
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)',loanPurposeId : '#(LoanPurposeCodeId)'}
     * def loanId = loan.loanId
 
       #approval
@@ -107,7 +114,7 @@ Feature: Test loan account apis
 
 
     * def loanAmount = 8500
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' }
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' ,loanPurposeId : '#(LoanPurposeCodeId)'}
     * def loanId = loan.loanId
 
       #approval
@@ -227,7 +234,7 @@ Feature: Test loan account apis
 
 
     * def loanAmount = 8500
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanAccountWithDisburseToSavingsAccountChargeAndPenaltyChargeSteps') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)', disburseSavingsAccountChargeId : '#(disburseSavingsAccountChargeId)', disburseToSavingsChargeAmount : '#(disburseToSavingsChargeAmount)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanAccountWithDisburseToSavingsAccountChargeAndPenaltyChargeSteps') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)', disburseSavingsAccountChargeId : '#(disburseSavingsAccountChargeId)', disburseToSavingsChargeAmount : '#(disburseToSavingsChargeAmount)',loanPurposeId : '#(LoanPurposeCodeId)'}
     * def loanId = loan.loanId
 
       #approval
@@ -333,7 +340,7 @@ Feature: Test loan account apis
 
 
     * def loanAmount = 8500
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanAccountWithDisburseToSavingsAccountChargeAndPenaltyChargeSteps') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)', disburseSavingsAccountChargeId : '#(disburseSavingsAccountChargeId)', disburseToSavingsChargeAmount : '#(disburseToSavingsChargeAmount)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanAccountWithDisburseToSavingsAccountChargeAndPenaltyChargeSteps') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)', disburseSavingsAccountChargeId : '#(disburseSavingsAccountChargeId)', disburseToSavingsChargeAmount : '#(disburseToSavingsChargeAmount)',,loanPurposeId : '#(LoanPurposeCodeId)'}
     * def loanId = loan.loanId
 
       #approval
@@ -455,7 +462,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 8500
     * def transferAmount = 850
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanAccountWithDisburseToSavingsAccountChargeAndPenaltyChargeSteps') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', savingsAccountId : '#(savingsId)', disburseSavingsAccountChargeId : '#(disburseSavingsAccountChargeId)', disburseToSavingsChargeAmount : '#(disburseToSavingsChargeAmount)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanAccountWithDisburseToSavingsAccountChargeAndPenaltyChargeSteps') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', savingsAccountId : '#(savingsId)', disburseSavingsAccountChargeId : '#(disburseSavingsAccountChargeId)', disburseToSavingsChargeAmount : '#(disburseToSavingsChargeAmount)',loanPurposeId : '#(LoanPurposeCodeId)'}
     * def loanId = loan.loanId
       #approval
     * call read('classpath:features/portfolio/loans/loansteps.feature@approveloan') { approvalDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanId : '#(loanId)' }
@@ -529,7 +536,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 8500
     * def transferAmount = 850
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanAccountWithDisburseToSavingsAccountChargeAndPenaltyChargeSteps') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)', disburseSavingsAccountChargeId : '#(disburseSavingsAccountChargeId)', disburseToSavingsChargeAmount : '#(disburseToSavingsChargeAmount)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanAccountWithDisburseToSavingsAccountChargeAndPenaltyChargeSteps') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)', disburseSavingsAccountChargeId : '#(disburseSavingsAccountChargeId)', disburseToSavingsChargeAmount : '#(disburseToSavingsChargeAmount)',loanPurposeId : '#(LoanPurposeCodeId)'}
     * def loanId = loan.loanId
 
       #approval
@@ -621,7 +628,7 @@ Feature: Test loan account apis
 
 
     * def loanAmount = 8500
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)',loanPurposeId : '#(LoanPurposeCodeId)'}
     * def loanId = loan.loanId
 
       #approval
@@ -731,7 +738,7 @@ Feature: Test loan account apis
 
 
     * def loanAmount = 8500
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanAccountWithDisburseToSavingsAccountChargeAndPenaltyChargeSteps') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)', disburseSavingsAccountChargeId : '#(disburseSavingsAccountChargeId)', disburseToSavingsChargeAmount : '#(disburseToSavingsChargeAmount)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanAccountWithDisburseToSavingsAccountChargeAndPenaltyChargeSteps') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)', disburseSavingsAccountChargeId : '#(disburseSavingsAccountChargeId)', disburseToSavingsChargeAmount : '#(disburseToSavingsChargeAmount)',loanPurposeId : '#(LoanPurposeCodeId)'}
     * def loanId = loan.loanId
 
       #approval
@@ -839,7 +846,7 @@ Feature: Test loan account apis
     * def loanAmount = 10000
     * def loanTermFrequency = 12
     * def numberOfRepayments = 12
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@400-OXY163loanScheduleWithInterestRecalculationEnabledIsOnly3PeriodsLongRegardlessOfTheNumberOfRepaymentsSetSteps') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', loanTermFrequency : '#(loanTermFrequency)', numberOfRepayments : '#(numberOfRepayments)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@400-OXY163loanScheduleWithInterestRecalculationEnabledIsOnly3PeriodsLongRegardlessOfTheNumberOfRepaymentsSetSteps') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', loanTermFrequency : '#(loanTermFrequency)', numberOfRepayments : '#(numberOfRepayments)',loanPurposeId : '#(LoanPurposeCodeId)'}
 
 
 
@@ -859,7 +866,7 @@ Feature: Test loan account apis
     * def loanAmount = 10000
     * def loanTermFrequency = 1
     * def numberOfRepayments = 1
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@OXY163loanScheduleWithInterestRecalculationEnabledIsOnly3PeriodsLongRegardlessOfTheNumberOfRepaymentsSetSteps') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', loanTermFrequency : '#(loanTermFrequency)', numberOfRepayments : '#(numberOfRepayments)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@OXY163loanScheduleWithInterestRecalculationEnabledIsOnly3PeriodsLongRegardlessOfTheNumberOfRepaymentsSetSteps') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', loanTermFrequency : '#(loanTermFrequency)', numberOfRepayments : '#(numberOfRepayments)',loanPurposeId : '#(LoanPurposeCodeId)'}
     * def loanId = loan.loanId
 
       #approval
@@ -907,13 +914,13 @@ Feature: Test loan account apis
     * def loanAmount = 10000
     * def loanTermFrequency = 1
     * def numberOfRepayments = 1
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@OXY163loanScheduleWithInterestRecalculationEnabledIsOnly3PeriodsLongRegardlessOfTheNumberOfRepaymentsSetSteps') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', loanTermFrequency : '#(loanTermFrequency)', numberOfRepayments : '#(numberOfRepayments)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@OXY163loanScheduleWithInterestRecalculationEnabledIsOnly3PeriodsLongRegardlessOfTheNumberOfRepaymentsSetSteps') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', loanTermFrequency : '#(loanTermFrequency)', numberOfRepayments : '#(numberOfRepayments)',loanPurposeId : '#(LoanPurposeCodeId)'}
     * def loanId = loan.loanId
 
     # Update should fail
     * def loanTermFrequency = 12
     * def numberOfRepayments = 12
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@Update-400-OXY163loanScheduleWithInterestRecalculationEnabledIsOnly3PeriodsLongRegardlessOfTheNumberOfRepaymentsSetSteps') {loanId : '#(loanId)', submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', loanTermFrequency : '#(loanTermFrequency)', numberOfRepayments : '#(numberOfRepayments)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@Update-400-OXY163loanScheduleWithInterestRecalculationEnabledIsOnly3PeriodsLongRegardlessOfTheNumberOfRepaymentsSetSteps') {loanId : '#(loanId)', submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', loanTermFrequency : '#(loanTermFrequency)', numberOfRepayments : '#(numberOfRepayments)',loanPurposeId : '#(LoanPurposeCodeId)'}
 
 
   @testThatICanHoldFundsOnASavingsAccountWhenTheLinkedLoanAccountIsInArrearsAndTheOtherSavingsAccountOfTheClientShouldNotBePutOnHold
@@ -949,7 +956,7 @@ Feature: Test loan account apis
 
 
     * def loanAmount = 8500
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' }
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)',loanPurposeId : '#(LoanPurposeCodeId)' }
     * def loanId = loan.loanId
 
       #approval

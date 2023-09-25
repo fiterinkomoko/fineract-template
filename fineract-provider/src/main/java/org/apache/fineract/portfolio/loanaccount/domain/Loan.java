@@ -162,12 +162,20 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "account_no", length = 20, unique = true, nullable = false)
     private String accountNumber;
 
+    public String getKivaId() {
+        return kivaId;
+    }
+
     @Column(name = "external_id")
     private String externalId;
 
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = true)
     private Client client;
+
+    public CodeValue getDepartment() {
+        return department;
+    }
 
     @ManyToOne
     @JoinColumn(name = "group_id", nullable = true)
@@ -424,6 +432,12 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     private LocalDate lastRepaymentDate;
     @Column(name = "kiva_id")
     private String kivaId;
+
+    @Column(name = "kiva_uuid")
+    private String kivaUUId;
+
+    @Column(name = "description")
+    private String description;
 
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
@@ -1443,6 +1457,19 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             final String newValue = command.stringValueOfParameterNamed(externalIdParamName);
             actualChanges.put(externalIdParamName, newValue);
             this.externalId = StringUtils.defaultIfEmpty(newValue, null);
+        }
+
+        final String descriptionParamName = "description";
+        if (command.isChangeInStringParameterNamed(descriptionParamName, this.description)) {
+            final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
+            actualChanges.put(descriptionParamName, newValue);
+            this.description = newValue;
+        }
+        final String kivaIdParamName = "kivaId";
+        if (command.isChangeInStringParameterNamed(kivaIdParamName, this.kivaId)) {
+            final String newValue = command.stringValueOfParameterNamed(kivaIdParamName);
+            actualChanges.put(kivaIdParamName, newValue);
+            this.kivaId = StringUtils.defaultIfEmpty(newValue, null);
         }
 
         // add clientId, groupId and loanType changes to actual changes
@@ -7032,5 +7059,25 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public CodeValue getLoanPurpose() {
         return loanPurpose;
+    }
+
+    public void setKivaId(String kivaId) {
+        this.kivaId = kivaId;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setKivaUUId(String kivaUUId) {
+        this.kivaUUId = kivaUUId;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getExternalId() {
+        return externalId;
     }
 }

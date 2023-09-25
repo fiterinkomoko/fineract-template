@@ -22,6 +22,9 @@
     "dateFormat": "#(format)",
     "loanType": "individual",
     "expectedDisbursementDate": "#(submittedOnDate)",
+    "externalId": "#(faker.lorem().characters(70))",
+    "description": "#(faker.lorem().characters(170))",
+    "loanPurposeId": "#(loanPurposeId)",
     "submittedOnDate": "#(submittedOnDate)"
   },
   "approve": {
@@ -75,6 +78,9 @@
     "dateFormat": "#(format)",
     "loanType": "individual",
     "expectedDisbursementDate": "#(submittedOnDate)",
+    "externalId": "#(faker.lorem().characters(70))",
+    "description": "#(faker.lorem().characters(170))",
+    "loanPurposeId": "#(loanPurposeId)",
     "submittedOnDate": "#(submittedOnDate)"
   },
   "unDisburseLoanAccountPayload": {
@@ -114,6 +120,9 @@
     "loanType": "individual",
     "expectedDisbursementDate": "#(submittedOnDate)",
     "submittedOnDate": "#(submittedOnDate)",
+    "externalId": "#(faker.lorem().characters(70))",
+    "description": "#(faker.lorem().characters(170))",
+    "loanPurposeId": "#(loanPurposeId)",
     "linkAccountId": "#(savingsAccountId)"
   },
   "loanAccountWithNewProductWithDisburseToSavingsAccountAndPenaltyChargePayLoad": {
@@ -148,6 +157,9 @@
     "dateFormat": "#(format)",
     "loanType": "individual",
     "expectedDisbursementDate": "#(submittedOnDate)",
+    "externalId": "#(faker.lorem().characters(70))",
+    "description": "#(faker.lorem().characters(170))",
+    "loanPurposeId": "#(loanPurposeId)",
     "submittedOnDate": "#(submittedOnDate)"
   },
   "transferFundsFromSavingsAccountToLoanAccountPayLoad": {
@@ -219,6 +231,9 @@
     "dateFormat": "#(format)",
     "loanType": "individual",
     "expectedDisbursementDate": "#(submittedOnDate)",
+    "externalId": "#(faker.lorem().characters(70))",
+    "description": "#(faker.lorem().characters(170))",
+    "loanPurposeId": "#(loanPurposeId)",
     "submittedOnDate": "#(submittedOnDate)"
   },
   "loanAccountWithNewProductAndNumberOfRepaymentPayLoad": {
@@ -246,6 +261,9 @@
     "loanType": "individual",
     "expectedDisbursementDate": "#(submittedOnDate)",
     "submittedOnDate": "#(submittedOnDate)",
+    "externalId": "#(faker.lorem().characters(70))",
+    "description": "#(faker.lorem().characters(170))",
+    "loanPurposeId": "#(loanPurposeId)",
     "linkAccountId": "#(savingsAccountId)"
   },
   "groupLoanAccountWithNewProductAndNumberOfRepaymentPayLoad": {
@@ -272,6 +290,9 @@
     "dateFormat": "#(format)",
     "loanType": "group",
     "expectedDisbursementDate": "#(submittedOnDate)",
+    "externalId": "#(faker.lorem().characters(70))",
+    "description": "#(faker.lorem().characters(170))",
+    "loanPurposeId": "#(loanPurposeId)",
     "submittedOnDate": "#(submittedOnDate)"
   },
   "jlgLoanAccountWithNewProductAndNumberOfRepaymentPayLoad": {
@@ -299,6 +320,9 @@
     "dateFormat": "#(format)",
     "loanType": "jlg",
     "expectedDisbursementDate": "#(submittedOnDate)",
+    "externalId": "#(faker.lorem().characters(70))",
+    "description": "#(faker.lorem().characters(170))",
+    "loanPurposeId": "#(loanPurposeId)",
     "submittedOnDate": "#(submittedOnDate)"
   },
   "createGLIMAccountPayLoad":

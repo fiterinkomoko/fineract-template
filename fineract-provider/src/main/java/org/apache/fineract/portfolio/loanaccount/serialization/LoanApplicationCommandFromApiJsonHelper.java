@@ -98,7 +98,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             LoanApiConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM, LoanApiConstants.NUMBER_OF_REPAYMENT_TO_CARRY_FORWARD,
             LoanApiConstants.linkVendorAccountIdParamName, LoanApiConstants.LOAN_TERM_TO_TOP_UP, LoanApiConstants.isBnplLoanParamName,
             LoanApiConstants.requiresEquityContributionParamName, LoanApiConstants.equityContributionLoanPercentageParamName,
-            LoanApiConstants.DEPARTMENT_PARAM));
+            LoanApiConstants.DEPARTMENT_PARAM, LoanApiConstants.DESCRIPTION_PARAM, LoanApiConstants.KIVA_ID_PARAM));
 
     private final FromJsonHelper fromApiJsonHelper;
     private final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper;
@@ -198,7 +198,17 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         final String externalIdParameterName = "externalId";
         if (this.fromApiJsonHelper.parameterExists(externalIdParameterName, element)) {
             final String externalId = this.fromApiJsonHelper.extractStringNamed(externalIdParameterName, element);
-            baseDataValidator.reset().parameter(externalIdParameterName).value(externalId).ignoreIfNull().notExceedingLengthOf(100);
+            baseDataValidator.reset().parameter(externalIdParameterName).value(externalId).notNull().notExceedingLengthOf(100);
+        }
+
+        final String descriptionParameterName = "description";
+        final String description = this.fromApiJsonHelper.extractStringNamed(descriptionParameterName, element);
+        baseDataValidator.reset().parameter(descriptionParameterName).value(description).notNull();
+
+        final String kivaIdParameterName = "kivaId";
+        if (this.fromApiJsonHelper.parameterExists(kivaIdParameterName, element)) {
+            final String kivaId = this.fromApiJsonHelper.extractStringNamed(kivaIdParameterName, element);
+            baseDataValidator.reset().parameter(kivaIdParameterName).value(kivaId).ignoreIfNull().notExceedingLengthOf(100);
         }
 
         final String fundIdParameterName = "fundId";
@@ -207,10 +217,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             baseDataValidator.reset().parameter(fundIdParameterName).value(fundId).ignoreIfNull().integerGreaterThanZero();
         }
         final String departmentParameterName = "department";
-        if (this.fromApiJsonHelper.parameterExists(departmentParameterName, element)) {
-            final Integer department = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(departmentParameterName, element);
-            baseDataValidator.reset().parameter(departmentParameterName).value(department).ignoreIfNull().integerGreaterThanZero();
-        }
+        final Integer department = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(departmentParameterName, element);
+        baseDataValidator.reset().parameter(departmentParameterName).value(department).notNull().integerGreaterThanZero();
 
         final String loanOfficerIdParameterName = "loanOfficerId";
         if (this.fromApiJsonHelper.parameterExists(loanOfficerIdParameterName, element)) {
@@ -219,10 +227,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         }
 
         final String loanPurposeIdParameterName = "loanPurposeId";
-        if (this.fromApiJsonHelper.parameterExists(loanPurposeIdParameterName, element)) {
-            final Long loanPurposeId = this.fromApiJsonHelper.extractLongNamed(loanPurposeIdParameterName, element);
-            baseDataValidator.reset().parameter(loanPurposeIdParameterName).value(loanPurposeId).ignoreIfNull().integerGreaterThanZero();
-        }
+        final Long loanPurposeId = this.fromApiJsonHelper.extractLongNamed(loanPurposeIdParameterName, element);
+        baseDataValidator.reset().parameter(loanPurposeIdParameterName).value(loanPurposeId).notNull().integerGreaterThanZero();
 
         final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", element);
         baseDataValidator.reset().parameter("principal").value(principal).notNull().positiveAmount();
@@ -666,7 +672,19 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         if (this.fromApiJsonHelper.parameterExists(externalIdParameterName, element)) {
             atLeastOneParameterPassedForUpdate = true;
             final String externalId = this.fromApiJsonHelper.extractStringNamed(externalIdParameterName, element);
-            baseDataValidator.reset().parameter(externalIdParameterName).value(externalId).ignoreIfNull().notExceedingLengthOf(100);
+            baseDataValidator.reset().parameter(externalIdParameterName).value(externalId).notNull().notExceedingLengthOf(100);
+        }
+        final String descriptionParameterName = "description";
+        if (this.fromApiJsonHelper.parameterExists(descriptionParameterName, element)) {
+            atLeastOneParameterPassedForUpdate = true;
+            final String description = this.fromApiJsonHelper.extractStringNamed(descriptionParameterName, element);
+            baseDataValidator.reset().parameter(descriptionParameterName).value(description).notNull();
+        }
+        final String kivaIdParameterName = "kivaId";
+        if (this.fromApiJsonHelper.parameterExists(kivaIdParameterName, element)) {
+            atLeastOneParameterPassedForUpdate = true;
+            final String kivaId = this.fromApiJsonHelper.extractStringNamed(kivaIdParameterName, element);
+            baseDataValidator.reset().parameter(kivaIdParameterName).value(kivaId).ignoreIfNull().notExceedingLengthOf(100);
         }
 
         final String fundIdParameterName = "fundId";
