@@ -41,7 +41,8 @@ public class DocumentCommand {
     private final Boolean isKivaProfileImage;
 
     public DocumentCommand(final Set<String> modifiedParameters, final Long id, final String parentEntityType, final Long parentEntityId,
-            final String name, final String fileName, final Long size, final String type, final String description, final String location,final Boolean isKivaProfileImage) {
+            final String name, final String fileName, final Long size, final String type, final String description, final String location,
+            final Boolean isKivaProfileImage) {
         this.modifiedParameters = modifiedParameters;
         this.id = id;
         this.parentEntityType = parentEntityType;
@@ -146,6 +147,9 @@ public class DocumentCommand {
     public boolean isLocationChanged() {
         return this.modifiedParameters.contains("location");
     }
-    public boolean isKivaProfileImageChanged() { return this.modifiedParameters.contains("isKivaProfileImage"); }
+
+    public boolean isKivaProfileImageChanged() {
+        return this.modifiedParameters.contains("isKivaProfileImage");
+    }
 
 }

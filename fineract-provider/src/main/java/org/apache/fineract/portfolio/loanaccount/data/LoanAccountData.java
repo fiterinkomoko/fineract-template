@@ -261,9 +261,9 @@ public final class LoanAccountData {
     private EnumOptionData nextLoanIcReviewDecisionState;
     private Boolean isExtendLoanLifeCycleConfig;
     private LoanDueDiligenceData loanDueDiligenceData;
-    private  String description;
-    private  String kivaId;
-    private  String kivaUUId;
+    private String description;
+    private String kivaId;
+    private String kivaUUId;
 
     public static LoanAccountData importInstanceIndividual(EnumOptionData loanTypeEnumOption, Long clientId, Long productId,
             Long loanOfficerId, LocalDate submittedOnDate, Long fundId, BigDecimal principal, Integer numberOfRepayments,

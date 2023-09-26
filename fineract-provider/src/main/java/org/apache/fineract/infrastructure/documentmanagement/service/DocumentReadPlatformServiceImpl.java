@@ -77,6 +77,13 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
         }
     }
 
+    @Override
+    public DocumentData retrieveKivaLoanProfileImage(String entityType, Long entityId) {
+        final DocumentMapper mapper = new DocumentMapper(false, false);
+        final String sql = "select " + mapper.schema() + "  and d.is_kiva_profile_image = true order by d.id limit 1";
+        return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { entityType, entityId }); // NOSONAR
+    }
+
     private DocumentData fetchDocumentDetails(final String entityType, final Long entityId, final Long documentId,
             final DocumentMapper mapper) {
         final String sql = "select " + mapper.schema() + " and d.id=? ";
@@ -97,7 +104,7 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
             return "d.id as id, d.parent_entity_type as parentEntityType, d.parent_entity_id as parentEntityId, d.name as name, "
                     + " d.file_name as fileName, d.size as fileSize, d.type as fileType, "
                     + " d.description as description, d.location as location," + " d.storage_type_enum as storageType"
-                    + " from m_document d where d.parent_entity_type=? and d.parent_entity_id=?";
+                    + " from m_document d where d.parent_entity_type=? and d.parent_entity_id=? ";
         }
 
         @Override

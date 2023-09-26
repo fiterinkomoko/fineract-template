@@ -22,9 +22,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.io.File;
+import java.io.IOException;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +39,9 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
+import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
+import org.apache.fineract.infrastructure.documentmanagement.service.DocumentReadPlatformServiceImpl;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
@@ -54,6 +60,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -67,6 +74,7 @@ public class KivaLoanServiceImpl implements KivaLoanService {
     public static final Integer DESCRIPTION_LANGUAGE_ID = 1;
 
     private final LoanRepository loanRepository;
+    private final DocumentReadPlatformServiceImpl documentReadPlatformService;
     @Autowired
     private Environment env;
 
@@ -94,10 +102,22 @@ public class KivaLoanServiceImpl implements KivaLoanService {
 
     private String loanPayloadToKivaMapper(List<KivaLoanAccountSchedule> kivaLoanAccountSchedules, List<KivaLoanAccount> kivaLoanAccounts,
             List<Boolean> notPictured, Loan loan) {
+
         Client client = loan.getClient();
         String gender = (client.gender() != null) ? client.gender().label() : "unknown";
         String loanPurpose = (loan.getLoanPurpose() != null) ? loan.getLoanPurpose().label() : "Not Defined";
         String clientKivaId = (client.getExternalId() != null) ? client.getExternalId() : client.getId().toString();
+
+        final DocumentData documentData = this.documentReadPlatformService.retrieveKivaLoanProfileImage("loans", loan.getId());
+        if (documentData != null && documentData.fileLocation() != null && documentData.storageType().equals(StorageType.FILE_SYSTEM)) {
+
+            try {
+                String base64Image = getImageAsBase64(documentData.fileLocation());
+                LOG.info("Image Details: => " + base64Image);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
         KivaLoanAccount loanAccount = new KivaLoanAccount(loan.getNetDisbursalAmount(), clientKivaId, client.getFirstname(), gender,
                 client.getLastname(), getLoanKivaId(loan));
@@ -233,6 +253,12 @@ public class KivaLoanServiceImpl implements KivaLoanService {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public String getImageAsBase64(String imageName) throws IOException {
+        File imageFile = new File(imageName);
+        byte[] imageBytes = FileCopyUtils.copyToByteArray(imageFile);
+        return Base64.getEncoder().encodeToString(imageBytes);
     }
 
 }

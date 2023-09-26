@@ -131,14 +131,14 @@ public class DocumentManagementApiResource {
             @HeaderParam("Content-Length") @Parameter(description = "Content-Length") final Long fileSize,
             @FormDataParam("file") final InputStream inputStream, @FormDataParam("file") final FormDataContentDisposition fileDetails,
             @FormDataParam("file") final FormDataBodyPart bodyPart, @FormDataParam("name") final String name,
-            @FormDataParam("description") final String description,@FormDataParam("isKivaProfileImage") final Boolean isKivaProfileImage) {
+            @FormDataParam("description") final String description, @FormDataParam("isKivaProfileImage") final Boolean isKivaProfileImage) {
 
         // TODO: stop reading from stream after max size is reached to protect against malicious clients
         // TODO: need to extract the actual file type and determine if they are permissible
 
         fileUploadValidator.validate(fileSize, inputStream, fileDetails, bodyPart);
         final DocumentCommand documentCommand = new DocumentCommand(null, null, entityType, entityId, name, fileDetails.getFileName(),
-                fileSize, bodyPart.getMediaType().toString(), description, null,isKivaProfileImage);
+                fileSize, bodyPart.getMediaType().toString(), description, null, isKivaProfileImage);
         final Long documentId = this.documentWritePlatformService.createDocument(documentCommand, inputStream);
         return this.toApiJsonSerializer.serialize(CommandProcessingResult.resourceResult(documentId, null));
     }
@@ -160,7 +160,7 @@ public class DocumentManagementApiResource {
             @HeaderParam("Content-Length") @Parameter(description = "Content-Length") final Long fileSize,
             @FormDataParam("file") final InputStream inputStream, @FormDataParam("file") final FormDataContentDisposition fileDetails,
             @FormDataParam("file") final FormDataBodyPart bodyPart, @FormDataParam("name") final String name,
-            @FormDataParam("description") final String description,@FormDataParam("isKivaProfileImage") final Boolean isKivaProfileImage) {
+            @FormDataParam("description") final String description, @FormDataParam("isKivaProfileImage") final Boolean isKivaProfileImage) {
 
         final Set<String> modifiedParams = new HashSet<>();
         modifiedParams.add("name");
@@ -177,10 +177,10 @@ public class DocumentManagementApiResource {
             modifiedParams.add("type");
             modifiedParams.add("location");
             documentCommand = new DocumentCommand(modifiedParams, documentId, entityType, entityId, name, fileDetails.getFileName(),
-                    fileSize, bodyPart.getMediaType().toString(), description, null,isKivaProfileImage);
+                    fileSize, bodyPart.getMediaType().toString(), description, null, isKivaProfileImage);
         } else {
             documentCommand = new DocumentCommand(modifiedParams, documentId, entityType, entityId, name, null, null, null, description,
-                    null,isKivaProfileImage);
+                    null, isKivaProfileImage);
         }
         /***
          * TODO: does not return list of changes, should be done for consistency with rest of API
@@ -238,7 +238,7 @@ public class DocumentManagementApiResource {
             @PathParam("documentId") @Parameter(description = "documentId") final Long documentId) {
 
         final DocumentCommand documentCommand = new DocumentCommand(null, documentId, entityType, entityId, null, null, null, null, null,
-                null,false);
+                null, false);
 
         final CommandProcessingResult documentIdentifier = this.documentWritePlatformService.deleteDocument(documentCommand);
 

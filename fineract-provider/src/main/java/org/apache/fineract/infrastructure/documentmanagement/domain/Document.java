@@ -62,12 +62,15 @@ public class Document extends AbstractPersistableCustom {
     public Document() {}
 
     public static Document createNew(final String parentEntityType, final Long parentEntityId, final String name, final String fileName,
-            final Long size, final String type, final String description, final String location, final StorageType storageType,final Boolean isKivaProfileImage) {
-        return new Document(parentEntityType, parentEntityId, name, fileName, size, type, description, location, storageType,isKivaProfileImage);
+            final Long size, final String type, final String description, final String location, final StorageType storageType,
+            final Boolean isKivaProfileImage) {
+        return new Document(parentEntityType, parentEntityId, name, fileName, size, type, description, location, storageType,
+                isKivaProfileImage);
     }
 
     private Document(final String parentEntityType, final Long parentEntityId, final String name, final String fileName, final Long size,
-            final String type, final String description, final String location, final StorageType storageType,final Boolean isKivaProfileImage) {
+            final String type, final String description, final String location, final StorageType storageType,
+            final Boolean isKivaProfileImage) {
         this.parentEntityType = StringUtils.defaultIfEmpty(parentEntityType, null);
         this.parentEntityId = parentEntityId;
         this.name = StringUtils.defaultIfEmpty(name, null);

@@ -200,7 +200,6 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         final String externalId = this.fromApiJsonHelper.extractStringNamed(externalIdParameterName, element);
         baseDataValidator.reset().parameter(externalIdParameterName).value(externalId).notNull().notExceedingLengthOf(100);
 
-
         final String descriptionParameterName = "description";
         final String description = this.fromApiJsonHelper.extractStringNamed(descriptionParameterName, element);
         baseDataValidator.reset().parameter(descriptionParameterName).value(description).notNull();
