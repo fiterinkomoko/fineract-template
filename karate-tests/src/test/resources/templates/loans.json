@@ -25,6 +25,7 @@
     "externalId": "#(faker.lorem().characters(70))",
     "description": "#(faker.lorem().characters(170))",
     "loanPurposeId": "#(loanPurposeId)",
+    "department": "#(department)",
     "submittedOnDate": "#(submittedOnDate)"
   },
   "approve": {
@@ -81,6 +82,7 @@
     "externalId": "#(faker.lorem().characters(70))",
     "description": "#(faker.lorem().characters(170))",
     "loanPurposeId": "#(loanPurposeId)",
+    "department": "#(department)",
     "submittedOnDate": "#(submittedOnDate)"
   },
   "unDisburseLoanAccountPayload": {
@@ -123,6 +125,7 @@
     "externalId": "#(faker.lorem().characters(70))",
     "description": "#(faker.lorem().characters(170))",
     "loanPurposeId": "#(loanPurposeId)",
+    "department": "#(department)",
     "linkAccountId": "#(savingsAccountId)"
   },
   "loanAccountWithNewProductWithDisburseToSavingsAccountAndPenaltyChargePayLoad": {
@@ -160,6 +163,7 @@
     "externalId": "#(faker.lorem().characters(70))",
     "description": "#(faker.lorem().characters(170))",
     "loanPurposeId": "#(loanPurposeId)",
+    "department": "#(department)",
     "submittedOnDate": "#(submittedOnDate)"
   },
   "transferFundsFromSavingsAccountToLoanAccountPayLoad": {
@@ -234,6 +238,7 @@
     "externalId": "#(faker.lorem().characters(70))",
     "description": "#(faker.lorem().characters(170))",
     "loanPurposeId": "#(loanPurposeId)",
+    "department": "#(department)",
     "submittedOnDate": "#(submittedOnDate)"
   },
   "loanAccountWithNewProductAndNumberOfRepaymentPayLoad": {
@@ -264,6 +269,7 @@
     "externalId": "#(faker.lorem().characters(70))",
     "description": "#(faker.lorem().characters(170))",
     "loanPurposeId": "#(loanPurposeId)",
+    "department": "#(department)",
     "linkAccountId": "#(savingsAccountId)"
   },
   "groupLoanAccountWithNewProductAndNumberOfRepaymentPayLoad": {
@@ -293,6 +299,7 @@
     "externalId": "#(faker.lorem().characters(70))",
     "description": "#(faker.lorem().characters(170))",
     "loanPurposeId": "#(loanPurposeId)",
+    "department": "#(department)",
     "submittedOnDate": "#(submittedOnDate)"
   },
   "jlgLoanAccountWithNewProductAndNumberOfRepaymentPayLoad": {
@@ -323,6 +330,7 @@
     "externalId": "#(faker.lorem().characters(70))",
     "description": "#(faker.lorem().characters(170))",
     "loanPurposeId": "#(loanPurposeId)",
+    "department": "#(department)",
     "submittedOnDate": "#(submittedOnDate)"
   },
   "createGLIMAccountPayLoad":

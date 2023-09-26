@@ -20,13 +20,22 @@ Feature: Test loan account apis
     * def LoanPurposeCodeId = codeValueResCT.listOfCodeValues[0].id
 
 
+     #-Get code and code values for Department
+    *  def departmentCode = 'Department'
+    *  def departmentResponse = call read('classpath:features/system/codes/codesStep.feature@fetchCodeByNameStep') { codeName : '#(departmentCode)' }
+    *  def departmentCode = departmentResponse.codeName.id
+       #- Fetch codeValue for LoanPurpose
+    * def departmentCodeValueResCT = call read('classpath:features/system/codes/codeValuesStep.feature@fetchCodeValuesStep'){ codeId : '#(departmentCode)' }
+    * def departmentCodeId = departmentCodeValueResCT.listOfCodeValues[0].id
+
+
   @createanddisburseloan
   Scenario: Create approve and disburse loan
       #to choose an earlier date use faker.date().past(20, TimeUnit.DAYS)
       #loan creation made 30 days back
     * def submittedOnDate = df.format(faker.date().past(370, 369, TimeUnit.DAYS))
     * def loanAmount = 1000
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createloan') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)',loanPurposeId : '#(LoanPurposeCodeId)' }
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createloan') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)' }
     * def loanId = loan.loanId
       #approval
     * def approvalDate = submittedOnDate
@@ -74,7 +83,7 @@ Feature: Test loan account apis
     Then def activeSavingsId = activateSavings.activeSavingsId
 
     * def loanAmount = 8500
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithSavingsAccountStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', savingsAccountId : '#(savingsId)' ,loanPurposeId : '#(LoanPurposeCodeId)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithSavingsAccountStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', savingsAccountId : '#(savingsId)' ,loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
       #approval
@@ -130,12 +139,12 @@ Feature: Test loan account apis
     * def clientId = result.response.resourceId
     # Principal Amount should not be greater than the maximum principal set on the product
     * def loanAmount = 85000000000000
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createloanTemplate400Step') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', clientId : '#(clientId)',loanPurposeId : '#(LoanPurposeCodeId)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createloanTemplate400Step') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', clientId : '#(clientId)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
 
     # Loan Account can not be created with Date before the client creation
     * def LoanCreationDate = df.format(faker.date().past(50, 29, TimeUnit.DAYS))
     * def loanAmount = 8500
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createloanTemplate403Step') { submittedOnDate : '#(LoanCreationDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', clientId : '#(clientId)',loanPurposeId : '#(LoanPurposeCodeId)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createloanTemplate403Step') { submittedOnDate : '#(LoanCreationDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', clientId : '#(clientId)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
   @Ignore
   @testUndoLoanReschedule
   Scenario: Test Undo Loan Reschedule
@@ -152,7 +161,7 @@ Feature: Test loan account apis
     * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
     * def clientId = result.response.
 
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createloanTemplate400Step') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', clientId : '#(clientId)',loanPurposeId : '#(LoanPurposeCodeId)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createloanTemplate400Step') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', clientId : '#(clientId)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
     * def loanResponseBeforeReschedule = call read('classpath:features/portfolio/loans/loansteps.feature@findloanbyidWithAllAssociationStep') { loanId : '#(loanId)' }
     * def loanReschedule = call read('classpath:features/portfolio/loans/loansteps.feature@loanRescheduleSteps') { submittedOnDate : '#(submittedOnDate)', rescheduledFrom : '#(rescheduledFrom)', adjustedDueDate : '#(adjustedDueDate)', loanId : '#(loanId)' }
