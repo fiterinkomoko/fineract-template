@@ -840,6 +840,7 @@ public class LoansApiResource {
         loanAccount.setExtendLoanLifeCycleConfig(isExtendLoanLifeCycleConfig);
         loanAccount.setLoanDueDiligenceData(loanDueDiligenceData);
 
+
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);
         return this.toApiJsonSerializer.serialize(settings, loanAccount, this.loanDataParameters);

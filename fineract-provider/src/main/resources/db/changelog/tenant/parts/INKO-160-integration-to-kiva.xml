@@ -108,4 +108,17 @@
         </insert>
     </changeSet>
 
+    <changeSet author="bosco@fiter.io" id="add_is_kiva_profile_image_column_to_m_document_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_document" columnName="is_kiva_profile_image"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_document">
+            <column name="is_kiva_profile_image" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

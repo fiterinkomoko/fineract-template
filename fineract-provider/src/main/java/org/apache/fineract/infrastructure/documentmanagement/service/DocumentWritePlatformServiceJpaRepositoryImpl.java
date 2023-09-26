@@ -75,7 +75,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
 
             final Document document = Document.createNew(documentCommand.getParentEntityType(), documentCommand.getParentEntityId(),
                     documentCommand.getName(), documentCommand.getFileName(), documentCommand.getSize(), documentCommand.getType(),
-                    documentCommand.getDescription(), fileLocation, contentRepository.getStorageType());
+                    documentCommand.getDescription(), fileLocation, contentRepository.getStorageType(),documentCommand.getKivaProfileImage());
 
             this.documentRepository.saveAndFlush(document);
 
@@ -93,7 +93,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
             final String mimeType, final String name, final String description, final String fileName) {
 
         final DocumentCommand documentCommand = new DocumentCommand(null, null, entityType, entityId, name, fileName, fileSize, mimeType,
-                description, null);
+                description, null,false);
 
         final Long documentId = createDocument(documentCommand, inputStream);
 

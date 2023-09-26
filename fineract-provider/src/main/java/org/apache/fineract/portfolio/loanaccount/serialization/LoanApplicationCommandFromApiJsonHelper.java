@@ -196,10 +196,10 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         }
 
         final String externalIdParameterName = "externalId";
-        if (this.fromApiJsonHelper.parameterExists(externalIdParameterName, element)) {
-            final String externalId = this.fromApiJsonHelper.extractStringNamed(externalIdParameterName, element);
-            baseDataValidator.reset().parameter(externalIdParameterName).value(externalId).notNull().notExceedingLengthOf(100);
-        }
+
+        final String externalId = this.fromApiJsonHelper.extractStringNamed(externalIdParameterName, element);
+        baseDataValidator.reset().parameter(externalIdParameterName).value(externalId).notNull().notExceedingLengthOf(100);
+
 
         final String descriptionParameterName = "description";
         final String description = this.fromApiJsonHelper.extractStringNamed(descriptionParameterName, element);

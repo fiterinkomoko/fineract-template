@@ -56,15 +56,18 @@ public class Document extends AbstractPersistableCustom {
     @Column(name = "storage_type_enum")
     private Integer storageType;
 
+    @Column(name = "is_kiva_profile_image")
+    private Boolean isKivaProfileImage;
+
     public Document() {}
 
     public static Document createNew(final String parentEntityType, final Long parentEntityId, final String name, final String fileName,
-            final Long size, final String type, final String description, final String location, final StorageType storageType) {
-        return new Document(parentEntityType, parentEntityId, name, fileName, size, type, description, location, storageType);
+            final Long size, final String type, final String description, final String location, final StorageType storageType,final Boolean isKivaProfileImage) {
+        return new Document(parentEntityType, parentEntityId, name, fileName, size, type, description, location, storageType,isKivaProfileImage);
     }
 
     private Document(final String parentEntityType, final Long parentEntityId, final String name, final String fileName, final Long size,
-            final String type, final String description, final String location, final StorageType storageType) {
+            final String type, final String description, final String location, final StorageType storageType,final Boolean isKivaProfileImage) {
         this.parentEntityType = StringUtils.defaultIfEmpty(parentEntityType, null);
         this.parentEntityId = parentEntityId;
         this.name = StringUtils.defaultIfEmpty(name, null);
@@ -74,6 +77,7 @@ public class Document extends AbstractPersistableCustom {
         this.description = StringUtils.defaultIfEmpty(description, null);
         this.location = StringUtils.defaultIfEmpty(location, null);
         this.storageType = storageType.getValue();
+        this.isKivaProfileImage = isKivaProfileImage;
     }
 
     public void update(final DocumentCommand command) {
@@ -94,6 +98,9 @@ public class Document extends AbstractPersistableCustom {
         }
         if (command.isSizeChanged()) {
             this.size = command.getSize();
+        }
+        if (command.isKivaProfileImageChanged()) {
+            this.isKivaProfileImage = command.getKivaProfileImage();
         }
     }
 
@@ -163,5 +170,13 @@ public class Document extends AbstractPersistableCustom {
 
     public StorageType storageType() {
         return StorageType.fromInt(this.storageType);
+    }
+
+    public Boolean getIsKivaProfileImage() {
+        return isKivaProfileImage;
+    }
+
+    public void setIsKivaProfileImage(Boolean isKivaProfileImage) {
+        this.isKivaProfileImage = isKivaProfileImage;
     }
 }

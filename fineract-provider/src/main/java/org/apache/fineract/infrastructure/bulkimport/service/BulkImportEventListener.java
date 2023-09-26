@@ -146,7 +146,7 @@ public class BulkImportEventListener implements ApplicationListener<BulkImportEv
         Document document = importDocument.getDocument();
 
         DocumentCommand documentCommand = new DocumentCommand(modifiedParams, document.getId(), entityType.name(), null, document.getName(),
-                document.getFileName(), document.getSize(), URLConnection.guessContentTypeFromName(document.getFileName()), null, null);
+                document.getFileName(), document.getSize(), URLConnection.guessContentTypeFromName(document.getFileName()), null, null,false);
 
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
