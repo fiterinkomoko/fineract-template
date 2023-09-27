@@ -29,6 +29,15 @@ Feature: Test loan account apis
     * def departmentCodeId = departmentCodeValueResCT.listOfCodeValues[0].id
 
 
+         #-Get code and code values for Gender
+    *  def gender = 'Gender'
+    *  def genderResponse = call read('classpath:features/system/codes/codesStep.feature@fetchCodeByNameStep') { codeName : '#(gender)' }
+    *  def genderCode = genderResponse.codeName.id
+       #- Fetch codeValue for Gender
+    * def genderCodeValueResCT = call read('classpath:features/system/codes/codeValuesStep.feature@fetchCodeValuesStep'){ codeId : '#(genderCode)' }
+    * def genderCodeId = genderCodeValueResCT.listOfCodeValues[0].id
+
+
   @createanddisburseloan
   Scenario: Create approve and disburse loan
       #to choose an earlier date use faker.date().past(20, TimeUnit.DAYS)
@@ -70,7 +79,7 @@ Feature: Test loan account apis
     #create savings account with clientCreationDate
     * def submittedOnDate = df.format(faker.date().past(30, 29, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderCodeId : '#(genderCodeId)'}
     * def clientId = result.response.resourceId
     #Create Savings Account Product and Savings Account
     * def savingsAccount = call read('classpath:features/portfolio/savingsaccount/savingssteps.feature@createSavingsAccountStep') { submittedOnDate : '#(submittedOnDate)', clientId : '#(clientId)'}
@@ -135,7 +144,7 @@ Feature: Test loan account apis
     #create savings account with clientCreationDate
     * def submittedOnDate = df.format(faker.date().past(30, 29, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderCodeId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
     # Principal Amount should not be greater than the maximum principal set on the product
     * def loanAmount = 85000000000000
@@ -158,7 +167,7 @@ Feature: Test loan account apis
     * def loanProduct = call read('classpath:features/portfolio/products/loanproduct.feature@fetchdefaultproduct')
     * def loanProductId = loanProduct.loanProductId
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderCodeId : '#(genderCodeId)' }
     * def clientId = result.response.
 
     * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createloanTemplate400Step') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', clientId : '#(clientId)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}

@@ -224,6 +224,9 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<ClientCollateralManagement> clientCollateralManagements = new HashSet<>();
 
+    @Column(name = "kiva_id")
+    private String kivaId;
+
     public static Client createNew(final AppUser currentUser, final Office clientOffice, final Group clientParentGroup, final Staff staff,
             final Long savingsProductId, final CodeValue gender, final CodeValue clientType, final CodeValue clientClassification,
             final Integer legalForm, final JsonCommand command) {
@@ -1025,4 +1028,11 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
         this.proposedTransferDate = proposedTransferDate;
     }
 
+    public String getKivaId() {
+        return kivaId;
+    }
+
+    public void setKivaId(String kivaId) {
+        this.kivaId = kivaId;
+    }
 }

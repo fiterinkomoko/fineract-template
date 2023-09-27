@@ -93,14 +93,14 @@ public class KivaLoanServiceImpl implements KivaLoanService {
         List<Loan> loanList = loanRepository.findLoanAccountsToBePostedToKiva();
 
         LOG.info("Posting this Loan Account To Kiva And Size = = > " + loanList.size());
-        if(!CollectionUtils.isEmpty(loanList)){
-        for (Loan loan : loanList) {
-            String loanToKiva = loanPayloadToKivaMapper(kivaLoanAccountSchedules, kivaLoanAccounts, notPictured, loan);
-            LOG.info("Loan Account To be Sent to Kiva : =GSON = >  " + loanToKiva);
-            String loanDraftUUID = postLoanToKiva(accessToken, loanToKiva);
-            loan.setKivaUUId(loanDraftUUID);
-            loanRepository.saveAndFlush(loan);
-        }
+        if (!CollectionUtils.isEmpty(loanList)) {
+            for (Loan loan : loanList) {
+                String loanToKiva = loanPayloadToKivaMapper(kivaLoanAccountSchedules, kivaLoanAccounts, notPictured, loan);
+                LOG.info("Loan Account To be Sent to Kiva : =GSON = >  " + loanToKiva);
+                String loanDraftUUID = postLoanToKiva(accessToken, loanToKiva);
+                loan.setKivaUUId(loanDraftUUID);
+                loanRepository.saveAndFlush(loan);
+            }
         }
     }
 
@@ -142,7 +142,8 @@ public class KivaLoanServiceImpl implements KivaLoanService {
 
             if ("image/png".equalsIgnoreCase(documentData.contentType())) {
                 formatIdentifier = "data:image/png;base64,";
-            } else if ("image/jpg".equalsIgnoreCase(documentData.contentType()) || "image/jpeg".equalsIgnoreCase(documentData.contentType())) {
+            } else if ("image/jpg".equalsIgnoreCase(documentData.contentType())
+                    || "image/jpeg".equalsIgnoreCase(documentData.contentType())) {
                 formatIdentifier = "data:image/jpeg;base64,";
             } else if ("image/gif".equalsIgnoreCase(documentData.contentType())) {
                 formatIdentifier = "data:image/gif;base64,";

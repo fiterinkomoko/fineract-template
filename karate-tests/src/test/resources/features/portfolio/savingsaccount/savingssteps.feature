@@ -3,7 +3,13 @@ Feature: Savings Creation Steps
   Background:
     * callonce read('classpath:features/base.feature')
     * url baseUrl
-
+       #-Get code and code values for Gender
+    *  def gender = 'Gender'
+    *  def genderResponse = call read('classpath:features/system/codes/codesStep.feature@fetchCodeByNameStep') { codeName : '#(gender)' }
+    *  def genderCode = genderResponse.codeName.id
+       #- Fetch codeValue for Gender
+    * def genderCodeValueResCT = call read('classpath:features/system/codes/codeValuesStep.feature@fetchCodeValuesStep'){ codeId : '#(genderCode)' }
+    * def genderCodeId = genderCodeValueResCT.listOfCodeValues[0].id
 
   # set parameter submittedOnDate, clientCreationDate
   @ignore
@@ -12,7 +18,7 @@ Feature: Savings Creation Steps
     #create savings product step
     * def savingsProduct = call read('classpath:features/portfolio/products/savingsproduct.feature@fetchdefaultproduct')
     #create client step with clientCreationDate
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(clientCreationDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(clientCreationDate)',genderId : '#(genderCodeId)' }
     Given configure ssl = true
     #now create savings here
     Given path 'savingsaccounts'

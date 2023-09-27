@@ -11,6 +11,8 @@
     "dateFormat": "#(format)",
     "activationDate": "#(clientCreationDate)",
     "submittedOnDate": "#(clientCreationDate)",
+    "externalId": "#(faker.lorem().characters(70))",
+    "genderId": "#(genderCodeId)",
     "dateOfBirth": "#(df.format(faker.date().birthday()))"
   },
   "updateClientPayload": {
@@ -23,6 +25,8 @@
     "dateFormat": "#(format)",
     "activationDate": "#(df.format(calendar.getTime()))",
     "submittedOnDate": "#(df.format(calendar.getTime()))",
+    "externalId": "#(faker.lorem().characters(70))",
+    "genderId": "#(genderCodeId)",
     "dateOfBirth": "#(df.format(faker.date().birthday()))"
   },
   "activateClientPayload": {
@@ -50,6 +54,8 @@
     "dateOfBirth": "#(df.format(faker.date().birthday()))",
     "savingsProductId": null,
     "mnemonics": "anything",
+    "externalId": "#(faker.lorem().characters(70))",
+    "genderId": "#(genderCodeId)",
     "initials": "1"
   },
   "updateEntityClientPayload": {
@@ -75,6 +81,7 @@
     "submittedOnDate": "#(df.format(calendar.getTime()))",
     "externalId": "#(faker.number().randomNumber())",
     "mnemonics": "anything",
+    "genderId": "#(genderCodeId)",
     "initials": "1"
   },
   "createClientWithSavingsPayload" : {
@@ -95,6 +102,8 @@
     "dateFormat": "#(format)",
     "activationDate": "#(df.format(calendar.getTime()))",
     "submittedOnDate": "#(df.format(calendar.getTime()))",
+    "externalId": "#(faker.lorem().characters(70))",
+    "genderId": "#(genderCodeId)",
     "dateOfBirth": "#(df.format(faker.date().birthday()))"
   },
   "createClientWithdrawalLimitsPayload": {
@@ -114,6 +123,8 @@
     "initials": "1",
     "dailyWithdrawLimit": "#(dailyWithdrawLimit)",
     "singleWithdrawLimit": "#(singleWithdrawLimit)",
+    "externalId": "#(faker.lorem().characters(70))",
+    "genderId": "#(genderCodeId)",
     "clientLevelId": "#(clientLevel)"
   }
 }

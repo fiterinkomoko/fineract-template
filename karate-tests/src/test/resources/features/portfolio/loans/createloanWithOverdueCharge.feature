@@ -18,6 +18,14 @@ Feature: Test loan account apis
     * def departmentCodeValueResCT = call read('classpath:features/system/codes/codeValuesStep.feature@fetchCodeValuesStep'){ codeId : '#(departmentCode)' }
     * def departmentCodeId = departmentCodeValueResCT.listOfCodeValues[0].id
 
+         #-Get code and code values for Gender
+    *  def gender = 'Gender'
+    *  def genderResponse = call read('classpath:features/system/codes/codesStep.feature@fetchCodeByNameStep') { codeName : '#(gender)' }
+    *  def genderCode = genderResponse.codeName.id
+       #- Fetch codeValue for Gender
+    * def genderCodeValueResCT = call read('classpath:features/system/codes/codeValuesStep.feature@fetchCodeValuesStep'){ codeId : '#(genderCode)' }
+    * def genderCodeId = genderCodeValueResCT.listOfCodeValues[0].id
+
   @testThatICanCreateLoanAccountWithFlatOverdueChargesAndDisburseByCash
   Scenario: Test That I Can Create Loan Account With Flat Overdue Charges and disburse it by Cash
     * def chargeAmount = 100;
@@ -32,7 +40,7 @@ Feature: Test loan account apis
     #create savings account with clientCreationDate
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
 
         #Create Savings Account Product and Savings Account
@@ -104,7 +112,7 @@ Feature: Test loan account apis
     #create savings account with clientCreationDate
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
 
 
@@ -227,7 +235,7 @@ Feature: Test loan account apis
     #create savings account with clientCreationDate
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
 
         #Create Savings Account Product and Savings Account
@@ -333,7 +341,7 @@ Feature: Test loan account apis
     #create savings account with clientCreationDate
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
 
         #Create Savings Account Product and Savings Account
@@ -454,7 +462,7 @@ Feature: Test loan account apis
     #create savings account with clientCreationDate
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
 
         #Create Savings Account Product and Savings Account
@@ -528,7 +536,7 @@ Feature: Test loan account apis
     #create savings account with clientCreationDate
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
 
         #Create Savings Account Product and Savings Account
@@ -621,7 +629,7 @@ Feature: Test loan account apis
     #create savings account with clientCreationDate
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
 
         #Create Savings Account Product and Savings Account
@@ -731,7 +739,7 @@ Feature: Test loan account apis
     #create savings account with clientCreationDate
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
 
         #Create Savings Account Product and Savings Account
@@ -847,7 +855,7 @@ Feature: Test loan account apis
     #Loan and client creation date
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
 
 
@@ -867,7 +875,7 @@ Feature: Test loan account apis
     #Loan and client creation date
     * def submittedOnDate = df.format(faker.date().past(7, 5, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
 
 
@@ -915,7 +923,7 @@ Feature: Test loan account apis
     #Loan and client creation date
     * def submittedOnDate = df.format(faker.date().past(7, 5, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
 
 
@@ -946,7 +954,7 @@ Feature: Test loan account apis
     #create savings account with clientCreationDate
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
 
 

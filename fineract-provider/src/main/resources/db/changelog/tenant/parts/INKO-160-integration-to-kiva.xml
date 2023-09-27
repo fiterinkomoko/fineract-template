@@ -120,5 +120,34 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_code_values_for_m_client_Gender_male">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code_value where code_value = 'male';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueComputed="(select id from m_code where code_name='Gender')"/>
+            <column name="code_value" value="male"/>
+            <column name="code_description"/>
+            <column name="order_position" valueNumeric="1"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_kiva_id_column_to_m_client_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_client" columnName="kiva_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_client">
+            <column name="kiva_id" type="varchar(255)" >
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>
