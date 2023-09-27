@@ -38,6 +38,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
 import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
@@ -96,7 +97,9 @@ public class KivaLoanServiceImpl implements KivaLoanService {
         for (Loan loan : loanList) {
             String loanToKiva = loanPayloadToKivaMapper(kivaLoanAccountSchedules, kivaLoanAccounts, notPictured, loan);
             LOG.info("Loan Account To be Sent to Kiva : =GSON = >  " + loanToKiva);
-            postLoanToKiva(accessToken, loanToKiva);
+            String loanDraftUUID = postLoanToKiva(accessToken, loanToKiva);
+            loan.setKivaUUId(loanDraftUUID);
+            loanRepository.saveAndFlush(loan);
         }
     }
 
@@ -107,17 +110,7 @@ public class KivaLoanServiceImpl implements KivaLoanService {
         String gender = (client.gender() != null) ? client.gender().label() : "unknown";
         String loanPurpose = (loan.getLoanPurpose() != null) ? loan.getLoanPurpose().label() : "Not Defined";
         String clientKivaId = (client.getExternalId() != null) ? client.getExternalId() : client.getId().toString();
-
-        final DocumentData documentData = this.documentReadPlatformService.retrieveKivaLoanProfileImage("loans", loan.getId());
-        if (documentData != null && documentData.fileLocation() != null && documentData.storageType().equals(StorageType.FILE_SYSTEM)) {
-
-            try {
-                String base64Image = getImageAsBase64(documentData.fileLocation());
-                LOG.info("Image Details: => " + base64Image);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        String base64Image = generateBase64Image(loan);
 
         KivaLoanAccount loanAccount = new KivaLoanAccount(loan.getNetDisbursalAmount(), clientKivaId, client.getFirstname(), gender,
                 client.getLastname(), getLoanKivaId(loan));
@@ -132,14 +125,34 @@ public class KivaLoanServiceImpl implements KivaLoanService {
 
         // build final object
         LoanDetailToKivaData loanDetailToKivaData = new LoanDetailToKivaData(ACTIVITY_ID, Boolean.TRUE, loan.getCurrencyCode(),
-                loan.getDescription(), DESCRIPTION_LANGUAGE_ID, Date.valueOf(loan.getDisbursementDate()), " ",
-                "https://res.cloudinary.com/dile4yok6/image/upload/v1636108796/image-5_usok73.png", client.getId().toString(),
-                generateInternalLoanId(loan.getDisbursementDate(), loan.getId()), loanPurpose, "Kakuma Town: Kenya",
-                getKivaLoanDepartmentThemeType(loan), kivaLoanAccounts, kivaLoanAccountSchedules, notPictured);
+                loan.getDescription(), DESCRIPTION_LANGUAGE_ID, Date.valueOf(loan.getDisbursementDate()), " ", base64Image,
+                client.getId().toString(), generateInternalLoanId(loan.getDisbursementDate(), loan.getId()), loanPurpose,
+                "Kakuma Town: Kenya", getKivaLoanDepartmentThemeType(loan), kivaLoanAccounts, kivaLoanAccountSchedules, notPictured);
 
         Gson gson = new GsonBuilder().registerTypeAdapter(Date.class, new KivaDateSerializerApi()).create();
 
         return gson.toJson(loanDetailToKivaData);
+    }
+
+    private String generateBase64Image(Loan loan) {
+        final DocumentData documentData = this.documentReadPlatformService.retrieveKivaLoanProfileImage("loans", loan.getId());
+        if (documentData != null && documentData.fileLocation() != null && documentData.storageType().equals(StorageType.FILE_SYSTEM)) {
+            String formatIdentifier = null;
+
+            if ("image/png".equalsIgnoreCase(documentData.contentType())) {
+                formatIdentifier = "data:image/png;base64,";
+            } else if ("image/jpg".equalsIgnoreCase(documentData.contentType()) || "jpeg".equalsIgnoreCase(documentData.contentType())) {
+                formatIdentifier = "data:image/jpeg;base64,";
+            } else if ("image/gif".equalsIgnoreCase(documentData.contentType())) {
+                formatIdentifier = "data:image/gif;base64,";
+            } else {
+                throw new GeneralPlatformDomainRuleException("error.msg.unsupported.image.type.to.kiva",
+                        "Only PNG,GIF,JPEG,JPG are accepted but this" + documentData.contentType() + " was found");
+            }
+
+            return formatIdentifier + getImageAsBase64(documentData.fileLocation());
+        }
+        return null;
     }
 
     @NotNull
@@ -180,11 +193,11 @@ public class KivaLoanServiceImpl implements KivaLoanService {
                 JsonObject jsonResponse = JsonParser.parseString(resObject).getAsJsonObject();
                 String accessToken = jsonResponse.get("access_token").getAsString();
 
-                log.info("Request to KIVA is Successfully with status code:=>" + accessToken);
+                log.info("Login to KIVA is Successful");
 
                 return accessToken;
             } else {
-                log.error("Request to KIVA failed with Message:", resObject);
+                log.error("Login to KIVA failed with Message:", resObject);
 
                 handleAPIIntegrityIssues(resObject);
 
@@ -216,7 +229,7 @@ public class KivaLoanServiceImpl implements KivaLoanService {
         return "LOAN/" + loanId + "/" + year;
     }
 
-    private void postLoanToKiva(String accessToken, String loanToKiva) {
+    private String postLoanToKiva(String accessToken, String loanToKiva) {
         HttpUrl.Builder urlBuilder = HttpUrl.parse(getConfigProperty("fineract.integrations.kiva.postLoanDraftUrl")).newBuilder();
         String url = urlBuilder.build().toString();
 
@@ -234,7 +247,10 @@ public class KivaLoanServiceImpl implements KivaLoanService {
             String resObject = response.body().string();
             if (response.isSuccessful()) {
 
-                log.info("Loan Account Posted to Kiva Response :=>" + resObject);
+                JsonObject jsonResponse = JsonParser.parseString(resObject).getAsJsonObject();
+                log.info("Loan Account Response from KIVA :=>" + resObject);
+
+                return jsonResponse.get("loan_draft_uuid").getAsString();
 
             } else {
                 log.error("Post Loan to KIVA failed with Message:", resObject);
@@ -253,11 +269,17 @@ public class KivaLoanServiceImpl implements KivaLoanService {
                 throw new RuntimeException(e);
             }
         }
+        return null;
     }
 
-    public String getImageAsBase64(String imageName) throws IOException {
+    public String getImageAsBase64(String imageName) {
         File imageFile = new File(imageName);
-        byte[] imageBytes = FileCopyUtils.copyToByteArray(imageFile);
+        byte[] imageBytes;
+        try {
+            imageBytes = FileCopyUtils.copyToByteArray(imageFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         return Base64.getEncoder().encodeToString(imageBytes);
     }
 

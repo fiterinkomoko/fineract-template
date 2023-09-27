@@ -32,7 +32,7 @@ public class LoanDetailToKivaData {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date disburse_time;
     private String group_name;
-    private String image_url;
+    private String image_encoded;
     private String internal_client_id;
     private String internal_loan_id;
     private String loanuse;
@@ -43,7 +43,7 @@ public class LoanDetailToKivaData {
     private List<Boolean> not_pictured;
 
     public LoanDetailToKivaData(Long activity_id, Boolean client_waiver_signed, String currency, String description,
-            Integer description_language_id, Date disburse_time, String group_name, String image_url, String internal_client_id,
+            Integer description_language_id, Date disburse_time, String group_name, String image_encoded, String internal_client_id,
             String internal_loan_id, String loanuse, String location, Integer theme_type_id, List<KivaLoanAccount> entreps,
             List<KivaLoanAccountSchedule> schedule, List<Boolean> not_pictured) {
         this.activity_id = activity_id;
@@ -53,7 +53,7 @@ public class LoanDetailToKivaData {
         this.description_language_id = description_language_id;
         this.disburse_time = disburse_time;
         this.group_name = group_name;
-        this.image_url = image_url;
+        this.image_encoded = image_encoded;
         this.internal_client_id = internal_client_id;
         this.internal_loan_id = internal_loan_id;
         this.loanuse = loanuse;
@@ -68,7 +68,7 @@ public class LoanDetailToKivaData {
     public String toString() {
         return "LoanDetailToKivaData{" + "activity_id=" + activity_id + ", client_waiver_signed=" + client_waiver_signed + ", currency='"
                 + currency + '\'' + ", description='" + description + '\'' + ", description_language_id='" + description_language_id + '\''
-                + ", disburse_time=" + disburse_time + ", group_name='" + group_name + '\'' + ", image_url='" + image_url + '\''
+                + ", disburse_time=" + disburse_time + ", group_name='" + group_name + '\'' + ", image_encoded='" + image_encoded + '\''
                 + ", internal_client_id=" + internal_client_id + ", internal_loan_id=" + internal_loan_id + ", loanuse='" + loanuse + '\''
                 + ", location='" + location + '\'' + ", theme_type_id='" + theme_type_id + '\'' + ", entreps=" + entreps + ", schedule="
                 + schedule + '}';

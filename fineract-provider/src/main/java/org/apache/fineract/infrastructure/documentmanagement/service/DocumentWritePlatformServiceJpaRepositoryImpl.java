@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.documentmanagement.service;
 
 import java.io.InputStream;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCommand;
 import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCommandValidator;
@@ -68,6 +69,14 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
             validateParentEntityType(documentCommand);
 
             validator.validateForCreate();
+            if (documentCommand.getKivaProfileImage()
+                    && !(documentCommand.getType().equals("image/png") || documentCommand.getType().equals("image/PNG")
+                            || documentCommand.getType().equals("image/jpg") || documentCommand.getType().equals("image/JPG")
+                            || documentCommand.getType().equals("image/jpeg") || documentCommand.getType().equals("image/JPEG")
+                            || documentCommand.getType().equals("image/GIF") || documentCommand.getType().equals("image/gif"))) {
+                throw new GeneralPlatformDomainRuleException("error.msg.document.invalid.file.type",
+                        "Invalid file type for Kiva Profile Image required file type is PNG, JPG, JPEG, GIF");
+            }
 
             final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository();
 
