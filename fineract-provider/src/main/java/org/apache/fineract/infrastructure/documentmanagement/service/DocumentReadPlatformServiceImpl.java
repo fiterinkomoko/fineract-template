@@ -80,7 +80,7 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
     @Override
     public DocumentData retrieveKivaLoanProfileImage(String entityType, Long entityId) {
         final DocumentMapper mapper = new DocumentMapper(false, false);
-        final String sql = "select " + mapper.schema() + "  and d.is_kiva_profile_image = true order by d.id limit 1";
+        final String sql = "select " + mapper.schema() + "  and d.is_kiva_profile_image = true order by d.id DESC limit 1";
         return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { entityType, entityId }); // NOSONAR
     }
 
