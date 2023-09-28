@@ -47,6 +47,8 @@ import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.portfolio.client.domain.ClientRecruitmentSurvey;
+import org.apache.fineract.portfolio.client.domain.ClientRecruitmentSurveyRepository;
 import org.apache.fineract.portfolio.common.domain.KivaLoanDepartmentThemeTypeMapper;
 import org.apache.fineract.portfolio.loanaccount.data.KivaLoanAccount;
 import org.apache.fineract.portfolio.loanaccount.data.KivaLoanAccountSchedule;
@@ -76,6 +78,7 @@ public class KivaLoanServiceImpl implements KivaLoanService {
 
     private final LoanRepository loanRepository;
     private final DocumentReadPlatformServiceImpl documentReadPlatformService;
+    private final ClientRecruitmentSurveyRepository clientRecruitmentSurveyRepository;
     @Autowired
     private Environment env;
 
@@ -108,10 +111,13 @@ public class KivaLoanServiceImpl implements KivaLoanService {
             List<Boolean> notPictured, Loan loan) {
 
         Client client = loan.getClient();
-        String gender = (client.gender() != null) ? client.gender().label() : "unknown";
+        String gender = (client.gender() != null) ? client.gender().label().toLowerCase() : "unknown";
         String loanPurpose = (loan.getLoanPurpose() != null) ? loan.getLoanPurpose().label() : "Not Defined";
         String clientKivaId = (client.getExternalId() != null) ? client.getExternalId() : client.getId().toString();
         String base64Image = generateBase64Image(loan);
+
+        ClientRecruitmentSurvey clientRecruitmentSurvey = clientRecruitmentSurveyRepository.getByClientId(client.getId());
+        String location = getClientLocation(clientRecruitmentSurvey);
 
         KivaLoanAccount loanAccount = new KivaLoanAccount(loan.getNetDisbursalAmount(), clientKivaId, client.getFirstname(), gender,
                 client.getLastname(), getLoanKivaId(loan));
@@ -127,12 +133,18 @@ public class KivaLoanServiceImpl implements KivaLoanService {
         // build final object
         LoanDetailToKivaData loanDetailToKivaData = new LoanDetailToKivaData(ACTIVITY_ID, Boolean.TRUE, loan.getCurrencyCode(),
                 loan.getDescription(), DESCRIPTION_LANGUAGE_ID, Date.valueOf(loan.getDisbursementDate()), " ", base64Image,
-                client.getId().toString(), generateInternalLoanId(loan.getDisbursementDate(), loan.getId()), loanPurpose,
-                "Kakuma Town: Kenya", getKivaLoanDepartmentThemeType(loan), kivaLoanAccounts, kivaLoanAccountSchedules, notPictured);
+                client.getId().toString(), generateInternalLoanId(loan.getDisbursementDate(), loan.getId()), loanPurpose, location,
+                getKivaLoanDepartmentThemeType(loan), kivaLoanAccounts, kivaLoanAccountSchedules, notPictured);
 
         Gson gson = new GsonBuilder().registerTypeAdapter(Date.class, new KivaDateSerializerApi()).create();
 
         return gson.toJson(loanDetailToKivaData);
+    }
+
+    private String getClientLocation(ClientRecruitmentSurvey clientRecruitmentSurvey) {
+        String clientLocation = (clientRecruitmentSurvey != null) ? clientRecruitmentSurvey.getSurveyLocation().label() : "Not Defined";
+        String clientCountry = (clientRecruitmentSurvey != null) ? clientRecruitmentSurvey.getCountry().label() : "Not Defined";
+        return clientLocation + ": " + clientCountry;
     }
 
     private String generateBase64Image(Loan loan) {
@@ -183,7 +195,7 @@ public class KivaLoanServiceImpl implements KivaLoanService {
 
         RequestBody formBody = RequestBody.create(MediaType.parse(FORM_URL_ENCODED), requestBody.toString());
 
-        Request request = new Request.Builder().url(url).header("Content-Type", FORM_URL_ENCODED).post(formBody).build();
+        Request request = new Request.Builder().url(url).header(FORM_URL_CONTENT_TYPE, FORM_URL_ENCODED).post(formBody).build();
 
         List<Throwable> exceptions = new ArrayList<>();
 
