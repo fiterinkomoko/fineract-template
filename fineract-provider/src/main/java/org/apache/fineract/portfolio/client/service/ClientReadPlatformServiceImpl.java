@@ -506,7 +506,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             sqlBuilder.append("cvMainBusinessLine.code_value as mainBusinessLineValue, ");
             sqlBuilder.append("cnp.remarks as remarks, ");
             sqlBuilder.append("cnp.is_registered as isRegistered, ");
-            sqlBuilder.append("cnp.in_business_since as inBusinessSince ");
+            sqlBuilder.append("cnp.in_business_since as inBusinessSince, ");
+            sqlBuilder.append("c.kiva_id as kivaId  ");
 
             sqlBuilder.append("from m_client c ");
             sqlBuilder.append("join m_office o on o.id = c.office_id ");
