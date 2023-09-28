@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.infrastructure.Odoo;
 
+import java.net.URL;
+import java.util.Arrays;
+import java.util.Collections;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.slf4j.Logger;
@@ -25,10 +28,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import java.net.URL;
-import java.util.Collections;
-import java.util.Arrays;
-
 
 @Service
 @SuppressWarnings({ "unchecked", "rawtypes", "cast" })
@@ -48,26 +47,22 @@ public class OdooServiceImpl implements OdooService {
     @Value("${fineract.integrations.odoo.url}")
     private String url;
 
-
     @Autowired
-    public OdooServiceImpl() {
-    }
+    public OdooServiceImpl() {}
 
     @Override
     public Integer loginToOddo() {
         try {
             final XmlRpcClientConfigImpl common_config = new XmlRpcClientConfigImpl();
             final XmlRpcClient client = new XmlRpcClient();
-            common_config
-                    .setServerURL(new URL(String.format("%s/xmlrpc/2/common", url)));
+            common_config.setServerURL(new URL(String.format("%s/xmlrpc/2/common", url)));
 
             Object uid = (Object) client.execute(common_config, "authenticate",
                     Arrays.asList(odooDB, username, password, Collections.emptyMap()));
-            if (!uid.equals(false))
-            {
+            if (!uid.equals(false)) {
                 LOG.info("Login successful" + uid);
                 return (Integer) uid;
-            }else{
+            } else {
                 LOG.error("Login failed");
                 return 0;
             }
