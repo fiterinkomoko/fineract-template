@@ -224,12 +224,16 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<ClientCollateralManagement> clientCollateralManagements = new HashSet<>();
 
+    @Column(name = "kiva_id")
+    private String kivaId;
+
     public static Client createNew(final AppUser currentUser, final Office clientOffice, final Group clientParentGroup, final Staff staff,
             final Long savingsProductId, final CodeValue gender, final CodeValue clientType, final CodeValue clientClassification,
             final Integer legalForm, final JsonCommand command) {
 
         final String accountNo = command.stringValueOfParameterNamed(ClientApiConstants.accountNoParamName);
         final String externalId = command.stringValueOfParameterNamed(ClientApiConstants.externalIdParamName);
+        final String kivaId = command.stringValueOfParameterNamed(ClientApiConstants.KIVA_ID);
         final String mobileNo = command.stringValueOfParameterNamed(ClientApiConstants.mobileNoParamName);
         final String emailAddress = command.stringValueOfParameterNamed(ClientApiConstants.emailAddressParamName);
 
@@ -264,9 +268,11 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
             submittedOnDate = activationDate;
         }
         final Long savingsAccountId = null;
-        return new Client(currentUser, status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname,
-                activationDate, officeJoiningDate, externalId, mobileNo, emailAddress, staff, submittedOnDate, savingsProductId,
+        Client client = new Client(currentUser, status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname,
+                fullname, activationDate, officeJoiningDate, externalId, mobileNo, emailAddress, staff, submittedOnDate, savingsProductId,
                 savingsAccountId, dataOfBirth, gender, clientType, clientClassification, legalForm, isStaff);
+        client.setKivaId(kivaId);
+        return client;
     }
 
     protected Client() {}
@@ -483,6 +489,11 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
             final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.externalIdParamName);
             actualChanges.put(ClientApiConstants.externalIdParamName, newValue);
             this.externalId = StringUtils.defaultIfEmpty(newValue, null);
+        }
+        if (command.isChangeInStringParameterNamed(ClientApiConstants.KIVA_ID, this.kivaId)) {
+            final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.KIVA_ID);
+            actualChanges.put(ClientApiConstants.KIVA_ID, newValue);
+            this.kivaId = StringUtils.defaultIfEmpty(newValue, null);
         }
 
         if (command.isChangeInStringParameterNamed(ClientApiConstants.mobileNoParamName, this.mobileNo)) {
@@ -1025,4 +1036,11 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
         this.proposedTransferDate = proposedTransferDate;
     }
 
+    public String getKivaId() {
+        return kivaId;
+    }
+
+    public void setKivaId(String kivaId) {
+        this.kivaId = kivaId;
+    }
 }

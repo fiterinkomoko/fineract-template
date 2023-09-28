@@ -261,6 +261,9 @@ public final class LoanAccountData {
     private EnumOptionData nextLoanIcReviewDecisionState;
     private Boolean isExtendLoanLifeCycleConfig;
     private LoanDueDiligenceData loanDueDiligenceData;
+    private String description;
+    private String kivaId;
+    private String kivaUUId;
 
     public static LoanAccountData importInstanceIndividual(EnumOptionData loanTypeEnumOption, Long clientId, Long productId,
             Long loanOfficerId, LocalDate submittedOnDate, Long fundId, BigDecimal principal, Integer numberOfRepayments,
@@ -825,6 +828,9 @@ public final class LoanAccountData {
         loanAccountData.setCountryOptions(acc.countryOptions);
         loanAccountData.setProgramOptions(acc.programOptions);
         loanAccountData.setNextLoanIcReviewDecisionState(acc.nextLoanIcReviewDecisionState);
+        loanAccountData.setDescription(acc.description);
+        loanAccountData.setKivaId(acc.kivaId);
+        loanAccountData.setKivaUUId(acc.kivaUUId);
         return loanAccountData;
     }
 
@@ -1398,6 +1404,9 @@ public final class LoanAccountData {
         loanAccountData.setCountryOptions(acc.countryOptions);
         loanAccountData.setProgramOptions(acc.programOptions);
         loanAccountData.setNextLoanIcReviewDecisionState(acc.nextLoanIcReviewDecisionState);
+        loanAccountData.setDescription(acc.description);
+        loanAccountData.setKivaId(acc.kivaId);
+        loanAccountData.setKivaUUId(acc.kivaUUId);
         return loanAccountData;
     }
 
@@ -1425,6 +1434,9 @@ public final class LoanAccountData {
         loanAccountData.setCountryOptions(acc.countryOptions);
         loanAccountData.setProgramOptions(acc.programOptions);
         loanAccountData.setNextLoanIcReviewDecisionState(acc.nextLoanIcReviewDecisionState);
+        loanAccountData.setDescription(acc.description);
+        loanAccountData.setKivaId(acc.kivaId);
+        loanAccountData.setKivaUUId(acc.kivaUUId);
         return loanAccountData;
     }
 
@@ -1469,6 +1481,9 @@ public final class LoanAccountData {
         loanAccountData.setCountryOptions(acc.countryOptions);
         loanAccountData.setProgramOptions(acc.programOptions);
         loanAccountData.setNextLoanIcReviewDecisionState(acc.nextLoanIcReviewDecisionState);
+        loanAccountData.setDescription(acc.description);
+        loanAccountData.setKivaId(acc.kivaId);
+        loanAccountData.setKivaUUId(acc.kivaUUId);
         return loanAccountData;
     }
 
@@ -1581,6 +1596,9 @@ public final class LoanAccountData {
         loanAccountData.setCountryOptions(acc.countryOptions);
         loanAccountData.setProgramOptions(acc.programOptions);
         loanAccountData.setNextLoanIcReviewDecisionState(acc.nextLoanIcReviewDecisionState);
+        loanAccountData.setDescription(acc.description);
+        loanAccountData.setKivaId(acc.kivaId);
+        loanAccountData.setKivaUUId(acc.kivaUUId);
         return loanAccountData;
     }
 
@@ -1622,6 +1640,9 @@ public final class LoanAccountData {
         loanAccountData.setCountryOptions(acc.countryOptions);
         loanAccountData.setProgramOptions(acc.programOptions);
         loanAccountData.setNextLoanIcReviewDecisionState(acc.nextLoanIcReviewDecisionState);
+        loanAccountData.setDescription(acc.description);
+        loanAccountData.setKivaId(acc.kivaId);
+        loanAccountData.setKivaUUId(acc.kivaUUId);
         return loanAccountData;
     }
 
@@ -2160,5 +2181,17 @@ public final class LoanAccountData {
 
     public void setNextLoanIcReviewDecisionState(EnumOptionData nextLoanIcReviewDecisionState) {
         this.nextLoanIcReviewDecisionState = nextLoanIcReviewDecisionState;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setKivaId(String kivaId) {
+        this.kivaId = kivaId;
+    }
+
+    public void setKivaUUId(String kivaUUId) {
+        this.kivaUUId = kivaUUId;
     }
 }

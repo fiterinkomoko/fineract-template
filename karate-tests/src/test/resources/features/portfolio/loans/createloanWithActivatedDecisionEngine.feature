@@ -2,6 +2,28 @@ Feature: Test loan account apis
   Background:
     * callonce read('classpath:features/base.feature')
     * url baseUrl
+     #-Get code and code values for LoanPurpose
+    *  def LoanPurposeCode = 'LoanPurpose'
+    *  def LoanPurposeResponse = call read('classpath:features/system/codes/codesStep.feature@fetchCodeByNameStep') { codeName : '#(LoanPurposeCode)' }
+    *  def LoanPurposeCode = LoanPurposeResponse.codeName.id
+       #- Fetch codeValue for LoanPurpose
+    * def codeValueResCT = call read('classpath:features/system/codes/codeValuesStep.feature@fetchCodeValuesStep'){ codeId : '#(LoanPurposeCode)' }
+    * def LoanPurposeCodeId = codeValueResCT.listOfCodeValues[0].id
+
+     #-Get code and code values for Department
+    *  def departmentCode = 'Department'
+    *  def departmentResponse = call read('classpath:features/system/codes/codesStep.feature@fetchCodeByNameStep') { codeName : '#(departmentCode)' }
+    *  def departmentCode = departmentResponse.codeName.id
+       #- Fetch codeValue for LoanPurpose
+    * def departmentCodeValueResCT = call read('classpath:features/system/codes/codeValuesStep.feature@fetchCodeValuesStep'){ codeId : '#(departmentCode)' }
+    * def departmentCodeId = departmentCodeValueResCT.listOfCodeValues[0].id
+         #-Get code and code values for Gender
+    *  def gender = 'Gender'
+    *  def genderResponse = call read('classpath:features/system/codes/codesStep.feature@fetchCodeByNameStep') { codeName : '#(gender)' }
+    *  def genderCode = genderResponse.codeName.id
+       #- Fetch codeValue for Gender
+    * def genderCodeValueResCT = call read('classpath:features/system/codes/codeValuesStep.feature@fetchCodeValuesStep'){ codeId : '#(genderCode)' }
+    * def genderCodeId = genderCodeValueResCT.listOfCodeValues[0].id
 
   @testThatICanCreateLoanAccountAndShouldNotApproveItIfDecisionEngineIsActivated
   Scenario: Test That I Can Create Loan Account And should not Approve it if Decision Engine is Activated
@@ -23,7 +45,7 @@ Feature: Test loan account apis
     #create savings account with clientCreationDate
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
 
         #Create Savings Account Product and Savings Account
@@ -38,7 +60,7 @@ Feature: Test loan account apis
 
 
     * def loanAmount = 8500
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
       #approval should fail
@@ -65,7 +87,7 @@ Feature: Test loan account apis
     #create savings account with clientCreationDate
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
 
         #Create Savings Account Product and Savings Account
@@ -80,7 +102,7 @@ Feature: Test loan account apis
 
 
     * def loanAmount = 8500
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
       #approval should fail
@@ -122,7 +144,7 @@ Feature: Test loan account apis
     #create savings account with clientCreationDate
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
 
         #Create Savings Account Product and Savings Account
@@ -137,7 +159,7 @@ Feature: Test loan account apis
 
 
     * def loanAmount = 8500
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
       #Review Loan Application Stage With Decision Stage
@@ -175,7 +197,7 @@ Feature: Test loan account apis
     #create savings account with clientCreationDate
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
 
         #Create Savings Account Product and Savings Account
@@ -190,7 +212,7 @@ Feature: Test loan account apis
 
 
     * def loanAmount = 8500
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
       #Review Loan Application Stage With Decision Stage
@@ -299,7 +321,7 @@ Feature: Test loan account apis
     #create savings account with clientCreationDate
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
 
         #Create Savings Account Product and Savings Account
@@ -315,7 +337,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 2000
     * def loanTerm = 4
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' , loanTerm : '#(loanTerm)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' , loanTerm : '#(loanTerm)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
       #Review Loan Application Stage With Decision Stage
@@ -451,7 +473,7 @@ Feature: Test loan account apis
     #create savings account with clientCreationDate
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
 
         #Create Savings Account Product and Savings Account
@@ -467,7 +489,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 300000
     * def loanTerm = 4
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' , loanTerm : '#(loanTerm)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' , loanTerm : '#(loanTerm)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
       #Review Loan Application Stage With Decision Stage
@@ -600,7 +622,7 @@ Feature: Test loan account apis
     #create savings account with clientCreationDate
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
 
         #Create Savings Account Product and Savings Account
@@ -616,7 +638,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 300000
     * def loanTerm = 4
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' , loanTerm : '#(loanTerm)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' , loanTerm : '#(loanTerm)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
      #approval
@@ -645,7 +667,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 500000
     * def loanTerm = 7
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' , loanTerm : '#(loanTerm)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' , loanTerm : '#(loanTerm)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
       #Review Loan Application Stage With Decision Stage
@@ -778,7 +800,7 @@ Feature: Test loan account apis
     #create savings account with clientCreationDate
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
 
         #Create Savings Account Product and Savings Account
@@ -794,7 +816,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 300000
     * def loanTerm = 4
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' , loanTerm : '#(loanTerm)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' , loanTerm : '#(loanTerm)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
      #approval
@@ -823,7 +845,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 600000
     * def loanTerm = 7
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' , loanTerm : '#(loanTerm)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' , loanTerm : '#(loanTerm)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
       #Review Loan Application Stage With Decision Stage
@@ -956,7 +978,7 @@ Feature: Test loan account apis
     #create savings account with clientCreationDate
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
 
         #Create Savings Account Product and Savings Account
@@ -972,7 +994,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 300000
     * def loanTerm = 4
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' , loanTerm : '#(loanTerm)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' , loanTerm : '#(loanTerm)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
      #approval
@@ -1001,7 +1023,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 600000
     * def loanTerm = 7
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' , loanTerm : '#(loanTerm)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' , loanTerm : '#(loanTerm)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
       #Review Loan Application Stage With Decision Stage
@@ -1171,7 +1193,7 @@ Feature: Test loan account apis
     #create savings account with clientCreationDate
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
 
         #Create Savings Account Product and Savings Account
@@ -1187,7 +1209,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 300000
     * def loanTerm = 4
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' , loanTerm : '#(loanTerm)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' , loanTerm : '#(loanTerm)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
      #approval
@@ -1216,7 +1238,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 1000000
     * def loanTerm = 12
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' , loanTerm : '#(loanTerm)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' , loanTerm : '#(loanTerm)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
       #Review Loan Application Stage With Decision Stage
@@ -1402,10 +1424,10 @@ Feature: Test loan account apis
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
     #Client One
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId_1 = result.response.resourceId
     # Client Two
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId_2 = result.response.resourceId
 
     * def result = call read('classpath:features/portfolio/clients/groupSteps.feature@createGroupStep') { groupCreationDate : '#(submittedOnDate)',clientId_1 : '#(clientId_1)',clientId_2 : '#(clientId_2)' }
@@ -1415,7 +1437,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 300000
     * def loanTerm = 4
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createGroupLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', chargeId : '#(chargeId)' , loanTerm : '#(loanTerm)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createGroupLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', chargeId : '#(chargeId)' , loanTerm : '#(loanTerm)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
      #approval
@@ -1444,7 +1466,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 1000000
     * def loanTerm = 12
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createGroupLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', chargeId : '#(chargeId)', loanTerm : '#(loanTerm)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createGroupLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', chargeId : '#(chargeId)', loanTerm : '#(loanTerm)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
       #Review Loan Application Stage With Decision Stage
@@ -1632,10 +1654,10 @@ Feature: Test loan account apis
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
     #Client One
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId_1 = result.response.resourceId
     # Client Two
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId_2 = result.response.resourceId
 
     * def result = call read('classpath:features/portfolio/clients/groupSteps.feature@createGroupStep') { groupCreationDate : '#(submittedOnDate)',clientId_1 : '#(clientId_1)',clientId_2 : '#(clientId_2)' }
@@ -1645,7 +1667,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 300000
     * def loanTerm = 4
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createJLGLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', chargeId : '#(chargeId)' , loanTerm : '#(loanTerm)', clientId : '#(clientId_1)' }
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createJLGLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', chargeId : '#(chargeId)' , loanTerm : '#(loanTerm)', clientId : '#(clientId_1)',loanPurposeId : '#(LoanPurposeCodeId)' ,department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
      #approval
@@ -1674,7 +1696,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 1000000
     * def loanTerm = 12
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createJLGLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', chargeId : '#(chargeId)', loanTerm : '#(loanTerm)' , clientId : '#(clientId_1)' }
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createJLGLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', chargeId : '#(chargeId)', loanTerm : '#(loanTerm)' , clientId : '#(clientId_1)' ,loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
       #Review Loan Application Stage With Decision Stage
@@ -1862,10 +1884,10 @@ Feature: Test loan account apis
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
     #Client One
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId_1 = result.response.resourceId
     # Client Two
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId_2 = result.response.resourceId
 
     * def result = call read('classpath:features/portfolio/clients/groupSteps.feature@createGroupStep') { groupCreationDate : '#(submittedOnDate)',clientId_1 : '#(clientId_1)',clientId_2 : '#(clientId_2)' }
@@ -1875,7 +1897,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 300000
     * def loanTerm = 4
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createJLGLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', chargeId : '#(chargeId)' , loanTerm : '#(loanTerm)', clientId : '#(clientId_1)' }
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createJLGLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', chargeId : '#(chargeId)' , loanTerm : '#(loanTerm)', clientId : '#(clientId_1)' ,loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
      #approval
@@ -1904,7 +1926,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 3000500
     * def loanTerm = 12
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createJLGLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', chargeId : '#(chargeId)', loanTerm : '#(loanTerm)' , clientId : '#(clientId_1)' }
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createJLGLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', chargeId : '#(chargeId)', loanTerm : '#(loanTerm)' , clientId : '#(clientId_1)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)' }
     * def loanId = loan.loanId
 
       #Review Loan Application Stage With Decision Stage
@@ -2158,10 +2180,10 @@ Feature: Test loan account apis
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
     #Client One
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId_1 = result.response.resourceId
     # Client Two
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId_2 = result.response.resourceId
 
     * def result = call read('classpath:features/portfolio/clients/groupSteps.feature@createGroupStep') { groupCreationDate : '#(submittedOnDate)',clientId_1 : '#(clientId_1)',clientId_2 : '#(clientId_2)' }
@@ -2171,7 +2193,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 300000
     * def loanTerm = 4
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createJLGLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', chargeId : '#(chargeId)' , loanTerm : '#(loanTerm)', clientId : '#(clientId_1)' }
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createJLGLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', chargeId : '#(chargeId)' , loanTerm : '#(loanTerm)', clientId : '#(clientId_1)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)' }
     * def loanId = loan.loanId
 
      #approval
@@ -2200,7 +2222,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 3000500
     * def loanTerm = 12
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createJLGLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', chargeId : '#(chargeId)', loanTerm : '#(loanTerm)' , clientId : '#(clientId_1)' }
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createJLGLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', chargeId : '#(chargeId)', loanTerm : '#(loanTerm)' , clientId : '#(clientId_1)' ,loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
       #Review Loan Application Stage With Decision Stage
@@ -2460,7 +2482,7 @@ Feature: Test loan account apis
     #create savings account with clientCreationDate
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
 
         #Create Savings Account Product and Savings Account
@@ -2476,7 +2498,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 2000
     * def loanTerm = 4
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' , loanTerm : '#(loanTerm)'}
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', clientCreationDate : '#(submittedOnDate)', loanProductId : '#(loanProductId)', clientId : '#(clientId)', chargeId : '#(chargeId)', savingsAccountId : '#(savingsId)' , loanTerm : '#(loanTerm)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
       #Review Loan Application Stage With Decision Stage
@@ -2609,10 +2631,10 @@ Feature: Test loan account apis
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
     #Client One
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId_1 = result.response.resourceId
     # Client Two
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId_2 = result.response.resourceId
 
     * def result = call read('classpath:features/portfolio/clients/groupSteps.feature@createGroupStep') { groupCreationDate : '#(submittedOnDate)',clientId_1 : '#(clientId_1)',clientId_2 : '#(clientId_2)' }
@@ -2622,7 +2644,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 300000
     * def loanTerm = 4
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createJLGLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', chargeId : '#(chargeId)' , loanTerm : '#(loanTerm)', clientId : '#(clientId_1)' }
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createJLGLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', chargeId : '#(chargeId)' , loanTerm : '#(loanTerm)', clientId : '#(clientId_1)' ,loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
      #approval
@@ -2651,7 +2673,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 3000500
     * def loanTerm = 12
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createJLGLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', chargeId : '#(chargeId)', loanTerm : '#(loanTerm)' , clientId : '#(clientId_1)' }
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createJLGLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', chargeId : '#(chargeId)', loanTerm : '#(loanTerm)' , clientId : '#(clientId_1)' ,loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
       #Review Loan Application Stage With Decision Stage
@@ -2903,10 +2925,10 @@ Feature: Test loan account apis
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
     #Client One
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId_1 = result.response.resourceId
     # Client Two
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId_2 = result.response.resourceId
 
     * def result = call read('classpath:features/portfolio/clients/groupSteps.feature@createGroupStep') { groupCreationDate : '#(submittedOnDate)',clientId_1 : '#(clientId_1)',clientId_2 : '#(clientId_2)' }
@@ -2915,7 +2937,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 300000
     * def loanTerm = 4
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createJLGLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', chargeId : '#(chargeId)' , loanTerm : '#(loanTerm)', clientId : '#(clientId_1)' }
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createJLGLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', chargeId : '#(chargeId)' , loanTerm : '#(loanTerm)', clientId : '#(clientId_1)',loanPurposeId : '#(LoanPurposeCodeId)' ,department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
      #approval
@@ -2942,7 +2964,7 @@ Feature: Test loan account apis
 
     * def loanAmount = 3000500
     * def loanTerm = 12
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createJLGLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', chargeId : '#(chargeId)', loanTerm : '#(loanTerm)' , clientId : '#(clientId_1)' }
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createJLGLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', chargeId : '#(chargeId)', loanTerm : '#(loanTerm)' , clientId : '#(clientId_1)',loanPurposeId : '#(LoanPurposeCodeId)' ,department : '#(departmentCodeId)'}
     * def loanId = loan.loanId
 
       #Review Loan Application Stage With Decision Stage
@@ -3139,10 +3161,10 @@ Feature: Test loan account apis
     * def submittedOnDate = df.format(faker.date().past(425, 421, TimeUnit.DAYS))
 
     #Client One
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' ,genderId : '#(genderCodeId)'}
     * def clientId_1 = result.response.resourceId
     # Client Two
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId_2 = result.response.resourceId
 
 
@@ -3154,7 +3176,7 @@ Feature: Test loan account apis
     * def loanAmount = 300000
     * def totalLoanAmount = 600000
     * def loanTerm = 4
-    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createGLIMLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', loanTerm : '#(loanTerm)', clientId_1 : '#(clientId_1)', clientId_2 : '#(clientId_2)', totalLoanAmount : '#(totalLoanAmount)' }
+    * def loan = call read('classpath:features/portfolio/loans/loansteps.feature@createGLIMLoanWithConfigurableProductAndLoanTermStep') { submittedOnDate : '#(submittedOnDate)', loanAmount : '#(loanAmount)', loanProductId : '#(loanProductId)', groupId : '#(groupId)', loanTerm : '#(loanTerm)', clientId_1 : '#(clientId_1)', clientId_2 : '#(clientId_2)', totalLoanAmount : '#(totalLoanAmount)',loanPurposeId : '#(LoanPurposeCodeId)',department : '#(departmentCodeId)' }
     * def loanId = loan.loanId
 
 

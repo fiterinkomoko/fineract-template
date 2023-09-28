@@ -3,6 +3,14 @@ Feature: Test client apis
     * callonce read('classpath:features/base.feature')
     * url baseUrl
 
+         #-Get code and code values for Gender
+    *  def gender = 'Gender'
+    *  def genderResponse = call read('classpath:features/system/codes/codesStep.feature@fetchCodeByNameStep') { codeName : '#(gender)' }
+    *  def genderCode = genderResponse.codeName.id
+       #- Fetch codeValue for Gender
+    * def genderCodeValueResCT = call read('classpath:features/system/codes/codeValuesStep.feature@fetchCodeValuesStep'){ codeId : '#(genderCode)' }
+    * def genderCodeId = genderCodeValueResCT.listOfCodeValues[0].id
+
 
   @createFetchUpdateEntityClient
     Scenario: Create fetch and update Entity client
@@ -55,12 +63,12 @@ Feature: Test client apis
 
     #- Create client without address
     * def submittedOnDate = df.format(faker.date().past(30, 29, TimeUnit.DAYS))
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)'}
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)'}
     * def createdClientId = result.clientId
 
     # Fetch created client
     * def legalFormId = 1
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@findbyclientid') { clientId : '#(createdClientId)'}
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@findbyclientid') { clientId : '#(createdClientId)',genderId : '#(genderCodeId)'}
     * def client = result.client
     * match createdClientId == client.id
     * match legalFormId == client.legalForm.id
@@ -83,7 +91,7 @@ Feature: Test client apis
     * def savingsProductId = savingsProduct.savingsProductId
 
     # Then create client
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@createClientWithSavingsStep') { savingsProductId : '#(savingsProductId)'}
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@createClientWithSavingsStep') { savingsProductId : '#(savingsProductId)',genderId : '#(genderCodeId)'}
     * def savingsId = result.client.savingsId
 
     # Fetch savings account for created client

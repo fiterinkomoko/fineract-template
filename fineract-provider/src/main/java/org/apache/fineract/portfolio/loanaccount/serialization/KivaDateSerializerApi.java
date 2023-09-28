@@ -16,20 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.documentmanagement.service;
+package org.apache.fineract.portfolio.loanaccount.serialization;
 
-import java.util.Collection;
-import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
-import org.apache.fineract.infrastructure.documentmanagement.data.FileData;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-public interface DocumentReadPlatformService {
+public class KivaDateSerializerApi implements JsonSerializer<Date> {
 
-    Collection<DocumentData> retrieveAllDocuments(String entityType, Long entityId);
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-    FileData retrieveFileData(String entityType, Long entityId, Long documentId);
-
-    DocumentData retrieveDocument(String entityType, Long entityId, Long documentId);
-
-    DocumentData retrieveKivaLoanProfileImage(String entityType, Long entityId);
-
+    @Override
+    public JsonElement serialize(Date date, Type typeOfSrc, JsonSerializationContext context) {
+        return context.serialize(dateFormat.format(date));
+    }
 }

@@ -2,6 +2,13 @@ Feature: Test client other info apis
   Background:
     * callonce read('classpath:features/base.feature')
     * url baseUrl
+         #-Get code and code values for Gender
+    *  def gender = 'Gender'
+    *  def genderResponse = call read('classpath:features/system/codes/codesStep.feature@fetchCodeByNameStep') { codeName : '#(gender)' }
+    *  def genderCode = genderResponse.codeName.id
+       #- Fetch codeValue for Gender
+    * def genderCodeValueResCT = call read('classpath:features/system/codes/codeValuesStep.feature@fetchCodeValuesStep'){ codeId : '#(genderCode)' }
+    * def genderCodeId = genderCodeValueResCT.listOfCodeValues[0].id
 
 
   @createClientOtherInfo
@@ -41,7 +48,7 @@ Feature: Test client other info apis
 
   #- Create client without address
     * def submittedOnDate = df.format(faker.date().past(30, 29, TimeUnit.DAYS))
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)'}
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)'}
     * def createdClientId = result.clientId
 
   #- Create client other info
@@ -92,7 +99,7 @@ Feature: Test client other info apis
 
     #- Create client without address
     * def submittedOnDate = df.format(faker.date().past(30, 29, TimeUnit.DAYS))
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)'}
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)'}
     * def createdClientId = result.clientId
 
     #- Create client other info

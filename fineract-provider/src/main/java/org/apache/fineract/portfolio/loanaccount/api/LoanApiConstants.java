@@ -100,6 +100,8 @@ public interface LoanApiConstants {
     String EMI_AMOUNT_VARIATIONS_PARAMNAME = "emiAmountVariations";
     String COLLECTION_PARAMNAME = "collection";
     String DEPARTMENT_PARAM = "department";
+    String DESCRIPTION_PARAM = "description";
+    String KIVA_ID_PARAM = "kivaId";
 
     // Interest recalculation related
     String isInterestRecalculationEnabledParameterName = "isInterestRecalculationEnabled";

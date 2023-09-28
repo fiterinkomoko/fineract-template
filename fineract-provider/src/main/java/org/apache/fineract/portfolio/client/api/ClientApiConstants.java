@@ -203,6 +203,7 @@ public class ClientApiConstants {
     public static final String titleParam = "titleId";
 
     public static final String inBusinessSinceParamName = "inBusinessSince";
+    public static final String KIVA_ID = "kivaId";
 
     public static final String isRegisteredParam = "isRegistered";
 
