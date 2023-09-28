@@ -120,15 +120,15 @@
             </column>
         </addColumn>
     </changeSet>
-    <changeSet author="bosco@fiter.io" id="add_code_values_for_m_client_Gender_male">
+    <changeSet author="bosco@fiter.io" id="add_code_values_for_m_client_Gender_Male_2">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
-                select count(1) from m_code_value where code_value = 'male';
+                select count(1) from m_code_value where code_value = 'Male';
             </sqlCheck>
         </preConditions>
         <insert tableName="m_code_value">
             <column name="code_id" valueComputed="(select id from m_code where code_name='Gender')"/>
-            <column name="code_value" value="male"/>
+            <column name="code_value" value="Male"/>
             <column name="code_description"/>
             <column name="order_position" valueNumeric="1"/>
             <column name="code_score"/>

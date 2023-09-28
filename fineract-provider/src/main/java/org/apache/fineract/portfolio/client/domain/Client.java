@@ -233,6 +233,7 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
 
         final String accountNo = command.stringValueOfParameterNamed(ClientApiConstants.accountNoParamName);
         final String externalId = command.stringValueOfParameterNamed(ClientApiConstants.externalIdParamName);
+        final String kivaId = command.stringValueOfParameterNamed(ClientApiConstants.KIVA_ID);
         final String mobileNo = command.stringValueOfParameterNamed(ClientApiConstants.mobileNoParamName);
         final String emailAddress = command.stringValueOfParameterNamed(ClientApiConstants.emailAddressParamName);
 
@@ -267,9 +268,11 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
             submittedOnDate = activationDate;
         }
         final Long savingsAccountId = null;
-        return new Client(currentUser, status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname,
-                activationDate, officeJoiningDate, externalId, mobileNo, emailAddress, staff, submittedOnDate, savingsProductId,
+        Client client = new Client(currentUser, status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname,
+                fullname, activationDate, officeJoiningDate, externalId, mobileNo, emailAddress, staff, submittedOnDate, savingsProductId,
                 savingsAccountId, dataOfBirth, gender, clientType, clientClassification, legalForm, isStaff);
+        client.setKivaId(kivaId);
+        return client;
     }
 
     protected Client() {}
@@ -486,6 +489,11 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
             final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.externalIdParamName);
             actualChanges.put(ClientApiConstants.externalIdParamName, newValue);
             this.externalId = StringUtils.defaultIfEmpty(newValue, null);
+        }
+        if (command.isChangeInStringParameterNamed(ClientApiConstants.KIVA_ID, this.kivaId)) {
+            final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.KIVA_ID);
+            actualChanges.put(ClientApiConstants.KIVA_ID, newValue);
+            this.kivaId = StringUtils.defaultIfEmpty(newValue, null);
         }
 
         if (command.isChangeInStringParameterNamed(ClientApiConstants.mobileNoParamName, this.mobileNo)) {
