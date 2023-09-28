@@ -137,7 +137,9 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
             throw new TransferNotSupportedException(TransferNotSupportedReason.BULK_CLIENT_TRANSFER_ACROSS_BRANCHES, sourceGroupId,
                     destinationGroupId);
         }
-
+        if (sourceGroup.getRepresentative() != null) {
+            validateThatGroupRepresentativeShouldNotBeTransferredFromThisGroup(clients, sourceGroup.getRepresentative().getId());
+        }
         for (final Client client : clients) {
             transferClientBetweenGroups(sourceGroup, client, destinationGroup, inheritDestinationGroupLoanOfficer, staff);
         }
@@ -145,6 +147,15 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         return new CommandProcessingResultBuilder() //
                 .withEntityId(sourceGroupId) //
                 .build();
+    }
+
+    public void validateThatGroupRepresentativeShouldNotBeTransferredFromThisGroup(List<Client> clientMembers, Long representativeId) {
+        boolean isRepresentativeMember = clientMembers.stream().anyMatch(client -> client.getId().equals(representativeId));
+
+        if (isRepresentativeMember) {
+            throw new GeneralPlatformDomainRuleException("error.representative.should.not.be.Transferred.from.this.group",
+                    String.format("Representative [%s] should not be Transferred from this Group: ", representativeId));
+        }
     }
 
     /****
