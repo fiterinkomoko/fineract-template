@@ -194,7 +194,7 @@
         <dropColumn tableName="m_client_recruitment_survey" columnName="survey_location"/>
     </changeSet>
 
-    <changeSet author="bosco@fiter.io" id="add_survey_location_cv_id_column_to_m_client_recruitment_survey_table">
+    <changeSet author="bosco@fiter.io" id="add_survey_location_cv_id_column_to_m_client_recruitment_survey_table_2">
         <preConditions onFail="MARK_RAN">
             <not>
                 <columnExists tableName="m_client_recruitment_survey" columnName="survey_location_cv_id"/>
