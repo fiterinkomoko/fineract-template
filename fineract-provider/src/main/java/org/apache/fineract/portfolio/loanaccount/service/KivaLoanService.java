@@ -16,20 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.documentmanagement.service;
+package org.apache.fineract.portfolio.loanaccount.service;
 
-import java.util.Collection;
-import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
-import org.apache.fineract.infrastructure.documentmanagement.data.FileData;
+import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 
-public interface DocumentReadPlatformService {
+public interface KivaLoanService {
 
-    Collection<DocumentData> retrieveAllDocuments(String entityType, Long entityId);
-
-    FileData retrieveFileData(String entityType, Long entityId, Long documentId);
-
-    DocumentData retrieveDocument(String entityType, Long entityId, Long documentId);
-
-    DocumentData retrieveKivaLoanProfileImage(String entityType, Long entityId);
-
+    void postLoanAccountsToKiva() throws JobExecutionException;
 }

@@ -34,6 +34,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.apache.commons.lang3.StringUtils;
@@ -139,6 +140,10 @@ public final class Group extends AbstractPersistableCustom {
 
     @OneToMany(mappedBy = "group")
     private List<GroupLoanIndividualMonitoringAccount> glimLoan;
+
+    @OneToOne()
+    @JoinColumn(name = "representative_id")
+    private Client representative;
 
     // JPA default constructor for entity
     Group() {
@@ -765,4 +770,11 @@ public final class Group extends AbstractPersistableCustom {
         this.groupMembers = groupMembers;
     }
 
+    public Client getRepresentative() {
+        return representative;
+    }
+
+    public void setRepresentative(Client representative) {
+        this.representative = representative;
+    }
 }

@@ -3,6 +3,14 @@ Feature:  Create Client Business Details APIs
     * callonce read('classpath:features/base.feature')
     * url baseUrl
 
+         #-Get code and code values for Gender
+    *  def gender = 'Gender'
+    *  def genderResponse = call read('classpath:features/system/codes/codesStep.feature@fetchCodeByNameStep') { codeName : '#(gender)' }
+    *  def genderCode = genderResponse.codeName.id
+       #- Fetch codeValue for Gender
+    * def codeValueResCT = call read('classpath:features/system/codes/codeValuesStep.feature@fetchCodeValuesStep'){ codeId : '#(genderCode)' }
+    * def genderCodeId = codeValueResCT.listOfCodeValues[0].id
+
   @createClientBusinessDetails
   Scenario: Create Client Business Details
 
@@ -34,7 +42,7 @@ Feature:  Create Client Business Details APIs
 
     * def submittedOnDate = df.format(faker.date().past(370, 369, TimeUnit.DAYS))
 
-    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)' }
+    * def result = call read('classpath:features/portfolio/clients/clientsteps.feature@create') { clientCreationDate : '#(submittedOnDate)',genderId : '#(genderCodeId)' }
     * def clientId = result.response.resourceId
 
     * def clientDetailsResponse = call read('classpath:features/portfolio/clientdetails/clientdetailssteps.feature@createClientBusinessDetailsStep'){clientCreationDate : '#(submittedOnDate)' ,businessType : '#(businessTypeCodeValueId)' ,sourceOfCapital : '#(SourceOfCapitalCodeValueId)' ,clientId : '#(clientId)' }

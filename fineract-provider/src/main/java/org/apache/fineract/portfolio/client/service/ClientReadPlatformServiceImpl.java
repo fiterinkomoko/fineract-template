@@ -290,7 +290,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         if (sqlSearch != null) {
             sqlSearch = sqlSearch.replaceAll(" display_name ", " c.display_name ");
             sqlSearch = sqlSearch.replaceAll("display_name ", "c.display_name ");
-            sqlSearch = sqlSearch.replaceAll("account_no", "c.account_no");
+            sqlSearch = sqlSearch.replaceAll("account_no", "c.account_no ");
             extraCriteria = " and (" + sqlSearch + ")";
             this.columnValidator.validateSqlInjection(schemaSql, sqlSearch);
         }
@@ -506,7 +506,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             sqlBuilder.append("cvMainBusinessLine.code_value as mainBusinessLineValue, ");
             sqlBuilder.append("cnp.remarks as remarks, ");
             sqlBuilder.append("cnp.is_registered as isRegistered, ");
-            sqlBuilder.append("cnp.in_business_since as inBusinessSince ");
+            sqlBuilder.append("cnp.in_business_since as inBusinessSince, ");
+            sqlBuilder.append("c.kiva_id as kivaId  ");
 
             sqlBuilder.append("from m_client c ");
             sqlBuilder.append("join m_office o on o.id = c.office_id ");
@@ -560,6 +561,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String fullname = rs.getString("fullname");
             final String displayName = rs.getString("displayName");
             final String externalId = rs.getString("externalId");
+            final String kivaId = rs.getString("kivaId");
             final String mobileNo = rs.getString("mobileNo");
             final boolean isStaff = rs.getBoolean("isStaff");
             final String emailAddress = rs.getString("emailAddress");
@@ -631,7 +633,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             return ClientData.instance(accountNo, status, subStatus, officeId, officeName, transferToOfficeId, transferToOfficeName, id,
                     firstname, middlename, lastname, fullname, displayName, externalId, mobileNo, emailAddress, dateOfBirth, gender,
                     activationDate, imageId, staffId, staffName, timeline, savingsProductId, savingsProductName, savingsAccountId,
-                    clienttype, classification, legalForm, clientNonPerson, isStaff, null, null, null, null, createdDate);
+                    clienttype, classification, legalForm, clientNonPerson, isStaff, null, null, null, null, createdDate, kivaId);
 
         }
     }
@@ -715,7 +717,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             builder.append("c.activation_date as activationDate, c.image_id as imageId, ");
             builder.append("c.staff_id as staffId, s.display_name as staffName, ");
             builder.append("c.default_savings_product as savingsProductId, sp.name as savingsProductName, ");
-            builder.append("c.default_savings_account as savingsAccountId ");
+            builder.append("c.default_savings_account as savingsAccountId, ");
+            builder.append("c.kiva_id as kivaId ");
             builder.append("from m_client c ");
             builder.append("join m_office o on o.id = c.office_id ");
             builder.append("left join m_client_non_person cnp on cnp.client_id = c.id ");
@@ -771,6 +774,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String fullname = rs.getString("fullname");
             final String displayName = rs.getString("displayName");
             final String externalId = rs.getString("externalId");
+            final String kivaId = rs.getString("kivaId");
             final String mobileNo = rs.getString("mobileNo");
             final boolean isStaff = rs.getBoolean("isStaff");
             final String emailAddress = rs.getString("emailAddress");
@@ -860,7 +864,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
                     firstname, middlename, lastname, fullname, displayName, externalId, mobileNo, emailAddress, dateOfBirth, gender,
                     activationDate, imageId, staffId, staffName, timeline, savingsProductId, savingsProductName, savingsAccountId,
                     clienttype, classification, legalForm, clientNonPerson, isStaff, clientLevel, dailyWithDrawLimit, singleWithDrawLimit,
-                    clientAdditionalInfo, createdDate);
+                    clientAdditionalInfo, createdDate, kivaId);
 
         }
     }
