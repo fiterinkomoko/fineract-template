@@ -97,5 +97,6 @@
     <include file="parts/INKO_78_add_secured_and_non_secured_table_report.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO_79_update_reschuled_loan_table_report.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO_80_add_sectorial_table_report.xml" relativeToChangelogFile="true" />
+    <include file="parts/INKO_81_add_group_loans_table_report.xml" relativeToChangelogFile="true" />
     <includeAll path="custom-changelog" relativeToChangelogFile="true"/>
 </databaseChangeLog>
