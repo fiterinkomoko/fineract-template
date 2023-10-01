@@ -190,12 +190,11 @@ public final class SearchParameters {
         return new SearchParameters(provisioningEntryId, officeId, productId, categoryId, offset, limit);
     }
 
-    public static SearchParameters forSavings(final String sqlSearch, final String externalId, final Integer offset, final Integer limit,
-            final String orderBy, final String sortOrder) {
+    public static SearchParameters forSavings(final String sqlSearch, final String externalId, final String accountNo, final Integer offset,
+            final Integer limit, final String orderBy, final String sortOrder) {
 
         final Integer maxLimitAllowed = getCheckedLimit(limit);
         final Long staffId = null;
-        final String accountNo = null;
         final Long loanId = null;
         final Long savingsId = null;
         final Boolean orphansOnly = false;
