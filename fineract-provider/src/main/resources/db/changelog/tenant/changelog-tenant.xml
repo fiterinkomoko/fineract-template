@@ -101,5 +101,6 @@
     <include file="parts/INKO_81_add_group_loans_table_report.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO_82_update_report_sql_secured_and_unsecured_loans_table_report.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO_83_update_report_sql_obligations_met_loans_summary_table_report.xml" relativeToChangelogFile="true" />
+    <include file="parts/INKO_84_update_report_sql_loan_arrears_table_report.xml" relativeToChangelogFile="true" />
     <includeAll path="custom-changelog" relativeToChangelogFile="true"/>
 </databaseChangeLog>
