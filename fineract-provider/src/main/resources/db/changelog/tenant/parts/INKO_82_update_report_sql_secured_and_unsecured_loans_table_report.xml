@@ -39,7 +39,7 @@ l.total_outstanding_derived as 'Outstanding Loan Amount',
 cvs.code_value as 'Strata'
 from m_office o
 join m_office ounder on ounder.hierarchy like concat(o.hierarchy, '%')
-and ounder.hierarchy like concat('${currentUserHierarchy}''', '%')
+and ounder.hierarchy like concat('${currentUserHierarchy}', '%')
 join m_client c on c.office_id = ounder.id
 join m_loan l on l.client_id = c.id
 left join m_currency cur on cur.code = l.currency_code
