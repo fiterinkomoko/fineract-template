@@ -69,7 +69,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
             validateParentEntityType(documentCommand);
 
             validator.validateForCreate();
-            if (documentCommand.getKivaProfileImage()
+            if ((documentCommand.getKivaProfileImage() != null && documentCommand.getKivaProfileImage())
                     && !(documentCommand.getType().equals("image/png") || documentCommand.getType().equals("image/PNG")
                             || documentCommand.getType().equals("image/jpg") || documentCommand.getType().equals("image/JPG")
                             || documentCommand.getType().equals("image/jpeg") || documentCommand.getType().equals("image/JPEG")
