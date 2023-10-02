@@ -16,20 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.documentmanagement.service;
+package org.apache.fineract.portfolio.loanaccount.data;
 
-import java.util.Collection;
-import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
-import org.apache.fineract.infrastructure.documentmanagement.data.FileData;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import java.math.BigDecimal;
+import java.util.Date;
 
-public interface DocumentReadPlatformService {
+public class KivaLoanAccountSchedule {
 
-    Collection<DocumentData> retrieveAllDocuments(String entityType, Long entityId);
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private Date date;
+    private BigDecimal interest;
+    private BigDecimal principal;
 
-    FileData retrieveFileData(String entityType, Long entityId, Long documentId);
+    public KivaLoanAccountSchedule(Date date, BigDecimal interest, BigDecimal principal) {
+        this.date = date;
+        this.interest = interest;
+        this.principal = principal;
+    }
 
-    DocumentData retrieveDocument(String entityType, Long entityId, Long documentId);
-
-    DocumentData retrieveKivaLoanProfileImage(String entityType, Long entityId);
-
+    @Override
+    public String toString() {
+        return "KivaLoanAccountSchedule{" + "date=" + date + ", interest=" + interest + ", principal=" + principal + '}';
+    }
 }

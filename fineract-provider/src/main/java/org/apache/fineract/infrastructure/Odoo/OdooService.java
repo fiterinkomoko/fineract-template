@@ -16,20 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.documentmanagement.service;
+package org.apache.fineract.infrastructure.Odoo;
 
-import java.util.Collection;
-import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
-import org.apache.fineract.infrastructure.documentmanagement.data.FileData;
+public interface OdooService {
 
-public interface DocumentReadPlatformService {
-
-    Collection<DocumentData> retrieveAllDocuments(String entityType, Long entityId);
-
-    FileData retrieveFileData(String entityType, Long entityId, Long documentId);
-
-    DocumentData retrieveDocument(String entityType, Long entityId, Long documentId);
-
-    DocumentData retrieveKivaLoanProfileImage(String entityType, Long entityId);
+    Integer loginToOddo();
 
 }

@@ -1238,6 +1238,33 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="bosco@fiter.io" id="add_representative_id_to_table_m_group">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_group" columnName="representative_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_group">
+            <column name="representative_id"  type="bigint">
+                <constraints nullable="true" foreignKeyName="FK_m_group-m_client-representative_id" references="m_client(id)"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+
+    <changeSet author="bosco@fiter.io" id="add_permission_UPDATEREPRESENTATIVE_GROUP">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_permission where code = 'UPDATEREPRESENTATIVE_GROUP';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio" />
+            <column name="code" value="UPDATEREPRESENTATIVE_GROUP" />
+            <column name="entity_name" value="GROUP" />
+            <column name="action_name" value="UPDATEREPRESENTATIVE" />
+        </insert>
+    </changeSet>
     <changeSet author="bosco@fiter.io" id="add_last_repayment_amount_column_to_m_loan_table">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -1262,6 +1289,57 @@
                 <constraints nullable="true"/>
             </column>
         </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_code_values_for_m_loan_Department_SME">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code_value where code_value = 'SME';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueComputed="(select id from m_code where code_name='Department')"/>
+            <column name="code_value" value="SME"/>
+            <column name="code_description"/>
+            <column name="order_position" valueNumeric="1"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_code_values_for_m_loan_Department_Vulnerable-Populations">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code_value where code_value = 'Vulnerable-Populations';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueComputed="(select id from m_code where code_name='Department')"/>
+            <column name="code_value" value="Vulnerable-Populations"/>
+            <column name="code_description"/>
+            <column name="order_position" valueNumeric="1"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_code_values_for_m_loan_Department_Vulnerable-Populations(Refugees-Kenya)">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code_value where code_value = 'Vulnerable-Populations(Refugees-Kenya)';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueComputed="(select id from m_code where code_name='Department')"/>
+            <column name="code_value" value="Vulnerable-Populations(Refugees-Kenya)"/>
+            <column name="code_description"/>
+            <column name="order_position" valueNumeric="1"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
     </changeSet>
 
 </databaseChangeLog>

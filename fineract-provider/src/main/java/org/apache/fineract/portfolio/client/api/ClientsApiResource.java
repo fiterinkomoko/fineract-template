@@ -53,6 +53,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.Odoo.OdooService;
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookPopulatorService;
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookService;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
@@ -99,6 +100,8 @@ public class ClientsApiResource {
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
     private final GuarantorReadPlatformService guarantorReadPlatformService;
     private final ConfigurationReadPlatformService configurationReadPlatformService;
+
+    private final OdooService odooService;
 
     @GET
     @Path("template")
@@ -158,6 +161,8 @@ public class ClientsApiResource {
             @QueryParam("orphansOnly") @Parameter(description = "orphansOnly") final Boolean orphansOnly,
             @QueryParam("accountNo") @Parameter(description = "accountNo") final String accountNo,
             @QueryParam("mobileNo") @Parameter(description = "mobileNo") final String mobileNo) {
+
+        this.odooService.loginToOddo();
 
         return this.retrieveAll(uriInfo, sqlSearch, officeId, externalId, displayName, firstname, lastname, status, hierarchy, offset,
                 limit, orderBy, sortOrder, orphansOnly, false, clientType, accountNo, mobileNo);
