@@ -162,8 +162,6 @@ public class ClientsApiResource {
             @QueryParam("accountNo") @Parameter(description = "accountNo") final String accountNo,
             @QueryParam("mobileNo") @Parameter(description = "mobileNo") final String mobileNo) {
 
-        this.odooService.loginToOddo();
-
         return this.retrieveAll(uriInfo, sqlSearch, officeId, externalId, displayName, firstname, lastname, status, hierarchy, offset,
                 limit, orderBy, sortOrder, orphansOnly, false, clientType, accountNo, mobileNo);
     }

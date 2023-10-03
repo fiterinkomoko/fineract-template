@@ -227,6 +227,12 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "kiva_id")
     private String kivaId;
 
+    @Column(name = "is_odoo_customer_posted")
+    private boolean isOdooCustomerPosted;
+
+    @Column(name = "odoo_customer_id")
+    private Integer odooCustomerId;
+
     public static Client createNew(final AppUser currentUser, final Office clientOffice, final Group clientParentGroup, final Staff staff,
             final Long savingsProductId, final CodeValue gender, final CodeValue clientType, final CodeValue clientClassification,
             final Integer legalForm, final JsonCommand command) {
@@ -489,11 +495,6 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
             final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.externalIdParamName);
             actualChanges.put(ClientApiConstants.externalIdParamName, newValue);
             this.externalId = StringUtils.defaultIfEmpty(newValue, null);
-        }
-        if (command.isChangeInStringParameterNamed(ClientApiConstants.KIVA_ID, this.kivaId)) {
-            final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.KIVA_ID);
-            actualChanges.put(ClientApiConstants.KIVA_ID, newValue);
-            this.kivaId = StringUtils.defaultIfEmpty(newValue, null);
         }
 
         if (command.isChangeInStringParameterNamed(ClientApiConstants.mobileNoParamName, this.mobileNo)) {
@@ -1042,5 +1043,24 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
 
     public void setKivaId(String kivaId) {
         this.kivaId = kivaId;
+    }
+    public String getMobileNo() {
+        return mobileNo;
+    }
+
+    public boolean isOdooCustomerPosted() {
+        return isOdooCustomerPosted;
+    }
+
+    public void setOdooCustomerPosted(boolean odooCustomerPosted) {
+        isOdooCustomerPosted = odooCustomerPosted;
+    }
+
+    public Integer getOdooCustomerId() {
+        return odooCustomerId;
+    }
+
+    public void setOdooCustomerId(Integer odooCustomerId) {
+        this.odooCustomerId = odooCustomerId;
     }
 }
