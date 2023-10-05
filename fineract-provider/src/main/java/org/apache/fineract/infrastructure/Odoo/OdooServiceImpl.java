@@ -18,10 +18,13 @@
  */
 package org.apache.fineract.infrastructure.Odoo;
 
-
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
@@ -37,12 +40,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
-
-
 
 @Service
 @SuppressWarnings({ "unchecked", "rawtypes", "cast" })
@@ -110,10 +107,8 @@ public class OdooServiceImpl implements OdooService {
                     map.put("is_company", LegalForm.fromInt(client.getLegalForm().intValue()).isEntity() ? true : false);
 
                     final Integer id = (Integer) models.execute("execute_kw",
-                            Arrays.asList(odooDB, uid,
-                                    password, "res.partner", "create",
-                                    Arrays.asList(map)));
-                    if(id != null){
+                            Arrays.asList(odooDB, uid, password, "res.partner", "create", Arrays.asList(map)));
+                    if (id != null) {
                         LOG.info("Odoo Client created with id " + id);
                     }
                     return id;
@@ -135,9 +130,9 @@ public class OdooServiceImpl implements OdooService {
                 map.put("limit", 5);
 
                 if (clientId != null) {
-                    partners = Arrays.asList((Object[]) models.execute("execute_kw",
-                            Arrays.asList(odooDB, uid, password, "res.partner", "search_read",
-                                    Arrays.asList(Arrays.asList(Arrays.asList("fineract_customer_id", "=", clientId.intValue()))),map)));
+                    partners = Arrays.asList(
+                            (Object[]) models.execute("execute_kw", Arrays.asList(odooDB, uid, password, "res.partner", "search_read",
+                                    Arrays.asList(Arrays.asList(Arrays.asList("fineract_customer_id", "=", clientId.intValue()))), map)));
                     Integer partnerId = null;
                     if (partners != null && partners.size() > 0) {
                         HashMap partner = (HashMap) partners.get(0);
@@ -156,12 +151,12 @@ public class OdooServiceImpl implements OdooService {
         XmlRpcClient models;
         try {
             models = new XmlRpcClient() {
+
                 {
                     setConfig(new XmlRpcClientConfigImpl() {
 
                         {
-                            setServerURL(
-                                    new URL(String.format("%s/xmlrpc/2/object", url)));
+                            setServerURL(new URL(String.format("%s/xmlrpc/2/object", url)));
                         }
                     });
                 }
@@ -203,7 +198,9 @@ public class OdooServiceImpl implements OdooService {
                 }
             }
 
-            if (errors.size() > 0) { throw new JobExecutionException(errors); }
+            if (errors.size() > 0) {
+                throw new JobExecutionException(errors);
+            }
         }
     }
 

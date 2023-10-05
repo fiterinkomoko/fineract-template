@@ -107,6 +107,16 @@ public class KivaLoanServiceImpl implements KivaLoanService {
         }
     }
 
+    @Override
+    @CronTarget(jobName = JobName.POST_LOAN_REPAYMENTS_TO_KIVA)
+    public void postLoanRepaymentsToKiva() throws JobExecutionException {
+        // Authenticate to KIVA
+        String accessToken = authenticateToKiva();
+        // Get Loan Accounts expecting repayment from KIVA
+        JsonObject pingKivaForSizeOfLoanAwaitingRepayment = getLoanAccountsReadyForRepayments(accessToken);
+
+    }
+
     private String loanPayloadToKivaMapper(List<KivaLoanAccountSchedule> kivaLoanAccountSchedules, List<KivaLoanAccount> kivaLoanAccounts,
             List<Boolean> notPictured, Loan loan) {
 
@@ -244,8 +254,13 @@ public class KivaLoanServiceImpl implements KivaLoanService {
     }
 
     private String postLoanToKiva(String accessToken, String loanToKiva) {
-        HttpUrl.Builder urlBuilder = HttpUrl.parse(getConfigProperty("fineract.integrations.kiva.postLoanDraftUrl")).newBuilder();
-        String url = urlBuilder.build().toString();
+        HttpUrl urlBuilder = new HttpUrl.Builder().scheme(getConfigProperty("fineract.integrations.kiva.httpType"))
+                .host(getConfigProperty("fineract.integrations.kiva.baseUrl"))
+                .addPathSegment(getConfigProperty("fineract.integrations.kiva.apiVersion"))
+                .addPathSegment(getConfigProperty("fineract.integrations.kiva.partnerCode"))
+                .addPathSegment(getConfigProperty("fineract.integrations.kiva.partnerId")).addPathSegment("loan_draft").build();
+
+        String url = urlBuilder.toString();
 
         OkHttpClient client = new OkHttpClient();
         Response response = null;
@@ -295,6 +310,54 @@ public class KivaLoanServiceImpl implements KivaLoanService {
             throw new RuntimeException(e);
         }
         return Base64.getEncoder().encodeToString(imageBytes);
+    }
+
+    private JsonObject getLoanAccountsReadyForRepayments(String accessToken) {
+
+        HttpUrl.Builder builder = new HttpUrl.Builder().scheme(getConfigProperty("fineract.integrations.kiva.httpType"))
+                .host(getConfigProperty("fineract.integrations.kiva.baseUrl"))
+                .addPathSegment(getConfigProperty("fineract.integrations.kiva.apiVersion"))
+                .addPathSegment(getConfigProperty("fineract.integrations.kiva.partnerCode"))
+                .addPathSegment(getConfigProperty("fineract.integrations.kiva.partnerId")).addPathSegment("loans");
+
+        builder.addQueryParameter("limit", "1").addQueryParameter("offset", "0").addQueryParameter("status", "payingBack");
+
+        String url = builder.build().toString();
+
+        OkHttpClient client = new OkHttpClient();
+        List<Throwable> exceptions = new ArrayList<>();
+        Response response = null;
+
+        Request request = new Request.Builder().url(url).header("Authorization", "Bearer " + accessToken).get().build();
+
+        try {
+            response = client.newCall(request).execute();
+            String resObject = response.body().string();
+            if (response.isSuccessful()) {
+
+                JsonObject jsonResponse = JsonParser.parseString(resObject).getAsJsonObject();
+                log.info("Loan Account Expecting Repayment from KIVA :=>" + resObject);
+
+                return jsonResponse;
+
+            } else {
+                log.error("Get Loans expecting repayment from KIVA failed with Message:", resObject);
+
+                handleAPIIntegrityIssues(resObject);
+
+            }
+        } catch (Exception e) {
+            log.error("Get Loans expecting repayment from KIVA failed", e);
+            exceptions.add(e);
+        }
+        if (!CollectionUtils.isEmpty(exceptions)) {
+            try {
+                throw new JobExecutionException(exceptions);
+            } catch (JobExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return null;
     }
 
 }

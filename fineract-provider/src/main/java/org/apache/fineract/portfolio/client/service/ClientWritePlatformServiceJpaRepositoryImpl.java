@@ -146,23 +146,24 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-                                                       final ClientRepositoryWrapper clientRepository, final ClientNonPersonRepositoryWrapper clientNonPersonRepository,
-                                                       final OfficeRepositoryWrapper officeRepositoryWrapper, final NoteRepository noteRepository,
-                                                       final ClientDataValidator fromApiJsonDeserializer, final AccountNumberGenerator accountNumberGenerator,
-                                                       final GroupRepository groupRepository, final StaffRepositoryWrapper staffRepository,
-                                                       final CodeValueRepositoryWrapper codeValueRepository, final LoanRepositoryWrapper loanRepositoryWrapper,
-                                                       final SavingsAccountRepositoryWrapper savingsRepositoryWrapper, final SavingsProductRepository savingsProductRepository,
-                                                       final SavingsApplicationProcessWritePlatformService savingsApplicationProcessWritePlatformService,
-                                                       final CommandProcessingService commandProcessingService, final ConfigurationDomainService configurationDomainService,
-                                                       final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, final FromJsonHelper fromApiJsonHelper,
-                                                       final ConfigurationReadPlatformService configurationReadPlatformService,
-                                                       final AddressWritePlatformService addressWritePlatformService,
-                                                       final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService,
-                                                       final BusinessEventNotifierService businessEventNotifierService,
-                                                       final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
-                                                       BusinessOwnerWritePlatformService businessOwnerWritePlatformService,
-                                                       final ClientTransactionLimitRepository clientTransactionLimitRepository,
-                                                       ClientAdditionalInfoRepository clientAdditionalInfoRepository, ValidationLimitRepository validationLimitRepository, OdooService odooService) {
+            final ClientRepositoryWrapper clientRepository, final ClientNonPersonRepositoryWrapper clientNonPersonRepository,
+            final OfficeRepositoryWrapper officeRepositoryWrapper, final NoteRepository noteRepository,
+            final ClientDataValidator fromApiJsonDeserializer, final AccountNumberGenerator accountNumberGenerator,
+            final GroupRepository groupRepository, final StaffRepositoryWrapper staffRepository,
+            final CodeValueRepositoryWrapper codeValueRepository, final LoanRepositoryWrapper loanRepositoryWrapper,
+            final SavingsAccountRepositoryWrapper savingsRepositoryWrapper, final SavingsProductRepository savingsProductRepository,
+            final SavingsApplicationProcessWritePlatformService savingsApplicationProcessWritePlatformService,
+            final CommandProcessingService commandProcessingService, final ConfigurationDomainService configurationDomainService,
+            final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository, final FromJsonHelper fromApiJsonHelper,
+            final ConfigurationReadPlatformService configurationReadPlatformService,
+            final AddressWritePlatformService addressWritePlatformService,
+            final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService,
+            final BusinessEventNotifierService businessEventNotifierService,
+            final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
+            BusinessOwnerWritePlatformService businessOwnerWritePlatformService,
+            final ClientTransactionLimitRepository clientTransactionLimitRepository,
+            ClientAdditionalInfoRepository clientAdditionalInfoRepository, ValidationLimitRepository validationLimitRepository,
+            OdooService odooService) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.clientNonPersonRepository = clientNonPersonRepository;

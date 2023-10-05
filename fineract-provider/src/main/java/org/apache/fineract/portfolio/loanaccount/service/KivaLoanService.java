@@ -23,4 +23,6 @@ import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 public interface KivaLoanService {
 
     void postLoanAccountsToKiva() throws JobExecutionException;
+
+    void postLoanRepaymentsToKiva() throws JobExecutionException;
 }
