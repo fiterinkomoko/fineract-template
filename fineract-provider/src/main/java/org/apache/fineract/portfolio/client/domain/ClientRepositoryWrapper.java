@@ -95,4 +95,12 @@ public class ClientRepositoryWrapper {
         }
         return client;
     }
+
+    public List<Client> getClientByIsOdooPosted(boolean isOdooCustomerPosted) {
+        List<Client> clients = this.repository.findByIsOdooPosted(isOdooCustomerPosted);
+        if (clients.isEmpty()) {
+            throw new ClientNotFoundException();
+        }
+        return clients;
+    }
 }
