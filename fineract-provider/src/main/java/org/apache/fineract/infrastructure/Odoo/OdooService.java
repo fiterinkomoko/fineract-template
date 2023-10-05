@@ -18,8 +18,15 @@
  */
 package org.apache.fineract.infrastructure.Odoo;
 
+import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
+import org.apache.fineract.portfolio.client.domain.Client;
+
 public interface OdooService {
 
     Integer loginToOddo();
+
+    public Integer createCustomerToOddo(Client client);
+
+    public void postClientsAndSavingsAccountToOddo() throws JobExecutionException;
 
 }
