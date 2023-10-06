@@ -120,6 +120,8 @@ public class KivaLoanServiceImpl implements KivaLoanService {
     public void postLoanRepaymentsToKiva() throws JobExecutionException {
         // Authenticate to KIVA
         String accessToken = authenticateToKiva();
+        //Reset this table to receive new loan data
+        kivaLoanAwaitingApprovalRepository.deleteAll();
         // Get Loan Accounts expecting repayment from KIVA
         KivaLoanAwaitingRepaymentData intialKivaLoanRequest = getLoanAccountsReadyForRepayments(accessToken, 1, 0, LOAN_STATUS);
         log.error("Kiva Loan Waiting Repayment" + intialKivaLoanRequest.toString());
