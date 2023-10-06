@@ -181,5 +181,93 @@
 
         </insert>
     </changeSet>
+    <changeSet id="create-m_kiva_loan_awaiting_approval" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_kiva_loan_awaiting_approval"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_kiva_loan_awaiting_approval">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="borrower_count" type="int">
+                <constraints nullable="true"/>
+            </column>
+            <column name="internal_loan_id" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="internal_client_id" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="partner_id" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="partner" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="kiva_id" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="uuid" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="location" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="status" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="loan_price" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="loan_local_price" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="loan_currency" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="create_time" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="ended_time" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="refunded_time" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="expired_time" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="defaulted_time" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="planned_expiration_time" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="planned_inactive_expire_time" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="delinquent" type="boolean">
+                <constraints nullable="true" />
+            </column>
+            <column name="issue_feedback_time" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="issue_reported_by" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="flexible_fundraising_enabled" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="funded_amount" type="decimal(19,6)">
+                <constraints nullable="true" />
+            </column>
+        </createTable>
+    </changeSet>
+
 
 </databaseChangeLog>
