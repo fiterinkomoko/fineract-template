@@ -268,6 +268,24 @@
             </column>
         </createTable>
     </changeSet>
+    <changeSet author="bosco@fiter.io" id="m_kiva_loan_awaiting_approval_report">
+        <insert tableName="stretchy_report">
+            <column name="report_name" value="Loans Awaiting Payment at Kiva"/>
+            <column name="report_type" value="Table"/>
+            <column name="report_subtype"/>
+            <column name="report_category" value="Loan"/>
+            <column name="report_sql" value="SELECT mklaa.id AS id,mklaa.borrower_count AS borrowerCount,mklaa.internal_client_id AS clientId,
+               mklaa.internal_loan_id AS loanId , mklaa.partner_id AS partnerId , mklaa.partner AS partner , mklaa.kiva_id AS kivaId ,
+               mklaa.uuid AS uuid , mklaa.name AS clientName ,mklaa.location AS location , mklaa.status AS status ,
+               mklaa.status AS status , mklaa.loan_price AS loanPrice , mklaa.loan_price AS loanPrice , mklaa.loan_local_price AS loanLocalPrice ,
+               mklaa.loan_currency AS currency , mklaa.funded_amount AS fundedAmount , Coalesce(ml.principal_repaid_derived,0) AS amount
+               FROM m_kiva_loan_awaiting_approval mklaa  LEFT JOIN m_loan ml on mklaa.kiva_id = ml.kiva_id "/>
+            <column name="description" value="Loans Awaiting Payment at Kiva Report"/>
+            <column name="core_report" valueBoolean="true"/>
+            <column name="use_report" valueBoolean="true"/>
+            <column name="self_service_user_report" valueBoolean="false"/>
+        </insert>
+    </changeSet>
 
 
 </databaseChangeLog>
