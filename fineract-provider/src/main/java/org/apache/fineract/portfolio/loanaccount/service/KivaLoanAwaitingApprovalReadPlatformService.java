@@ -18,11 +18,10 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
+import java.util.Collection;
+import org.apache.fineract.portfolio.loanaccount.data.KivaLoanAwaitingApprovalData;
 
-public interface KivaLoanService {
+public interface KivaLoanAwaitingApprovalReadPlatformService {
 
-    void postLoanAccountsToKiva() throws JobExecutionException;
-
-    void postLoanRepaymentsToKiva() throws JobExecutionException;
+    Collection<KivaLoanAwaitingApprovalData> retrieveAllKivaLoanAwaitingApproval();
 }

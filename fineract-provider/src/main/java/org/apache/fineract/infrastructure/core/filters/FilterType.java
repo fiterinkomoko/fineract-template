@@ -16,13 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
 
-import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
+package org.apache.fineract.infrastructure.core.filters;
 
-public interface KivaLoanService {
-
-    void postLoanAccountsToKiva() throws JobExecutionException;
-
-    void postLoanRepaymentsToKiva() throws JobExecutionException;
+public enum FilterType {
+    BOOLEAN, STRING, INTEGER, DECIMAL, DATE, ENUMERATION;
 }

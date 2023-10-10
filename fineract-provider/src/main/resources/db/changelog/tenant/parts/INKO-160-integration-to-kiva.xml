@@ -150,4 +150,142 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="bosco@fiter.io" id="add-Post-loan-repayments-to-kiva-job">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sqlCheck expectedResult="1">
+                    SELECT COUNT(1) FROM job WHERE name = 'Post Loan Repayments to Kiva'
+                </sqlCheck>
+            </not>
+        </preConditions>
+
+        <insert tableName="job">
+            <column name="name" value="Post Loan Repayments to Kiva" />
+            <column name="display_name" value="Post Loan Repayments to Kiva" />
+            <column name="cron_expression" value="0 0 22 1/1 * ? *" />
+            <column name="create_time" value="now()" />
+            <column name="task_priority" value="5" />
+            <column name="group_name" value="null" />
+            <column name="previous_run_start_time" value="null" />
+            <column name="next_run_time" value="null" />
+            <column name="job_key" value="Post Loan Repayments to Kiva _ DEFAULT" />
+            <column name="initializing_errorlog" value="null" />
+            <column name="is_active" valueBoolean="true" />
+            <column name="currently_running" valueBoolean="false" />
+            <column name="updates_allowed" valueBoolean="true" />
+            <column name="scheduler_group" value="1" />
+            <column name="is_misfired" valueBoolean="false" />
+            <column name="node_id" value="0" />
+            <column name="is_mismatched_job" valueBoolean="false" />
+
+        </insert>
+    </changeSet>
+    <changeSet id="create-m_kiva_loan_awaiting_approval" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_kiva_loan_awaiting_approval"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_kiva_loan_awaiting_approval">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="borrower_count" type="int">
+                <constraints nullable="true"/>
+            </column>
+            <column name="internal_loan_id" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="internal_client_id" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="partner_id" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="partner" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="kiva_id" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="uuid" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="location" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="status" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="loan_price" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="loan_local_price" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="loan_currency" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="create_time" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="ended_time" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="refunded_time" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="expired_time" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="defaulted_time" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="planned_expiration_time" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="planned_inactive_expire_time" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="delinquent" type="boolean">
+                <constraints nullable="true" />
+            </column>
+            <column name="issue_feedback_time" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="issue_reported_by" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="flexible_fundraising_enabled" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="funded_amount" type="decimal(19,6)">
+                <constraints nullable="true" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="m_kiva_loan_awaiting_approval_report">
+        <insert tableName="stretchy_report">
+            <column name="report_name" value="Loans Awaiting Payment at Kiva"/>
+            <column name="report_type" value="Table"/>
+            <column name="report_subtype"/>
+            <column name="report_category" value="Loan"/>
+            <column name="report_sql" value="SELECT mklaa.id AS id,mklaa.borrower_count AS borrowerCount,mklaa.internal_client_id AS clientId,
+               mklaa.internal_loan_id AS loanId , mklaa.partner_id AS partnerId , mklaa.partner AS partner , mklaa.kiva_id AS kivaId ,
+               mklaa.uuid AS uuid , mklaa.name AS clientName ,mklaa.location AS location , mklaa.status AS status ,
+               mklaa.status AS status , mklaa.loan_price AS loanPrice , mklaa.loan_price AS loanPrice , mklaa.loan_local_price AS loanLocalPrice ,
+               mklaa.loan_currency AS currency , mklaa.funded_amount AS fundedAmount , Coalesce(ml.principal_repaid_derived,0) AS amount
+               FROM m_kiva_loan_awaiting_approval mklaa  LEFT JOIN m_loan ml on mklaa.kiva_id = ml.kiva_id "/>
+            <column name="description" value="Loans Awaiting Payment at Kiva Report"/>
+            <column name="core_report" valueBoolean="true"/>
+            <column name="use_report" valueBoolean="true"/>
+            <column name="self_service_user_report" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+
 </databaseChangeLog>

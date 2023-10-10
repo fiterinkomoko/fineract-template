@@ -1044,6 +1044,7 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
     public void setKivaId(String kivaId) {
         this.kivaId = kivaId;
     }
+
     public String getMobileNo() {
         return mobileNo;
     }

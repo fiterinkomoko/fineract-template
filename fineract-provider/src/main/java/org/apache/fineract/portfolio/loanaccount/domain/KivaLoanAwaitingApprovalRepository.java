@@ -16,21 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.client.domain;
+package org.apache.fineract.portfolio.loanaccount.domain;
 
-import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
-interface ClientRepository extends JpaRepository<Client, Long>, JpaSpecificationExecutor<Client> {
+public interface KivaLoanAwaitingApprovalRepository
+        extends JpaRepository<KivaLoanAwaitingApproval, Long>, JpaSpecificationExecutor<KivaLoanAwaitingApproval> {
 
-    String FIND_CLIENT_BY_ACCOUNT_NUMBER = "select client from Client client where client.accountNumber = :accountNumber";
-
-    @Query(FIND_CLIENT_BY_ACCOUNT_NUMBER)
-    Client getClientByAccountNumber(@Param("accountNumber") String accountNumber);
-
-    @Query("select client from Client client where client.isOdooCustomerPosted= :isOdooCustomerPosted")
-    List<Client> findByIsOdooPosted(@Param("isOdooCustomerPosted") boolean isOdooCustomerPosted);
 }

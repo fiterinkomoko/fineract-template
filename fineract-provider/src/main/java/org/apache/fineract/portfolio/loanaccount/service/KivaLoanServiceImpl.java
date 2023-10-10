@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.File;
@@ -28,6 +29,7 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +54,13 @@ import org.apache.fineract.portfolio.client.domain.ClientRecruitmentSurveyReposi
 import org.apache.fineract.portfolio.common.domain.KivaLoanDepartmentThemeTypeMapper;
 import org.apache.fineract.portfolio.loanaccount.data.KivaLoanAccount;
 import org.apache.fineract.portfolio.loanaccount.data.KivaLoanAccountSchedule;
+import org.apache.fineract.portfolio.loanaccount.data.KivaLoanAwaitingApprovalData;
+import org.apache.fineract.portfolio.loanaccount.data.KivaLoanAwaitingRepaymentData;
+import org.apache.fineract.portfolio.loanaccount.data.KivaLoanData;
+import org.apache.fineract.portfolio.loanaccount.data.KivaLoanRepaymentData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDetailToKivaData;
+import org.apache.fineract.portfolio.loanaccount.domain.KivaLoanAwaitingApproval;
+import org.apache.fineract.portfolio.loanaccount.domain.KivaLoanAwaitingApprovalRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
@@ -73,12 +81,16 @@ public class KivaLoanServiceImpl implements KivaLoanService {
     private static final Logger LOG = LoggerFactory.getLogger(KivaLoanServiceImpl.class);
     public static final String FORM_URL_ENCODED = "application/x-www-form-urlencoded";
     public static final String FORM_URL_CONTENT_TYPE = "Content-Type";
+    public static final String LOAN_STATUS = "payingBack";
+    public static final Integer INITIAL_LOAN_LIMIT = 100;
     public static final Long ACTIVITY_ID = 110L;
     public static final Integer DESCRIPTION_LANGUAGE_ID = 1;
 
     private final LoanRepository loanRepository;
     private final DocumentReadPlatformServiceImpl documentReadPlatformService;
     private final ClientRecruitmentSurveyRepository clientRecruitmentSurveyRepository;
+    private final KivaLoanAwaitingApprovalRepository kivaLoanAwaitingApprovalRepository;
+    private final KivaLoanAwaitingApprovalReadPlatformService kivaLoanAwaitingApprovalReadPlatformService;
     @Autowired
     private Environment env;
 
@@ -103,6 +115,55 @@ public class KivaLoanServiceImpl implements KivaLoanService {
                 String loanDraftUUID = postLoanToKiva(accessToken, loanToKiva);
                 loan.setKivaUUId(loanDraftUUID);
                 loanRepository.saveAndFlush(loan);
+            }
+        }
+    }
+
+    @Override
+    @CronTarget(jobName = JobName.POST_LOAN_REPAYMENTS_TO_KIVA)
+    public void postLoanRepaymentsToKiva() throws JobExecutionException {
+        // Authenticate to KIVA
+        String accessToken = authenticateToKiva();
+        // Reset this table to receive new loan data
+        kivaLoanAwaitingApprovalRepository.deleteAll();
+        // Get Loan Accounts expecting repayment from KIVA
+        KivaLoanAwaitingRepaymentData intialKivaLoanRequest = getLoanAccountsReadyForRepayments(accessToken, 1, 0, LOAN_STATUS);
+        log.info("Kiva Loan Waiting Repayment" + intialKivaLoanRequest.toString());
+        Integer totalPages = getKivaLoanPageSize(intialKivaLoanRequest.getTotal_records());
+        log.info("Kiva Loan Total Records  " + intialKivaLoanRequest.getTotal_records());
+        log.info("Kiva Loan Pages  " + totalPages);
+        if (totalPages > 0) {
+            for (int page = 1; page <= totalPages; page++) {
+                int offset = (page - 1) * INITIAL_LOAN_LIMIT;
+                KivaLoanAwaitingRepaymentData kivaLoanAwaitingRepaymentData = getLoanAccountsReadyForRepayments(accessToken, 100, offset,
+                        LOAN_STATUS);
+                log.info("Kiva Loan Waiting Repayment-- Page - - " + page + " - Offset - " + offset + "  ** "
+                        + kivaLoanAwaitingRepaymentData.toString());
+
+                saveKivaLoanAccountsAwaitingForRepayment(kivaLoanAwaitingRepaymentData);
+            }
+            // Now send repayments to Kiva
+            KivaLoanRepaymentData kivaLoanRepaymentData = new KivaLoanRepaymentData();
+            final Collection<KivaLoanAwaitingApprovalData> loanAwaitingApprovalData = this.kivaLoanAwaitingApprovalReadPlatformService
+                    .retrieveAllKivaLoanAwaitingApproval();
+            kivaLoanRepaymentData.setRepayments(loanAwaitingApprovalData);
+            LOG.info(kivaLoanRepaymentData.toString());
+            Gson gson = new GsonBuilder().create();
+
+            String repayment = gson.toJson(kivaLoanRepaymentData);
+            LOG.info("Repayment Object to Kiva :=> " + repayment);
+            postLoanRepaymentToKiva(accessToken, repayment);
+
+        }
+
+    }
+
+    private void saveKivaLoanAccountsAwaitingForRepayment(KivaLoanAwaitingRepaymentData kivaLoanAwaitingRepaymentData) {
+        if (!CollectionUtils.isEmpty(kivaLoanAwaitingRepaymentData.getData())) {
+
+            for (KivaLoanData kivaLoanData : kivaLoanAwaitingRepaymentData.getData()) {
+                KivaLoanAwaitingApproval kivaLoanAwaitingApproval = new KivaLoanAwaitingApproval(kivaLoanData);
+                kivaLoanAwaitingApprovalRepository.saveAndFlush(kivaLoanAwaitingApproval);
             }
         }
     }
@@ -211,13 +272,13 @@ public class KivaLoanServiceImpl implements KivaLoanService {
 
                 return accessToken;
             } else {
-                log.error("Login to KIVA failed with Message:", resObject);
+                log.error("Login to KIVA failed with Message:" + resObject);
 
                 handleAPIIntegrityIssues(resObject);
 
             }
         } catch (Exception e) {
-            log.error("Authentication to KIVA has failed", e);
+            log.error("Authentication to KIVA has failed" + e);
             exceptions.add(e);
         }
         if (!CollectionUtils.isEmpty(exceptions)) {
@@ -244,8 +305,13 @@ public class KivaLoanServiceImpl implements KivaLoanService {
     }
 
     private String postLoanToKiva(String accessToken, String loanToKiva) {
-        HttpUrl.Builder urlBuilder = HttpUrl.parse(getConfigProperty("fineract.integrations.kiva.postLoanDraftUrl")).newBuilder();
-        String url = urlBuilder.build().toString();
+        HttpUrl urlBuilder = new HttpUrl.Builder().scheme(getConfigProperty("fineract.integrations.kiva.httpType"))
+                .host(getConfigProperty("fineract.integrations.kiva.baseUrl"))
+                .addPathSegment(getConfigProperty("fineract.integrations.kiva.apiVersion"))
+                .addPathSegment(getConfigProperty("fineract.integrations.kiva.partnerCode"))
+                .addPathSegment(getConfigProperty("fineract.integrations.kiva.partnerId")).addPathSegment("loan_draft").build();
+
+        String url = urlBuilder.toString();
 
         OkHttpClient client = new OkHttpClient();
         Response response = null;
@@ -267,13 +333,13 @@ public class KivaLoanServiceImpl implements KivaLoanService {
                 return jsonResponse.get("loan_draft_uuid").getAsString();
 
             } else {
-                log.error("Post Loan to KIVA failed with Message:", resObject);
+                log.error("Post Loan to KIVA failed with Message:" + resObject);
 
                 handleAPIIntegrityIssues(resObject);
 
             }
         } catch (Exception e) {
-            log.error("Post Loan to KIVA has failed", e);
+            log.error("Post Loan to KIVA has failed" + e);
             exceptions.add(e);
         }
         if (!CollectionUtils.isEmpty(exceptions)) {
@@ -295,6 +361,142 @@ public class KivaLoanServiceImpl implements KivaLoanService {
             throw new RuntimeException(e);
         }
         return Base64.getEncoder().encodeToString(imageBytes);
+    }
+
+    private KivaLoanAwaitingRepaymentData getLoanAccountsReadyForRepayments(String accessToken, Integer limit, Integer offset,
+            String status) {
+
+        HttpUrl.Builder builder = new HttpUrl.Builder().scheme(getConfigProperty("fineract.integrations.kiva.httpType"))
+                .host(getConfigProperty("fineract.integrations.kiva.baseUrl"))
+                .addPathSegment(getConfigProperty("fineract.integrations.kiva.apiVersion"))
+                .addPathSegment(getConfigProperty("fineract.integrations.kiva.partnerCode"))
+                .addPathSegment(getConfigProperty("fineract.integrations.kiva.partnerId")).addPathSegment("loans")
+                .addQueryParameter("limit", String.valueOf(limit)).addQueryParameter("offset", String.valueOf(offset))
+                .addQueryParameter("status", status);
+
+        String url = builder.build().toString();
+
+        OkHttpClient client = new OkHttpClient();
+        List<Throwable> exceptions = new ArrayList<>();
+        Response response = null;
+
+        Request request = new Request.Builder().url(url).header("Authorization", "Bearer " + accessToken).get().build();
+
+        try {
+            response = client.newCall(request).execute();
+            String resObject = response.body().string();
+            if (response.isSuccessful()) {
+                return fromJson(JsonParser.parseString(resObject).getAsJsonObject());
+            } else {
+                log.error("Get Loans expecting repayment from KIVA failed with Message:" + resObject);
+
+                handleAPIIntegrityIssues(resObject);
+
+            }
+        } catch (Exception e) {
+            log.error("Get Loans expecting repayment from KIVA failed" + e);
+            exceptions.add(e);
+        }
+        if (!CollectionUtils.isEmpty(exceptions)) {
+            try {
+                throw new JobExecutionException(exceptions);
+            } catch (JobExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return null;
+    }
+
+    public KivaLoanAwaitingRepaymentData fromJson(JsonObject jsonResponse) {
+
+        KivaLoanAwaitingRepaymentData loanResponse = new KivaLoanAwaitingRepaymentData();
+
+        loanResponse.setTotal_records(jsonResponse.get("total_records").getAsInt());
+
+        JsonArray dataArray = jsonResponse.getAsJsonArray("data");
+        List<KivaLoanData> loanDataList = new ArrayList<>();
+        for (int i = 0; i < dataArray.size(); i++) {
+            JsonObject loanDataObject = dataArray.get(i).getAsJsonObject();
+
+            KivaLoanData loanData = new KivaLoanData();
+
+            loanData.setBorrower_count(loanDataObject.get("borrower_count").getAsInt());
+            loanData.setInternal_loan_id(loanDataObject.get("internal_loan_id").getAsString());
+            loanData.setInternal_client_id(loanDataObject.get("internal_client_id").getAsString());
+            loanData.setPartner_id(loanDataObject.get("partner_id").getAsString());
+            loanData.setPartner(loanDataObject.get("partner").getAsString());
+            loanData.setKiva_id(loanDataObject.get("kiva_id").getAsString());
+            loanData.setUuid(loanDataObject.get("uuid").getAsString());
+            loanData.setName(loanDataObject.get("name").getAsString());
+            loanData.setLocation(loanDataObject.get("location").getAsString());
+            loanData.setStatus(loanDataObject.get("status").getAsString());
+            loanData.setLoan_price(loanDataObject.get("loan_price").getAsString());
+            loanData.setLoan_local_price(loanDataObject.get("loan_local_price").getAsString());
+            loanData.setLoan_currency(loanDataObject.get("loan_currency").getAsString());
+            loanData.setDelinquent(loanDataObject.get("delinquent").getAsBoolean());
+            loanData.setFundedAmount(loanDataObject.get("fundedAmount").getAsBigDecimal());
+
+            loanDataList.add(loanData);
+        }
+        loanResponse.setData(loanDataList);
+
+        return loanResponse;
+    }
+
+    private Integer getKivaLoanPageSize(Integer totalRecords) {
+
+        Integer totalPages = totalRecords / INITIAL_LOAN_LIMIT;
+        Integer remainder = totalRecords % INITIAL_LOAN_LIMIT;
+
+        if (remainder > 0) {
+            totalPages++;
+        }
+        return totalPages;
+    }
+
+    private void postLoanRepaymentToKiva(String accessToken, String repayments) {
+        HttpUrl urlBuilder = new HttpUrl.Builder().scheme(getConfigProperty("fineract.integrations.kiva.httpType"))
+                .host(getConfigProperty("fineract.integrations.kiva.baseUrl"))
+                .addPathSegment(getConfigProperty("fineract.integrations.kiva.apiVersion"))
+                .addPathSegment(getConfigProperty("fineract.integrations.kiva.partnerCode"))
+                .addPathSegment(getConfigProperty("fineract.integrations.kiva.partnerId")).addPathSegment("repayments").build();
+
+        String url = urlBuilder.toString();
+        LOG.info("Post Loan Repayments to KIVA URL :=>" + url);
+        OkHttpClient client = new OkHttpClient();
+        Response response = null;
+
+        RequestBody formBody = RequestBody.create(MediaType.parse(FORM_URL_CONTENT_TYPE), repayments);
+
+        Request request = new Request.Builder().url(url).header("Authorization", "Bearer " + accessToken).post(formBody).build();
+
+        List<Throwable> exceptions = new ArrayList<>();
+
+        try {
+            response = client.newCall(request).execute();
+            String resObject = response.body().string();
+            if (response.isSuccessful()) {
+
+                JsonObject jsonResponse = JsonParser.parseString(resObject).getAsJsonObject();
+                log.info("Loan Account Repayment Response from KIVA :=>" + resObject);
+
+            } else {
+                log.error("Post Loan Repayments to KIVA failed with Message:" + resObject);
+
+                handleAPIIntegrityIssues(resObject);
+
+            }
+        } catch (Exception e) {
+            log.error("Post Loan Repayments to KIVA has failed" + e);
+            exceptions.add(e);
+        }
+        if (!CollectionUtils.isEmpty(exceptions)) {
+            try {
+                throw new JobExecutionException(exceptions);
+            } catch (JobExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
 }
