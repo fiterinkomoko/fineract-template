@@ -77,7 +77,8 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
         if (LegalForm.fromInt(legalFormId).isPerson()) {
             final Integer nationalityId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.nationalityIdParamName,
                     element);
-            baseDataValidator.reset().parameter(ClientApiConstants.nationalityIdParamName).value(nationalityId).notNull().integerGreaterThanZero();
+            baseDataValidator.reset().parameter(ClientApiConstants.nationalityIdParamName).value(nationalityId).notNull()
+                    .integerGreaterThanZero();
 
             if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.numberOfChildren, element) != null) {
                 final Long numberOfChildren = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.numberOfChildren, element);
