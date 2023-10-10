@@ -16,13 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.portfolio.loanaccount.data;
 
-import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
+import java.math.BigDecimal;
+import lombok.Data;
 
-public interface KivaLoanService {
+@Data
+public class KivaLoanAwaitingApprovalData {
 
-    void postLoanAccountsToKiva() throws JobExecutionException;
+    private String loan_id;
+    private String client_id;
+    private BigDecimal amount;
 
-    void postLoanRepaymentsToKiva() throws JobExecutionException;
+    public KivaLoanAwaitingApprovalData(String loan_id, String client_id, BigDecimal amount) {
+        this.loan_id = loan_id;
+        this.client_id = client_id;
+        this.amount = amount;
+    }
 }

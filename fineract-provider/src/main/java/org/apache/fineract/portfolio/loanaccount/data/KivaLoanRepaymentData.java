@@ -16,13 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.portfolio.loanaccount.data;
 
-import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
+import java.util.Collection;
+import lombok.Data;
 
-public interface KivaLoanService {
+@Data
+public class KivaLoanRepaymentData {
 
-    void postLoanAccountsToKiva() throws JobExecutionException;
+    Collection<KivaLoanAwaitingApprovalData> repayments;
 
-    void postLoanRepaymentsToKiva() throws JobExecutionException;
 }
