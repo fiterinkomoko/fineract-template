@@ -1037,7 +1037,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             return ClientData.instance(accountNo, status, subStatus, officeId, officeName, null, null, id, firstname, middlename, lastname,
                     fullname, displayName, externalId, mobileNo, emailAddress, dateOfBirth, gender, activationDate, null, null, null,
                     timeline, savingsProductId, savingsProductName, savingsAccountId, clienttype, null, legalForm, null, isStaff, null,
-                    dailyWithDrawLimit, singleWithDrawLimit, null, createdDate);
+                    dailyWithDrawLimit, singleWithDrawLimit, null, createdDate, null);
 
         }
     }
