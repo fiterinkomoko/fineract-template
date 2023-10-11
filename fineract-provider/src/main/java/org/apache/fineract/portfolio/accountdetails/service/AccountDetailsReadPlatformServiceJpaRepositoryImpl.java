@@ -455,7 +455,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
 
             final StringBuilder accountsSummary = new StringBuilder("l.id as id, l.account_no as accountNo, l.external_id as externalId,");
             accountsSummary.append(" l.product_id as productId, lp.name as productName, lp.short_name as shortProductName,")
-                    .append(" l.loan_status_id as statusId, l.loan_type_enum as loanType,")
+                    .append(" lp.description as loanProductDescription, l.loan_status_id as statusId, l.loan_type_enum as loanType,")
 
                     .append(" glim.account_number as parentAccountNumber,")
 
@@ -510,6 +510,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
             final Long productId = JdbcSupport.getLong(rs, "productId");
             final String loanProductName = rs.getString("productName");
             final String shortLoanProductName = rs.getString("shortProductName");
+            final String loanProductDescription = rs.getString("loanProductDescription");
             final Integer loanStatusId = JdbcSupport.getInteger(rs, "statusId");
             final LoanStatusEnumData loanStatus = LoanEnumerations.status(loanStatusId);
             final Integer loanTypeId = JdbcSupport.getInteger(rs, "loanType");
@@ -575,9 +576,11 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
                     disbursedByFirstname, disbursedByLastname, closedOnDate, closedByUsername, closedByFirstname, closedByLastname,
                     expectedMaturityDate, writtenOffOnDate, closedByUsername, closedByFirstname, closedByLastname);
 
-            return new LoanAccountSummaryData(id, accountNo, parentAccountNumber, externalId, productId, loanProductName,
-                    shortLoanProductName, loanStatus, loanType, loanCycle, timeline, inArrears, originalLoan, loanBalance, amountPaid,
-                    loanDecisionStateEnumData, actualPrincipalAmount);
+            LoanAccountSummaryData loanAccountSummaryData = new LoanAccountSummaryData(id, accountNo, parentAccountNumber, externalId,
+                    productId, loanProductName, shortLoanProductName, loanStatus, loanType, loanCycle, timeline, inArrears, originalLoan,
+                    loanBalance, amountPaid, loanDecisionStateEnumData, actualPrincipalAmount);
+            loanAccountSummaryData.setLoanProductDescription(loanProductDescription);
+            return loanAccountSummaryData;
         }
 
     }
