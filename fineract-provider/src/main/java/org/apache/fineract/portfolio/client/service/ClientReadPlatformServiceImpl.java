@@ -106,9 +106,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private final PaginationHelper paginationHelper;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final ClientMapper clientMapper = new ClientMapper();
-
     private final ClientLiteMapper clientLiteMapper = new ClientLiteMapper();
-    private final ClientLookupMapper lookupMapper = new ClientLookupMapper();
     private final ClientMembersOfGroupMapper membersOfGroupMapper = new ClientMembersOfGroupMapper();
     private final ParentGroupsMapper clientGroupsMapper = new ParentGroupsMapper();
 
@@ -440,26 +438,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         } catch (final EmptyResultDataAccessException e) {
             throw new ClientNotFoundException(clientId, e);
         }
-    }
-
-    @Override
-    public Collection<ClientData> retrieveAllForLookup(final String extraCriteria) {
-
-        String sql = "select " + this.lookupMapper.schema();
-
-        if (StringUtils.isNotBlank(extraCriteria)) {
-            sql += " and (" + extraCriteria + ")";
-            this.columnValidator.validateSqlInjection(sql, extraCriteria);
-        }
-        return this.jdbcTemplate.query(sql, this.lookupMapper); // NOSONAR
-    }
-
-    @Override
-    public Collection<ClientData> retrieveAllForLookupByOfficeId(final Long officeId) {
-
-        final String sql = "select " + this.lookupMapper.schema() + " where c.office_id = ? and c.status_enum != ?";
-
-        return this.jdbcTemplate.query(sql, this.lookupMapper, officeId, ClientStatus.CLOSED.getValue()); // NOSONAR
     }
 
     @Override
@@ -1052,37 +1030,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String accountNo = rs.getString("accountNo");
 
             return GroupGeneralData.lookup(groupId, accountNo, groupName);
-        }
-    }
-
-    private static final class ClientLookupMapper implements RowMapper<ClientData> {
-
-        private final String schema;
-
-        ClientLookupMapper() {
-            final StringBuilder builder = new StringBuilder(200);
-
-            builder.append("c.id as id, c.display_name as displayName, ");
-            builder.append("c.office_id as officeId, o.name as officeName ");
-            builder.append("from m_client c ");
-            builder.append("join m_office o on o.id = c.office_id ");
-
-            this.schema = builder.toString();
-        }
-
-        public String schema() {
-            return this.schema;
-        }
-
-        @Override
-        public ClientData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
-
-            final Long id = rs.getLong("id");
-            final String displayName = rs.getString("displayName");
-            final Long officeId = rs.getLong("officeId");
-            final String officeName = rs.getString("officeName");
-
-            return ClientData.lookup(id, displayName, officeId, officeName);
         }
     }
 
