@@ -312,25 +312,40 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             extraCriteria += " and c.external_id like ? ";
         }
 
-        if (displayName != null) {
-            // extraCriteria += " and concatcoalesce(c.firstname, ''),
-            // if(c.firstname > '',' ', '') , coalesce(c.lastname, '')) like "
-            paramList.add("%" + displayName + "%");
-            extraCriteria += " and (c.display_name like ? "; // For Carbon search should be by display_name or
-                                                             // account_no so we use OR to support either
-        }
+        if (displayName != null || accountNumber != null || mobileNo != null) {
+            extraCriteria += " and ( ";
 
-        if (accountNumber != null) {
-            paramList.add("%" + accountNumber + "%");
-            extraCriteria += " or c.account_no like ? "; // For Carbon search should be by display_name or account_no
-                                                         // so we use OR to support either
-        }
+            if (displayName != null) {
+                // extraCriteria += " and concatcoalesce(c.firstname, ''),
+                // if(c.firstname > '',' ', '') , coalesce(c.lastname, '')) like "
+                paramList.add("%" + displayName + "%");
+                extraCriteria += " c.display_name like ? "; // For Carbon search should be by display_name or
+                // account_no so we use OR to support either
+            }
 
-        if (mobileNo != null) {
-            paramList.add("%" + mobileNo + "%");
-            extraCriteria += " or c.mobile_no like ? "; // For Carbon search should be by display_name or account_no or
-                                                        // mobile_no
-                                                        // so we use OR to support either
+            if (accountNumber != null) {
+                paramList.add("%" + accountNumber + "%");
+                if (displayName != null)
+                    extraCriteria += " or c.account_no like ? "; // For Carbon search should be by display_name or
+                                                                 // account_no
+                else
+                    extraCriteria += " c.account_no like ? "; // For Carbon search should be by display_name or
+                                                              // account_no
+            }
+
+            if (mobileNo != null) {
+                paramList.add("%" + mobileNo + "%");
+                if (displayName != null || accountNumber != null)
+                    extraCriteria += " or c.mobile_no like ? "; // For Carbon search should be by display_name or
+                                                                // account_no or
+                else
+                    extraCriteria += " c.mobile_no like ? "; // For Carbon search should be by display_name or
+                                                             // account_no or
+                // mobile_no
+                // so we use OR to support either
+            }
+
+            extraCriteria += " ) ";
         }
 
         if (status != null) {
