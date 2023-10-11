@@ -42,7 +42,6 @@ import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
-import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.group.api.GroupingTypesApiConstants;
 import org.apache.fineract.portfolio.group.data.CenterData;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
@@ -125,10 +124,8 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         final String centerName = null;
         final Long staffId = null;
         final String staffName = null;
-        final Collection<ClientData> clientOptions = null;
-
         return GroupGeneralData.template(defaultOfficeId, centerId, accountNo, centerName, staffId, staffName, centerOptions, officeOptions,
-                staffOptions, clientOptions, availableRoles);
+                staffOptions, availableRoles);
     }
 
     private Long defaultToUsersOfficeIfNull(final Long officeId) {

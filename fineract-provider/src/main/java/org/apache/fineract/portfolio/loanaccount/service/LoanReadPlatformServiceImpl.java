@@ -1574,12 +1574,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final ClientData clientAccount = this.clientReadPlatformService.retrieveOne(clientId);
         final LocalDate expectedDisbursementDate = DateUtils.getBusinessLocalDate();
 
-        Collection<ClientData> vendorClientOptions = this.clientReadPlatformService
-                .retrieveAllForLookupByOfficeId(clientAccount.officeId());
-
         LoanAccountData loanAccountData = LoanAccountData.clientDefaults(clientAccount.id(), clientAccount.accountNo(),
                 clientAccount.displayName(), clientAccount.officeId(), expectedDisbursementDate);
-        loanAccountData.setVendorClientOptions(vendorClientOptions);
+
         return loanAccountData;
     }
 
