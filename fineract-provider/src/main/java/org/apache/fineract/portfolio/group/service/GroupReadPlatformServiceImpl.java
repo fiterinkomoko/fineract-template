@@ -218,6 +218,8 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
         extraCriteria.addNonNullCriteria(" g.external_id =", searchCriteria.getExternalId());
 
+        extraCriteria.addNonNullCriteria(" g.account_no = ", searchCriteria.getAccountNo());
+
         final String name = searchCriteria.getName();
         if (name != null) {
             extraCriteria.addNonNullCriteria("g.display_name like", "%" + name + "%");
