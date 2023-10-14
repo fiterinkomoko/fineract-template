@@ -279,4 +279,14 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         return GroupGeneralData.withClosureReasons(closureReasons);
     }
 
+    @Override
+    public void validateGroup(Long clientId) {
+        try {
+            final String sql = "SELECT cl.id FROM m_group cl WHERE cl.id =? ";
+            this.jdbcTemplate.queryForObject(sql, Long.class, clientId);
+        } catch (final EmptyResultDataAccessException e) {
+            throw new GroupNotFoundException(clientId, e);
+        }
+    }
+
 }
