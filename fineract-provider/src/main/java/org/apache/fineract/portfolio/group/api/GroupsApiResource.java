@@ -558,7 +558,7 @@ public class GroupsApiResource {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.GetGroupsGroupIdAccountsResponse.class))) })
     public String retrieveAccounts(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId,
-            @Context final UriInfo uriInfo) {
+            @QueryParam("fields") String fields) {
 
         this.context.authenticatedUser().validateHasReadPermission("GROUP");
 
@@ -566,14 +566,11 @@ public class GroupsApiResource {
                 .retrieveGlobalConfiguration("Add-More-Stages-To-A-Loan-Life-Cycle");
         final Boolean isExtendLoanLifeCycleConfig = extendLoanLifeCycleConfig.isEnabled();
 
-        final AccountSummaryCollectionData groupAccount = this.accountDetailsReadPlatformService.retrieveGroupAccountDetails(groupId);
+        final AccountSummaryCollectionData groupAccount = this.accountDetailsReadPlatformService.retrieveGroupAccountDetails(groupId,
+                fields);
         groupAccount.setExtendLoanLifeCycleConfig(isExtendLoanLifeCycleConfig);
 
-        final Set<String> GROUP_ACCOUNTS_DATA_PARAMETERS = new HashSet<>(Arrays.asList("loanAccounts",
-                "groupLoanIndividualMonitoringAccounts", "savingsAccounts", "memberLoanAccounts", "memberSavingsAccounts"));
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.groupSummaryToApiJsonSerializer.serialize(settings, groupAccount, GROUP_ACCOUNTS_DATA_PARAMETERS);
+        return this.groupSummaryToApiJsonSerializer.serialize(groupAccount);
     }
 
     @GET

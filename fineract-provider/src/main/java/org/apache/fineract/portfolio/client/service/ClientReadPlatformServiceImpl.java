@@ -309,7 +309,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         if (externalId != null) {
             paramList.add(externalId);
-            extraCriteria += " and c.external_id like ? ";
+            extraCriteria += " and c.external_id = ? ";
         }
 
         if (displayName != null || accountNumber != null || mobileNo != null) {
@@ -326,11 +326,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             if (accountNumber != null) {
                 paramList.add("%" + accountNumber + "%");
                 if (displayName != null)
-                    extraCriteria += " or c.account_no like ? "; // For Carbon search should be by display_name or
-                                                                 // account_no
-                else
-                    extraCriteria += " c.account_no like ? "; // For Carbon search should be by display_name or
+                    extraCriteria += " or c.account_no = ? "; // For Carbon search should be by display_name or
                                                               // account_no
+                else
+                    extraCriteria += " c.account_no = ? "; // For Carbon search should be by display_name or
+                                                           // account_no
             }
 
             if (mobileNo != null) {
