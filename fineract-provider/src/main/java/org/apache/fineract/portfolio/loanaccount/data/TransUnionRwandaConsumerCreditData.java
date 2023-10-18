@@ -76,7 +76,7 @@ public class TransUnionRwandaConsumerCreditData {
     private String physicalAddressSector;
     private String employerName;
     private Long firstPaymentDate;
-    private String dateClosed;
+    private Long dateClosed;
     private String accountStatus;
     private Integer numberOfJointLoanParticipants;
     private Integer termsDuration;

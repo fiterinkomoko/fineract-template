@@ -168,4 +168,13 @@ public final class DateUtils {
     public static LocalDateTime convertToLocalDateTime(Date date) {
         return date.toInstant().atZone(getDateTimeZoneOfTenant()).toLocalDateTime();
     }
+
+    public static Long convertLocalDateToLong(LocalDate localDate) {
+        if (localDate == null) {
+            return null;
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        LocalDate parsedDate = LocalDate.parse(localDate.format(formatter), formatter);
+        return ChronoUnit.DAYS.between(LocalDate.of(1970, 1, 1), parsedDate);
+    }
 }

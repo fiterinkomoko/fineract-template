@@ -231,8 +231,7 @@ public class GroupGeneralData implements Serializable {
                 grouping.staffName, grouping.hierarchy, grouping.groupLevel, grouping.clientMembers, grouping.activeClientMembers,
                 templatedGrouping.centerOptions, templatedGrouping.officeOptions, templatedGrouping.staffOptions, grouping.groupRoles,
                 templatedGrouping.availableRoles, grouping.selectedRole, grouping.calendarsData, grouping.collectionMeetingCalendar,
-                grouping.closureReasons, templatedGrouping.timeline,
-                grouping.representativeId, grouping.representativeName);
+                grouping.closureReasons, templatedGrouping.timeline, grouping.representativeId, grouping.representativeName);
     }
 
     public static GroupGeneralData withAssocations(final GroupGeneralData grouping, final Collection<ClientData> membersOfGroup,
@@ -242,8 +241,8 @@ public class GroupGeneralData implements Serializable {
                 grouping.activationDate, grouping.officeId, grouping.officeName, grouping.centerId, grouping.centerName, grouping.staffId,
                 grouping.staffName, grouping.hierarchy, grouping.groupLevel, membersOfGroup, activeClientMembers, grouping.centerOptions,
                 grouping.officeOptions, grouping.staffOptions, groupRoles, grouping.availableRoles, grouping.selectedRole, calendarsData,
-                collectionMeetingCalendar, grouping.closureReasons, grouping.timeline,
-                grouping.representativeId, grouping.representativeName);
+                collectionMeetingCalendar, grouping.closureReasons, grouping.timeline, grouping.representativeId,
+                grouping.representativeName);
     }
 
     public static GroupGeneralData instance(final Long id, final String accountNo, final String name, final String externalId,
@@ -265,8 +264,8 @@ public class GroupGeneralData implements Serializable {
 
         return new GroupGeneralData(id, accountNo, name, externalId, status, activationDate, officeId, officeName, centerId, centerName,
                 staffId, staffName, hierarchy, groupLevel, clientMembers, activeClientMembers, centerOptions, officeOptions, staffOptions,
-                groupRoles, availableRoles, role, calendarsData, collectionMeetingCalendar, closureReasons, timeline,
-                representativeId, representativeName);
+                groupRoles, availableRoles, role, calendarsData, collectionMeetingCalendar, closureReasons, timeline, representativeId,
+                representativeName);
     }
 
     private GroupGeneralData(final Long id, final String accountNo, final String name, final String externalId, final EnumOptionData status,
@@ -276,9 +275,8 @@ public class GroupGeneralData implements Serializable {
             final Collection<CenterData> centerOptions, final Collection<OfficeData> officeOptions,
             final Collection<StaffData> staffOptions, final Collection<GroupRoleData> groupRoles,
             final Collection<CodeValueData> availableRoles, final GroupRoleData role, final Collection<CalendarData> calendarsData,
-            final CalendarData collectionMeetingCalendar, final Collection<CodeValueData> closureReasons,
-            final GroupTimelineData timeline, final Long representativeId,
-            final String representativeName) {
+            final CalendarData collectionMeetingCalendar, final Collection<CodeValueData> closureReasons, final GroupTimelineData timeline,
+            final Long representativeId, final String representativeName) {
         this.id = id;
         this.accountNo = accountNo;
         this.name = name;
@@ -352,7 +350,8 @@ public class GroupGeneralData implements Serializable {
                 grouping.activationDate, grouping.officeId, grouping.officeName, grouping.centerId, grouping.centerName, grouping.staffId,
                 grouping.staffName, grouping.hierarchy, grouping.groupLevel, grouping.clientMembers, grouping.activeClientMembers,
                 grouping.centerOptions, grouping.officeOptions, grouping.staffOptions, grouping.groupRoles, grouping.availableRoles,
-                selectedRole, grouping.calendarsData, grouping.collectionMeetingCalendar, grouping.closureReasons, null, grouping.representativeId, grouping.representativeName);
+                selectedRole, grouping.calendarsData, grouping.collectionMeetingCalendar, grouping.closureReasons, null,
+                grouping.representativeId, grouping.representativeName);
     }
 
     public static GroupGeneralData withClosureReasons(final Collection<CodeValueData> closureReasons) {
@@ -383,8 +382,7 @@ public class GroupGeneralData implements Serializable {
 
         return new GroupGeneralData(id, accountNo, name, externalId, status, activationDate, officeId, officeName, centerId, centerName,
                 staffId, staffName, hierarchy, groupLevel, clientMembers, activeClientMembers, centerOptions, officeOptions, staffOptions,
-                groupRoles, availableRoles, role, calendarsData, collectionMeetingCalendar, closureReasons, null, null,
-                null);
+                groupRoles, availableRoles, role, calendarsData, collectionMeetingCalendar, closureReasons, null, null, null);
     }
 
     public Collection<ClientData> clientMembers() {

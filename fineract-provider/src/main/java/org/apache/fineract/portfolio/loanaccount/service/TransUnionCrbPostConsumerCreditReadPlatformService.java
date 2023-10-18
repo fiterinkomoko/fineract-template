@@ -18,9 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaConsumerCreditData;
-
 import java.util.Collection;
+import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaConsumerCreditData;
 
 public interface TransUnionCrbPostConsumerCreditReadPlatformService {
 

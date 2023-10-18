@@ -24,6 +24,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,6 +55,7 @@ public class TransUnionCrbServiceImpl implements TransUnionCrbService {
 
     private static final Logger LOG = LoggerFactory.getLogger(TransUnionCrbServiceImpl.class);
     public static final String FORM_URL_CONTENT_TYPE = "Content-Type";
+    private final TransUnionCrbPostConsumerCreditReadPlatformServiceImpl transUnionCrbPostConsumerCreditReadPlatformServiceImpl;
     @Autowired
     private Environment env;
 
@@ -63,10 +65,24 @@ public class TransUnionCrbServiceImpl implements TransUnionCrbService {
         LOG.info("Starting Consumer Credit Data Upload To TransUnion CRB");
         String token = authenticateToTransUnionRestApi();
         LOG.info("CRB Token == > " + token);
-
+        Collection<TransUnionRwandaConsumerCreditData> transUnionRwandaConsumerCreditDataCollection = transUnionCrbPostConsumerCreditReadPlatformServiceImpl
+                .retrieveAllConsumerCredits();
         String request = getConsumerCreditRequestData();
-        postRwandaConsumerCreditToTransUnion(token, request);
+        LOG.info("Old Payload - - >" + request);
+        LOG.info(" >>>> Size for Consumer credit - - >" + transUnionRwandaConsumerCreditDataCollection.size());
+        if (!CollectionUtils.isEmpty(transUnionRwandaConsumerCreditDataCollection)) {
+            for (TransUnionRwandaConsumerCreditData creditData : transUnionRwandaConsumerCreditDataCollection) {
+                postRwandaConsumerCreditToTransUnion(token, convertConsumerCreditPayloadToJson(creditData));
+            }
+        }
 
+    }
+
+    private String convertConsumerCreditPayloadToJson(TransUnionRwandaConsumerCreditData creditData) {
+        Gson gson = new GsonBuilder().create();
+        String request = gson.toJson(creditData);
+        LOG.info("Actual Payload to be sent - - >" + request);
+        return request;
     }
 
     private String authenticateToTransUnionRestApi() {
@@ -149,9 +165,10 @@ public class TransUnionCrbServiceImpl implements TransUnionCrbService {
 
                 JsonObject jsonResponse = JsonParser.parseString(resObject).getAsJsonObject();
                 log.info("Consumer Credit Response from TransUnion :=>" + resObject);
+                log.info("Response Obj :=>" + jsonResponse);
 
-                return jsonResponse.get("callbackId").getAsString();
-
+                // return jsonResponse.get("callbackId").getAsString();
+                return null;
             } else {
                 log.error("Post Consumer Credit to TransUnion failed with Message:" + resObject);
 
@@ -227,7 +244,7 @@ public class TransUnionCrbServiceImpl implements TransUnionCrbService {
         transUnionRwandaConsumerCreditData.setPhysicalAddressSector("Kinunga");
         transUnionRwandaConsumerCreditData.setEmployerName("");
         transUnionRwandaConsumerCreditData.setFirstPaymentDate(20200926L);
-        transUnionRwandaConsumerCreditData.setDateClosed("");
+        transUnionRwandaConsumerCreditData.setDateClosed(20200926L);
         transUnionRwandaConsumerCreditData.setAccountStatus("A");
         transUnionRwandaConsumerCreditData.setNumberOfJointLoanParticipants(0);
         transUnionRwandaConsumerCreditData.setTermsDuration(60);
