@@ -488,4 +488,11 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         }
         return property.getValue();
     }
+
+    @Override
+    public boolean isOdooIntegrationEnabled() {
+        final String propertyName = "Enable-Odoo-Integration";
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
+        return property.isEnabled();
+    }
 }

@@ -72,12 +72,13 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
         baseDataValidator.reset().parameter(ClientApiConstants.legalFormIdParamName).value(legalFormId).notNull().inMinMaxRange(1, 2);
 
         final Integer strataId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.strataIdParamName, element);
-        baseDataValidator.reset().parameter(ClientApiConstants.staffIdParamName).value(strataId).integerGreaterThanZero();
+        baseDataValidator.reset().parameter(ClientApiConstants.strataIdParamName).value(strataId).notNull().integerGreaterThanZero();
 
         if (LegalForm.fromInt(legalFormId).isPerson()) {
             final Integer nationalityId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.nationalityIdParamName,
                     element);
-            baseDataValidator.reset().parameter(ClientApiConstants.nationalityIdParamName).value(nationalityId).integerGreaterThanZero();
+            baseDataValidator.reset().parameter(ClientApiConstants.nationalityIdParamName).value(nationalityId).notNull()
+                    .integerGreaterThanZero();
 
             if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.numberOfChildren, element) != null) {
                 final Long numberOfChildren = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.numberOfChildren, element);
@@ -92,7 +93,7 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
             }
             final Integer yearArrivedInHostCountryId = this.fromApiJsonHelper
                     .extractIntegerSansLocaleNamed(ClientApiConstants.yearArrivedInHostCountry, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountry).value(yearArrivedInHostCountryId)
+            baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountry).value(yearArrivedInHostCountryId).notNull()
                     .integerGreaterThanZero();
         } else if (LegalForm.fromInt(legalFormId).isEntity()) {
 
@@ -160,7 +161,7 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.strataIdParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
             final Integer strataId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.strataIdParamName, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.staffIdParamName).value(strataId).integerGreaterThanZero();
+            baseDataValidator.reset().parameter(ClientApiConstants.staffIdParamName).value(strataId).notNull().integerGreaterThanZero();
         }
 
         if (LegalForm.fromInt(legalFormId).isPerson()) {
@@ -168,7 +169,7 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
                 atLeastOneParameterPassedForUpdate = true;
                 final Integer nationalityId = this.fromApiJsonHelper
                         .extractIntegerSansLocaleNamed(ClientApiConstants.nationalityIdParamName, element);
-                baseDataValidator.reset().parameter(ClientApiConstants.nationalityIdParamName).value(nationalityId)
+                baseDataValidator.reset().parameter(ClientApiConstants.nationalityIdParamName).value(nationalityId).notNull()
                         .integerGreaterThanZero();
             }
 
@@ -192,7 +193,7 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
                 atLeastOneParameterPassedForUpdate = true;
                 final Integer yearArrivedInHostCountryId = this.fromApiJsonHelper
                         .extractIntegerSansLocaleNamed(ClientApiConstants.yearArrivedInHostCountry, element);
-                baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountry).value(yearArrivedInHostCountryId)
+                baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountry).value(yearArrivedInHostCountryId).notNull()
                         .integerGreaterThanZero();
             }
         } else if (LegalForm.fromInt(legalFormId).isEntity()) {

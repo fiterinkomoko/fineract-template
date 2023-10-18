@@ -329,6 +329,8 @@ public class LoanAssembler {
         }
 
         final String externalId = this.fromApiJsonHelper.extractStringNamed("externalId", element);
+        final String description = this.fromApiJsonHelper.extractStringNamed("description", element);
+        final String kivaId = this.fromApiJsonHelper.extractStringNamed("kivaId", element);
         final LocalDate submittedOnDate = this.fromApiJsonHelper.extractLocalDateNamed("submittedOnDate", element);
 
         if (loanApplication == null) {
@@ -364,6 +366,8 @@ public class LoanAssembler {
         loanApplication.setBnplLoan(isBnplLoan);
         loanApplication.setRequiresEquityContribution(requiresEquityContribution);
         loanApplication.setEquityContributionLoanPercentage(equityContributionLoanPercentage);
+        loanApplication.setKivaId(kivaId);
+        loanApplication.setDescription(description);
         return loanApplication;
     }
 

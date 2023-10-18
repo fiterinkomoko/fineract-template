@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.client.domain;
 
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -29,4 +30,7 @@ interface ClientRepository extends JpaRepository<Client, Long>, JpaSpecification
 
     @Query(FIND_CLIENT_BY_ACCOUNT_NUMBER)
     Client getClientByAccountNumber(@Param("accountNumber") String accountNumber);
+
+    @Query("select client from Client client where client.isOdooCustomerPosted= :isOdooCustomerPosted")
+    List<Client> findByIsOdooPosted(@Param("isOdooCustomerPosted") boolean isOdooCustomerPosted);
 }

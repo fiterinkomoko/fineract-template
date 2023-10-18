@@ -1432,10 +1432,10 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         if (!CollectionUtils.isEmpty(activeChild)) {
             BigDecimal sum = activeChild.stream().map(Loan::getProposedPrincipal).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            parentLoan.setActualPrincipalAmount(sum);
+            parentLoan.setPrincipalAmount(sum);
             glimRepository.save(parentLoan);
         } else {
-            parentLoan.setActualPrincipalAmount(BigDecimal.ZERO);
+            parentLoan.setPrincipalAmount(BigDecimal.ZERO);
             glimRepository.save(parentLoan);
         }
     }
