@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
-import java.math.BigDecimal;
 import lombok.Data;
 
 @Data
@@ -31,7 +30,7 @@ public class TransUnionRwandaConsumerCreditData {
     private String surName;
     private String studentNumber;
     private String postalCode;
-    private Long dateAccountUpdated;
+    private String dateAccountUpdated;
     private String physicalAddressPlotNumber;
     private Integer daysInArrears;
     private String residenceType;
@@ -39,29 +38,29 @@ public class TransUnionRwandaConsumerCreditData {
     private String foreName3;
     private String foreName2;
     private String foreName1;
-    private BigDecimal openingBalance;
+    private Integer openingBalance;
     private String passportNumber;
     private String sectorOfActivity;
     private String oldAccountNumber;
-    private BigDecimal availableCredit;
+    private Integer availableCredit;
     private String facsimile;
     private String accountRepaymentTerm;
     private String accountType;
-    private BigDecimal currentBalance;
+    private Integer currentBalance;
     private String taxNumber;
     private String accountOwner;
-    private String classification;
+    private Integer classification;
     private String physicalAddressDistrict;
     private String employerAddressLine2;
     private String employerAddressLine1;
     private String incomeFrequency;
     private String healthInsuranceNumber;
-    private BigDecimal scheduledPaymentAmount;
+    private Integer scheduledPaymentAmount;
     private String groupName;
     private String mobileTelephone;
-    private BigDecimal actualPaymentAmount;
+    private Integer actualPaymentAmount;
     private String nationality;
-    private Long dateAccountOpened;
+    private String dateAccountOpened;
     private String salutation;
     private Double interestRateAtDisbursement;
     private Integer noOfDependants;
@@ -69,18 +68,18 @@ public class TransUnionRwandaConsumerCreditData {
     private String maritalStatus;
     private String postalAddressNumber;
     private String currentBalanceIndicator;
-    private BigDecimal income;
-    private Long approvalDate;
+    private Integer income;
+    private String approvalDate;
     private String gender;
     private String socialSecurityNumber;
     private String physicalAddressSector;
     private String employerName;
-    private Long firstPaymentDate;
-    private Long dateClosed;
+    private String firstPaymentDate;
+    private String dateClosed;
     private String accountStatus;
     private Integer numberOfJointLoanParticipants;
     private Integer termsDuration;
-    private Long lastPaymentDate;
+    private String lastPaymentDate;
     private String physicalAddressCell;
     private String homeTelephone;
     private String employerTown;
@@ -90,13 +89,13 @@ public class TransUnionRwandaConsumerCreditData {
     private String placeOfBirth;
     private String physicalAddressPostalCode;
     private Integer nature;
-    private Long dateOfBirth;
+    private String dateOfBirth;
     private String workTelephone;
     private String accountNumber;
-    private Long finalPaymentDate;
+    private String finalPaymentDate;
     private Long groupNumber;
     private Integer installmentsInArrears;
     private String nationalId;
-    private BigDecimal amountPastDue;
+    private Integer amountPastDue;
     private Integer category;
 }

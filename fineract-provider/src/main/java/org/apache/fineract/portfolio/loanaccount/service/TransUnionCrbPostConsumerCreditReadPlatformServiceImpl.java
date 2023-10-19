@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -65,9 +64,9 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
                     + "           END                                                                           AS accountRepaymentTerm,   "
                     + "       l.total_outstanding_derived                                                       AS currentBalance,   "
                     + "       'O'                                                                               AS accountOwner,   "
-                    + "       CASE   " + "           WHEN l.repayment_period_frequency_enum = 1 THEN 'WKY'   "
-                    + "           WHEN l.repayment_period_frequency_enum = 2 THEN 'MTH'   "
-                    + "           WHEN l.repayment_period_frequency_enum = 3 THEN 'ANN'   "
+                    + "       CASE   " + "           WHEN l.repayment_period_frequency_enum = 1 THEN 'W'   "
+                    + "           WHEN l.repayment_period_frequency_enum = 2 THEN 'M'   "
+                    + "           WHEN l.repayment_period_frequency_enum = 3 THEN 'A'   "
                     + "           END                                                                           AS incomeFrequency,   "
                     + "       l.principal_disbursed_derived + l.interest_charged_derived                        AS scheduledPaymentAmount,   "
                     + "       mc.mobile_no                                                                      AS mobileTelephone,   "
@@ -77,7 +76,7 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
                     + "       l.nominal_interest_rate_per_period                                                AS interestRateAtDisbursement,   "
                     + "       info.number_of_dependents                                                         AS noOfDependants,   "
                     + "       nationality_cv.code_value                                                         AS nationality,   "
-                    + "       title_cv.code_value                                                               AS salutation,   "
+                    + "       UPPER(title_cv.code_value)                                                               AS salutation,   "
                     + "       address.postal_code                                                               AS postalCode,   "
                     + "       province_cv.code_value                                                            AS physicalAddressProvince,   "
                     + "       CASE   " + "           WHEN marital_cv.code_value = 'Single' THEN 'S'   "
@@ -112,6 +111,14 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
                     + "       'Kinunga'                                                                         AS physicalAddressCell,   "
                     + "       13                                                                                AS nature,   "
                     + "       '1119707000196801'                                                                AS nationalId,   "
+                    + "       1                                                                                 AS classification,   "
+                    + "       ''                                                                                 AS emailAddress,   "
+                    + "       'T'                                                                                 AS residenceType,   "
+                    + "       0                                                                                 AS availableCredit,   "
+                    + "       0                                                                                 AS income,   "
+                    + "       ''                                                                                 AS homeTelephone,   "
+                    + "       ''                                                                                 AS workTelephone,   "
+                    + "       l.last_modified_on_utc                                                            AS dateAccountUpdated,   "
                     + "       r.installments_in_arrears                                                         AS installmentsInArrears   "
                     + " FROM m_loan l   " + "         INNER JOIN m_client mc ON l.client_id = mc.id   "
                     + "         LEFT JOIN m_client_recruitment_survey mcrs ON mc.id = mcrs.client_id   "
@@ -135,7 +142,7 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
                     + "           COUNT(*) AS installments_in_arrears   " + "    FROM m_loan_repayment_schedule   "
                     + "    WHERE duedate <= CURRENT_DATE   " + "      AND completed_derived = FALSE   "
                     + "      AND obligations_met_on_date IS NULL   " + "    GROUP BY loan_id   " + " ) AS r ON l.id = r.loan_id   "
-                    + " WHERE l.loan_status_id IN (300, 600, 601, 700) ";
+                    + " WHERE l.loan_status_id IN (300, 600, 601, 700) AND l.currency_code = 'RWF' AND first_payment.firstPaymentDate  IS NOT NULL AND l.last_repayment_date IS NOT NULL ";
         }
 
         @Override
@@ -151,14 +158,14 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
             final String foreName1 = rs.getString("foreName1");
             final String foreName2 = rs.getString("foreName2");
             final String foreName3 = rs.getString("foreName3");
-            final BigDecimal openingBalance = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "openingBalance");
+            final Integer openingBalance = rs.getInt("openingBalance");
             final String accountRepaymentTerm = rs.getString("accountRepaymentTerm");
-            final BigDecimal currentBalance = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "currentBalance");
+            final Integer currentBalance = rs.getInt("currentBalance");
             final String accountOwner = rs.getString("accountOwner");
             final String incomeFrequency = rs.getString("incomeFrequency");
-            final BigDecimal scheduledPaymentAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "scheduledPaymentAmount");
+            final Integer scheduledPaymentAmount = rs.getInt("scheduledPaymentAmount");
             final String mobileTelephone = rs.getString("mobileTelephone");
-            final BigDecimal actualPaymentAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "actualPaymentAmount");
+            final Integer actualPaymentAmount = rs.getInt("actualPaymentAmount");
             final LocalDate dateAccountOpened = JdbcSupport.getLocalDate(rs, "dateAccountOpened");
             final Double interestRateAtDisbursement = rs.getDouble("interestRateAtDisbursement");
             final Integer noOfDependants = rs.getInt("noOfDependants");
@@ -177,7 +184,7 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
             final LocalDate lastPaymentDate = JdbcSupport.getLocalDate(rs, "lastPaymentDate");
             final LocalDate dateOfBirth = JdbcSupport.getLocalDate(rs, "dateOfBirth");
             final LocalDate finalPaymentDate = JdbcSupport.getLocalDate(rs, "finalPaymentDate");
-            final BigDecimal amountPastDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "amountPastDue");
+            final Integer amountPastDue = rs.getInt("amountPastDue");
             final Integer category = rs.getInt("category");
             final String sectorOfActivity = rs.getString("sectorOfActivity");
             final String accountType = rs.getString("accountType");
@@ -190,6 +197,14 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
             final String nationalId = rs.getString("nationalId");
             final Integer nature = rs.getInt("nature");
             final Integer installmentsInArrears = rs.getInt("installmentsInArrears");
+            final Integer classification = rs.getInt("classification");
+            final String emailAddress = rs.getString("emailAddress");
+            final String residenceType = rs.getString("residenceType");
+            final Integer availableCredit = rs.getInt("availableCredit");
+            final Integer income = rs.getInt("income");
+            final String homeTelephone = rs.getString("homeTelephone");
+            final String workTelephone = rs.getString("workTelephone");
+            final LocalDate dateAccountUpdated = JdbcSupport.getLocalDate(rs, "dateAccountUpdated");
 
             TransUnionRwandaConsumerCreditData trans = new TransUnionRwandaConsumerCreditData();
             trans.setCurrencyType(currencyType);
@@ -238,6 +253,15 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
             trans.setNature(nature);
             trans.setNationalId(nationalId);
             trans.setInstallmentsInArrears(installmentsInArrears);
+            trans.setAccountNumber(accountNumber);
+            trans.setEmailAddress(emailAddress);
+            trans.setClassification(classification);
+            trans.setResidenceType(residenceType);
+            trans.setAvailableCredit(availableCredit);
+            trans.setIncome(income);
+            trans.setHomeTelephone(homeTelephone);
+            trans.setWorkTelephone(workTelephone);
+            trans.setDateAccountUpdated(DateUtils.convertLocalDateToLong(dateAccountUpdated));
 
             return trans;
 

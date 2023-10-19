@@ -22,7 +22,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -67,20 +66,22 @@ public class TransUnionCrbServiceImpl implements TransUnionCrbService {
         LOG.info("CRB Token == > " + token);
         Collection<TransUnionRwandaConsumerCreditData> transUnionRwandaConsumerCreditDataCollection = transUnionCrbPostConsumerCreditReadPlatformServiceImpl
                 .retrieveAllConsumerCredits();
-        String request = getConsumerCreditRequestData();
-        LOG.info("Old Payload - - >" + request);
+
         LOG.info(" >>>> Size for Consumer credit - - >" + transUnionRwandaConsumerCreditDataCollection.size());
         if (!CollectionUtils.isEmpty(transUnionRwandaConsumerCreditDataCollection)) {
             for (TransUnionRwandaConsumerCreditData creditData : transUnionRwandaConsumerCreditDataCollection) {
-                postRwandaConsumerCreditToTransUnion(token, convertConsumerCreditPayloadToJson(creditData));
+                RwandaConsumerCreditData rwandaConsumerCreditData = new RwandaConsumerCreditData();
+                rwandaConsumerCreditData.setConsumerCreditInformationRecord(creditData);
+                rwandaConsumerCreditData.setRecordType("IC");
+                postRwandaConsumerCreditToTransUnion(token, convertConsumerCreditPayloadToJson(rwandaConsumerCreditData));
             }
         }
 
     }
 
-    private String convertConsumerCreditPayloadToJson(TransUnionRwandaConsumerCreditData creditData) {
+    private String convertConsumerCreditPayloadToJson(RwandaConsumerCreditData rwandaConsumerCreditData) {
         Gson gson = new GsonBuilder().create();
-        String request = gson.toJson(creditData);
+        String request = gson.toJson(rwandaConsumerCreditData);
         LOG.info("Actual Payload to be sent - - >" + request);
         return request;
     }
@@ -165,9 +166,13 @@ public class TransUnionCrbServiceImpl implements TransUnionCrbService {
 
                 JsonObject jsonResponse = JsonParser.parseString(resObject).getAsJsonObject();
                 log.info("Consumer Credit Response from TransUnion :=>" + resObject);
-                log.info("Response Obj :=>" + jsonResponse);
 
-                // return jsonResponse.get("callbackId").getAsString();
+                Integer code = jsonResponse.get("responseCode").getAsInt();
+                if (code == 200) {
+                    return jsonResponse.get("callbackId").getAsString();
+                } else {
+                    handleAPIIntegrityIssues(resObject);
+                }
                 return null;
             } else {
                 log.error("Post Consumer Credit to TransUnion failed with Message:" + resObject);
@@ -187,91 +192,5 @@ public class TransUnionCrbServiceImpl implements TransUnionCrbService {
             }
         }
         return null;
-    }
-
-    private static String getConsumerCreditRequestData() {
-        RwandaConsumerCreditData rwandaConsumerCreditData = new RwandaConsumerCreditData();
-        TransUnionRwandaConsumerCreditData transUnionRwandaConsumerCreditData = new TransUnionRwandaConsumerCreditData();
-        transUnionRwandaConsumerCreditData.setCurrencyType("RWF");
-        transUnionRwandaConsumerCreditData.setCountry("RWANDA");
-        transUnionRwandaConsumerCreditData.setDrivingLicenseNumber("");
-        transUnionRwandaConsumerCreditData.setOccupation("Other personal service activities n.e.c.");
-        transUnionRwandaConsumerCreditData.setSurName("surname");
-        transUnionRwandaConsumerCreditData.setStudentNumber(null);
-        transUnionRwandaConsumerCreditData.setPostalCode("P.O.Box 000");
-        transUnionRwandaConsumerCreditData.setDateAccountUpdated(20200926L);
-        transUnionRwandaConsumerCreditData.setPhysicalAddressPlotNumber("");
-        transUnionRwandaConsumerCreditData.setDaysInArrears(0);
-        transUnionRwandaConsumerCreditData.setResidenceType("T");
-        transUnionRwandaConsumerCreditData.setEmailAddress("");
-        transUnionRwandaConsumerCreditData.setForeName3("");
-        transUnionRwandaConsumerCreditData.setForeName2("");
-        transUnionRwandaConsumerCreditData.setForeName1("HABIYAMBEREJOSEPHINE");
-        transUnionRwandaConsumerCreditData.setOpeningBalance(BigDecimal.valueOf(16120000));
-        transUnionRwandaConsumerCreditData.setPassportNumber("");
-        transUnionRwandaConsumerCreditData.setSectorOfActivity("Other personal service activities n.e.c.");
-        transUnionRwandaConsumerCreditData.setOldAccountNumber("");
-        transUnionRwandaConsumerCreditData.setAvailableCredit(BigDecimal.ZERO);
-        transUnionRwandaConsumerCreditData.setFacsimile("");
-        transUnionRwandaConsumerCreditData.setAccountRepaymentTerm("MTH");
-        transUnionRwandaConsumerCreditData.setAccountType("I");
-        transUnionRwandaConsumerCreditData.setCurrentBalance(BigDecimal.valueOf(10549060));
-        transUnionRwandaConsumerCreditData.setTaxNumber("");
-        transUnionRwandaConsumerCreditData.setAccountOwner("O");
-        transUnionRwandaConsumerCreditData.setClassification("1");
-        transUnionRwandaConsumerCreditData.setPhysicalAddressDistrict("HUYE");
-        transUnionRwandaConsumerCreditData.setEmployerAddressLine2("");
-        transUnionRwandaConsumerCreditData.setEmployerAddressLine1("");
-        transUnionRwandaConsumerCreditData.setIncomeFrequency("");
-        transUnionRwandaConsumerCreditData.setHealthInsuranceNumber("");
-        transUnionRwandaConsumerCreditData.setScheduledPaymentAmount(BigDecimal.valueOf(404971));
-        transUnionRwandaConsumerCreditData.setGroupName("");
-        transUnionRwandaConsumerCreditData.setMobileTelephone("250788636722");
-        transUnionRwandaConsumerCreditData.setActualPaymentAmount(BigDecimal.valueOf(11380875));
-        transUnionRwandaConsumerCreditData.setNationality("Rwanda");
-        transUnionRwandaConsumerCreditData.setDateAccountOpened(20200926L);
-        transUnionRwandaConsumerCreditData.setSalutation("MRS");
-        transUnionRwandaConsumerCreditData.setInterestRateAtDisbursement(17.5);
-        transUnionRwandaConsumerCreditData.setNoOfDependants(0);
-        transUnionRwandaConsumerCreditData.setPhysicalAddressProvince("KIGALI");
-        transUnionRwandaConsumerCreditData.setMaritalStatus("O");
-        transUnionRwandaConsumerCreditData.setPostalAddressNumber("P.O.Box 000");
-        transUnionRwandaConsumerCreditData.setCurrentBalanceIndicator("D");
-        transUnionRwandaConsumerCreditData.setIncome(BigDecimal.ZERO);
-        transUnionRwandaConsumerCreditData.setApprovalDate(20200926L);
-        transUnionRwandaConsumerCreditData.setGender("F");
-        transUnionRwandaConsumerCreditData.setSocialSecurityNumber("");
-        transUnionRwandaConsumerCreditData.setPhysicalAddressSector("Kinunga");
-        transUnionRwandaConsumerCreditData.setEmployerName("");
-        transUnionRwandaConsumerCreditData.setFirstPaymentDate(20200926L);
-        transUnionRwandaConsumerCreditData.setDateClosed(20200926L);
-        transUnionRwandaConsumerCreditData.setAccountStatus("A");
-        transUnionRwandaConsumerCreditData.setNumberOfJointLoanParticipants(0);
-        transUnionRwandaConsumerCreditData.setTermsDuration(60);
-        transUnionRwandaConsumerCreditData.setLastPaymentDate(20230223L);
-        transUnionRwandaConsumerCreditData.setPhysicalAddressCell("Kinunga");
-        transUnionRwandaConsumerCreditData.setHomeTelephone("");
-        transUnionRwandaConsumerCreditData.setEmployerTown("");
-        transUnionRwandaConsumerCreditData.setPhysicalAddressLine2("");
-        transUnionRwandaConsumerCreditData.setPhysicalAddressLine1("");
-        transUnionRwandaConsumerCreditData.setEmployerCountry("");
-        transUnionRwandaConsumerCreditData.setPlaceOfBirth("Kinunga");
-        transUnionRwandaConsumerCreditData.setPhysicalAddressPostalCode("");
-        transUnionRwandaConsumerCreditData.setNature(33);
-        transUnionRwandaConsumerCreditData.setDateOfBirth(19700210L);
-        transUnionRwandaConsumerCreditData.setWorkTelephone("");
-        transUnionRwandaConsumerCreditData.setAccountNumber("4004511751352");
-        transUnionRwandaConsumerCreditData.setFinalPaymentDate(20251023L);
-        transUnionRwandaConsumerCreditData.setGroupNumber(null);
-        transUnionRwandaConsumerCreditData.setInstallmentsInArrears(0);
-        transUnionRwandaConsumerCreditData.setNationalId("1119707000196801");
-        transUnionRwandaConsumerCreditData.setAmountPastDue(BigDecimal.ZERO);
-        transUnionRwandaConsumerCreditData.setCategory(40);
-
-        rwandaConsumerCreditData.setConsumerCreditInformationRecord(transUnionRwandaConsumerCreditData);
-        rwandaConsumerCreditData.setRecordType("IC");
-        Gson gson = new GsonBuilder().create();
-        String request = gson.toJson(rwandaConsumerCreditData);
-        return request;
     }
 }
