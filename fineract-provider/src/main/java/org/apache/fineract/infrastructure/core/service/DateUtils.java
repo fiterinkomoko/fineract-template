@@ -168,4 +168,13 @@ public final class DateUtils {
     public static LocalDateTime convertToLocalDateTime(Date date) {
         return date.toInstant().atZone(getDateTimeZoneOfTenant()).toLocalDateTime();
     }
+
+    public static String convertLocalDateToLong(LocalDate localDate) {
+        if (localDate == null) {
+            return "";
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        String formattedDate = localDate.format(formatter);
+        return formattedDate;
+    }
 }
