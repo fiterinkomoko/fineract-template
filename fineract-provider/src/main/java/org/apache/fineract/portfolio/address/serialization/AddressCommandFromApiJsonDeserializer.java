@@ -22,6 +22,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -67,12 +68,15 @@ public class AddressCommandFromApiJsonDeserializer {
         // validate the json fields from the configuration data fields
         final List<FieldConfigurationData> configData = configurationData.stream().filter(FieldConfigurationData::isEnabled)
                 .collect(Collectors.toList());
+        final List<String> alwaysMandatoryFields = Arrays.asList("physicalAddressDistrict", "physicalAddressSector", "physicalAddressCell",
+                "addressId");
 
         final Set<String> supportedParameters = configData.stream().map(FieldConfigurationData::getField).collect(Collectors.toSet());
 
         supportedParameters.add("locale");
         supportedParameters.add("dateFormat");
         supportedParameters.add(fromNewClient ? "addressTypeId" : "addressId");
+        supportedParameters.addAll(alwaysMandatoryFields);
 
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 

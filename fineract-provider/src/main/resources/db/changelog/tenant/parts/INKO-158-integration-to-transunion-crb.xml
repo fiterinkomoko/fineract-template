@@ -181,4 +181,108 @@ WHERE l.loan_status_id IN (300, 600, 601, 700)
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
     </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_address_physical_address_district">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_address" columnName="physical_address_district"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_address">
+            <column name="physical_address_district" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_address_physical_address_sector">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_address" columnName="physical_address_sector"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_address">
+            <column name="physical_address_sector" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_address_physical_address_cell">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_address" columnName="physical_address_cell"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_address">
+            <column name="physical_address_cell" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_field_configuration_for_client_address_physicalAddressDistrict">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_field_configuration where field = 'physicalAddressDistrict' and entity = 'ADDRESS' and subentity='CLIENT';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_field_configuration">
+            <column name="entity" value="ADDRESS"/>
+            <column name="subentity" value="CLIENT"/>
+            <column name="field" value="physicalAddressDistrict"/>
+            <column name="is_enabled" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="true"/>
+            <column name="validation_regex" value=""/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_field_configuration_for_client_address_physicalAddressSector">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_field_configuration where field = 'physicalAddressSector' and entity = 'ADDRESS' and subentity='CLIENT';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_field_configuration">
+            <column name="entity" value="ADDRESS"/>
+            <column name="subentity" value="CLIENT"/>
+            <column name="field" value="physicalAddressSector"/>
+            <column name="is_enabled" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="true"/>
+            <column name="validation_regex" value=""/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_field_configuration_for_client_address_physicalAddressCell">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_field_configuration where field = 'physicalAddressCell' and entity = 'ADDRESS' and subentity='CLIENT';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_field_configuration">
+            <column name="entity" value="ADDRESS"/>
+            <column name="subentity" value="CLIENT"/>
+            <column name="field" value="physicalAddressCell"/>
+            <column name="is_enabled" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="true"/>
+            <column name="validation_regex" value=""/>
+        </insert>
+    </changeSet>
+    <changeSet id="update_field_configuration_for_client_address_addressLine1_is_mandatory" author="bosco@fiter.io">
+        <sql>
+            update m_field_configuration set is_mandatory = TRUE where  field='addressLine1';
+        </sql>
+    </changeSet>
+    <changeSet id="update_field_configuration_for_client_address_stateProvinceId_is_mandatory" author="bosco@fiter.io">
+        <sql>
+            update m_field_configuration set is_mandatory = TRUE where  field='stateProvinceId';
+        </sql>
+    </changeSet>
+    <changeSet id="update_field_configuration_for_client_address_countryId_is_mandatory" author="bosco@fiter.io">
+        <sql>
+            update m_field_configuration set is_mandatory = TRUE where  field='countryId';
+        </sql>
+    </changeSet>
+    <changeSet id="update_field_configuration_for_client_address_postalCode_is_mandatory" author="bosco@fiter.io">
+        <sql>
+            update m_field_configuration set is_mandatory = TRUE where  field='postalCode';
+        </sql>
+    </changeSet>
 </databaseChangeLog>
