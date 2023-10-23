@@ -285,4 +285,9 @@ WHERE l.loan_status_id IN (300, 600, 601, 700)
             update m_field_configuration set is_mandatory = TRUE where  field='postalCode';
         </sql>
     </changeSet>
+    <changeSet id="update_field_configuration_for_client_address_addressType_is_mandatory_3" author="bosco@fiter.io">
+        <sql>
+            update m_field_configuration set is_mandatory = TRUE where  field='addressType';
+        </sql>
+    </changeSet>
 </databaseChangeLog>

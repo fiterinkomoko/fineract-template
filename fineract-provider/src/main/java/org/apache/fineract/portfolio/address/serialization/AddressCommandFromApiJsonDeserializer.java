@@ -46,7 +46,7 @@ public class AddressCommandFromApiJsonDeserializer {
     private final FieldConfigurationReadPlatformService readservice;
 
     public void validateForUpdate(final String json) {
-        validate(json, false);
+        validate(json, true);
     }
 
     public void validateForCreate(final String json, final boolean fromNewClient) {
