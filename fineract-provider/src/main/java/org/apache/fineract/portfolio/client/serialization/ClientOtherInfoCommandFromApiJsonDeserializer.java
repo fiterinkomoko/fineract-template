@@ -44,10 +44,10 @@ import org.springframework.stereotype.Component;
 public final class ClientOtherInfoCommandFromApiJsonDeserializer {
 
     private final FromJsonHelper fromApiJsonHelper;
-    private final Set<String> supportedParameters = new HashSet<>(
-            Arrays.asList("id", "clientId", "strataId", "nationalityId", "numberOfChildren", "numberOfDependents",
-                    "yearArrivedInHostCountryId", "coSignorsName", "guarantor", "locale", "dateFormat", "businessLocation",
-                    "taxIdentificationNumber", "incomeGeneratingActivity", "incomeGeneratingActivityMonthlyAmount", "telephoneNo"));
+    private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "clientId", "strataId", "nationalityId",
+            "numberOfChildren", "numberOfDependents", "yearArrivedInHostCountryId", "coSignorsName", "guarantor", "locale", "dateFormat",
+            "businessLocation", "taxIdentificationNumber", "incomeGeneratingActivity", "incomeGeneratingActivityMonthlyAmount",
+            "telephoneNo", "nationalIdentificationNumber", "passportNumber", "bankAccountNumber", "bankName"));
 
     @Autowired
     public ClientOtherInfoCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
@@ -95,6 +95,23 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
                     .extractIntegerSansLocaleNamed(ClientApiConstants.yearArrivedInHostCountry, element);
             baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountry).value(yearArrivedInHostCountryId).notNull()
                     .integerGreaterThanZero();
+
+            if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER, element) != null) {
+                final String nationalIdentificationNumber = this.fromApiJsonHelper
+                        .extractStringNamed(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER, element);
+                baseDataValidator.reset().parameter(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER).value(nationalIdentificationNumber)
+                        .notNull().notBlank();
+            } else {
+                final String passportNumber = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.PASSPORT_NUMBER, element);
+                baseDataValidator.reset().parameter(ClientApiConstants.PASSPORT_NUMBER).value(passportNumber).notNull().notBlank();
+            }
+
+            final String bankAccountNumber = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.BANK_ACCOUNT_NUMBER, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.BANK_ACCOUNT_NUMBER).value(bankAccountNumber).notNull().notBlank();
+
+            final String bankName = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.BANK_NAME, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.BANK_NAME).value(bankName).notNull().notBlank();
+
         } else if (LegalForm.fromInt(legalFormId).isEntity()) {
 
             final String businessLocation = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.businessLocationParamName,
