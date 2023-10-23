@@ -114,14 +114,6 @@ public final class ClientDataValidator {
             final Long savingsProductId = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.savingsProductIdParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.savingsProductIdParamName).value(savingsProductId).ignoreIfNull()
                     .longGreaterThanZero();
-            /*
-             * if (savingsProductId != null && this.fromApiJsonHelper.parameterExists(ClientApiConstants. datatables,
-             * element)) { final JsonArray datatables = this.fromApiJsonHelper.extractJsonArrayNamed(ClientApiConstants.
-             * datatables, element); if (datatables.size() > 0) {
-             * baseDataValidator.reset().parameter(ClientApiConstants.
-             * savingsProductIdParamName).value(savingsProductId) .failWithCodeNoParameterAddedToErrorCode(
-             * "should.not.be.used.with.datatables.parameter"); } }
-             */
         }
 
         if (isFullnameProvided(element) || isIndividualNameProvided(element)) {
@@ -164,11 +156,8 @@ public final class ClientDataValidator {
             }
         }
 
-        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.externalIdParamName, element)) {
-            final String externalId = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.externalIdParamName, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.externalIdParamName).value(externalId).ignoreIfNull()
-                    .notExceedingLengthOf(100);
-        }
+        final String externalId = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.externalIdParamName, element);
+        baseDataValidator.reset().parameter(ClientApiConstants.externalIdParamName).value(externalId).notNull().notExceedingLengthOf(100);
 
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.mobileNoParamName, element)) {
             final String mobileNo = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.mobileNoParamName, element);
@@ -443,9 +432,10 @@ public final class ClientDataValidator {
 
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.externalIdParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
-            final String externalId = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.externalIdParamName, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.externalIdParamName).value(externalId).notExceedingLengthOf(100);
         }
+
+        final String externalId = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.externalIdParamName, element);
+        baseDataValidator.reset().parameter(ClientApiConstants.externalIdParamName).value(externalId).notNull().notExceedingLengthOf(100);
 
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.mobileNoParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
@@ -479,7 +469,7 @@ public final class ClientDataValidator {
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.genderIdParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
             final Integer genderId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.genderIdParamName, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.genderIdParamName).value(genderId).integerGreaterThanZero();
+            baseDataValidator.reset().parameter(ClientApiConstants.genderIdParamName).value(genderId).integerGreaterThanZero().notNull();
         }
 
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.clientTypeIdParamName, element)) {

@@ -5,6 +5,14 @@ Feature: Create loan stapes
     * url baseUrl
     * def productsData = read('classpath:templates/savings.json')
 
+          #-Get code and code values for Gender
+    *  def gender = 'Gender'
+    *  def genderResponse = call read('classpath:features/system/codes/codesStep.feature@fetchCodeByNameStep') { codeName : '#(gender)' }
+    *  def genderCode = genderResponse.codeName.id
+       #- Fetch codeValue for Gender
+    * def genderCodeValueResCT = call read('classpath:features/system/codes/codeValuesStep.feature@fetchCodeValuesStep'){ codeId : '#(genderCode)' }
+    * def genderCodeId = genderCodeValueResCT.listOfCodeValues[0].id
+
 
   #Set up parameters submittedOnDate, clientId, loanProductId, loanAmount, clientCreationDate
   @ignore

@@ -36,6 +36,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandProcessingService;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
+import org.apache.fineract.infrastructure.Odoo.OdooService;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatRepositoryWrapper;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccountType;
@@ -141,6 +142,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
     private final ValidationLimitRepository validationLimitRepository;
 
+    private final OdooService odooService;
+
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final ClientRepositoryWrapper clientRepository, final ClientNonPersonRepositoryWrapper clientNonPersonRepository,
@@ -159,7 +162,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService,
             BusinessOwnerWritePlatformService businessOwnerWritePlatformService,
             final ClientTransactionLimitRepository clientTransactionLimitRepository,
-            ClientAdditionalInfoRepository clientAdditionalInfoRepository, ValidationLimitRepository validationLimitRepository) {
+            ClientAdditionalInfoRepository clientAdditionalInfoRepository, ValidationLimitRepository validationLimitRepository,
+            OdooService odooService) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.clientNonPersonRepository = clientNonPersonRepository;
@@ -187,6 +191,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.clientTransactionLimitRepository = clientTransactionLimitRepository;
         this.clientAdditionalInfoRepository = clientAdditionalInfoRepository;
         this.validationLimitRepository = validationLimitRepository;
+        this.odooService = odooService;
     }
 
     @Transactional
@@ -377,6 +382,15 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 this.entityDatatableChecksWritePlatformService.saveDatatables(StatusEnum.CREATE.getCode().longValue(),
                         EntityTables.CLIENT.getName(), newClient.getId(), null,
                         command.arrayOfParameterNamed(ClientApiConstants.datatables));
+            }
+            boolean isOdooIntegrationEnable = this.configurationDomainService.isOdooIntegrationEnabled();
+            if (isOdooIntegrationEnable) {
+                Integer customerId = this.odooService.createCustomerToOddo(newClient);
+                if (customerId != null) {
+                    newClient.setOdooCustomerId(customerId);
+                    newClient.setOdooCustomerPosted(true);
+                    this.clientRepository.save(newClient);
+                }
             }
 
             businessEventNotifierService.notifyPostBusinessEvent(new ClientCreateBusinessEvent(newClient));

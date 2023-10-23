@@ -182,4 +182,11 @@ public class ClientRecruitmentSurvey extends AbstractPersistableCustom {
         this.surveyLocation = surveyLocation;
     }
 
+    public CodeValue getCountry() {
+        return country;
+    }
+
+    public CodeValue getSurveyLocation() {
+        return surveyLocation;
+    }
 }
