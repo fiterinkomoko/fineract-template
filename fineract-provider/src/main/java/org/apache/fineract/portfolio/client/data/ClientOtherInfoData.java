@@ -55,9 +55,18 @@ public final class ClientOtherInfoData implements Serializable {
     private BigDecimal incomeGeneratingActivityMonthlyAmount;
     private String telephoneNumber;
 
+    private String nationalIdentificationNumber;
+
+    private String passportNumber;
+
+    private String bankAccountNumber;
+
+    private String bankName;
+
     public ClientOtherInfoData(Long id, Long clientId, CodeValueData strata, CodeValueData yearArrivedInHostCountry,
             CodeValueData nationality, Integer numberOfChildren, Integer numberOfDependents, Collection<CodeValueData> nationalityOptions,
-            Collection<CodeValueData> strataOptions, Collection<CodeValueData> yearArrivedInHostCountryOptions) {
+            Collection<CodeValueData> strataOptions, Collection<CodeValueData> yearArrivedInHostCountryOptions,
+            String nationalIdentificationNumber, String passportNumber, String bankAccountNumber, String bankName) {
 
         this.id = id;
         this.clientId = clientId;
@@ -69,6 +78,10 @@ public final class ClientOtherInfoData implements Serializable {
         this.nationalityOptions = nationalityOptions;
         this.strataOptions = strataOptions;
         this.yearArrivedInHostCountryOptions = yearArrivedInHostCountryOptions;
+        this.nationalIdentificationNumber = nationalIdentificationNumber;
+        this.passportNumber = passportNumber;
+        this.bankAccountNumber = bankAccountNumber;
+        this.bankName = bankName;
     }
 
     public ClientOtherInfoData(Long id, Long clientId, String coSignors, String guarantor, CodeValueData strata, String businessLocation,
@@ -97,14 +110,15 @@ public final class ClientOtherInfoData implements Serializable {
         Integer numberOfDependents = null;
 
         return new ClientOtherInfoData(id, clientId, strata, yearArrivedInHostCountry, nationality, numberOfChildren, numberOfDependents,
-                nationalityOptions, strataOptions, yearArrivedInHostCountryOptions);
+                nationalityOptions, strataOptions, yearArrivedInHostCountryOptions, null, null, null, null);
     }
 
     public static ClientOtherInfoData instance(final Long id, final Long clientId, final CodeValueData strata,
             final CodeValueData yearArrivedInHostCountry, final CodeValueData nationality, final Integer numberOfChildren,
-            final Integer numberOfDependents) {
+            final Integer numberOfDependents, final String nationalIdentificationNumber, final String passportNumber,
+            final String bankAccountNumber, final String bankName) {
         return new ClientOtherInfoData(id, clientId, strata, yearArrivedInHostCountry, nationality, numberOfChildren, numberOfDependents,
-                null, null, null);
+                null, null, null, nationalIdentificationNumber, passportNumber, bankAccountNumber, bankName);
     }
 
     public static ClientOtherInfoData instanceEntity(final Long id, final Long clientId, String coSignors, String guarantor,
