@@ -54,7 +54,8 @@ public class ClientOtherInfoReadPlatformServiceImpl implements ClientOtherInfoRe
 
         public String schema() {
             return "co.id AS id, co.client_id AS clientId, co.strata_cv_id AS strataId, co.nationality_cv_id AS nationalityId, cv.code_value as strataName, co.year_arrived_in_country_cv_id AS yearArrivedInHostCountryId,"
-                    + "cvn.code_value AS nationalityName, cy.code_value AS yearArrivedInHostCountryName, co.number_of_children AS numberOfChildren, co.number_of_dependents AS numberOfDependents, co.co_signors as coSignors, co.guarantor as guarantor"
+                    + "cvn.code_value AS nationalityName, cy.code_value AS yearArrivedInHostCountryName, co.number_of_children AS numberOfChildren, co.number_of_dependents AS numberOfDependents, co.co_signors as coSignors, co.guarantor as guarantor,"
+                    + "co.national_identification_number AS nationalIdentificationNumber,co.passport_number AS passportNumber,co.bank_account_number AS bankAccountNumber,co.bank_name AS bankName "
                     + " FROM m_client_other_info co" + " left join m_code_value cvn on co.nationality_cv_id=cvn.id"
                     + " left join m_code_value cv on co.strata_cv_id=cv.id left join m_code_value cy on co.year_arrived_in_country_cv_id=cy.id";
         }
@@ -75,9 +76,13 @@ public class ClientOtherInfoReadPlatformServiceImpl implements ClientOtherInfoRe
             final long yearArrivedInHostCountryId = rs.getLong("yearArrivedInHostCountryId");
             final String yearArrivedInHostCountryName = rs.getString("yearArrivedInHostCountryName");
             final CodeValueData yearArrivedInHostCountry = CodeValueData.instance(yearArrivedInHostCountryId, yearArrivedInHostCountryName);
+            final String nationalIdentificationNumber = rs.getString("nationalIdentificationNumber");
+            final String passportNumber = rs.getString("passportNumber");
+            final String bankAccountNumber = rs.getString("bankAccountNumber");
+            final String bankName = rs.getString("bankName");
 
             return ClientOtherInfoData.instance(id, clientId, strata, yearArrivedInHostCountry, nationality, numberOfChildren,
-                    numberOfDependents);
+                    numberOfDependents, nationalIdentificationNumber, passportNumber, bankAccountNumber, bankName);
 
         }
     }

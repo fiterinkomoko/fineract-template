@@ -414,4 +414,59 @@ WHERE l.loan_status_id IN (300, 600, 601, 700)
             <where>report_name = 'Rwanda Consumer Credit To TransUnion Report'</where>
         </update>
     </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_client_other_info_national_identification_number">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_client_other_info" columnName="national_identification_number"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_client_other_info">
+            <column name="national_identification_number" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_m_client_other_info_passport_number">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_client_other_info" columnName="passport_number"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_client_other_info">
+            <column name="passport_number" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_m_client_other_info_bank_account_number">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_client_other_info" columnName="bank_account_number"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_client_other_info">
+            <column name="bank_account_number" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_m_client_other_info_bank_name">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_client_other_info" columnName="bank_name"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_client_other_info">
+            <column name="bank_name" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
