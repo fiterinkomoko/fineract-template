@@ -204,6 +204,9 @@ public class ClientApiConstants {
 
     public static final String inBusinessSinceParamName = "inBusinessSince";
     public static final String KIVA_ID = "kivaId";
+    public static final String PHYSICAL_ADDRESS_DISTRICT = "physicalAddressDistrict";
+    public static final String PHYSICAL_ADDRESS_SECTOR = "physicalAddressSector";
+    public static final String PHYSICAL_ADDRESS_CELL = "physicalAddressCell";
 
     public static final String isRegisteredParam = "isRegistered";
 

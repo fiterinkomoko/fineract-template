@@ -82,6 +82,9 @@ public class AddressData implements Serializable {
     private final Collection<CodeValueData> stateProvinceIdOptions;
     private final Collection<CodeValueData> addressTypeIdOptions;
     private final Collection<CodeValueData> lgaIdOptions;
+    private String physicalAddressDistrict;
+    private String physicalAddressSector;
+    private String physicalAddressCell;
 
     public AddressData(Long addressTypeId, String street, String addressLine1, String addressLine2, String addressLine3, String city,
             String postalCode, Boolean isActive, Long stateProvinceId, Long countryId) {
@@ -124,7 +127,8 @@ public class AddressData implements Serializable {
             final BigDecimal longitude, final String createdBy, final LocalDate createdOn, final String updatedBy,
             final LocalDate updatedOn, final Collection<CodeValueData> countryIdOptions,
             final Collection<CodeValueData> stateProvinceIdOptions, final Collection<CodeValueData> addressTypeIdOptions,
-            final Collection<CodeValueData> lgaIdOptions, final Long lgaId, final String lgaName) {
+            final Collection<CodeValueData> lgaIdOptions, final Long lgaId, final String lgaName, final String physicalAddressDistrict,
+            final String physicalAddressSector, final String physicalAddressCell) {
         this.addressType = addressType;
         this.clientID = clientID;
         this.addressId = addressId;
@@ -155,6 +159,9 @@ public class AddressData implements Serializable {
         this.lgaIdOptions = lgaIdOptions;
         this.lgaId = lgaId;
         this.lgaName = lgaName;
+        this.physicalAddressDistrict = physicalAddressDistrict;
+        this.physicalAddressSector = physicalAddressSector;
+        this.physicalAddressCell = physicalAddressCell;
     }
 
     public static AddressData instance(final String addressType, final Long clientID, final Long addressId, final Long addressTypeId,
@@ -162,11 +169,13 @@ public class AddressData implements Serializable {
             final String townVillage, final String city, final String countyDistrict, final Long stateProvinceId, final Long countryId,
             final String stateName, final String countryName, final String postalCode, final BigDecimal latitude,
             final BigDecimal longitude, final String createdBy, final LocalDate createdOn, final String updatedBy,
-            final LocalDate updatedOn, final Long lgaId, final String lgaName) {
+            final LocalDate updatedOn, final Long lgaId, final String lgaName, final String physicalAddressDistrict,
+            final String physicalAddressSector, final String physicalAddressCell) {
 
         return new AddressData(addressType, clientID, addressId, addressTypeId, is_active, street, addressLine1, addressLine2, addressLine3,
                 townVillage, city, countyDistrict, stateProvinceId, countryId, stateName, countryName, postalCode, latitude, longitude,
-                createdBy, createdOn, updatedBy, updatedOn, null, null, null, null, lgaId, lgaName);
+                createdBy, createdOn, updatedBy, updatedOn, null, null, null, null, lgaId, lgaName, physicalAddressDistrict,
+                physicalAddressSector, physicalAddressCell);
     }
 
     public static AddressData instance1(final Long addressId, final String street, final String addressLine1, final String addressLine2,
@@ -175,7 +184,7 @@ public class AddressData implements Serializable {
             final LocalDate createdOn, final String updatedBy, final LocalDate updatedOn) {
         return new AddressData(null, null, addressId, null, false, street, addressLine1, addressLine2, addressLine3, townVillage, city,
                 countyDistrict, stateProvinceId, countryId, null, null, postalCode, latitude, longitude, createdBy, createdOn, updatedBy,
-                updatedOn, null, null, null, null, null, null);
+                updatedOn, null, null, null, null, null, null, null, null, null);
     }
 
     public static AddressData template(final Collection<CodeValueData> countryIdOptions,
@@ -224,7 +233,7 @@ public class AddressData implements Serializable {
         return new AddressData(null, client_idtemp, addressIdtemp, addressTypeIdtemp, is_activetemp, streettemp, addressLine1temp,
                 addressLine2temp, addressLine3temp, townVillagetemp, citytemp, countyDistricttemp, stateProvinceIdtemp, countryIdtemp, null,
                 null, postalCodetemp, latitudetemp, longitudetemp, createdBytemp, createdOntemp, updatedBytemp, updatedOntemp,
-                countryIdOptions, stateProvinceIdOptions, addressTypeIdOptions, lgaIdOptions, null, null);
+                countryIdOptions, stateProvinceIdOptions, addressTypeIdOptions, lgaIdOptions, null, null, null, null, null);
     }
 
 }

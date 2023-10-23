@@ -114,7 +114,8 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
                     + "addr.address_line_3 as address_line_3,addr.town_village as town_village, addr.city as city,addr.county_district as county_district,"
                     + "addr.state_province_id as state_province_id,cv.code_value as state_name, addr.country_id as country_id,c.code_value as country_name,addr.postal_code as postal_code,addr.latitude as latitude,"
                     + "addr.lga_id as lga_id, cl.code_value as lga_name, addr.longitude as longitude,addr.created_by as created_by,addr.created_on as created_on,addr.updated_by as updated_by,"
-                    + "addr.updated_on as updated_on" + " from m_address addr left join m_code_value cv on addr.state_province_id=cv.id"
+                    + "addr.updated_on as updated_on,addr.physical_address_cell as physicalAddressCell,addr.physical_address_district as physicalAddressDistrict,physical_address_sector as physicalAddressSector "
+                    + "from m_address addr left join m_code_value cv on addr.state_province_id=cv.id"
                     + " left join  m_code_value c on addr.country_id=c.id left join  m_code_value cl on addr.lga_id=cl.id"
                     + " join m_client_address ca on addr.id= ca.address_id" + " join m_code_value cv2 on ca.address_type_id=cv2.id";
 
@@ -173,13 +174,16 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
             final String updated_by = rs.getString("updated_by");
 
             final Date updated_on = rs.getDate("updated_on");
+            final String physicalAddressCell = rs.getString("physicalAddressCell");
+            final String physicalAddressDistrict = rs.getString("physicalAddressDistrict");
+            final String physicalAddressSector = rs.getString("physicalAddressSector");
 
             final LocalDate update_on_local_date = updated_on != null ? updated_on.toLocalDate() : null;
 
             return AddressData.instance(addressType, client_id, addressId, address_type_id, is_active, street, address_line_1,
                     address_line_2, address_line_3, town_village, city, county_district, state_province_id, country_id, state_name,
                     country_name, postal_code, latitude, longitude, created_by, created_on_local_date, updated_by, update_on_local_date,
-                    lgaId, lgaName);
+                    lgaId, lgaName, physicalAddressDistrict, physicalAddressSector, physicalAddressCell);
 
         }
     }
