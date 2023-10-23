@@ -25,19 +25,21 @@ import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 
 public class ClientApiCollectionConstants extends ClientApiConstants {
 
-    protected static final Set<String> CLIENT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(familyMembers, address,
-            localeParamName, dateFormatParamName, groupIdParamName, accountNoParamName, externalIdParamName, mobileNoParamName,
-            emailAddressParamName, firstnameParamName, middlenameParamName, lastnameParamName, fullnameParamName, officeIdParamName,
-            activeParamName, activationDateParamName, staffIdParamName, submittedOnDateParamName, savingsProductIdParamName,
-            dateOfBirthParamName, genderIdParamName, clientTypeIdParamName, clientClassificationIdParamName, clientLevelIdParamName,
-            clientNonPersonDetailsParamName, displaynameParamName, legalFormIdParamName, datatables, isStaffParamName, businessOwners,
-            dailyWithdrawLimit, singleWithdrawLimit, maritalStatusIdParamName, titleParam, mnemonicsParamNameParam, altMobileNoParam,
-            initialsParam, isRegisteredParam, inBusinessSinceParamName, KIVA_ID));
+    protected static final Set<String> CLIENT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(familyMembers, address, localeParamName, dateFormatParamName, groupIdParamName, accountNoParamName,
+                    externalIdParamName, mobileNoParamName, emailAddressParamName, firstnameParamName, middlenameParamName,
+                    lastnameParamName, fullnameParamName, officeIdParamName, activeParamName, activationDateParamName, staffIdParamName,
+                    submittedOnDateParamName, savingsProductIdParamName, dateOfBirthParamName, genderIdParamName, clientTypeIdParamName,
+                    clientClassificationIdParamName, clientLevelIdParamName, clientNonPersonDetailsParamName, displaynameParamName,
+                    legalFormIdParamName, datatables, isStaffParamName, businessOwners, dailyWithdrawLimit, singleWithdrawLimit,
+                    maritalStatusIdParamName, titleParam, mnemonicsParamNameParam, altMobileNoParam, initialsParam, isRegisteredParam,
+                    inBusinessSinceParamName, KIVA_ID, PHYSICAL_ADDRESS_DISTRICT, PHYSICAL_ADDRESS_CELL, PHYSICAL_ADDRESS_SECTOR));
 
     protected static final Set<String> CLIENT_NON_PERSON_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(familyMembers, address, localeParamName, dateFormatParamName, incorpNumberParamName, remarksParamName,
                     incorpValidityTillParamName, constitutionIdParamName, mainBusinessLineIdParamName, datatables, mnemonicsParamNameParam,
-                    altMobileNoParam, inBusinessSinceParamName, isRegisteredParam, KIVA_ID));
+                    altMobileNoParam, inBusinessSinceParamName, isRegisteredParam, KIVA_ID, PHYSICAL_ADDRESS_DISTRICT,
+                    PHYSICAL_ADDRESS_CELL, PHYSICAL_ADDRESS_SECTOR));
 
     protected static final Set<String> CLIENT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
             dateFormatParamName, accountNoParamName, externalIdParamName, mobileNoParamName, emailAddressParamName, firstnameParamName,
@@ -45,11 +47,13 @@ public class ClientApiCollectionConstants extends ClientApiConstants {
             staffIdParamName, savingsProductIdParamName, dateOfBirthParamName, genderIdParamName, clientTypeIdParamName,
             clientClassificationIdParamName, submittedOnDateParamName, clientNonPersonDetailsParamName, displaynameParamName,
             legalFormIdParamName, isStaffParamName, dailyWithdrawLimit, singleWithdrawLimit, maritalStatusIdParamName, titleParam,
-            mnemonicsParamNameParam, altMobileNoParam, initialsParam, isRegisteredParam, inBusinessSinceParamName, KIVA_ID));
+            mnemonicsParamNameParam, altMobileNoParam, initialsParam, isRegisteredParam, inBusinessSinceParamName, KIVA_ID,
+            PHYSICAL_ADDRESS_DISTRICT, PHYSICAL_ADDRESS_CELL, PHYSICAL_ADDRESS_SECTOR));
 
-    protected static final Set<String> CLIENT_NON_PERSON_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(localeParamName,
-            dateFormatParamName, incorpNumberParamName, remarksParamName, incorpValidityTillParamName, constitutionIdParamName,
-            mainBusinessLineIdParamName, altMobileNoParam, isRegisteredParam, inBusinessSinceParamName, KIVA_ID));
+    protected static final Set<String> CLIENT_NON_PERSON_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(localeParamName, dateFormatParamName, incorpNumberParamName, remarksParamName, incorpValidityTillParamName,
+                    constitutionIdParamName, mainBusinessLineIdParamName, altMobileNoParam, isRegisteredParam, inBusinessSinceParamName,
+                    KIVA_ID, PHYSICAL_ADDRESS_DISTRICT, PHYSICAL_ADDRESS_CELL, PHYSICAL_ADDRESS_SECTOR));
 
     /**
      * These parameters will match the class level parameters of {@link ClientData}. Where possible, we try to get

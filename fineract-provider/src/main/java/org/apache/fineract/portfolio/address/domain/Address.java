@@ -102,6 +102,12 @@ public class Address extends AbstractPersistableCustom {
     @ManyToOne
     @JoinColumn(name = "lga_id")
     private CodeValue lga;
+    @Column(name = "physical_address_district")
+    private String physicalAddressDistrict;
+    @Column(name = "physical_address_sector")
+    private String physicalAddressSector;
+    @Column(name = "physical_address_cell")
+    private String physicalAddressCell;
 
     @Getter
     @Setter
@@ -112,7 +118,8 @@ public class Address extends AbstractPersistableCustom {
             final String townVillage, final String city, final String countyDistrict, final CodeValue stateProvince,
             final CodeValue country, final String postalCode, final BigDecimal latitude, final BigDecimal longitude, final String createdBy,
             final LocalDate createdOn, final String updatedBy, final LocalDate updatedOn, final CodeValue lga,
-            final LocalDate atAddressSince) {
+            final LocalDate atAddressSince, final String physicalAddressDistrict, final String physicalAddressSector,
+            final String physicalAddressCell) {
         this.street = street;
         this.addressLine1 = addressLine1;
         this.addressLine2 = addressLine2;
@@ -126,10 +133,11 @@ public class Address extends AbstractPersistableCustom {
         this.latitude = latitude;
         this.longitude = longitude;
         this.createdBy = createdBy;
-        // this.createdOn = createdOn;
         this.updatedBy = updatedBy;
-        // this.updatedOn = updatedOn;
         this.lga = lga;
+        this.physicalAddressDistrict = physicalAddressDistrict;
+        this.physicalAddressSector = physicalAddressSector;
+        this.physicalAddressCell = physicalAddressCell;
 
         if (createdOn != null) {
             this.createdOn = createdOn;
@@ -180,8 +188,13 @@ public class Address extends AbstractPersistableCustom {
 
         final LocalDate atAddressSince = command.localDateValueOfParameterNamed("atAddressSince");
 
+        final String physicalAddressDistrict = command.stringValueOfParameterNamed("physicalAddressDistrict");
+        final String physicalAddressSector = command.stringValueOfParameterNamed("physicalAddressSector");
+        final String physicalAddressCell = command.stringValueOfParameterNamed("physicalAddressCell");
+
         return new Address(street, addressLine1, addressLine2, addressLine3, townVillage, city, countyDistrict, stateProvince, country,
-                postalCode, latitude, longitude, createdBy, createdOn, updatedBy, updatedOn, null, atAddressSince);
+                postalCode, latitude, longitude, createdBy, createdOn, updatedBy, updatedOn, null, atAddressSince, physicalAddressDistrict,
+                physicalAddressSector, physicalAddressCell);
     }
 
     public static Address fromJsonObject(final JsonObject jsonObject, final CodeValue state_province, final CodeValue country,
@@ -201,6 +214,9 @@ public class Address extends AbstractPersistableCustom {
         LocalDate updatedOnDate = null;
         LocalDate createdOnDate = null;
         LocalDate atAddressSince = null;
+        String physicalAddressDistrict = "";
+        String physicalAddressSector = "";
+        String physicalAddressCell = "";
 
         if (jsonObject.has("street")) {
             street = jsonObject.get("street").getAsString();
@@ -261,9 +277,19 @@ public class Address extends AbstractPersistableCustom {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             atAddressSince = LocalDate.parse(updatedOn, formatter);
         }
+        if (jsonObject.has("physicalAddressDistrict")) {
+            physicalAddressDistrict = jsonObject.get("physicalAddressDistrict").getAsString();
+        }
+        if (jsonObject.has("physicalAddressSector")) {
+            physicalAddressSector = jsonObject.get("physicalAddressSector").getAsString();
+        }
+        if (jsonObject.has("physicalAddressCell")) {
+            physicalAddressCell = jsonObject.get("physicalAddressCell").getAsString();
+        }
 
         return new Address(street, addressLine1, addressLine2, addressLine3, townVillage, city, countyDistrict, state_province, country,
-                postalCode, latitude, longitude, createdBy, createdOnDate, updatedBy, updatedOnDate, lga, atAddressSince);
+                postalCode, latitude, longitude, createdBy, createdOnDate, updatedBy, updatedOnDate, lga, atAddressSince,
+                physicalAddressDistrict, physicalAddressSector, physicalAddressCell);
     }
 
     public Set<ClientAddress> getClientaddress() {
@@ -408,5 +434,29 @@ public class Address extends AbstractPersistableCustom {
 
     public void setLga(CodeValue lga) {
         this.lga = lga;
+    }
+
+    public String getPhysicalAddressDistrict() {
+        return physicalAddressDistrict;
+    }
+
+    public void setPhysicalAddressDistrict(String physicalAddressDistrict) {
+        this.physicalAddressDistrict = physicalAddressDistrict;
+    }
+
+    public String getPhysicalAddressSector() {
+        return physicalAddressSector;
+    }
+
+    public void setPhysicalAddressSector(String physicalAddressSector) {
+        this.physicalAddressSector = physicalAddressSector;
+    }
+
+    public String getPhysicalAddressCell() {
+        return physicalAddressCell;
+    }
+
+    public void setPhysicalAddressCell(String physicalAddressCell) {
+        this.physicalAddressCell = physicalAddressCell;
     }
 }

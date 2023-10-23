@@ -259,6 +259,21 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
             addobj.setAtAddressSince(addressLine1);
 
         }
+        if (!command.stringValueOfParameterNamed("physicalAddressDistrict").isEmpty()) {
+            is_address_update = true;
+            final String physicalAddressDistrict = command.stringValueOfParameterNamed("physicalAddressDistrict");
+            addobj.setPhysicalAddressDistrict(physicalAddressDistrict);
+        }
+        if (!command.stringValueOfParameterNamed("physicalAddressSector").isEmpty()) {
+            is_address_update = true;
+            final String physicalAddressSector = command.stringValueOfParameterNamed("physicalAddressSector");
+            addobj.setPhysicalAddressSector(physicalAddressSector);
+        }
+        if (!command.stringValueOfParameterNamed("physicalAddressCell").isEmpty()) {
+            is_address_update = true;
+            final String physicalAddressCell = command.stringValueOfParameterNamed("physicalAddressCell");
+            addobj.setPhysicalAddressCell(physicalAddressCell);
+        }
 
         if (is_address_update) {
             addobj.setUpdatedOn(LocalDate.now(DateUtils.getDateTimeZoneOfTenant()));
