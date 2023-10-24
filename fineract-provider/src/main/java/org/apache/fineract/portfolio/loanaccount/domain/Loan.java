@@ -438,9 +438,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     @Column(name = "description")
     private String description;
-    @Column(name = "stop_consumer_credit_upload_to_transUnion", nullable = true)
+    @Column(name = "stop_consumer_credit_upload_to_trans_union", nullable = true)
     private Boolean stopConsumerCreditUploadToTransUnion;
-    @Column(name = "stop_consumer_credit_upload_to_transUnion_on")
+    @Column(name = "stop_consumer_credit_upload_to_trans_union_on")
     private LocalDate stopConsumerCreditUploadToTransUnionOn;
 
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,

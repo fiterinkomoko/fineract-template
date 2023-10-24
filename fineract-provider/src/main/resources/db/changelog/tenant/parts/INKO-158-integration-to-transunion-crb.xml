@@ -483,11 +483,11 @@ WHERE l.loan_status_id IN (300, 600, 601, 700)
         </addColumn>
     </changeSet>
 
-    <changeSet author="bosco@fiter.io" id="add_m_loan_stop_consumer_credit_upload_to_trans_union_on">
+    <changeSet author="bosco@fiter.io" id="add_m_loan_stop_consumer_credit_upload_to_trans_union_on_2">
 
         <preConditions onFail="MARK_RAN">
             <not>
-                <columnExists tableName="m_loan" columnName="stop_consumer_credit_upload_to_transUnion_on"/>
+                <columnExists tableName="m_loan" columnName="stop_consumer_credit_upload_to_trans_union_on"/>
             </not>
         </preConditions>
         <addColumn tableName="m_loan">
