@@ -35,12 +35,16 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.loanaccount.data.RwandaConsumerCreditData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionAuthenticationData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaConsumerCreditData;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +59,7 @@ public class TransUnionCrbServiceImpl implements TransUnionCrbService {
     private static final Logger LOG = LoggerFactory.getLogger(TransUnionCrbServiceImpl.class);
     public static final String FORM_URL_CONTENT_TYPE = "Content-Type";
     private final TransUnionCrbPostConsumerCreditReadPlatformServiceImpl transUnionCrbPostConsumerCreditReadPlatformServiceImpl;
+    private final LoanRepositoryWrapper loanRepository;
     @Autowired
     private Environment env;
 
@@ -64,6 +69,7 @@ public class TransUnionCrbServiceImpl implements TransUnionCrbService {
         LOG.info("Starting Consumer Credit Data Upload To TransUnion CRB");
         String token = authenticateToTransUnionRestApi();
         LOG.info("CRB Token == > " + token);
+        List<Integer> loansNotToBeRePostedTransUnion = new ArrayList<>();
         Collection<TransUnionRwandaConsumerCreditData> transUnionRwandaConsumerCreditDataCollection = transUnionCrbPostConsumerCreditReadPlatformServiceImpl
                 .retrieveAllConsumerCredits();
 
@@ -73,7 +79,31 @@ public class TransUnionCrbServiceImpl implements TransUnionCrbService {
                 RwandaConsumerCreditData rwandaConsumerCreditData = new RwandaConsumerCreditData();
                 rwandaConsumerCreditData.setConsumerCreditInformationRecord(creditData);
                 rwandaConsumerCreditData.setRecordType("IC");
-                postRwandaConsumerCreditToTransUnion(token, convertConsumerCreditPayloadToJson(rwandaConsumerCreditData));
+                String callbackId = null;
+
+                callbackId = postRwandaConsumerCreditToTransUnion(token, convertConsumerCreditPayloadToJson(rwandaConsumerCreditData));
+
+                if (callbackId != null && !creditData.getLoanStatus().equals(LoanStatus.ACTIVE.getValue())) {
+                    // add it to list to update flag on the loan account so that next time we don't post it to
+                    // TransUnion
+                    // We query by status 300, 600, 601, 700 so if loan account is not Activate , then after this
+                    // upload, stop re-posting
+                    loansNotToBeRePostedTransUnion.add(creditData.getLoanId());
+                }
+
+            }
+        }
+
+        // Update flags
+        if (!CollectionUtils.isEmpty(loansNotToBeRePostedTransUnion)) {
+            for (Integer loanId : loansNotToBeRePostedTransUnion) {
+
+                Loan loan = loanRepository.findOneWithNotFoundDetection(loanId.longValue());
+
+                loan.setStopConsumerCreditUploadToTransUnion(Boolean.TRUE);
+                loan.setStopConsumerCreditUploadToTransUnionOn(DateUtils.getBusinessLocalDate());
+
+                loanRepository.saveAndFlush(loan);
             }
         }
 
