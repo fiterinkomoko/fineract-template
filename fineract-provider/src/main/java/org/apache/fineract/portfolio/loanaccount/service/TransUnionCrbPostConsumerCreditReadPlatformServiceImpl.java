@@ -25,6 +25,7 @@ import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaConsumerCreditData;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -35,6 +36,7 @@ import org.springframework.stereotype.Service;
 public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements TransUnionCrbPostConsumerCreditReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final DatabaseTypeResolver databaseTypeResolver;
 
     @Override
     public Collection<TransUnionRwandaConsumerCreditData> retrieveAllConsumerCredits() {
@@ -43,10 +45,12 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
         return this.jdbcTemplate.query(sql, mapper, new Object[] {});
     }
 
-    private static final class ConsumerCreditMapper implements RowMapper<TransUnionRwandaConsumerCreditData> {
+    private final class ConsumerCreditMapper implements RowMapper<TransUnionRwandaConsumerCreditData> {
 
         public String schema() {
-            return "  WITH RankedAddresses AS ( " + "    SELECT client_id, " + "           address_id, "
+            final StringBuilder sql = new StringBuilder();
+
+            sql.append("  WITH RankedAddresses AS ( " + "    SELECT client_id, " + "           address_id, "
                     + "           ROW_NUMBER() OVER (PARTITION BY client_id ORDER BY address_id DESC) AS row_num "
                     + "    FROM m_client_address " + "  ) "
                     + "  SELECT l.id                                                                              AS loanId, "
@@ -54,9 +58,13 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
                     + "       l.loan_status_id                                                                  AS loanStatus, "
                     + "       l.currency_code                                                                   AS currencyType, "
                     + "       country_cv.code_value                                                             AS country, "
-                    + "       mc.firstname                                                                      AS surName, "
-                    + "       EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) AS daysInArrears, "
-                    + "       mc.firstname                                                                      AS foreName1, "
+                    + "       mc.firstname                                                                      AS surName, ");
+            if (databaseTypeResolver.isMySQL()) {
+                sql.append("       DATEDIFF(NOW(), mlaa.overdue_since_date_derived)                            AS daysInArrears, ");
+            } else {
+                sql.append("       EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) AS daysInArrears, ");
+            }
+            sql.append("       mc.firstname                                                                      AS foreName1, "
                     + "       mc.middlename                                                                     AS foreName2, "
                     + "       mc.lastname                                                                       AS foreName3, "
                     + "       l.principal_disbursed_derived                                                     AS openingBalance, "
@@ -151,7 +159,8 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
                     + "         LEFT JOIN m_code_value province_cv ON ra.state_province_id = province_cv.id "
                     + "  WHERE l.loan_status_id IN (300, 600, 601, 700) " + "  AND l.currency_code = 'RWF' "
                     + "  AND first_payment.firstPaymentDate IS NOT NULL " + "  AND l.last_repayment_date IS NOT NULL "
-                    + "  AND (l.stop_consumer_credit_upload_to_trans_union IS NULL OR l.stop_consumer_credit_upload_to_trans_union = false) ";
+                    + "  AND (l.stop_consumer_credit_upload_to_trans_union IS NULL OR l.stop_consumer_credit_upload_to_trans_union = false) ");
+            return sql.toString();
         }
 
         @Override
