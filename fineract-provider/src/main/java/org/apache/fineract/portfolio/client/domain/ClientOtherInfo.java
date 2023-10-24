@@ -77,16 +77,33 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
     @Column(name = "telephone_no")
     private String telephoneNo;
 
+    @Column(name = "national_identification_number")
+    private String nationalIdentificationNumber;
+
+    @Column(name = "passport_number")
+    private String passportNumber;
+
+    @Column(name = "bank_account_number")
+    private String bankAccountNumber;
+
+    @Column(name = "bank_name")
+    private String bankName;
+
     public ClientOtherInfo() {}
 
     public ClientOtherInfo(Client client, CodeValue strata, CodeValue yearArrivedInHostCountry, CodeValue nationality,
-            Integer numberOfChildren, Integer numberOfDependents) {
+            Integer numberOfChildren, Integer numberOfDependents, String nationalIdentificationNumber, String passportNumber,
+            String bankAccountNumber, String bankName) {
         this.client = client;
         this.strata = strata;
         this.yearArrivedInHostCountry = yearArrivedInHostCountry;
         this.nationality = nationality;
         this.numberOfChildren = numberOfChildren;
         this.numberOfDependents = numberOfDependents;
+        this.nationalIdentificationNumber = nationalIdentificationNumber;
+        this.passportNumber = passportNumber;
+        this.bankAccountNumber = bankAccountNumber;
+        this.bankName = bankName;
 
     }
 
@@ -110,7 +127,12 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
 
         final Integer numberOfChildren = command.integerValueOfParameterNamed(ClientApiConstants.numberOfChildren);
         final Integer numberOfDependents = command.integerValueOfParameterNamed(ClientApiConstants.numberOfDependents);
-        return new ClientOtherInfo(client, strata, yearArrivedInHostCountry, nationality, numberOfChildren, numberOfDependents);
+        final String nationalIdentificationNumber = command.stringValueOfParameterNamed(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER);
+        final String passportNumber = command.stringValueOfParameterNamed(ClientApiConstants.PASSPORT_NUMBER);
+        final String bankAccountNumber = command.stringValueOfParameterNamed(ClientApiConstants.BANK_ACCOUNT_NUMBER);
+        final String bankName = command.stringValueOfParameterNamed(ClientApiConstants.BANK_NAME);
+        return new ClientOtherInfo(client, strata, yearArrivedInHostCountry, nationality, numberOfChildren, numberOfDependents,
+                nationalIdentificationNumber, passportNumber, bankAccountNumber, bankName);
     }
 
     public static ClientOtherInfo createNewForEntity(JsonCommand command, Client client, final CodeValue strata) {
@@ -159,6 +181,28 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
                 final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.yearArrivedInHostCountry);
                 actualChanges.put(ClientApiConstants.yearArrivedInHostCountry, newValue);
             }
+            if (command.isChangeInStringParameterNamed(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER,
+                    this.nationalIdentificationNumber)) {
+                final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER);
+                actualChanges.put(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER, newValue);
+                this.nationalIdentificationNumber = newValue;
+            }
+            if (command.isChangeInStringParameterNamed(ClientApiConstants.PASSPORT_NUMBER, this.passportNumber)) {
+                final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.PASSPORT_NUMBER);
+                actualChanges.put(ClientApiConstants.PASSPORT_NUMBER, newValue);
+                this.passportNumber = newValue;
+            }
+            if (command.isChangeInStringParameterNamed(ClientApiConstants.BANK_ACCOUNT_NUMBER, this.bankAccountNumber)) {
+                final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.BANK_ACCOUNT_NUMBER);
+                actualChanges.put(ClientApiConstants.BANK_ACCOUNT_NUMBER, newValue);
+                this.bankAccountNumber = newValue;
+            }
+            if (command.isChangeInStringParameterNamed(ClientApiConstants.BANK_NAME, this.bankName)) {
+                final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.BANK_NAME);
+                actualChanges.put(ClientApiConstants.BANK_NAME, newValue);
+                this.bankName = newValue;
+            }
+
         } else if (LegalForm.fromInt(legalFormId).isEntity()) {
             if (command.isChangeInStringParameterNamed(ClientApiConstants.businessLocationParamName, this.businessLocation)) {
                 final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.businessLocationParamName);

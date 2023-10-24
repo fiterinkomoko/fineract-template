@@ -10,6 +10,8 @@
   "activationDate": "#(groupCreationDate)",
   "submittedOnDate": "#(groupCreationDate)",
   "locale": "en",
+  "representativeId": "#(clientId_1)",
+  "externalId": "#(faker.lorem().characters(70))",
   "dateFormat": "#(format)"
 }
 }

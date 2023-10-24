@@ -91,6 +91,7 @@
     <include file="parts/INKO_72_update_report_sql_obligations_met_table_report.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO_73_add_loan_in_arrears_to_reports_table.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO_74_add_collateral_report_to_reports_table.xml" relativeToChangelogFile="true" />
+    <include file="parts/INKO-160-integration-to-kiva.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO_76_update_client_id_select_all_report_parameter_query.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO_75_update_loan_aging_summary_reports.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO_77_add_loan_fully_paid_table_report.xml" relativeToChangelogFile="true" />
@@ -112,6 +113,7 @@
     <include file="parts/INKO_93_add_portfolio_management_table_report.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO_94_add_ic_minutes_table_report.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO_95_update_topup_report_parameters.xml" relativeToChangelogFile="true" />
+    <include file="parts/INKO-158-integration-to-transunion-crb.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO_96_update_portfolio_management_and_ic_minutes_report.xml" relativeToChangelogFile="true" />
     <includeAll path="custom-changelog" relativeToChangelogFile="true"/>
 </databaseChangeLog>
