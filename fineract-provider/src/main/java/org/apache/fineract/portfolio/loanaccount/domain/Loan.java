@@ -438,6 +438,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     @Column(name = "description")
     private String description;
+    @Column(name = "stop_consumer_credit_upload_to_trans_union", nullable = true)
+    private Boolean stopConsumerCreditUploadToTransUnion;
+    @Column(name = "stop_consumer_credit_upload_to_trans_union_on")
+    private LocalDate stopConsumerCreditUploadToTransUnionOn;
 
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
@@ -7079,5 +7083,21 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public String getExternalId() {
         return externalId;
+    }
+
+    public Boolean getStopConsumerCreditUploadToTransUnion() {
+        return stopConsumerCreditUploadToTransUnion;
+    }
+
+    public void setStopConsumerCreditUploadToTransUnion(Boolean stopConsumerCreditUploadToTransUnion) {
+        this.stopConsumerCreditUploadToTransUnion = stopConsumerCreditUploadToTransUnion;
+    }
+
+    public LocalDate getStopConsumerCreditUploadToTransUnionOn() {
+        return stopConsumerCreditUploadToTransUnionOn;
+    }
+
+    public void setStopConsumerCreditUploadToTransUnionOn(LocalDate stopConsumerCreditUploadToTransUnionOn) {
+        this.stopConsumerCreditUploadToTransUnionOn = stopConsumerCreditUploadToTransUnionOn;
     }
 }
