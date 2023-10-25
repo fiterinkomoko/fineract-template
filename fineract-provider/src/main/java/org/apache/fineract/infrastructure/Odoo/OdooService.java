@@ -29,4 +29,8 @@ public interface OdooService {
 
     public void postClientsAndSavingsAccountToOddo() throws JobExecutionException;
 
+    public Boolean updateCustomerToOddo(Client client);
+
+    public void postCustomerUpdatedDetailsToOddo() throws JobExecutionException;
+
 }

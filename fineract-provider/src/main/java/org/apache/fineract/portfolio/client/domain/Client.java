@@ -233,6 +233,9 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "odoo_customer_id")
     private Integer odooCustomerId;
 
+    @Column(name = "is_updated_to_odoo", nullable = true)
+    private boolean isUpdatedToOdoo;
+
     public static Client createNew(final AppUser currentUser, final Office clientOffice, final Group clientParentGroup, final Staff staff,
             final Long savingsProductId, final CodeValue gender, final CodeValue clientType, final CodeValue clientClassification,
             final Integer legalForm, final JsonCommand command) {
@@ -1063,5 +1066,13 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
 
     public void setOdooCustomerId(Integer odooCustomerId) {
         this.odooCustomerId = odooCustomerId;
+    }
+
+    public boolean isUpdatedToOdoo() {
+        return this.isUpdatedToOdoo;
+    }
+
+    public void setUpdatedToOdoo(boolean isUpdatedToOdoo) {
+        this.isUpdatedToOdoo = isUpdatedToOdoo;
     }
 }

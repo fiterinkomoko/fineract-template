@@ -33,4 +33,7 @@ interface ClientRepository extends JpaRepository<Client, Long>, JpaSpecification
 
     @Query("select client from Client client where client.isOdooCustomerPosted= :isOdooCustomerPosted")
     List<Client> findByIsOdooPosted(@Param("isOdooCustomerPosted") boolean isOdooCustomerPosted);
+
+    @Query("select client from Client client where client.isOdooCustomerPosted= :isOdooCustomerPosted and client.isUpdatedToOdoo = :isUpdatedToOdoo")
+    List<Client> getClientUpdatedDetailsByIsUpdatedToOdoo(@Param("isOdooCustomerPosted") boolean isOdooCustomerPosted, @Param("isUpdatedToOdoo") boolean isUpdatedToOdoo);
 }
