@@ -931,7 +931,7 @@ FROM m_loan l
          LEFT JOIN (SELECT loan_id,
                            COUNT(*) AS installments_in_arrears
                     FROM m_loan_repayment_schedule
-                    WHERE duedate <= CURRENT_DATE
+                    WHERE duedate &lt;= CURRENT_DATE
                       AND completed_derived = FALSE
                       AND obligations_met_on_date IS NULL
                     GROUP BY loan_id) AS r ON l.id = r.loan_id
