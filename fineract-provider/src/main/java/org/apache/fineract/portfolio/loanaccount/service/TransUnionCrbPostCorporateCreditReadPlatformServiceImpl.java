@@ -26,49 +26,47 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
-import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaConsumerCreditData;
+import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCorporateCreditData;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements TransUnionCrbPostConsumerCreditReadPlatformService {
+public class TransUnionCrbPostCorporateCreditReadPlatformServiceImpl implements TransUnionCrbPostCorporateCreditReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseTypeResolver databaseTypeResolver;
 
     @Override
-    public Collection<TransUnionRwandaConsumerCreditData> retrieveAllConsumerCredits() {
-        final ConsumerCreditMapper mapper = new ConsumerCreditMapper();
+    public Collection<TransUnionRwandaCorporateCreditData> retrieveAllCorporateCredits() {
+        final CorporateCreditMapper mapper = new CorporateCreditMapper();
         final String sql = mapper.schema() + " order by l.id ";
         return this.jdbcTemplate.query(sql, mapper, new Object[] {});
     }
 
-    private final class ConsumerCreditMapper implements RowMapper<TransUnionRwandaConsumerCreditData> {
+    private final class CorporateCreditMapper implements RowMapper<TransUnionRwandaCorporateCreditData> {
 
         public String schema() {
             final StringBuilder sql = new StringBuilder();
 
-            sql.append("  WITH RankedAddresses AS ( " + "    SELECT client_id, " + "           address_id, "
+            sql.append(" WITH RankedAddresses AS ( " + "    SELECT client_id, " + "           address_id, "
                     + "           ROW_NUMBER() OVER (PARTITION BY client_id ORDER BY address_id DESC) AS row_num "
-                    + "    FROM m_client_address " + "  ) "
-                    + "  SELECT l.id                                                                              AS loanId, "
+                    + "    FROM m_client_address " + " ) "
+                    + " SELECT l.id                                                                              AS loanId, "
                     + "       l.account_no                                                                      AS accountNumber, "
                     + "       l.loan_status_id                                                                  AS loanStatus, "
                     + "       l.currency_code                                                                   AS currencyType, "
                     + "       country_cv.code_value                                                             AS country, "
-                    + "       mc.firstname                                                                      AS surName, ");
+                    + "       mc.fullname                                                                      AS institution, "
+                    + "       mc.fullname                                                                      AS tradingName,");
             if (databaseTypeResolver.isMySQL()) {
-                sql.append("       DATEDIFF(NOW(), mlaa.overdue_since_date_derived)                            AS daysInArrears, ");
+                sql.append(" DATEDIFF(NOW(), mlaa.overdue_since_date_derived)                            AS daysInArrears, ");
             } else {
-                sql.append("       EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) AS daysInArrears, ");
+                sql.append(" EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) AS daysInArrears, ");
             }
-            sql.append("       mc.firstname                                                                      AS foreName1, "
-                    + "       mc.middlename                                                                     AS foreName2, "
-                    + "       mc.lastname                                                                       AS foreName3, "
-                    + "       l.principal_disbursed_derived                                                     AS openingBalance, "
-                    + "       CASE " + "           WHEN l.repayment_period_frequency_enum = 0 THEN 'DLY' "
+            sql.append("  mpl.max_principal_amount                                                     AS openingBalance, " + "       CASE "
+                    + "           WHEN l.repayment_period_frequency_enum = 0 THEN 'DLY' "
                     + "           WHEN l.repayment_period_frequency_enum = 1 THEN 'WKY' "
                     + "           WHEN l.repayment_period_frequency_enum = 2 THEN 'MTH' "
                     + "           WHEN l.repayment_period_frequency_enum = 3 THEN 'ANN' " + "           ELSE 'IRR' "
@@ -80,26 +78,15 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
                     + "           WHEN l.repayment_period_frequency_enum = 3 THEN 'A' "
                     + "           END                                                                           AS incomeFrequency, "
                     + "       l.principal_disbursed_derived + l.interest_charged_derived                        AS scheduledPaymentAmount, "
-                    + "       mc.mobile_no                                                                      AS mobileTelephone, "
-                    + "       (l.principal_repaid_derived + l.interest_repaid_derived + l.fee_charges_repaid_derived + "
-                    + "        l.penalty_charges_repaid_derived)                                                AS actualPaymentAmount, "
+                    + "       mc.mobile_no                                                                      AS telephone1, "
+                    + "       (l.principal_repaid_derived + l.interest_repaid_derived)                          AS actualPaymentAmount, "
                     + "       l.disbursedon_date                                                                AS dateAccountOpened, "
                     + "       l.nominal_interest_rate_per_period                                                AS interestRateAtDisbursement, "
-                    + "       info.number_of_dependents                                                         AS noOfDependants, "
                     + "       nationality_cv.code_value                                                         AS nationality, "
-                    + "       UPPER(title_cv.code_value)                                                        AS salutation, "
                     + "       ra.postal_code                                                                    AS postalCode, "
                     + "       province_cv.code_value                                                            AS physicalAddressProvince, "
-                    + "       CASE " + "           WHEN marital_cv.code_value = 'Single' THEN 'S' "
-                    + "           WHEN marital_cv.code_value = 'Married' THEN 'M' "
-                    + "           WHEN marital_cv.code_value = 'Divorced' THEN 'D' "
-                    + "           WHEN marital_cv.code_value = 'Widowed' THEN 'W' " + "           ELSE 'O' "
-                    + "           END                                                                           AS maritalStatus, "
                     + "       ra.postal_code                                                                    AS postalAddressNumber, "
                     + "       l.approvedon_date                                                                 AS approvalDate, "
-                    + "       CASE " + "           WHEN gender_cv.code_value = 'Male' THEN 'M' "
-                    + "           WHEN gender_cv.code_value = 'Female' THEN 'F' "
-                    + "           END                                                                           AS gender, "
                     + "       first_payment.firstPaymentDate                                                    AS firstPaymentDate, "
                     + "       l.closedon_date                                                                   AS dateClosed, "
                     + "       CASE " + "           WHEN l.loan_status_id = 300 THEN 'A' "
@@ -108,7 +95,7 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
                     + "           END                                                                           AS accountStatus, "
                     + "       l.number_of_repayments                                                            AS termsDuration, "
                     + "       l.last_repayment_date                                                             AS lastPaymentDate, "
-                    + "       mc.date_of_birth                                                                  AS dateOfBirth, "
+                    + "       mc.date_of_birth                                                                  AS companyRegistrationDate, "
                     + "       l.maturedon_date                                                                  AS finalPaymentDate, "
                     + "       mlaa.principal_overdue_derived                                                    AS amountPastDue, "
                     + "       40                                                                                AS category, "
@@ -120,29 +107,29 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
                     + "       ra.physical_address_sector                                                        AS physicalAddressSector, "
                     + "       0                                                                                 AS numberOfJointLoanParticipants, "
                     + "       ra.physical_address_cell                                                          AS physicalAddressCell, "
+                    + "       ra.address_line_1                                                                 AS physicalAddressLine1, "
                     + "       13                                                                                AS nature, "
-                    + "       other_info.national_identification_number                                         AS nationalId, "
-                    + "       other_info.passport_number                                                        AS passportNumber, "
                     + "       1                                                                                 AS classification, "
                     + "       ''                                                                                AS emailAddress, "
                     + "       'T'                                                                               AS residenceType, "
                     + "       0                                                                                 AS availableCredit, "
                     + "       0                                                                                 AS income, "
-                    + "       ''                                                                                AS homeTelephone, "
-                    + "       ''                                                                                AS workTelephone, "
-                    + "       l.last_modified_on_utc                                                            AS dateAccountUpdated, "
-                    + "       r.installments_in_arrears                                                         AS installmentsInArrears "
-                    + "  FROM m_loan l " + "         INNER JOIN m_client mc ON l.client_id = mc.id "
+                    + "       l.last_repayment_date                                                             AS dateAccountUpdated, "
+                    + "       r.installments_in_arrears                                                         AS installmentsInArrears, "
+                    + "       mcnp.incorp_no                                                                    AS companyRegNo, "
+                    + "       business_line_cv.code_value                                                       AS industry, "
+                    + "       other_info.tax_identification_number                                              AS taxNo "
+                    + " FROM m_loan l " + "         INNER JOIN m_product_loan mpl ON l.product_id = mpl.id "
+                    + "         INNER JOIN m_client mc ON l.client_id = mc.id "
+                    + "         INNER JOIN m_client_non_person mcnp on mc.id = mcnp.client_id "
                     + "         LEFT JOIN m_client_recruitment_survey mcrs ON mc.id = mcrs.client_id "
                     + "         LEFT JOIN m_code_value country_cv ON mcrs.country_cv_id = country_cv.id "
                     + "         LEFT JOIN m_loan_arrears_aging mlaa ON l.id = mlaa.loan_id "
                     + "         LEFT JOIN m_client_other_info info ON mc.id = info.client_id "
                     + "         LEFT JOIN m_code_value nationality_cv ON info.nationality_cv_id = nationality_cv.id "
+                    + "         LEFT JOIN m_code_value business_line_cv ON mcnp.main_business_line_cv_id = business_line_cv.id "
                     + "         LEFT JOIN m_client_additional_info ad_info ON mc.id = ad_info.client_id "
-                    + "         LEFT JOIN m_client_other_info other_info ON mc.id = other_info.client_id "
-                    + "         LEFT JOIN m_code_value marital_cv ON ad_info.marital_status = marital_cv.id "
-                    + "         LEFT JOIN m_code_value gender_cv ON mc.gender_cv_id = gender_cv.id "
-                    + "         LEFT JOIN m_code_value title_cv ON ad_info.title = title_cv.id " + " " + "         LEFT JOIN ( "
+                    + "         LEFT JOIN m_client_other_info other_info ON mc.id = other_info.client_id " + "         LEFT JOIN ( "
                     + "    SELECT loan_id, " + "           transaction_date AS firstPaymentDate " + "    FROM ( "
                     + "             SELECT loan_id, " + "                    transaction_date, "
                     + "                    ROW_NUMBER() OVER (PARTITION BY loan_id ORDER BY transaction_date) AS row_num "
@@ -157,51 +144,49 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
                     + "                      AND completed_derived = FALSE " + "                      AND obligations_met_on_date IS NULL "
                     + "                    GROUP BY loan_id) AS r ON l.id = r.loan_id "
                     + "         LEFT JOIN m_code_value province_cv ON ra.state_province_id = province_cv.id "
-                    + "  WHERE l.loan_status_id IN (300, 600, 601, 700) " + "  AND l.currency_code = 'RWF' "
-                    + "  AND first_payment.firstPaymentDate IS NOT NULL " + "  AND l.last_repayment_date IS NOT NULL "
-                    + "  AND mc.legal_form_enum = 1 " // 1 = individual 2= entity/corporate
+                    + " WHERE l.loan_status_id IN (300, 600, 601, 700) " + "  AND l.currency_code = 'RWF' "
+                    + "  AND mc.legal_form_enum = 2 " + "  AND first_payment.firstPaymentDate IS NOT NULL "
+                    + "  AND l.last_repayment_date IS NOT NULL "
                     + "  AND (l.stop_consumer_credit_upload_to_trans_union IS NULL OR l.stop_consumer_credit_upload_to_trans_union = false) ");
             return sql.toString();
         }
 
         @Override
-        public TransUnionRwandaConsumerCreditData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
+        public TransUnionRwandaCorporateCreditData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
                 throws SQLException {
             final Integer loanId = rs.getInt("loanId");
             final String accountNumber = rs.getString("accountNumber");
             final Integer loanStatus = rs.getInt("loanStatus");
             final String currencyType = rs.getString("currencyType");
+            final String institution = rs.getString("institution");
+            final String tradingName = rs.getString("tradingName");
+            final String telephone1 = rs.getString("telephone1");
+            final String companyRegNo = rs.getString("companyRegNo");
+            final String physicalAddressLine1 = rs.getString("physicalAddressLine1");
+            final String industry = rs.getString("industry");
+            final String taxNo = rs.getString("taxNo");
             final String country = rs.getString("country");
-            final String surName = rs.getString("surName");
             final Integer daysInArrears = rs.getInt("daysInArrears");
-            final String foreName1 = rs.getString("foreName1");
-            final String foreName2 = rs.getString("foreName2");
-            final String foreName3 = rs.getString("foreName3");
             final Integer openingBalance = rs.getInt("openingBalance");
             final String accountRepaymentTerm = rs.getString("accountRepaymentTerm");
             final Integer currentBalance = rs.getInt("currentBalance");
             final String accountOwner = rs.getString("accountOwner");
             final String incomeFrequency = rs.getString("incomeFrequency");
             final Integer scheduledPaymentAmount = rs.getInt("scheduledPaymentAmount");
-            final String mobileTelephone = rs.getString("mobileTelephone");
             final Integer actualPaymentAmount = rs.getInt("actualPaymentAmount");
             final LocalDate dateAccountOpened = JdbcSupport.getLocalDate(rs, "dateAccountOpened");
+            final LocalDate companyRegistrationDate = JdbcSupport.getLocalDate(rs, "companyRegistrationDate");
             final Double interestRateAtDisbursement = rs.getDouble("interestRateAtDisbursement");
-            final Integer noOfDependants = rs.getInt("noOfDependants");
             final String nationality = rs.getString("nationality");
-            final String salutation = rs.getString("salutation");
             final String postalCode = rs.getString("postalCode");
             final String physicalAddressProvince = rs.getString("physicalAddressProvince");
-            final String maritalStatus = rs.getString("maritalStatus");
             final String postalAddressNumber = rs.getString("postalAddressNumber");
             final LocalDate approvalDate = JdbcSupport.getLocalDate(rs, "approvalDate");
-            final String gender = rs.getString("gender");
             final LocalDate firstPaymentDate = JdbcSupport.getLocalDate(rs, "firstPaymentDate");
             final LocalDate dateClosed = JdbcSupport.getLocalDate(rs, "dateClosed");
             final String accountStatus = rs.getString("accountStatus");
             final Integer termsDuration = rs.getInt("termsDuration");
             final LocalDate lastPaymentDate = JdbcSupport.getLocalDate(rs, "lastPaymentDate");
-            final LocalDate dateOfBirth = JdbcSupport.getLocalDate(rs, "dateOfBirth");
             final LocalDate finalPaymentDate = JdbcSupport.getLocalDate(rs, "finalPaymentDate");
             final Integer amountPastDue = rs.getInt("amountPastDue");
             final Integer category = rs.getInt("category");
@@ -213,7 +198,6 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
             final String physicalAddressSector = rs.getString("physicalAddressSector");
             final Integer numberOfJointLoanParticipants = rs.getInt("numberOfJointLoanParticipants");
             final String physicalAddressCell = rs.getString("physicalAddressCell");
-            final String nationalId = rs.getString("nationalId");
             final Integer nature = rs.getInt("nature");
             final Integer installmentsInArrears = rs.getInt("installmentsInArrears");
             final Integer classification = rs.getInt("classification");
@@ -221,46 +205,41 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
             final String residenceType = rs.getString("residenceType");
             final Integer availableCredit = rs.getInt("availableCredit");
             final Integer income = rs.getInt("income");
-            final String homeTelephone = rs.getString("homeTelephone");
-            final String workTelephone = rs.getString("workTelephone");
-            final String passportNumber = rs.getString("passportNumber");
             final LocalDate dateAccountUpdated = JdbcSupport.getLocalDate(rs, "dateAccountUpdated");
 
-            TransUnionRwandaConsumerCreditData trans = new TransUnionRwandaConsumerCreditData();
+            TransUnionRwandaCorporateCreditData trans = new TransUnionRwandaCorporateCreditData();
             trans.setLoanId(loanId);
             trans.setLoanStatus(loanStatus);
+            trans.setInstitution(institution);
+            trans.setTradingName(tradingName);
+            trans.setTelephone1(telephone1);
+            trans.setCompanyRegNo(companyRegNo);
+            trans.setIndustry(industry);
+            trans.setTaxNo(taxNo);
             trans.setCurrencyType(currencyType);
+            trans.setPhysicalAddressLine1(physicalAddressLine1);
             trans.setCountry(country);
-            trans.setSurName(surName);
             trans.setDaysInArrears(daysInArrears);
-            trans.setForeName1(foreName1);
-            trans.setForeName2(foreName2);
-            trans.setForeName3(foreName3);
             trans.setOpeningBalance(openingBalance);
             trans.setAccountRepaymentTerm(accountRepaymentTerm);
             trans.setCurrentBalance(currentBalance);
             trans.setAccountOwner(accountOwner);
             trans.setIncomeFrequency(incomeFrequency);
             trans.setScheduledPaymentAmount(scheduledPaymentAmount);
-            trans.setMobileTelephone(mobileTelephone);
             trans.setActualPaymentAmount(actualPaymentAmount);
             trans.setDateAccountOpened(DateUtils.convertLocalDateToLong(dateAccountOpened));
+            trans.setCompanyRegistrationDate(DateUtils.convertLocalDateToLong(companyRegistrationDate));
             trans.setInterestRateAtDisbursement(interestRateAtDisbursement);
-            trans.setNoOfDependants(noOfDependants);
             trans.setNationality(nationality);
-            trans.setSalutation(salutation);
             trans.setPostalCode(postalCode);
             trans.setPhysicalAddressProvince(physicalAddressProvince);
-            trans.setMaritalStatus(maritalStatus);
             trans.setPostalAddressNumber(postalAddressNumber);
             trans.setApprovalDate(DateUtils.convertLocalDateToLong(approvalDate));
-            trans.setGender(gender);
             trans.setFirstPaymentDate(DateUtils.convertLocalDateToLong(firstPaymentDate));
             trans.setDateClosed(DateUtils.convertLocalDateToLong(dateClosed));
             trans.setAccountStatus(accountStatus);
             trans.setTermsDuration(termsDuration);
             trans.setLastPaymentDate(DateUtils.convertLocalDateToLong(lastPaymentDate));
-            trans.setDateOfBirth(DateUtils.convertLocalDateToLong(dateOfBirth));
             trans.setFinalPaymentDate(DateUtils.convertLocalDateToLong(finalPaymentDate));
             trans.setAmountPastDue(amountPastDue);
             trans.setCategory(category);
@@ -273,7 +252,6 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
             trans.setNumberOfJointLoanParticipants(numberOfJointLoanParticipants);
             trans.setPhysicalAddressCell(physicalAddressCell);
             trans.setNature(nature);
-            trans.setNationalId(nationalId);
             trans.setInstallmentsInArrears(installmentsInArrears);
             trans.setAccountNumber(accountNumber);
             trans.setEmailAddress(emailAddress);
@@ -281,10 +259,7 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
             trans.setResidenceType(residenceType);
             trans.setAvailableCredit(availableCredit);
             trans.setIncome(income);
-            trans.setHomeTelephone(homeTelephone);
-            trans.setWorkTelephone(workTelephone);
             trans.setDateAccountUpdated(DateUtils.convertLocalDateToLong(dateAccountUpdated));
-            trans.setPassportNumber(passportNumber);
 
             return trans;
 
