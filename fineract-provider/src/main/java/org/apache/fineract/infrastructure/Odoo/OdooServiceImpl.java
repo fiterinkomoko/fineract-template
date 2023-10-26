@@ -218,9 +218,7 @@ public class OdooServiceImpl implements OdooService {
                     map.put("mobile", client.getMobileNo() != null ? client.getMobileNo() : false);
 
                     Boolean status = (Boolean) models.execute("execute_kw",
-                            Arrays.asList(odooDB, uid,
-                                    password, "res.partner", "write",
-                                    Arrays.asList(Arrays.asList(partnerId), map)));
+                            Arrays.asList(odooDB, uid, password, "res.partner", "write", Arrays.asList(Arrays.asList(partnerId), map)));
 
                     LOG.info("Odoo Client updated with id " + partnerId);
                     return status;
@@ -256,11 +254,13 @@ public class OdooServiceImpl implements OdooService {
                     }
                 }
             }
-            if (errors.size() > 0) { throw new JobExecutionException(errors); }
+            if (errors.size() > 0) {
+                throw new JobExecutionException(errors);
+            }
         }
     }
 
-    public void updateClientWithOdooUpdateStatus(boolean status, Client client){
+    public void updateClientWithOdooUpdateStatus(boolean status, Client client) {
         if (status) {
             client.setUpdatedToOdoo(true);
             this.clientRepository.saveAndFlush(client);
@@ -268,5 +268,3 @@ public class OdooServiceImpl implements OdooService {
     }
 
 }
-
-

@@ -697,20 +697,20 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             updateClientAdditionalInfo(clientForUpdate, command);
             boolean isOdooEnabled = this.configurationDomainService.isOdooIntegrationEnabled();
-            if(isOdooEnabled) {
+            if (isOdooEnabled) {
                 if (changes.containsKey(ClientApiConstants.firstnameParamName) || changes.containsKey(ClientApiConstants.fullnameParamName)
                         || changes.containsKey(ClientApiConstants.lastnameParamName)
                         || changes.containsKey(ClientApiConstants.middlenameParamName)
                         || changes.containsKey(ClientApiConstants.mobileNoParamName)) {
 
                     boolean status = this.odooService.updateCustomerToOddo(clientForUpdate);
-                    if(status) {
+                    if (status) {
                         clientForUpdate.setUpdatedToOdoo(true);
-                    }else {
+                    } else {
                         clientForUpdate.setUpdatedToOdoo(false);
                     }
                 }
-            }else {
+            } else {
                 clientForUpdate.setUpdatedToOdoo(false);
             }
             return new CommandProcessingResultBuilder() //
