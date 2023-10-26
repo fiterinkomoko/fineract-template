@@ -16,11 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.portfolio.loanaccount.data;
 
-public interface TransUnionCrbService {
+import lombok.Data;
 
-    void ConsumerCreditDataUploadToTransUnion();
+@Data
+public class RwandaCorporateCreditData {
 
-    void CorporateCreditDataUploadToTransUnion();
+    private TransUnionRwandaCorporateCreditData corporateCreditInformationRecord;
+    private String recordType;
 }

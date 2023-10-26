@@ -836,7 +836,7 @@ SELECT l.id                                                                     
        country_cv.code_value                                                             AS country,
        mc.fullname                                                                      AS institution,
        mc.fullname                                                                      AS tradingName,
-       EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) AS daysInArrears,
+       CAST(EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) AS INTEGER) AS daysInArrears,
        mpl.max_principal_amount                                                     AS openingBalance,
        CASE
            WHEN l.repayment_period_frequency_enum = 0 THEN 'DLY'
@@ -945,6 +945,37 @@ WHERE l.loan_status_id IN (300, 600, 601, 700)
             <column name="core_report" valueBoolean="true"/>
             <column name="use_report" valueBoolean="true"/>
             <column name="self_service_user_report" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="post-corporate-credit-to-transunion-crb-job">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sqlCheck expectedResult="1">
+                    SELECT COUNT(1) FROM job WHERE name = 'Post Rwanda Corporate Credit To TransUnion (CRB)'
+                </sqlCheck>
+            </not>
+        </preConditions>
+
+        <insert tableName="job">
+            <column name="name" value="Post Rwanda Corporate Credit To TransUnion (CRB)" />
+            <column name="display_name" value="Post Rwanda Corporate Credit To TransUnion (CRB)" />
+            <column name="cron_expression" value="0 0 22 1/1 * ? *" />
+            <column name="create_time" value="now()" />
+            <column name="task_priority" value="5" />
+            <column name="group_name" value="null" />
+            <column name="previous_run_start_time" value="null" />
+            <column name="next_run_time" value="null" />
+            <column name="job_key" value="Post Rwanda Corporate Credit To TransUnion (CRB) _ DEFAULT" />
+            <column name="initializing_errorlog" value="null" />
+            <column name="is_active" valueBoolean="true" />
+            <column name="currently_running" valueBoolean="false" />
+            <column name="updates_allowed" valueBoolean="true" />
+            <column name="scheduler_group" value="1" />
+            <column name="is_misfired" valueBoolean="false" />
+            <column name="node_id" value="0" />
+            <column name="is_mismatched_job" valueBoolean="false" />
+
         </insert>
     </changeSet>
 
