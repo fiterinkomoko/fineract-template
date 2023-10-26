@@ -204,4 +204,67 @@ public class OdooServiceImpl implements OdooService {
         }
     }
 
+    @Override
+    public Boolean updateCustomerToOddo(Client client) {
+        try {
+            final Integer uid = loginToOddo();
+            if (uid > 0) {
+                XmlRpcClient models = getCommonConfig();
+                Integer partnerId = getPartner(client.getId(), uid, models);
+                // Update client
+                if (partnerId != null) {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("name", client.getDisplayName());
+                    map.put("mobile", client.getMobileNo() != null ? client.getMobileNo() : false);
+
+                    Boolean status = (Boolean) models.execute("execute_kw",
+                            Arrays.asList(odooDB, uid, password, "res.partner", "write", Arrays.asList(Arrays.asList(partnerId), map)));
+
+                    LOG.info("Odoo Client updated with id " + partnerId);
+                    return status;
+                }
+            }
+        } catch (XmlRpcException e) {
+            throw new RuntimeException(e);
+        }
+        return false;
+    }
+
+    @Override
+    @CronTarget(jobName = JobName.POST_UPDATED_DETAILS_OF_CUSTOMER_TO_ODDO)
+    public void postCustomerUpdatedDetailsToOddo() throws JobExecutionException {
+        Boolean isOdooEnabled = this.configurationDomainService.isOdooIntegrationEnabled();
+        if (isOdooEnabled) {
+            List<Client> clients = this.clientRepository.getClientUpdatedDetailsNotPostedToOdoo(true);
+            List<Throwable> errors = new ArrayList<>();
+
+            if (clients != null && clients.size() > 0) {
+                for (Client client : clients) {
+                    try {
+                        Boolean status = updateCustomerToOddo(client);
+                        updateClientWithOdooUpdateStatus(status, client);
+                    } catch (Exception e) {
+                        Throwable realCause = e;
+                        if (e.getCause() != null) {
+                            realCause = e.getCause();
+                        }
+                        LOG.error("Error occurred while updating client to Odoo with id " + client.getId() + " message "
+                                + realCause.getMessage());
+                        errors.add(realCause);
+                    }
+                }
+            }
+            if (errors.size() > 0) {
+                throw new JobExecutionException(errors);
+            }
+        }
+    }
+
+    public void updateClientWithOdooUpdateStatus(boolean status, Client client) {
+        if (status) {
+            client.setUpdatedToOdoo(true);
+            this.clientRepository.saveAndFlush(client);
+        }
+    }
+
 }

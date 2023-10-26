@@ -103,4 +103,12 @@ public class ClientRepositoryWrapper {
         }
         return clients;
     }
+
+    public List<Client> getClientUpdatedDetailsNotPostedToOdoo(boolean isOdooCustomerPosted) {
+        List<Client> clients = this.repository.getClientUpdatedDetailsByIsUpdatedToOdoo(isOdooCustomerPosted, false);
+        if (clients == null) {
+            throw new ClientNotFoundException("clients");
+        }
+        return clients;
+    }
 }
