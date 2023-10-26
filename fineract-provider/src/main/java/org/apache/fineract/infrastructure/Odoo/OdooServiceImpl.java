@@ -237,20 +237,14 @@ public class OdooServiceImpl implements OdooService {
     public void postCustomerUpdatedDetailsToOddo() throws JobExecutionException {
         Boolean isOdooEnabled = this.configurationDomainService.isOdooIntegrationEnabled();
         if (isOdooEnabled) {
-            List<Client> clients = this.clientRepository.getCLientUpdatedDetailsNotPostedToOdoo(true);
+            List<Client> clients = this.clientRepository.getClientUpdatedDetailsNotPostedToOdoo(true);
             List<Throwable> errors = new ArrayList<>();
 
             if (clients != null && clients.size() > 0) {
                 for (Client client : clients) {
                     try {
                         Boolean status = updateCustomerToOddo(client);
-                        if (status) {
-                            client.setUpdatedToOdoo(true);
-                            this.clientRepository.saveAndFlush(client);
-                        } else {
-                            client.setUpdatedToOdoo(false);
-                            this.clientRepository.saveAndFlush(client);
-                        }
+                        updateClientWithOdooUpdateStatus(status, client);
                     } catch (Exception e) {
                         Throwable realCause = e;
                         if (e.getCause() != null) {
@@ -263,6 +257,13 @@ public class OdooServiceImpl implements OdooService {
                 }
             }
             if (errors.size() > 0) { throw new JobExecutionException(errors); }
+        }
+    }
+
+    public void updateClientWithOdooUpdateStatus(boolean status, Client client){
+        if (status) {
+            client.setUpdatedToOdoo(true);
+            this.clientRepository.saveAndFlush(client);
         }
     }
 
