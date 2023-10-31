@@ -16,28 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.Odoo;
+package org.apache.fineract.infrastructure.Odoo.exception;
 
-import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
-import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
-import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import org.apache.xmlrpc.XmlRpcException;
 
-import java.util.List;
+@SuppressWarnings("serial")
+public class OdooFailedException extends AbstractPlatformResourceNotFoundException {
 
-public interface OdooService {
-
-    Integer loginToOddo();
-
-    public Integer createCustomerToOddo(Client client);
-
-    public void postClientsToOddo() throws JobExecutionException;
-
-    public Boolean updateCustomerToOddo(Client client);
-
-    public void postCustomerUpdatedDetailsToOddo() throws JobExecutionException;
-
-    Integer createJournalEntryToOddo(List<JournalEntry> entry);
-
-    void postJournalEntryToOddo() throws JobExecutionException;
-
+    public OdooFailedException(final XmlRpcException exception) {
+        super("error.msg.odoo.failed", "Odoo Failed with message " + exception, exception);
+    }
 }

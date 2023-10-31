@@ -29,6 +29,7 @@ import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
+import org.apache.fineract.accounting.journalentry.service.AccountingProcessorHelper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -77,6 +78,8 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
     private final FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper;
     private final CashierTransactionDataValidator cashierTransactionDataValidator;
 
+    private final AccountingProcessorHelper accountingProcessorHelper;
+
     @Autowired
     public TellerWritePlatformServiceJpaImpl(final PlatformSecurityContext context,
             final TellerCommandFromApiJsonDeserializer fromApiJsonDeserializer, final TellerRepositoryWrapper tellerRepositoryWrapper,
@@ -84,7 +87,8 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
             CashierRepository cashierRepository, CashierTransactionRepository cashierTxnRepository,
             JournalEntryRepository glJournalEntryRepository,
             FinancialActivityAccountRepositoryWrapper financialActivityAccountRepositoryWrapper,
-            final CashierTransactionDataValidator cashierTransactionDataValidator) {
+            final CashierTransactionDataValidator cashierTransactionDataValidator,
+            final AccountingProcessorHelper accountingProcessorHelper) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.tellerRepositoryWrapper = tellerRepositoryWrapper;
@@ -95,6 +99,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
         this.glJournalEntryRepository = glJournalEntryRepository;
         this.financialActivityAccountRepositoryWrapper = financialActivityAccountRepositoryWrapper;
         this.cashierTransactionDataValidator = cashierTransactionDataValidator;
+        this.accountingProcessorHelper = accountingProcessorHelper;
     }
 
     @Override
@@ -457,7 +462,9 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
                                                                         // Txn
 
             this.glJournalEntryRepository.saveAndFlush(debitJournalEntry);
+            this.accountingProcessorHelper.postJournalsToOdoo(debitJournalEntry);
             this.glJournalEntryRepository.saveAndFlush(creditJournalEntry);
+            this.accountingProcessorHelper.postJournalsToOdoo(creditJournalEntry);
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
