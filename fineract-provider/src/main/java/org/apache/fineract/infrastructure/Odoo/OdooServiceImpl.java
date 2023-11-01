@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.Odoo;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,6 +26,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
+import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository;
+import org.apache.fineract.infrastructure.Odoo.exception.OdooFailedException;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
@@ -61,10 +66,14 @@ public class OdooServiceImpl implements OdooService {
     private ClientRepositoryWrapper clientRepository;
     private ConfigurationDomainService configurationDomainService;
 
+    private final JournalEntryRepository journalEntryRepository;
+
     @Autowired
-    public OdooServiceImpl(ClientRepositoryWrapper clientRepository, ConfigurationDomainService configurationDomainService) {
+    public OdooServiceImpl(ClientRepositoryWrapper clientRepository, ConfigurationDomainService configurationDomainService,
+                           JournalEntryRepository journalEntryRepository) {
         this.clientRepository = clientRepository;
         this.configurationDomainService = configurationDomainService;
+        this.journalEntryRepository = journalEntryRepository;
     }
 
     @Override
@@ -89,7 +98,7 @@ public class OdooServiceImpl implements OdooService {
         return 0;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes", "cast" })
+    @SuppressWarnings({"unchecked", "rawtypes", "cast"})
     @Override
     public Integer createCustomerToOddo(Client client) {
         try {
@@ -114,8 +123,8 @@ public class OdooServiceImpl implements OdooService {
                     return id;
                 }
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (XmlRpcException e) {
+            throw new OdooFailedException(e);
         }
         return null;
     }
@@ -142,35 +151,34 @@ public class OdooServiceImpl implements OdooService {
                 }
             }
         } catch (XmlRpcException e) {
-            throw new RuntimeException(e);
+            throw new OdooFailedException(e);
         }
         return null;
     }
 
     private XmlRpcClient getCommonConfig() {
         XmlRpcClient models;
-        try {
-            models = new XmlRpcClient() {
+        models = new XmlRpcClient() {
 
-                {
-                    setConfig(new XmlRpcClientConfigImpl() {
+            {
+                setConfig(new XmlRpcClientConfigImpl() {
 
-                        {
+                    {
+                        try {
                             setServerURL(new URL(String.format("%s/xmlrpc/2/object", url)));
+                        } catch (MalformedURLException e) {
+                            throw new RuntimeException(e);
                         }
-                    });
-                }
-            };
-            return models;
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            throw new RuntimeException(e);
-        }
+                    }
+                });
+            }
+        };
+        return models;
     }
 
     @Override
     @CronTarget(jobName = JobName.POST_CUSTOMERS_TO_ODDO)
-    public void postClientsAndSavingsAccountToOddo() throws JobExecutionException {
+    public void postClientsToOddo() throws JobExecutionException {
         Boolean isOdooEnabled = this.configurationDomainService.isOdooIntegrationEnabled();
         if (isOdooEnabled) {
             List<Client> clients = this.clientRepository.getClientByIsOdooPosted(false);
@@ -225,7 +233,7 @@ public class OdooServiceImpl implements OdooService {
                 }
             }
         } catch (XmlRpcException e) {
-            throw new RuntimeException(e);
+            throw new OdooFailedException(e);
         }
         return false;
     }
@@ -266,5 +274,170 @@ public class OdooServiceImpl implements OdooService {
             this.clientRepository.saveAndFlush(client);
         }
     }
+
+    @Override
+    public Integer createJournalEntryToOddo(List<JournalEntry> list) {
+        try {
+            final Integer uid = loginToOddo();
+            if (uid > 0) {
+                XmlRpcClient models = getCommonConfig();
+
+                Integer currencyId = getCurrency(list.get(0), uid, models);
+                Integer id = 0;
+
+                JournalEntry debitJournalEntry = null;
+                JournalEntry creditJournalEntry = null;
+
+                for (JournalEntry journalEntry : list) {
+                    if (journalEntry.isDebitEntry()) {
+                        debitJournalEntry = journalEntry;
+                    } else {
+                        creditJournalEntry = journalEntry;
+                    }
+                }
+                JournalEntry debit = debitJournalEntry != null ? debitJournalEntry : list.get(0);
+                JournalEntry credit = creditJournalEntry != null ? creditJournalEntry : list.get(1);
+
+                Integer debitAccountId = getGlAccounts(debit, uid, models);
+                Integer creditAccountId = getGlAccounts(credit, uid, models);
+
+                if (debitAccountId == null || creditAccountId == null) {
+                    return null;
+                }
+
+                Integer debitPartnerId = getPartner((debit.getClient() != null ? debit.getClient().getId() : null), uid, models);
+                Integer creditPartnerId = getPartner((credit.getClient() != null ? credit.getClient().getId() : null), uid, models);
+
+                // Create journal entry
+                if (debit.getAmount().doubleValue() != 0 || credit.getAmount().doubleValue() != 0) {
+                    id = (Integer) models.execute("execute_kw",
+                            Arrays.asList(odooDB, uid,
+                                    password, "account.move", "create",
+                                    Arrays.asList(Map.of("line_ids", Arrays.asList(Arrays.asList(0, 0, Map.of(
+                                                    "account_id", debitAccountId,
+                                                    "amount_currency", currencyId,
+                                                    "credit", 0,
+                                                    "debit", debit.getAmount().doubleValue(),
+                                                    "partner_id", debitPartnerId != null ? debitPartnerId : false,
+                                                    "name", debit.getEntityId() != null ? debit.getEntityId().toString() : false
+                                    )), Arrays.asList(0, 0, Map.of(
+                                                    "account_id", creditAccountId,
+                                                    "amount_currency", currencyId,
+                                                    "credit", credit.getAmount().doubleValue(),
+                                                    "debit", 0,
+                                                    "partner_id", creditPartnerId != null ? creditPartnerId : false,
+                                                    "name", credit.getEntityId() != null ? credit.getEntityId().toString() : false
+                                            ))
+                                    )))
+                            ));
+                    LOG.info("Odoo Journal Entry created with id " + id);
+                    Boolean status = (Boolean) models.execute("execute_kw",
+                            Arrays.asList(odooDB, uid, password, "account.move", "action_post", Arrays.asList(Arrays.asList(id))));
+                    LOG.info("Odoo Journal Entry posted Successfully " + status);
+                    return id;
+                }
+            }
+
+        } catch (XmlRpcException e) {
+            throw new OdooFailedException(e);
+        }
+        return null;
+    }
+
+    @Override
+    @CronTarget(jobName = JobName.POST_JOURNAL_ENTRY_TO_ODDO)
+    public void postJournalEntryToOddo() throws JobExecutionException {
+        Boolean isOdooEnabled = this.configurationDomainService.isOdooIntegrationEnabled();
+        if (isOdooEnabled) {
+            List<JournalEntry> JE = this.journalEntryRepository.findJournalEntriesByIsOddoPosted(false);
+
+            List<Throwable> errors = new ArrayList<>();
+
+            List<JournalEntry> journalEntryDebitCredit = new ArrayList<>();
+            if (JE != null && JE.size() > 0) {
+                for (JournalEntry entry : JE) {
+
+                    try {
+                        journalEntryDebitCredit.add(entry);
+
+                        if (journalEntryDebitCredit.size() > 1 && journalEntryDebitCredit.size() <= 2) {
+                            Integer id = createJournalEntryToOddo(journalEntryDebitCredit);
+                            if (id != null) {
+                                for (JournalEntry je : journalEntryDebitCredit) {
+                                    je.setOddoPosted(true);
+                                    je.setOdooJournalId(id);
+                                    this.journalEntryRepository.saveAndFlush(je);
+                                }
+                                journalEntryDebitCredit.clear();
+                            }
+                            journalEntryDebitCredit.clear();
+                        }
+                    } catch (Exception e) {
+                        Throwable realCause = e;
+                        if (e.getCause() != null) {
+                            realCause = e.getCause();
+                        }
+                        LOG.error("Error occurred while updating Journals to Odoo with entity id  " + entry.getEntityId() + " message "
+                                + realCause.getMessage());
+                        errors.add(realCause);
+                    }
+                }
+            }
+            if (errors.size() > 0) {
+                throw new JobExecutionException(errors);
+            }
+        }
+    }
+
+    private Integer getCurrency(JournalEntry entry, Integer uid, XmlRpcClient models) {
+        List currency;
+        try {
+            if (uid > 0) {
+                currency = Arrays.asList((Object[]) models.execute("execute_kw",
+                        Arrays.asList(odooDB, uid,
+                                password, "res.currency", "search_read",
+                                Arrays.asList(Arrays.asList(Arrays.asList("name", "=", entry.getCurrencyCode()))), Map.of(
+
+                                        "fields", Arrays.asList("id"),
+                                        "limit", 5
+                                ))));
+                Integer currencyId = null;
+                if (currency != null && currency.size() > 0) {
+                    HashMap currencyData = (HashMap) currency.get(0);
+                    currencyId = (Integer) currencyData.get("id");
+                }
+
+                return currencyId;
+            }
+        } catch (XmlRpcException e) {
+            throw new OdooFailedException(e);
+        }
+        return null;
+    }
+
+    private Integer getGlAccounts(JournalEntry entry, Integer uid, XmlRpcClient models) {
+        try {
+            if (uid > 0) {
+                final List glAccount = Arrays.asList((Object[]) models.execute("execute_kw",
+                        Arrays.asList(odooDB, uid,
+                                password, "account.account", "search_read",
+                                Arrays.asList(Arrays.asList(Arrays.asList("code", "=", entry.getGlAccount().getGlCode()))), Map.of(
+                                        "fields", Arrays.asList("id"),
+                                        "limit", 5
+                                    ))));
+                Integer id = null;
+                if (glAccount != null && glAccount.size() > 0) {
+                    HashMap account = (HashMap) glAccount.get(0);
+                    id = (Integer) account.get("id");
+                }
+
+                return id;
+            }
+        } catch (XmlRpcException e) {
+            throw new OdooFailedException(e);
+        }
+        return null;
+    }
+
 
 }
