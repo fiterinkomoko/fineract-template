@@ -53,7 +53,7 @@ public class TransUnionCrbClientVerificationReadPlatformServiceImpl implements T
                     + "       other_info.passport_number                AS passportNo, "
                     + "       cl.date_of_birth                          AS dateOfBirth " + " FROM m_client cl "
                     + " LEFT JOIN m_client_other_info other_info on cl.id = other_info.client_id "
-                    + " WHERE cl.id = ? AND cl.status = 300 ");
+                    + " WHERE cl.id = ? AND cl.status_enum = 300 ");
             return sql.toString();
         }
 
