@@ -1108,5 +1108,18 @@ WHERE l.loan_status_id IN (300, 600, 601, 700)
             <column name="self_service_user_report" valueBoolean="false"/>
         </insert>
     </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_permission_VERIFYCLIENTONTRANSUNIONCRBRWANDA_CLIENT">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_permission where code = 'VERIFYCLIENTONTRANSUNIONCRBRWANDA_CLIENT';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio" />
+            <column name="code" value="VERIFYCLIENTONTRANSUNIONCRBRWANDA_CLIENT" />
+            <column name="entity_name" value="CLIENT" />
+            <column name="action_name" value="VERIFYCLIENTONTRANSUNIONCRBRWANDA" />
+        </insert>
+    </changeSet>
 
 </databaseChangeLog>
