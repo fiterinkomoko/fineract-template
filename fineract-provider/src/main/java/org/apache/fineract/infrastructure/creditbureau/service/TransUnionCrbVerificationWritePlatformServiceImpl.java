@@ -19,21 +19,129 @@
 package org.apache.fineract.infrastructure.creditbureau.service;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaClientVerificationData;
+import org.apache.fineract.portfolio.loanaccount.service.TransUnionCrbClientVerificationReadPlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import java.io.StringWriter;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 @Service
 @RequiredArgsConstructor
 public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransUnionCrbVerificationWritePlatformService {
 
     private static final Logger LOG = LoggerFactory.getLogger(TransUnionCrbVerificationWritePlatformServiceImpl.class);
+    public static final String FORM_URL_CONTENT_TYPE = "Content-Type";
+    private final TransUnionCrbClientVerificationReadPlatformService transUnionCrbClientVerificationReadPlatformService;
+
+    @Autowired
+    private Environment env;
 
     @Override
-    public CommandProcessingResult clientVerificationToTransUnionRwanda(JsonCommand command) {
-        LOG.info("Verifying clients to TransUnion Rwanda");
+    public CommandProcessingResult clientVerificationToTransUnionRwanda(Long clientId) {
+        LOG.info("Verifying clients to TransUnion Rwanda :: >> " + clientId);
+        final TransUnionRwandaClientVerificationData getProduct123 = this.transUnionCrbClientVerificationReadPlatformService
+                .retrieveClientToBeVerifiedToTransUnion(clientId);
+        LOG.info("Verifying clients to TransUnion Rwanda :: >> " + getProduct123.toString());
+
+
+        HttpUrl.Builder urlBuilder = HttpUrl.parse(getConfigProperty("fineract.integrations.transUnion.crb.soap.verifyClient"))
+                .newBuilder();
+        String url = urlBuilder.build().toString();
+
+        OkHttpClient client = new OkHttpClient();
+        Response response = null;
+
+        RequestBody formBody = RequestBody.create(MediaType.parse(FORM_URL_CONTENT_TYPE), convertClientDataToJAXBRequest(getProduct123));
+
+        Request request = new Request.Builder().url(url)
+                .header("Authorization", "Basic " + base64EncodeCredentials("RWFq7NE3vz", "WxB4sZQXDyUaxL"))
+                .header("Content-Type", "application/xml ")
+                .header("Content-Type", "text/xml ")
+                .post(formBody).build();
+        try {
+            response = client.newCall(request).execute();
+            String resObject = response.body().string();
+
+            if (response.isSuccessful()) {
+                LOG.info("Response from TransUnion Rwanda :: >> " + resObject);
+            } else {
+                LOG.info("Response from TransUnion Rwanda :: >> " + resObject);
+            }
+
+
+        }catch (Exception e){
+            e.printStackTrace();
+            LOG.info("Response from TransUnion Rwanda :: >> " + e.getMessage());
+        }
+
         return null;
     }
+    private String getConfigProperty(String propertyName) {
+        return this.env.getProperty(propertyName);
+    }
+
+    public String  base64EncodeCredentials(String username,String password) {
+        String credentials = username + ":" + password;
+        byte[] credentialsBytes = credentials.getBytes(StandardCharsets.UTF_8);
+
+        return Base64.getEncoder().encodeToString(credentialsBytes);
+    }
+
+
+        public String convertClientDataToJAXBRequest(TransUnionRwandaClientVerificationData getProduct123) {
+
+            getProduct123.setUsername("WS_AEC");
+            getProduct123.setPassword("1AFmtwa$*1mq");
+            getProduct123.setCode("1570");
+
+            try {
+                JAXBContext context = JAXBContext.newInstance(TransUnionRwandaClientVerificationData.class);
+
+                Marshaller marshaller = context.createMarshaller();
+
+                StringWriter stringWriter = new StringWriter();
+
+                // Add SOAP envelope elements manually
+                stringWriter.write("<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ws=\"http://ws.rw.crbws.transunion.ke.co/\">");
+                stringWriter.write("<soapenv:Header/>");
+                stringWriter.write("<soapenv:Body>");
+
+                // Marshal the POJO
+                marshaller.marshal(getProduct123, stringWriter);
+
+                // Close the SOAP envelope elements
+                stringWriter.write("</soapenv:Body>");
+                stringWriter.write("</soapenv:Envelope>");
+
+
+
+
+                String soapRequest = stringWriter.toString();
+
+                System.out.println(soapRequest);
+                return soapRequest;
+            } catch (JAXBException e) {
+                e.printStackTrace();
+                LOG.info("Response from TransUnion Rwanda :: >> " + e.getMessage());
+            }
+        return null;
+    }
+
+
 }

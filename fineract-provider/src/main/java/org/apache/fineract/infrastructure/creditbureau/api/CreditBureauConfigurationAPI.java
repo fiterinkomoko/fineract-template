@@ -286,7 +286,7 @@ public class CreditBureauConfigurationAPI {
     @Path("/clientDetails/{clientId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String getClientToBeVerifiedOnTransUnionRwanda(@PathParam("clientId") final Integer clientId) {
+    public String getClientToBeVerifiedOnTransUnionRwanda(@PathParam("clientId") final Long clientId) {
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         final TransUnionRwandaClientVerificationData creditBureauLoanProductMapping = this.transUnionCrbClientVerificationReadPlatformService
@@ -296,15 +296,14 @@ public class CreditBureauConfigurationAPI {
     }
 
     @POST
-    @Path("/verifyClientOnTransUnionRwanda")
+    @Path("/verifyClientOnTransUnionRwanda/{clientId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String verifyClientOnTransUnionRwanda(final String apiRequestBodyAsJson) {
+    public String verifyClientOnTransUnionRwanda(@PathParam("clientId") final Long clientId,
+                                                  final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .verifyClientOnTransUnionRwanda() //
-                .withJson(apiRequestBodyAsJson) //
-                .build(); //
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().verifyClientOnTransUnionRwanda(clientId)
+                .withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

@@ -20,6 +20,9 @@ package org.apache.fineract.portfolio.loanaccount.data;
 
 import lombok.Data;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name = "ws:getProduct123")
 @Data
 public class TransUnionRwandaClientVerificationData {
 

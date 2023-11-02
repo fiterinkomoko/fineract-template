@@ -35,7 +35,7 @@ public class TransUnionCrbClientVerificationReadPlatformServiceImpl implements T
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public TransUnionRwandaClientVerificationData retrieveClientToBeVerifiedToTransUnion(Integer clientId) {
+    public TransUnionRwandaClientVerificationData retrieveClientToBeVerifiedToTransUnion(Long clientId) {
         final ConsumerCreditMapper mapper = new ConsumerCreditMapper();
         final String sql = "SELECT " + mapper.schema() + " order by cl.id ";
         return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { clientId });
