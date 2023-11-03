@@ -18,9 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
-import lombok.Data;
-
 import javax.xml.bind.annotation.XmlRootElement;
+import lombok.Data;
 
 @XmlRootElement(name = "ws:getProduct123")
 @Data

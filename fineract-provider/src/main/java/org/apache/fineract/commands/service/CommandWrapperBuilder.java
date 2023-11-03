@@ -3911,6 +3911,7 @@ public class CommandWrapperBuilder {
         this.href = "/groups/" + groupId + "?command=updateGroupRepresentative";
         return this;
     }
+
     public CommandWrapperBuilder verifyClientOnTransUnionRwanda(final long clientId) {
         this.actionName = "VERIFYCLIENTONTRANSUNIONCRBRWANDA";
         this.entityName = "CLIENT";

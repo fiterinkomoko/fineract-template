@@ -299,8 +299,7 @@ public class CreditBureauConfigurationAPI {
     @Path("/verifyClientOnTransUnionRwanda/{clientId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String verifyClientOnTransUnionRwanda(@PathParam("clientId") final Long clientId,
-                                                  final String apiRequestBodyAsJson) {
+    public String verifyClientOnTransUnionRwanda(@PathParam("clientId") final Long clientId, final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().verifyClientOnTransUnionRwanda(clientId)
                 .withJson(apiRequestBodyAsJson).build();
