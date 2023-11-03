@@ -18,12 +18,15 @@
  */
 package org.apache.fineract.infrastructure.creditbureau.service;
 
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import lombok.RequiredArgsConstructor;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
@@ -37,7 +40,10 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
+import org.apache.fineract.portfolio.loanaccount.data.CollateralData;
+import org.apache.fineract.portfolio.loanaccount.data.EmploymentData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaClientVerificationData;
+import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaClientVerificationResponseData;
 import org.apache.fineract.portfolio.loanaccount.service.TransUnionCrbConsumerVerificationReadPlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,6 +96,7 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
 
             if (response.isSuccessful()) {
                 LOG.info("Response from TransUnion Rwanda :: >> " + resObject);
+                convertXmlToPojo(resObject);
             } else {
                 LOG.info("Response from TransUnion Rwanda :: >> " + resObject);
             }
@@ -151,6 +158,24 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
             LOG.info("Response from TransUnion Rwanda :: >> " + e.getMessage());
         }
         return null;
+    }
+
+    private void convertXmlToPojo(String xmlResponse) {
+        try {
+            JAXBContext context = JAXBContext.newInstance(TransUnionRwandaClientVerificationResponseData.class);
+
+            Unmarshaller unmarshaller = context.createUnmarshaller();
+
+            TransUnionRwandaClientVerificationResponseData product123Response = (TransUnionRwandaClientVerificationResponseData) unmarshaller
+                    .unmarshal(new StringReader(xmlResponse));
+
+            List<CollateralData> collateralList = product123Response.getCollateralList();
+            List<EmploymentData> employmentDataList = product123Response.getEmploymentList();
+
+        } catch (JAXBException e) {
+            e.printStackTrace();
+            LOG.info("Response from TransUnion Rwanda :: >> " + e.getMessage());
+        }
     }
 
 }
