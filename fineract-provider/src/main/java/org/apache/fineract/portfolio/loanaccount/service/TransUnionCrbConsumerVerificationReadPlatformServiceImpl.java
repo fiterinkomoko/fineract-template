@@ -20,9 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaClientVerificationData;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -30,7 +28,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class TransUnionCrbClientVerificationReadPlatformServiceImpl implements TransUnionCrbClientVerificationReadPlatformService {
+public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements TransUnionCrbConsumerVerificationReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -50,8 +48,7 @@ public class TransUnionCrbClientVerificationReadPlatformServiceImpl implements T
                     + "       cl.lastname                               AS name2, "
                     + "       cl.middlename                             AS name3, "
                     + "       other_info.national_identification_number AS nationalID, "
-                    + "       other_info.passport_number                AS passportNo, "
-                    + "       cl.date_of_birth                          AS dateOfBirth " + " FROM m_client cl "
+                    + "       other_info.passport_number                AS passportNo " + " FROM m_client cl "
                     + " LEFT JOIN m_client_other_info other_info on cl.id = other_info.client_id "
                     + " WHERE cl.id = ? AND cl.status_enum = 300 ");
             return sql.toString();
@@ -66,9 +63,8 @@ public class TransUnionCrbClientVerificationReadPlatformServiceImpl implements T
             final String name3 = rs.getString("name3");
             final String nationalID = rs.getString("nationalID");
             final String passportNo = rs.getString("passportNo");
-            final LocalDate dateOfBirth = JdbcSupport.getLocalDate(rs, "dateOfBirth");
 
-            return new TransUnionRwandaClientVerificationData(id, name1, name2, name3, nationalID, passportNo, dateOfBirth.toString());
+            return new TransUnionRwandaClientVerificationData(id, name1, name2, name3, nationalID, passportNo);
 
         }
     }

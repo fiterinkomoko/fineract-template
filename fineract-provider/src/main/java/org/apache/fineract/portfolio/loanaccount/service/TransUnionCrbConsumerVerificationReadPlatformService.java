@@ -20,7 +20,7 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaClientVerificationData;
 
-public interface TransUnionCrbClientVerificationReadPlatformService {
+public interface TransUnionCrbConsumerVerificationReadPlatformService {
 
     TransUnionRwandaClientVerificationData retrieveClientToBeVerifiedToTransUnion(Long clientId);
 }

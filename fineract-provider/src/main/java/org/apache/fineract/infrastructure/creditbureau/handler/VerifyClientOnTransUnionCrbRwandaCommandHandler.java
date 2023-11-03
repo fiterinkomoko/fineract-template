@@ -40,6 +40,6 @@ public class VerifyClientOnTransUnionCrbRwandaCommandHandler implements NewComma
 
     @Override
     public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.transUnionCrbVerificationWritePlatformService.clientVerificationToTransUnionRwanda(command.entityId());
+        return this.transUnionCrbVerificationWritePlatformService.clientVerificationToTransUnionRwanda(command.entityId(), command);
     }
 }

@@ -57,13 +57,12 @@ public class TransUnionRwandaClientVerificationData {
     public TransUnionRwandaClientVerificationData() {}
 
     public TransUnionRwandaClientVerificationData(Integer id, String name1, String name2, String name3, String nationalID,
-            String passportNo, String dateOfBirth) {
+            String passportNo) {
         this.id = id;
         this.name1 = name1;
         this.name2 = name2;
         this.name3 = name3;
         this.nationalID = nationalID;
         this.passportNo = passportNo;
-        this.dateOfBirth = dateOfBirth;
     }
 }

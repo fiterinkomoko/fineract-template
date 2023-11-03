@@ -51,7 +51,7 @@ import org.apache.fineract.infrastructure.creditbureau.service.CreditBureauReadP
 import org.apache.fineract.infrastructure.creditbureau.service.OrganisationCreditBureauReadPlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaClientVerificationData;
-import org.apache.fineract.portfolio.loanaccount.service.TransUnionCrbClientVerificationReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.TransUnionCrbConsumerVerificationReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -76,7 +76,7 @@ public class CreditBureauConfigurationAPI {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final CreditBureauReadConfigurationService creditBureauConfiguration;
-    private final TransUnionCrbClientVerificationReadPlatformService transUnionCrbClientVerificationReadPlatformService;
+    private final TransUnionCrbConsumerVerificationReadPlatformService transUnionCrbClientVerificationReadPlatformService;
 
     @Autowired
     public CreditBureauConfigurationAPI(final PlatformSecurityContext context, final CreditBureauReadPlatformService readPlatformService,
@@ -90,7 +90,7 @@ public class CreditBureauConfigurationAPI {
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final DefaultToApiJsonSerializer<CreditBureauConfigurationData> toApiJsonSerializerReport,
             final CreditBureauReadConfigurationService creditBureauConfiguration,
-            final TransUnionCrbClientVerificationReadPlatformService transUnionCrbClientVerificationReadPlatformService) {
+            final TransUnionCrbConsumerVerificationReadPlatformService transUnionCrbClientVerificationReadPlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
         this.apiRequestParameterHelper = apiRequestParameterHelper;

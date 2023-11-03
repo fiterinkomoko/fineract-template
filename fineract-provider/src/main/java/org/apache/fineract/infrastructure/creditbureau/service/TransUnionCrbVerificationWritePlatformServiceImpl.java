@@ -31,9 +31,14 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
+import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaClientVerificationData;
-import org.apache.fineract.portfolio.loanaccount.service.TransUnionCrbClientVerificationReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.TransUnionCrbConsumerVerificationReadPlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,13 +51,22 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
 
     private static final Logger LOG = LoggerFactory.getLogger(TransUnionCrbVerificationWritePlatformServiceImpl.class);
     public static final String FORM_URL_CONTENT_TYPE = "Content-Type";
-    private final TransUnionCrbClientVerificationReadPlatformService transUnionCrbClientVerificationReadPlatformService;
+    private final TransUnionCrbConsumerVerificationReadPlatformService transUnionCrbClientVerificationReadPlatformService;
+    private final ClientRepositoryWrapper clientRepositoryWrapper;
 
     @Autowired
     private Environment env;
 
     @Override
-    public CommandProcessingResult clientVerificationToTransUnionRwanda(Long clientId) {
+    public CommandProcessingResult clientVerificationToTransUnionRwanda(Long clientId, JsonCommand command) {
+
+        Client clientObj = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+        if (clientObj.getLegalForm().equals(LegalForm.PERSON.getValue())) {
+            LOG.info("Client is a person :: >> " + clientId);
+        } else {
+            LOG.info("Client is a company :: >> " + clientId);
+        }
+
         LOG.info("Verifying clients to TransUnion Rwanda :: >> " + clientId);
         final TransUnionRwandaClientVerificationData getProduct123 = this.transUnionCrbClientVerificationReadPlatformService
                 .retrieveClientToBeVerifiedToTransUnion(clientId);
@@ -85,7 +99,9 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
             LOG.info("Response from TransUnion Rwanda :: >> " + e.getMessage());
         }
 
-        return null;
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(clientId).build();
     }
 
     private String getConfigProperty(String propertyName) {
@@ -104,6 +120,9 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
         getProduct123.setUsername("WS_AEC");
         getProduct123.setPassword("1AFmtwa$*1mq");
         getProduct123.setCode("1570");
+        getProduct123.setReportSector(1);
+        getProduct123.setReportReason(2);
+        getProduct123.setInfinityCode("rw123456789");
 
         try {
             JAXBContext context = JAXBContext.newInstance(TransUnionRwandaClientVerificationData.class);
@@ -112,22 +131,20 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
 
             StringWriter stringWriter = new StringWriter();
 
-            // Add SOAP envelope elements manually
             stringWriter.write(
                     "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ws=\"http://ws.rw.crbws.transunion.ke.co/\">");
             stringWriter.write("<soapenv:Header/>");
             stringWriter.write("<soapenv:Body>");
 
-            // Marshal the POJO
             marshaller.marshal(getProduct123, stringWriter);
 
-            // Close the SOAP envelope elements
             stringWriter.write("</soapenv:Body>");
             stringWriter.write("</soapenv:Envelope>");
 
             String soapRequest = stringWriter.toString();
+            soapRequest = soapRequest.replaceFirst("<\\?xml [^>]*\\?>", "");
 
-            System.out.println(soapRequest);
+            LOG.info("Request for verification :: >> " + soapRequest);
             return soapRequest;
         } catch (JAXBException e) {
             e.printStackTrace();
