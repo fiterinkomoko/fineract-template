@@ -61,15 +61,15 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
     public CommandProcessingResult clientVerificationToTransUnionRwanda(Long clientId, JsonCommand command) {
 
         Client clientObj = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+
+        TransUnionRwandaClientVerificationData getProduct123 = null;
+
         if (clientObj.getLegalForm().equals(LegalForm.PERSON.getValue())) {
-            LOG.info("Client is a person :: >> " + clientId);
+            getProduct123 = this.transUnionCrbClientVerificationReadPlatformService.retrieveConsumerToBeVerifiedToTransUnion(clientId);
         } else {
-            LOG.info("Client is a company :: >> " + clientId);
+            getProduct123 = this.transUnionCrbClientVerificationReadPlatformService.retrieveCorporateToBeVerifiedToTransUnion(clientId);
         }
 
-        LOG.info("Verifying clients to TransUnion Rwanda :: >> " + clientId);
-        final TransUnionRwandaClientVerificationData getProduct123 = this.transUnionCrbClientVerificationReadPlatformService
-                .retrieveClientToBeVerifiedToTransUnion(clientId);
         LOG.info("Verifying clients to TransUnion Rwanda :: >> " + getProduct123.toString());
 
         HttpUrl.Builder urlBuilder = HttpUrl.parse(getConfigProperty("fineract.integrations.transUnion.crb.soap.verifyClient"))

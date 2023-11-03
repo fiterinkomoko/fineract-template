@@ -50,7 +50,6 @@ import org.apache.fineract.infrastructure.creditbureau.service.CreditBureauReadC
 import org.apache.fineract.infrastructure.creditbureau.service.CreditBureauReadPlatformService;
 import org.apache.fineract.infrastructure.creditbureau.service.OrganisationCreditBureauReadPlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaClientVerificationData;
 import org.apache.fineract.portfolio.loanaccount.service.TransUnionCrbConsumerVerificationReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -280,19 +279,6 @@ public class CreditBureauConfigurationAPI {
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
-    }
-
-    @GET
-    @Path("/clientDetails/{clientId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String getClientToBeVerifiedOnTransUnionRwanda(@PathParam("clientId") final Long clientId) {
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
-
-        final TransUnionRwandaClientVerificationData creditBureauLoanProductMapping = this.transUnionCrbClientVerificationReadPlatformService
-                .retrieveClientToBeVerifiedToTransUnion(clientId);
-
-        return this.toApiJsonSerializerCreditBureauLoanProduct.serialize(creditBureauLoanProductMapping);
     }
 
     @POST

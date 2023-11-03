@@ -38,21 +38,10 @@ public class TransUnionRwandaClientVerificationData {
     private String name4;
     private String nationalID;
     private String passportNo;
-    private String serviceID;
-    private String alienID;
-    private String taxID;
-    private String dateOfBirth;
-    private String postalBoxNo;
-    private String postalTown;
-    private String postalCountry;
-    private String telephoneWork;
-    private String telephoneHome;
-    private String telephoneMobile;
-    private String physicalAddress;
-    private String physicalTown;
-    private String physicalCountry;
     private int reportSector;
     private int reportReason;
+    private String companyName;
+    private String companyRegNo;
 
     public TransUnionRwandaClientVerificationData() {}
 
@@ -64,5 +53,11 @@ public class TransUnionRwandaClientVerificationData {
         this.name3 = name3;
         this.nationalID = nationalID;
         this.passportNo = passportNo;
+    }
+
+    public TransUnionRwandaClientVerificationData(Integer id, String companyName, String companyRegNo) {
+        this.id = id;
+        this.companyName = companyName;
+        this.companyRegNo = companyRegNo;
     }
 }

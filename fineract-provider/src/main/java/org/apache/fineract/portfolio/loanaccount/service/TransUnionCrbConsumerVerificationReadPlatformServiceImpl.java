@@ -33,8 +33,15 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public TransUnionRwandaClientVerificationData retrieveClientToBeVerifiedToTransUnion(Long clientId) {
+    public TransUnionRwandaClientVerificationData retrieveConsumerToBeVerifiedToTransUnion(Long clientId) {
         final ConsumerCreditMapper mapper = new ConsumerCreditMapper();
+        final String sql = "SELECT " + mapper.schema() + " order by cl.id ";
+        return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { clientId });
+    }
+
+    @Override
+    public TransUnionRwandaClientVerificationData retrieveCorporateToBeVerifiedToTransUnion(Long clientId) {
+        final CorporateCreditMapper mapper = new CorporateCreditMapper();
         final String sql = "SELECT " + mapper.schema() + " order by cl.id ";
         return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { clientId });
     }
@@ -50,7 +57,7 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
                     + "       other_info.national_identification_number AS nationalID, "
                     + "       other_info.passport_number                AS passportNo " + " FROM m_client cl "
                     + " LEFT JOIN m_client_other_info other_info on cl.id = other_info.client_id "
-                    + " WHERE cl.id = ? AND cl.status_enum = 300 ");
+                    + " WHERE cl.id = ? AND cl.status_enum = 300 AND cl.legal_form_enum = 1 ");
             return sql.toString();
         }
 
@@ -65,6 +72,30 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
             final String passportNo = rs.getString("passportNo");
 
             return new TransUnionRwandaClientVerificationData(id, name1, name2, name3, nationalID, passportNo);
+
+        }
+    }
+
+    private static final class CorporateCreditMapper implements RowMapper<TransUnionRwandaClientVerificationData> {
+
+        public String schema() {
+            final StringBuilder sql = new StringBuilder();
+
+            sql.append(" cl.id                                     as id, " + " cl.fullname                              AS companyName, "
+                    + " mcnp.incorp_no                           AS companyRegNo " + " FROM m_client cl "
+                    + " INNER JOIN  m_client_non_person mcnp on cl.id = mcnp.client_id "
+                    + " WHERE cl.id = ? AND cl.status_enum = 300 AND cl.legal_form_enum = 2");
+            return sql.toString();
+        }
+
+        @Override
+        public TransUnionRwandaClientVerificationData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
+                throws SQLException {
+            final Integer id = rs.getInt("id");
+            final String companyName = rs.getString("companyName");
+            final String companyRegNo = rs.getString("companyRegNo");
+
+            return new TransUnionRwandaClientVerificationData(id, companyName, companyRegNo);
 
         }
     }
