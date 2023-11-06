@@ -112,8 +112,8 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
         Long maxLoanIdInList = 0L;
         final Long penaltyWaitPeriodValue = this.configurationDomainService.retrievePenaltyWaitPeriod();
         final Boolean backdatePenalties = this.configurationDomainService.isBackdatePenaltiesEnabled();
-        final List<Long> overdueLoanIds = this.loanReadPlatformService
-                .retrieveAllLoanIdsWithOverdueInstallments(penaltyWaitPeriodValue, backdatePenalties, maxLoanIdInList, pageSize);
+        final List<Long> overdueLoanIds = this.loanReadPlatformService.retrieveAllLoanIdsWithOverdueInstallments(penaltyWaitPeriodValue,
+                backdatePenalties, maxLoanIdInList, pageSize);
 
         final ExecutorService executorService = Executors.newFixedThreadPool(threadPoolSize);
 
@@ -125,7 +125,8 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
                     LOG.info("Starting Apply penalty to overdue loans- total records - {}", totalFilteredRecords);
                     List<Long> queueElement = queue.element();
                     maxLoanIdInList = queueElement.get(queueElement.size() - 1);
-                    applyChargeForOverdueLoans(queue.remove(), queue, threadPoolSize, executorService, pageSize, maxLoanIdInList, penaltyWaitPeriodValue, backdatePenalties);
+                    applyChargeForOverdueLoans(queue.remove(), queue, threadPoolSize, executorService, pageSize, maxLoanIdInList,
+                            penaltyWaitPeriodValue, backdatePenalties);
                 } while (!CollectionUtils.isEmpty(queue));
             }
             // shutdown the executor when done
@@ -133,7 +134,8 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
         }
     }
 
-    private void applyChargeForOverdueLoans(List<Long> overdueLoanIds, Queue<List<Long>> queue, int threadPoolSize, ExecutorService executorService, int pageSize, Long maxLoanIdInList, Long penaltyWaitPeriodValue, Boolean backdatePenalties) {
+    private void applyChargeForOverdueLoans(List<Long> overdueLoanIds, Queue<List<Long>> queue, int threadPoolSize,
+            ExecutorService executorService, int pageSize, Long maxLoanIdInList, Long penaltyWaitPeriodValue, Boolean backdatePenalties) {
         List<Callable<Void>> posters = new ArrayList<>();
         int fromIndex = 0;
         int size = overdueLoanIds.size();
@@ -158,8 +160,8 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
             }
             while (queue.size() <= queueSize) {
                 LOG.info("Fetching while threads are running!");
-                List<Long> loanIds = this.loanReadPlatformService
-                        .retrieveAllLoanIdsWithOverdueInstallments(penaltyWaitPeriodValue, backdatePenalties, maxLoanIdInList, pageSize);
+                List<Long> loanIds = this.loanReadPlatformService.retrieveAllLoanIdsWithOverdueInstallments(penaltyWaitPeriodValue,
+                        backdatePenalties, maxLoanIdInList, pageSize);
 
                 if (loanIds.isEmpty()) {
                     break;
@@ -202,8 +204,8 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
             }
             while (queue.size() <= queueSize) {
                 LOG.info("Fetching while threads are running!..:: this is not supposed to run........");
-                overdueLoanIds = this.loanReadPlatformService
-                        .retrieveAllLoanIdsWithOverdueInstallments(penaltyWaitPeriodValue, backdatePenalties, maxId, pageSize);
+                overdueLoanIds = this.loanReadPlatformService.retrieveAllLoanIdsWithOverdueInstallments(penaltyWaitPeriodValue,
+                        backdatePenalties, maxId, pageSize);
 
                 if (overdueLoanIds.isEmpty()) {
                     break;
