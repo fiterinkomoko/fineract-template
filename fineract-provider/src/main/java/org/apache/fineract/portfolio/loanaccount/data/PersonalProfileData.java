@@ -124,4 +124,12 @@ public class PersonalProfileData {
     public void setSurname(String surname) {
         this.surname = surname;
     }
+
+    @Override
+    public String toString() {
+        return "PersonalProfileData{" + "crn='" + crn + '\'' + ", dateOfBirth='" + dateOfBirth + '\'' + ", fullName='" + fullName + '\''
+                + ", gender='" + gender + '\'' + ", healthInsuranceNo='" + healthInsuranceNo + '\'' + ", maritalStatus='" + maritalStatus
+                + '\'' + ", nationalID='" + nationalID + '\'' + ", otherNames='" + otherNames + '\'' + ", salutation='" + salutation + '\''
+                + ", surname='" + surname + '\'' + '}';
+    }
 }

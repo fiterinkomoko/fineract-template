@@ -1121,5 +1121,138 @@ WHERE l.loan_status_id IN (300, 600, 601, 700)
             <column name="action_name" value="VERIFYCLIENTONTRANSUNIONCRBRWANDA" />
         </insert>
     </changeSet>
+    <changeSet id="create-m_transunion_crb_header" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_transunion_crb_header"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_transunion_crb_header">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="client_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_m_transunion_crb_header-m_client_client_id" references="m_client(id)"/>
+            </column>
+            <column name="crb_name" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="pdf_id" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="product_display_name" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="report_date" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="report_type" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="request_no" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="requester" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="create-m_transunion_crb_score_output" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_transunion_crb_score_output"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_transunion_crb_score_output">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="header_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_m_transunion_crb_score_output-m_transunion_crb_header_header_id" references="m_transunion_crb_header(id)"/>
+            </column>
+            <column name="grade" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="positive_score" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="possibility" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="reason_code_aarc1" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="reason_code_aarc2" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="reason_code_aarc3" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="reason_code_aarc4" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="create-m_transunion_crb_personal_profile" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_transunion_crb_personal_profile"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_transunion_crb_personal_profile">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="header_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_m_transunion_crb_personal_profile-m_transunion_crb_header_header_id" references="m_transunion_crb_header(id)"/>
+            </column>
+            <column name="crn" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="date_of_birth" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="full_name" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="gender" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="health_insurance_no" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="marital_status" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="national_id" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="other_names" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="salutation" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="surname" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="create-m_transunion_crb_header-auditable" context="mysql">
+        <addColumn tableName="m_transunion_crb_header">
+            <column name="created_on_utc" type="DATETIME"/>
+            <column name="created_by" type="BIGINT"/>
+            <column name="last_modified_by" type="BIGINT"/>
+            <column name="last_modified_on_utc" type="DATETIME"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="create-m_transunion_crb_header-auditable" context="postgresql">
+        <addColumn tableName="m_transunion_crb_header">
+            <column name="created_on_utc" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="created_by" type="BIGINT" />
+            <column name="last_modified_by" type="BIGINT"/>
+            <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE"/>
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>

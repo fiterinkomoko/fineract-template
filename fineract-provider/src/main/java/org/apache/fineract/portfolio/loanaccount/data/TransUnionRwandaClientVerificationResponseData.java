@@ -32,6 +32,7 @@ public class TransUnionRwandaClientVerificationResponseData {
     private List<RecentEnquiryData> recentEnquiryList;
     private String responseCode;
     private ScoreOutputData scoreOutput;
+    private SummaryData summaryData;
 
     @XmlElement(name = "collateralList")
     public List<CollateralData> getCollateralList() {
@@ -96,4 +97,19 @@ public class TransUnionRwandaClientVerificationResponseData {
         this.scoreOutput = scoreOutput;
     }
 
+    @XmlElement(name = "summary")
+    public SummaryData getSummaryData() {
+        return summaryData;
+    }
+
+    public void setSummaryData(SummaryData summaryData) {
+        this.summaryData = summaryData;
+    }
+
+    @Override
+    public String toString() {
+        return "TransUnionRwandaClientVerificationResponseData{" + "collateralList=" + collateralList + ", employmentList=" + employmentList
+                + ", header=" + header + ", personalProfile=" + personalProfile + ", recentEnquiryList=" + recentEnquiryList
+                + ", responseCode='" + responseCode + '\'' + ", scoreOutput=" + scoreOutput + ", summaryData=" + summaryData + '}';
+    }
 }

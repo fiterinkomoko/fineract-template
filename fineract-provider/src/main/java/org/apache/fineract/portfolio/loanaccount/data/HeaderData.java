@@ -94,4 +94,11 @@ public class HeaderData {
     public void setRequester(String requester) {
         this.requester = requester;
     }
+
+    @Override
+    public String toString() {
+        return "HeaderData{" + "crbName='" + crbName + '\'' + ", pdfId='" + pdfId + '\'' + ", productDisplayName='" + productDisplayName
+                + '\'' + ", reportDate='" + reportDate + '\'' + ", reportType='" + reportType + '\'' + ", requestNo='" + requestNo + '\''
+                + ", requester='" + requester + '\'' + '}';
+    }
 }

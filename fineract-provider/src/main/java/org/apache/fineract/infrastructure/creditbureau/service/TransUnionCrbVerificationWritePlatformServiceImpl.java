@@ -22,11 +22,11 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import lombok.RequiredArgsConstructor;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
@@ -40,16 +40,27 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
-import org.apache.fineract.portfolio.loanaccount.data.CollateralData;
-import org.apache.fineract.portfolio.loanaccount.data.EmploymentData;
+import org.apache.fineract.portfolio.loanaccount.data.HeaderData;
+import org.apache.fineract.portfolio.loanaccount.data.PersonalProfileData;
+import org.apache.fineract.portfolio.loanaccount.data.ScoreOutputData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaClientVerificationData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaClientVerificationResponseData;
+import org.apache.fineract.portfolio.loanaccount.domain.TransunionCrbHeader;
+import org.apache.fineract.portfolio.loanaccount.domain.TransunionCrbHeaderRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.TransunionCrbPersonalProfile;
+import org.apache.fineract.portfolio.loanaccount.domain.TransunionCrbPersonalProfileRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.TransunionCrbScoreOutput;
+import org.apache.fineract.portfolio.loanaccount.domain.TransunionCrbScoreOutputRepository;
 import org.apache.fineract.portfolio.loanaccount.service.TransUnionCrbConsumerVerificationReadPlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 @Service
 @RequiredArgsConstructor
@@ -59,6 +70,9 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
     public static final String FORM_URL_CONTENT_TYPE = "Content-Type";
     private final TransUnionCrbConsumerVerificationReadPlatformService transUnionCrbClientVerificationReadPlatformService;
     private final ClientRepositoryWrapper clientRepositoryWrapper;
+    private final TransunionCrbHeaderRepository transunionCrbHeaderRepository;
+    private final TransunionCrbPersonalProfileRepository transunionCrbPersonalProfileRepository;
+    private final TransunionCrbScoreOutputRepository transunionCrbScoreOutputRepository;
 
     @Autowired
     private Environment env;
@@ -76,7 +90,7 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
             getProduct123 = this.transUnionCrbClientVerificationReadPlatformService.retrieveCorporateToBeVerifiedToTransUnion(clientId);
         }
 
-        LOG.info("Verifying clients to TransUnion Rwanda :: >> " + getProduct123.toString());
+        LOG.info("Verifying clients to TransUnion Rwanda Request :: >> " + getProduct123.toString());
 
         HttpUrl.Builder urlBuilder = HttpUrl.parse(getConfigProperty("fineract.integrations.transUnion.crb.soap.verifyClient"))
                 .newBuilder();
@@ -87,8 +101,9 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
 
         RequestBody formBody = RequestBody.create(MediaType.parse(FORM_URL_CONTENT_TYPE), convertClientDataToJAXBRequest(getProduct123));
 
-        Request request = new Request.Builder().url(url)
-                .header("Authorization", "Basic " + base64EncodeCredentials("RWFq7NE3vz", "WxB4sZQXDyUaxL"))
+        Request request = new Request.Builder().url(url).header("Authorization",
+                "Basic " + base64EncodeCredentials(getConfigProperty("fineract.integrations.transUnion.crb.soap.transportLevel.username"),
+                        getConfigProperty("fineract.integrations.transUnion.crb.soap.transportLevel.password")))
                 .header("Content-Type", "application/xml ").header("Content-Type", "text/xml ").post(formBody).build();
         try {
             response = client.newCall(request).execute();
@@ -96,19 +111,42 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
 
             if (response.isSuccessful()) {
                 LOG.info("Response from TransUnion Rwanda :: >> " + resObject);
-                convertXmlToPojo(resObject);
+                saveConsumerVerificattionReport(clientObj, resObject);
             } else {
-                LOG.info("Response from TransUnion Rwanda :: >> " + resObject);
+                LOG.error("Response from TransUnion Rwanda  Consumer credit Verification :: >> " + resObject);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            LOG.info("Response from TransUnion Rwanda :: >> " + e.getMessage());
+            LOG.info("Failed to Verify Consumer credit  :: >> " + e.getMessage());
         }
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(clientId).build();
+    }
+
+    private void saveConsumerVerificattionReport(Client clientObj, String resObject) {
+        TransUnionRwandaClientVerificationResponseData clientVerificationResponseData = convertXmlToPojoObj(resObject);
+        if (clientVerificationResponseData != null) {
+            HeaderData headerData = clientVerificationResponseData.getHeader();
+            PersonalProfileData personalProfileData = clientVerificationResponseData.getPersonalProfile();
+            ScoreOutputData scoreOutputData = clientVerificationResponseData.getScoreOutput();
+            if (headerData != null) {
+                TransunionCrbHeader transunionCrbHeader = new TransunionCrbHeader(clientObj, headerData);
+                transunionCrbHeaderRepository.saveAndFlush(transunionCrbHeader);
+                if (personalProfileData != null) {
+                    TransunionCrbPersonalProfile transunionCrbPersonalProfile = new TransunionCrbPersonalProfile(transunionCrbHeader,
+                            personalProfileData);
+                    transunionCrbPersonalProfileRepository.saveAndFlush(transunionCrbPersonalProfile);
+                }
+                if (scoreOutputData != null) {
+                    TransunionCrbScoreOutput scoreOutput = new TransunionCrbScoreOutput(transunionCrbHeader, scoreOutputData);
+                    transunionCrbScoreOutputRepository.saveAndFlush(scoreOutput);
+                }
+            }
+
+        }
     }
 
     private String getConfigProperty(String propertyName) {
@@ -124,12 +162,7 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
 
     public String convertClientDataToJAXBRequest(TransUnionRwandaClientVerificationData getProduct123) {
 
-        getProduct123.setUsername("WS_AEC");
-        getProduct123.setPassword("1AFmtwa$*1mq");
-        getProduct123.setCode("1570");
-        getProduct123.setReportSector(1);
-        getProduct123.setReportReason(2);
-        getProduct123.setInfinityCode("rw123456789");
+        addExtraDetailsToProduct123(getProduct123);
 
         try {
             JAXBContext context = JAXBContext.newInstance(TransUnionRwandaClientVerificationData.class);
@@ -148,34 +181,99 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
             stringWriter.write("</soapenv:Body>");
             stringWriter.write("</soapenv:Envelope>");
 
-            String soapRequest = stringWriter.toString();
-            soapRequest = soapRequest.replaceFirst("<\\?xml [^>]*\\?>", "");
+            String request = stringWriter.toString();
+            request = request.replaceFirst("<\\?xml [^>]*\\?>", "");
 
-            LOG.info("Request for verification :: >> " + soapRequest);
-            return soapRequest;
+            LOG.info(" unmarshal Consumer verification Response to Pojo :: >> " + request);
+            return request;
         } catch (JAXBException e) {
             e.printStackTrace();
-            LOG.info("Response from TransUnion Rwanda :: >> " + e.getMessage());
+            LOG.error("Failure to unmarshal consumer credit :: >> " + e.getMessage());
         }
         return null;
     }
 
-    private void convertXmlToPojo(String xmlResponse) {
+    private void addExtraDetailsToProduct123(TransUnionRwandaClientVerificationData getProduct123) {
+        getProduct123.setUsername(getConfigProperty("fineract.integrations.transUnion.crb.soap.messageLevel.username"));
+        getProduct123.setPassword(getConfigProperty("fineract.integrations.transUnion.crb.soap.messageLevel.password"));
+        getProduct123.setCode("1570");
+        getProduct123.setReportSector(1);
+        getProduct123.setReportReason(2);
+        getProduct123.setInfinityCode(getConfigProperty("fineract.integrations.transUnion.crb.rest.infinityCode"));
+    }
+
+    public TransUnionRwandaClientVerificationResponseData convertXmlToPojoObj(String xml) {
         try {
-            JAXBContext context = JAXBContext.newInstance(TransUnionRwandaClientVerificationResponseData.class);
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(new InputSource(new StringReader(xml)));
 
-            Unmarshaller unmarshaller = context.createUnmarshaller();
+            NodeList product123ResponseNodes = document.getElementsByTagName("ns2:getProduct123Response");
+            if (product123ResponseNodes.getLength() > 0) {
+                Element getProduct123ResponseElement = (Element) product123ResponseNodes.item(0);
 
-            TransUnionRwandaClientVerificationResponseData product123Response = (TransUnionRwandaClientVerificationResponseData) unmarshaller
-                    .unmarshal(new StringReader(xmlResponse));
+                TransUnionRwandaClientVerificationResponseData product123Response = new TransUnionRwandaClientVerificationResponseData();
 
-            List<CollateralData> collateralList = product123Response.getCollateralList();
-            List<EmploymentData> employmentDataList = product123Response.getEmploymentList();
-
-        } catch (JAXBException e) {
+                product123Response.setHeader(extractHeader(getProduct123ResponseElement));
+                product123Response.setPersonalProfile(extractPersonalProfile(getProduct123ResponseElement));
+                product123Response.setScoreOutput(extractScoreOutputData(getProduct123ResponseElement));
+                LOG.info("Response from TransUnion Rwanda  product123Response:: >> " + product123Response.toString());
+                return product123Response;
+            }
+        } catch (Exception e) {
             e.printStackTrace();
-            LOG.info("Response from TransUnion Rwanda :: >> " + e.getMessage());
+            LOG.info("Response from TransUnion Rwanda  Extraction:: >> " + e.getMessage());
         }
+
+        return null;
+    }
+
+    private HeaderData extractHeader(Element getProduct123ResponseElement) {
+        HeaderData header = new HeaderData();
+        Element headerElement = (Element) getProduct123ResponseElement.getElementsByTagName("header").item(0);
+
+        header.setCrbName(headerElement.getElementsByTagName("crbName").item(0).getTextContent());
+        header.setPdfId(headerElement.getElementsByTagName("pdfId").item(0).getTextContent());
+        header.setProductDisplayName(headerElement.getElementsByTagName("productDisplayName").item(0).getTextContent());
+        header.setReportDate(headerElement.getElementsByTagName("reportDate").item(0).getTextContent());
+        header.setReportType(headerElement.getElementsByTagName("reportType").item(0).getTextContent());
+        header.setRequestNo(headerElement.getElementsByTagName("requestNo").item(0).getTextContent());
+        header.setRequester(headerElement.getElementsByTagName("requester").item(0).getTextContent());
+
+        return header;
+    }
+
+    private PersonalProfileData extractPersonalProfile(Element getProduct123ResponseElement) {
+        PersonalProfileData personalProfileData = new PersonalProfileData();
+        Element headerElement = (Element) getProduct123ResponseElement.getElementsByTagName("personalProfile").item(0);
+
+        personalProfileData.setCrn(headerElement.getElementsByTagName("crn").item(0).getTextContent());
+        personalProfileData.setDateOfBirth(headerElement.getElementsByTagName("dateOfBirth").item(0).getTextContent());
+        personalProfileData.setFullName(headerElement.getElementsByTagName("fullName").item(0).getTextContent());
+        personalProfileData.setGender(headerElement.getElementsByTagName("gender").item(0).getTextContent());
+        personalProfileData.setHealthInsuranceNo(headerElement.getElementsByTagName("healthInsuranceNo").item(0).getTextContent());
+        personalProfileData.setMaritalStatus(headerElement.getElementsByTagName("maritalStatus").item(0).getTextContent());
+        personalProfileData.setNationalID(headerElement.getElementsByTagName("nationalID").item(0).getTextContent());
+        personalProfileData.setOtherNames(headerElement.getElementsByTagName("otherNames").item(0).getTextContent());
+        personalProfileData.setSalutation(headerElement.getElementsByTagName("salutation").item(0).getTextContent());
+        personalProfileData.setSurname(headerElement.getElementsByTagName("surname").item(0).getTextContent());
+
+        return personalProfileData;
+    }
+
+    private ScoreOutputData extractScoreOutputData(Element getProduct123ResponseElement) {
+        ScoreOutputData scoreOutputData = new ScoreOutputData();
+        Element headerElement = (Element) getProduct123ResponseElement.getElementsByTagName("scoreOutput").item(0);
+
+        scoreOutputData.setGrade(headerElement.getElementsByTagName("grade").item(0).getTextContent());
+        scoreOutputData.setPositiveScore(headerElement.getElementsByTagName("positiveScore").item(0).getTextContent());
+        scoreOutputData.setProbability(headerElement.getElementsByTagName("probability").item(0).getTextContent());
+        scoreOutputData.setReasonCodeAARC1(headerElement.getElementsByTagName("reasonCodeAARC1").item(0).getTextContent());
+        scoreOutputData.setReasonCodeAARC2(headerElement.getElementsByTagName("reasonCodeAARC2").item(0).getTextContent());
+        scoreOutputData.setReasonCodeAARC3(headerElement.getElementsByTagName("reasonCodeAARC3").item(0).getTextContent());
+        scoreOutputData.setReasonCodeAARC4(headerElement.getElementsByTagName("reasonCodeAARC4").item(0).getTextContent());
+
+        return scoreOutputData;
     }
 
 }

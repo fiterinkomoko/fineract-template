@@ -94,4 +94,11 @@ public class ScoreOutputData {
     public void setReasonCodeAARC4(String reasonCodeAARC4) {
         this.reasonCodeAARC4 = reasonCodeAARC4;
     }
+
+    @Override
+    public String toString() {
+        return "ScoreOutputData{" + "grade='" + grade + '\'' + ", positiveScore='" + positiveScore + '\'' + ", probability='" + probability
+                + '\'' + ", reasonCodeAARC1='" + reasonCodeAARC1 + '\'' + ", reasonCodeAARC2='" + reasonCodeAARC2 + '\''
+                + ", reasonCodeAARC3='" + reasonCodeAARC3 + '\'' + ", reasonCodeAARC4='" + reasonCodeAARC4 + '\'' + '}';
+    }
 }
