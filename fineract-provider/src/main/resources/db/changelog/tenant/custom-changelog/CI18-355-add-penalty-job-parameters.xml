@@ -28,7 +28,7 @@
             <column name="parameter_name" value="thread-pool-size"/>
             <column name="parameter_value" valueNumeric="10"/>
         </insert>
-	<insert tableName="job_parameters">
+    <insert tableName="job_parameters">
             <column name="job_id" valueComputed="(select id from job where name = 'Apply penalty to overdue loans')"/>
             <column name="parameter_name" value="batch-size"/>
             <column name="parameter_value" valueNumeric="100"/>
