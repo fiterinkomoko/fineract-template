@@ -21,9 +21,9 @@ package org.apache.fineract.portfolio.loanaccount.data;
 import javax.xml.bind.annotation.XmlRootElement;
 import lombok.Data;
 
-@XmlRootElement(name = "ws:getProduct123")
+@XmlRootElement(name = "ws:getProduct168")
 @Data
-public class TransUnionRwandaClientVerificationData {
+public class TransUnionRwandaCorporateVerificationData {
 
     private Integer id;
     private String username;
@@ -43,19 +43,9 @@ public class TransUnionRwandaClientVerificationData {
     private String companyName;
     private String companyRegNo;
 
-    public TransUnionRwandaClientVerificationData() {}
+    public TransUnionRwandaCorporateVerificationData() {}
 
-    public TransUnionRwandaClientVerificationData(Integer id, String name1, String name2, String name3, String nationalID,
-            String passportNo) {
-        this.id = id;
-        this.name1 = name1;
-        this.name2 = name2;
-        this.name3 = name3;
-        this.nationalID = nationalID;
-        this.passportNo = passportNo;
-    }
-
-    public TransUnionRwandaClientVerificationData(Integer id, String companyName, String companyRegNo) {
+    public TransUnionRwandaCorporateVerificationData(Integer id, String companyName, String companyRegNo) {
         this.id = id;
         this.companyName = companyName;
         this.companyRegNo = companyRegNo;

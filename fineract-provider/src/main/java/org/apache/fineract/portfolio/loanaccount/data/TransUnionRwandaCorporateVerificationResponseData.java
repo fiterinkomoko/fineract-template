@@ -22,13 +22,13 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "getProduct123Response", namespace = "http://ws.rw.crbws.transunion.ke.co/")
-public class TransUnionRwandaClientVerificationResponseData {
+@XmlRootElement(name = "getProduct168Response", namespace = "http://ws.rw.crbws.transunion.ke.co/")
+public class TransUnionRwandaCorporateVerificationResponseData {
 
     private List<CollateralData> collateralList;
     private List<EmploymentData> employmentList;
     private HeaderData header;
-    private PersonalProfileData personalProfile;
+    private CorporateProfileData corporateProfile;
     private List<RecentEnquiryData> recentEnquiryList;
     private String responseCode;
     private ScoreOutputData scoreOutput;
@@ -61,13 +61,13 @@ public class TransUnionRwandaClientVerificationResponseData {
         this.header = header;
     }
 
-    @XmlElement(name = "personalProfile")
-    public PersonalProfileData getPersonalProfile() {
-        return personalProfile;
+    @XmlElement(name = "corporateProfile")
+    public CorporateProfileData getCorporateProfile() {
+        return corporateProfile;
     }
 
-    public void setPersonalProfile(PersonalProfileData personalProfile) {
-        this.personalProfile = personalProfile;
+    public void setCorporateProfile(CorporateProfileData corporateProfile) {
+        this.corporateProfile = corporateProfile;
     }
 
     @XmlElement(name = "recentEnquiryList")
@@ -109,7 +109,7 @@ public class TransUnionRwandaClientVerificationResponseData {
     @Override
     public String toString() {
         return "TransUnionRwandaClientVerificationResponseData{" + "collateralList=" + collateralList + ", employmentList=" + employmentList
-                + ", header=" + header + ", personalProfile=" + personalProfile + ", recentEnquiryList=" + recentEnquiryList
+                + ", header=" + header + ", corporateProfile=" + corporateProfile + ", recentEnquiryList=" + recentEnquiryList
                 + ", responseCode='" + responseCode + '\'' + ", scoreOutput=" + scoreOutput + ", summaryData=" + summaryData + '}';
     }
 }

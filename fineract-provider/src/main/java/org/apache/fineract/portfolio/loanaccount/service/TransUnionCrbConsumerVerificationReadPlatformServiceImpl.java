@@ -21,7 +21,8 @@ package org.apache.fineract.portfolio.loanaccount.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaClientVerificationData;
+import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaConsumerVerificationData;
+import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCorporateVerificationData;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -33,20 +34,20 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public TransUnionRwandaClientVerificationData retrieveConsumerToBeVerifiedToTransUnion(Long clientId) {
+    public TransUnionRwandaConsumerVerificationData retrieveConsumerToBeVerifiedToTransUnion(Long clientId) {
         final ConsumerCreditMapper mapper = new ConsumerCreditMapper();
         final String sql = "SELECT " + mapper.schema() + " order by cl.id ";
         return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { clientId });
     }
 
     @Override
-    public TransUnionRwandaClientVerificationData retrieveCorporateToBeVerifiedToTransUnion(Long clientId) {
+    public TransUnionRwandaCorporateVerificationData retrieveCorporateToBeVerifiedToTransUnion(Long clientId) {
         final CorporateCreditMapper mapper = new CorporateCreditMapper();
         final String sql = "SELECT " + mapper.schema() + " order by cl.id ";
         return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { clientId });
     }
 
-    private static final class ConsumerCreditMapper implements RowMapper<TransUnionRwandaClientVerificationData> {
+    private static final class ConsumerCreditMapper implements RowMapper<TransUnionRwandaConsumerVerificationData> {
 
         public String schema() {
             final StringBuilder sql = new StringBuilder();
@@ -62,7 +63,7 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
         }
 
         @Override
-        public TransUnionRwandaClientVerificationData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
+        public TransUnionRwandaConsumerVerificationData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
                 throws SQLException {
             final Integer id = rs.getInt("id");
             final String name1 = rs.getString("name1");
@@ -71,12 +72,12 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
             final String nationalID = rs.getString("nationalID");
             final String passportNo = rs.getString("passportNo");
 
-            return new TransUnionRwandaClientVerificationData(id, name1, name2, name3, nationalID, passportNo);
+            return new TransUnionRwandaConsumerVerificationData(id, name1, name2, name3, nationalID, passportNo);
 
         }
     }
 
-    private static final class CorporateCreditMapper implements RowMapper<TransUnionRwandaClientVerificationData> {
+    private static final class CorporateCreditMapper implements RowMapper<TransUnionRwandaCorporateVerificationData> {
 
         public String schema() {
             final StringBuilder sql = new StringBuilder();
@@ -89,13 +90,13 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
         }
 
         @Override
-        public TransUnionRwandaClientVerificationData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
+        public TransUnionRwandaCorporateVerificationData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
                 throws SQLException {
             final Integer id = rs.getInt("id");
             final String companyName = rs.getString("companyName");
             final String companyRegNo = rs.getString("companyRegNo");
 
-            return new TransUnionRwandaClientVerificationData(id, companyName, companyRegNo);
+            return new TransUnionRwandaCorporateVerificationData(id, companyName, companyRegNo);
 
         }
     }
