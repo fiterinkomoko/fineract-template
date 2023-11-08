@@ -52,11 +52,15 @@ public class TransunionCrbHeader extends AbstractAuditableWithUTCDateTimeCustom 
     private String requestNo;
     @Column(name = "requester")
     private String requester;
+    @ManyToOne
+    @JoinColumn(name = "loan_id", nullable = true)
+    private Loan loanId;
 
     public TransunionCrbHeader() {}
 
-    public TransunionCrbHeader(Client clientId, HeaderData headerData) {
+    public TransunionCrbHeader(Client clientId, Loan loanId, HeaderData headerData) {
         this.clientId = clientId;
+        this.loanId = loanId;
         this.crbName = headerData.getCrbName();
         this.pdfId = headerData.getPdfId();
         this.productDisplayName = headerData.getProductDisplayName();

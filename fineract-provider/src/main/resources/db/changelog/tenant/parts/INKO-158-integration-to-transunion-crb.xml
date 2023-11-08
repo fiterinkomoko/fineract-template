@@ -1278,5 +1278,18 @@ WHERE l.loan_status_id IN (300, 600, 601, 700)
             </column>
         </createTable>
     </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_header_loan_id">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_transunion_crb_header" columnName="loan_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_transunion_crb_header">
+            <column name="loan_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_m_transunion_crb_header_loan_id" references="m_loan(id)"/>
+            </column>
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>

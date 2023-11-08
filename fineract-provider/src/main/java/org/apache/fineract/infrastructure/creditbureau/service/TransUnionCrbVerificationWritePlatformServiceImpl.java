@@ -50,6 +50,8 @@ import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaConsumerVe
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaConsumerVerificationResponseData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCorporateVerificationData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCorporateVerificationResponseData;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.TransunionCrbCorporateProfile;
 import org.apache.fineract.portfolio.loanaccount.domain.TransunionCrbCorporateProfileRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.TransunionCrbHeader;
@@ -81,14 +83,16 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
     private final TransunionCrbPersonalProfileRepository transunionCrbPersonalProfileRepository;
     private final TransunionCrbCorporateProfileRepository transunionCrbCorporateProfileRepository;
     private final TransunionCrbScoreOutputRepository transunionCrbScoreOutputRepository;
+    private final LoanRepositoryWrapper loanRepositoryWrapper;
 
     @Autowired
     private Environment env;
 
     @Override
-    public CommandProcessingResult clientVerificationToTransUnionRwanda(Long clientId, JsonCommand command) {
+    public CommandProcessingResult clientVerificationToTransUnionRwanda(Long loanId, JsonCommand command) {
+        Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
 
-        Client clientObj = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+        Client clientObj = this.clientRepositoryWrapper.findOneWithNotFoundDetection(loan.getClientId());
 
         TransUnionRwandaConsumerVerificationData getProduct123 = null;
         TransUnionRwandaCorporateVerificationData getProduct168 = null;
@@ -97,12 +101,14 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
 
         if (clientObj.getLegalForm().equals(LegalForm.PERSON.getValue())) {
             isClient = true;
-            getProduct123 = this.transUnionCrbClientVerificationReadPlatformService.retrieveConsumerToBeVerifiedToTransUnion(clientId);
+            getProduct123 = this.transUnionCrbClientVerificationReadPlatformService
+                    .retrieveConsumerToBeVerifiedToTransUnion(clientObj.getId());
             requestToCrb = convertConsumerDataToJAXBRequest(getProduct123);
             LOG.info("Verifying clients to TransUnion Rwanda Request :: >> " + getProduct123.toString());
         } else {
             isClient = false;
-            getProduct168 = this.transUnionCrbClientVerificationReadPlatformService.retrieveCorporateToBeVerifiedToTransUnion(clientId);
+            getProduct168 = this.transUnionCrbClientVerificationReadPlatformService
+                    .retrieveCorporateToBeVerifiedToTransUnion(clientObj.getId());
             requestToCrb = convertCorporateDataToJAXBRequest(getProduct168);
             LOG.info("Verifying clients to TransUnion Rwanda Request :: >> " + getProduct168.toString());
         }
@@ -127,9 +133,9 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
             if (response.isSuccessful()) {
                 LOG.info("Response from TransUnion Rwanda :: >> " + resObject);
                 if (isClient) {
-                    saveConsumerVerificationReport(clientObj, resObject);
+                    saveConsumerVerificationReport(clientObj, loan, resObject);
                 } else {
-                    saveCorporateVerificationReport(clientObj, resObject);
+                    saveCorporateVerificationReport(clientObj, loan, resObject);
                 }
             } else {
                 LOG.error("Response from TransUnion Rwanda  Consumer credit Verification :: >> " + resObject);
@@ -142,17 +148,17 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
-                .withEntityId(clientId).build();
+                .withEntityId(clientObj.getId()).build();
     }
 
-    private void saveConsumerVerificationReport(Client clientObj, String resObject) {
+    private void saveConsumerVerificationReport(Client clientObj, Loan loan, String resObject) {
         TransUnionRwandaConsumerVerificationResponseData clientVerificationResponseData = convertConsumerReponse(resObject);
         if (clientVerificationResponseData != null) {
             HeaderData headerData = clientVerificationResponseData.getHeader();
             PersonalProfileData personalProfileData = clientVerificationResponseData.getPersonalProfile();
             ScoreOutputData scoreOutputData = clientVerificationResponseData.getScoreOutput();
             if (headerData != null) {
-                TransunionCrbHeader transunionCrbHeader = new TransunionCrbHeader(clientObj, headerData);
+                TransunionCrbHeader transunionCrbHeader = new TransunionCrbHeader(clientObj, loan, headerData);
                 transunionCrbHeaderRepository.saveAndFlush(transunionCrbHeader);
                 if (personalProfileData != null) {
                     TransunionCrbPersonalProfile transunionCrbPersonalProfile = new TransunionCrbPersonalProfile(transunionCrbHeader,
@@ -168,14 +174,14 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
         }
     }
 
-    private void saveCorporateVerificationReport(Client clientObj, String resObject) {
+    private void saveCorporateVerificationReport(Client clientObj, Loan loan, String resObject) {
         TransUnionRwandaCorporateVerificationResponseData corporateVerificationResponseData = convertCorporateResponse(resObject);
         if (corporateVerificationResponseData != null) {
             HeaderData headerData = corporateVerificationResponseData.getHeader();
             CorporateProfileData corporateProfileData = corporateVerificationResponseData.getCorporateProfile();
             ScoreOutputData scoreOutputData = corporateVerificationResponseData.getScoreOutput();
             if (headerData != null) {
-                TransunionCrbHeader transunionCrbHeader = new TransunionCrbHeader(clientObj, headerData);
+                TransunionCrbHeader transunionCrbHeader = new TransunionCrbHeader(clientObj, loan, headerData);
                 transunionCrbHeaderRepository.saveAndFlush(transunionCrbHeader);
                 if (corporateProfileData != null) {
                     TransunionCrbCorporateProfile transunionCrbCorporateProfile = new TransunionCrbCorporateProfile(transunionCrbHeader,

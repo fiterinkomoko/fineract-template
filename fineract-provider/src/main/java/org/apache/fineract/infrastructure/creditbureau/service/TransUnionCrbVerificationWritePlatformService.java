@@ -23,5 +23,5 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
 public interface TransUnionCrbVerificationWritePlatformService {
 
-    CommandProcessingResult clientVerificationToTransUnionRwanda(Long clientId, JsonCommand command);
+    CommandProcessingResult clientVerificationToTransUnionRwanda(Long loanId, JsonCommand command);
 }
