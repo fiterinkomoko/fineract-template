@@ -19,6 +19,10 @@
 package org.apache.fineract.scheduledjobs.service;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -31,11 +35,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
-
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
 
 @Component
 @Scope("prototype")
@@ -62,7 +61,7 @@ public class AccrualInterestForSavingsPoster implements Callable<Void> {
 
     @Override
     @SuppressFBWarnings(value = {
-            "DMI_RANDOM_USED_ONLY_ONCE"}, justification = "False positive for random object created and used only once")
+            "DMI_RANDOM_USED_ONLY_ONCE" }, justification = "False positive for random object created and used only once")
     public Void call() throws JobExecutionException {
         ThreadLocalContextUtil.init(this.context);
         Integer maxNumberOfRetries = this.context.getTenantContext().getConnection().getMaxRetriesOnDeadlock();
@@ -77,14 +76,16 @@ public class AccrualInterestForSavingsPoster implements Callable<Void> {
                 Integer numberOfRetries = 0;
                 while (numberOfRetries <= maxNumberOfRetries) {
                     try {
-                        this.savingsAccountWritePlatformService.postAccrualInterest(savingAccountId, DateUtils.getLocalDateOfTenant(), false);
+                        this.savingsAccountWritePlatformService.postAccrualInterest(savingAccountId, DateUtils.getLocalDateOfTenant(),
+                                false);
                         numberOfRetries = maxNumberOfRetries + 1;
                     } catch (CannotAcquireLockException | ObjectOptimisticLockingFailureException exception) {
                         LOG.info("Accrual Interest For Savings job has been retried {} time(s)", numberOfRetries);
                         // Fail if the transaction has been retired for
                         // maxNumberOfRetries
                         if (numberOfRetries >= maxNumberOfRetries) {
-                            LOG.error("Accrual Interest For Savings job has been retried for the max allowed attempts of {} and will be rolled back",
+                            LOG.error(
+                                    "Accrual Interest For Savings job has been retried for the max allowed attempts of {} and will be rolled back",
                                     numberOfRetries);
                             errors.add(exception);
                             break;

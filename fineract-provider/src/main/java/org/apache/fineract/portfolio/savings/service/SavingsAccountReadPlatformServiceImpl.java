@@ -694,8 +694,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         sql.append(" and msa.id > ? order by msa.id asc limit ? ");
 
         try {
-            return Collections.synchronizedList(
-                    this.jdbcTemplate.queryForList(sql.toString(), Long.class, maxSavingsAccountId, pageSize));
+            return Collections.synchronizedList(this.jdbcTemplate.queryForList(sql.toString(), Long.class, maxSavingsAccountId, pageSize));
         } catch (final EmptyResultDataAccessException e) {
             return new ArrayList<Long>();
         }

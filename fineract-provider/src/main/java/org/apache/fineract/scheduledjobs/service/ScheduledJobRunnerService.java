@@ -18,9 +18,8 @@
  */
 package org.apache.fineract.scheduledjobs.service;
 
-import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
-
 import java.util.Map;
+import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 
 public interface ScheduledJobRunnerService {
 

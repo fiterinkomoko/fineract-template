@@ -111,8 +111,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             final ScheduledJobDetailRepository scheduledJobDetailsRepository, final FineractProperties fineractProperties,
             DatabaseSpecificSQLGenerator sqlGenerator, DatabaseTypeResolver databaseTypeResolver,
             final SavingsAccountReadPlatformService savingsAccountReadPlatformService, final JobExecuter jobExecuter,
-            SavingsAccountRepositoryWrapper savingAccountRepositoryWrapper,
-            final ApplicationContext applicationContext) {
+            SavingsAccountRepositoryWrapper savingAccountRepositoryWrapper, final ApplicationContext applicationContext) {
         this.dataSourceServiceFactory = dataSourceServiceFactory;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
         this.savingsAccountChargeReadPlatformService = savingsAccountChargeReadPlatformService;
@@ -428,7 +427,8 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         final int pageSize = batchSize * threadPoolSize;
         Long maxSavingsAccountIdInList = 0L;
 
-        final List<Long> activeSavingsAccounts = this.savingsAccountReadPlatformService.retrieveActiveSavingsAccrualAccounts(maxSavingsAccountIdInList, pageSize);
+        final List<Long> activeSavingsAccounts = this.savingsAccountReadPlatformService
+                .retrieveActiveSavingsAccrualAccounts(maxSavingsAccountIdInList, pageSize);
 
         final ExecutorService executorService = Executors.newFixedThreadPool(threadPoolSize);
 
@@ -440,7 +440,8 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
                     List<Long> queueElement = queue.element();
                     LOG.info("Post Accrual Interest for Savings- total records in batch - {}", queueElement.size());
                     maxSavingsAccountIdInList = queueElement.get(queueElement.size() - 1);
-                    postAccrualInterestForSavings(queue.remove(), queue, threadPoolSize, executorService, pageSize, maxSavingsAccountIdInList);
+                    postAccrualInterestForSavings(queue.remove(), queue, threadPoolSize, executorService, pageSize,
+                            maxSavingsAccountIdInList);
                 } while (!CollectionUtils.isEmpty(queue));
             }
             // shutdown the executor when done
@@ -449,7 +450,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     }
 
     private void postAccrualInterestForSavings(List<Long> activeSavingsAccounts, Queue<List<Long>> queue, int threadPoolSize,
-                                               ExecutorService executorService, int pageSize, Long maxSavingsAccountIdInList) {
+            ExecutorService executorService, int pageSize, Long maxSavingsAccountIdInList) {
         List<Callable<Void>> posters = new ArrayList<>();
         int fromIndex = 0;
         int size = activeSavingsAccounts.size();
@@ -474,7 +475,8 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             }
             while (queue.size() <= queueSize) {
                 LOG.info("Fetching while threads are running!");
-                final List<Long> activeSavingsAccountsNextBatch = this.savingsAccountReadPlatformService.retrieveActiveSavingsAccrualAccounts(maxId, pageSize);
+                final List<Long> activeSavingsAccountsNextBatch = this.savingsAccountReadPlatformService
+                        .retrieveActiveSavingsAccrualAccounts(maxId, pageSize);
 
                 if (activeSavingsAccountsNextBatch == null || activeSavingsAccountsNextBatch.isEmpty()) {
                     break;
