@@ -18,9 +18,38 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
-public class BouncedChequesData {
+public class CrbAccountsSummaryData {
 
     private int allSectors;
     private int mySector;
     private int otherSectors;
+
+    public int getAllSectors() {
+        return allSectors;
+    }
+
+    public void setAllSectors(int allSectors) {
+        this.allSectors = allSectors;
+    }
+
+    public int getMySector() {
+        return mySector;
+    }
+
+    public void setMySector(int mySector) {
+        this.mySector = mySector;
+    }
+
+    public int getOtherSectors() {
+        return otherSectors;
+    }
+
+    public void setOtherSectors(int otherSectors) {
+        this.otherSectors = otherSectors;
+    }
+
+    @Override
+    public String toString() {
+        return "CrbAccountsSummaryData{" + "allSectors=" + allSectors + ", mySector=" + mySector + ", otherSectors=" + otherSectors + '}';
+    }
 }

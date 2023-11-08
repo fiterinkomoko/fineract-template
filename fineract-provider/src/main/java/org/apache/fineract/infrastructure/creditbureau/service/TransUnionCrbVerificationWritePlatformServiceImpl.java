@@ -41,9 +41,11 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.apache.fineract.portfolio.loanaccount.data.CorporateProfileData;
+import org.apache.fineract.portfolio.loanaccount.data.CrbAccountsSummaryData;
 import org.apache.fineract.portfolio.loanaccount.data.HeaderData;
 import org.apache.fineract.portfolio.loanaccount.data.PersonalProfileData;
 import org.apache.fineract.portfolio.loanaccount.data.ScoreOutputData;
+import org.apache.fineract.portfolio.loanaccount.data.SummaryData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaConsumerVerificationData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaConsumerVerificationResponseData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCorporateVerificationData;
@@ -299,6 +301,7 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
                 product123Response.setHeader(extractHeader(getProduct123ResponseElement));
                 product123Response.setPersonalProfile(extractPersonalProfile(getProduct123ResponseElement));
                 product123Response.setScoreOutput(extractScoreOutputData(getProduct123ResponseElement));
+                product123Response.setSummaryData(extractSummaryData(getProduct123ResponseElement));
                 LOG.info("Response from TransUnion Rwanda  product123Response:: >> " + product123Response.toString());
                 return product123Response;
             }
@@ -324,6 +327,7 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
 
                 product168Response.setHeader(extractHeader(getProduct168ResponseElement));
                 product168Response.setCorporateProfile(extractCorporateProfile(getProduct168ResponseElement));
+                product168Response.setSummaryData(extractSummaryData(getProduct168ResponseElement));
                 LOG.info("Response from TransUnion Rwanda  product168Response:: >> " + product168Response.toString());
                 return product168Response;
             }
@@ -392,6 +396,116 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
         scoreOutputData.setReasonCodeAARC4(headerElement.getElementsByTagName("reasonCodeAARC4").item(0).getTextContent());
 
         return scoreOutputData;
+    }
+
+    private SummaryData extractSummaryData(Element summary) {
+        SummaryData summaryData = new SummaryData();
+        Element summaryElement = (Element) summary.getElementsByTagName("summary").item(0);
+        if (summaryElement != null) {
+            summaryData.setBouncedCheques(createCrbSummaryDetails(summaryElement, "bouncedCheques"));
+            summaryData.setBouncedCheques90Days(createCrbSummaryDetails(summaryElement, "bouncedCheques90Days"));
+            summaryData.setBouncedCheques180Days(createCrbSummaryDetails(summaryElement, "bouncedCheques180Days"));
+            summaryData.setBouncedCheques365Days(createCrbSummaryDetails(summaryElement, "bouncedCheques365Days"));
+            summaryData.setClosedAccounts(createCrbSummaryDetails(summaryElement, "closedAccounts"));
+            summaryData.setCreditApplications(createCrbSummaryDetails(summaryElement, "creditApplications"));
+            summaryData.setCreditHistory(createCrbSummaryDetails(summaryElement, "creditHistory"));
+            summaryData.setEnquiries31to60Days(createCrbSummaryDetails(summaryElement, "enquiries31to60Days"));
+            summaryData.setEnquiries61to90Days(createCrbSummaryDetails(summaryElement, "enquiries61to90Days"));
+            summaryData.setEnquiries91Days(createCrbSummaryDetails(summaryElement, "enquiries91Days"));
+            summaryData.setEnquiriesLast30Days(createCrbSummaryDetails(summaryElement, "enquiriesLast30Days"));
+            summaryData.setFraudulentCases(createCrbSummaryDetails(summaryElement, "fraudulentCases"));
+            summaryData.setNpaAccounts(createCrbSummaryDetails(summaryElement, "npaAccounts"));
+            summaryData.setOpenAccounts(createCrbSummaryDetails(summaryElement, "openAccounts"));
+            summaryData.setPaAccounts(createCrbSummaryDetails(summaryElement, "paAccounts"));
+            summaryData.setPaAccountsWithDh(createCrbSummaryDetails(summaryElement, "paAccountsWithDh"));
+            summaryData.setPaClosedAccounts(createCrbSummaryDetails(summaryElement, "paClosedAccounts"));
+            summaryData.setPaClosedAccountsWithDh(createCrbSummaryDetails(summaryElement, "paClosedAccountsWithDh"));
+            summaryData.setPaAccounts(createCrbSummaryDetails(summaryElement, "paOpenAccounts"));
+            summaryData.setInsurancePolicies(createCrbSummaryDetails(summaryElement, "insurancePolicies"));
+
+            Element lastBouncedChequeDatelement = (Element) summaryElement.getElementsByTagName("lastBouncedChequeDate").item(0);
+            if (lastBouncedChequeDatelement != null) {
+                String Value = lastBouncedChequeDatelement.getTextContent();
+                if (Value != null && !Value.isEmpty()) {
+                    summaryData.setLastBouncedChequeDate(Value);
+                }
+            }
+
+            Element lastCreditApplicationDateElement = (Element) summaryElement.getElementsByTagName("lastCreditApplicationDate").item(0);
+            if (lastCreditApplicationDateElement != null) {
+                String Value = lastCreditApplicationDateElement.getTextContent();
+                if (Value != null && !Value.isEmpty()) {
+                    summaryData.setLastCreditApplicationDate(Value);
+                }
+            }
+
+            Element lastFraudDateElement = (Element) summaryElement.getElementsByTagName("lastFraudDate").item(0);
+            if (lastFraudDateElement != null) {
+                String Value = lastFraudDateElement.getTextContent();
+                if (Value != null && !Value.isEmpty()) {
+                    summaryData.setLastFraudDate(Value);
+                }
+            }
+
+            Element lastNPAListingDateDateElement = (Element) summaryElement.getElementsByTagName("lastNPAListingDate").item(0);
+            if (lastNPAListingDateDateElement != null) {
+                String Value = lastNPAListingDateDateElement.getTextContent();
+                if (Value != null && !Value.isEmpty()) {
+                    summaryData.setLastNPAListingDate(Value);
+                }
+            }
+
+            Element lastPAListingDateElement = (Element) summaryElement.getElementsByTagName("lastPAListingDate").item(0);
+            if (lastPAListingDateElement != null) {
+                String Value = lastPAListingDateElement.getTextContent();
+                if (Value != null && !Value.isEmpty()) {
+                    summaryData.setLastPAListingDate(Value);
+                }
+            }
+
+            Element lastInsurancePolicyDateElement = (Element) summaryElement.getElementsByTagName("lastInsurancePolicyDate").item(0);
+            if (lastInsurancePolicyDateElement != null) {
+                String Value = lastInsurancePolicyDateElement.getTextContent();
+                if (Value != null && !Value.isEmpty()) {
+                    summaryData.setLastInsurancePolicyDate(Value);
+                }
+            }
+        }
+        return summaryData;
+    }
+
+    private CrbAccountsSummaryData createCrbSummaryDetails(Element summaryElement, String tag) {
+        CrbAccountsSummaryData crbAccountsSummaryData = new CrbAccountsSummaryData();
+        Element summaryElements = (Element) summaryElement.getElementsByTagName(tag).item(0);
+
+        if (summaryElements != null) {
+
+            Element allSectorsElement = (Element) summaryElements.getElementsByTagName("allSectors").item(0);
+            if (allSectorsElement != null) {
+                String allSectorsValue = allSectorsElement.getTextContent();
+                if (allSectorsValue != null && !allSectorsValue.isEmpty()) {
+                    crbAccountsSummaryData.setAllSectors(Integer.parseInt(allSectorsValue));
+                }
+            }
+
+            Element mySectorElement = (Element) summaryElements.getElementsByTagName("mySector").item(0);
+            if (mySectorElement != null) {
+                String mySectorValue = mySectorElement.getTextContent();
+                if (mySectorValue != null && !mySectorValue.isEmpty()) {
+                    crbAccountsSummaryData.setMySector(Integer.parseInt(mySectorValue));
+                }
+            }
+
+            Element otherSectorsElement = (Element) summaryElements.getElementsByTagName("otherSectors").item(0);
+            if (otherSectorsElement != null) {
+                String otherSectorsValue = otherSectorsElement.getTextContent();
+                if (otherSectorsValue != null && !otherSectorsValue.isEmpty()) {
+                    crbAccountsSummaryData.setOtherSectors(Integer.parseInt(otherSectorsValue));
+                }
+            }
+        }
+
+        return crbAccountsSummaryData;
     }
 
 }
