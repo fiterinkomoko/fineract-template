@@ -161,7 +161,7 @@ public class LoanSchedularServiceImpl implements LoanSchedularService {
             while (queue.size() <= queueSize) {
                 LOG.info("Fetching while threads are running!");
                 List<Long> loanIds = this.loanReadPlatformService.retrieveAllLoanIdsWithOverdueInstallments(penaltyWaitPeriodValue,
-                        backdatePenalties, maxLoanIdInList, pageSize);
+                        backdatePenalties, maxId, pageSize);
 
                 if (loanIds.isEmpty()) {
                     break;
