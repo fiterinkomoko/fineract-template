@@ -20,6 +20,8 @@ package org.apache.fineract.scheduledjobs.service;
 
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 
+import java.util.Map;
+
 public interface ScheduledJobRunnerService {
 
     void applyAnnualFeeForSavings();
@@ -38,7 +40,7 @@ public interface ScheduledJobRunnerService {
 
     void executeMissMatchedJobs() throws JobExecutionException;
 
-    void postAccrualInterestForSavings() throws JobExecutionException;
+    void postAccrualInterestForSavings(Map<String, String> jobParameters) throws JobExecutionException;
 
     void updateNextWithdrawalDateOnSavingsAccount() throws JobExecutionException;
 }
