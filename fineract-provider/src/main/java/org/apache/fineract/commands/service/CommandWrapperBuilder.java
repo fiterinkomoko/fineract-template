@@ -3911,4 +3911,12 @@ public class CommandWrapperBuilder {
         this.href = "/groups/" + groupId + "?command=updateGroupRepresentative";
         return this;
     }
+
+    public CommandWrapperBuilder verifyLoanOnTransUnionRwanda(final long loanId) {
+        this.actionName = "VERIFYLOANONTRANSUNIONCRBRWANDA";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.href = "/loan/verifyloanontransunioncrbrwanda";
+        return this;
+    }
 }
