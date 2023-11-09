@@ -27,19 +27,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-@CommandType(entity = "CLIENT", action = "VERIFYCLIENTONTRANSUNIONCRBRWANDA")
-public class VerifyClientOnTransUnionCrbRwandaCommandHandler implements NewCommandSourceHandler {
+@CommandType(entity = "LOAN", action = "VERIFYLOANONTRANSUNIONCRBRWANDA")
+public class VerifyLoanOnTransUnionCrbRwandaCommandHandler implements NewCommandSourceHandler {
 
     private final TransUnionCrbVerificationWritePlatformService transUnionCrbVerificationWritePlatformService;
 
     @Autowired
-    public VerifyClientOnTransUnionCrbRwandaCommandHandler(
+    public VerifyLoanOnTransUnionCrbRwandaCommandHandler(
             final TransUnionCrbVerificationWritePlatformService transUnionCrbVerificationWritePlatformService) {
         this.transUnionCrbVerificationWritePlatformService = transUnionCrbVerificationWritePlatformService;
     }
 
     @Override
     public CommandProcessingResult processCommand(JsonCommand command) {
-        return this.transUnionCrbVerificationWritePlatformService.clientVerificationToTransUnionRwanda(command.entityId(), command);
+        return this.transUnionCrbVerificationWritePlatformService.loanVerificationToTransUnionRwanda(command.entityId(), command);
     }
 }

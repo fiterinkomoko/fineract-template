@@ -282,12 +282,12 @@ public class CreditBureauConfigurationAPI {
     }
 
     @POST
-    @Path("/verifyClientOnTransUnionRwanda/{clientId}")
+    @Path("/verifyLoanOnTransUnionRwanda/{loanId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String verifyClientOnTransUnionRwanda(@PathParam("clientId") final Long clientId, final String apiRequestBodyAsJson) {
+    public String verifyLoanOnTransUnionRwanda(@PathParam("loanId") final Long loanId, final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().verifyClientOnTransUnionRwanda(clientId)
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().verifyLoanOnTransUnionRwanda(loanId)
                 .withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);

@@ -3912,11 +3912,11 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder verifyClientOnTransUnionRwanda(final long clientId) {
-        this.actionName = "VERIFYCLIENTONTRANSUNIONCRBRWANDA";
-        this.entityName = "CLIENT";
-        this.entityId = clientId;
-        this.href = "/clients/verifyclientontransunioncrbrwanda";
+    public CommandWrapperBuilder verifyLoanOnTransUnionRwanda(final long loanId) {
+        this.actionName = "VERIFYLOANONTRANSUNIONCRBRWANDA";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.href = "/loan/verifyloanontransunioncrbrwanda";
         return this;
     }
 }

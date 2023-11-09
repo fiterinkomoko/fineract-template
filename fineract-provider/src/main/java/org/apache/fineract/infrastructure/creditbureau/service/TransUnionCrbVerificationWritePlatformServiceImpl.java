@@ -89,7 +89,7 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
     private Environment env;
 
     @Override
-    public CommandProcessingResult clientVerificationToTransUnionRwanda(Long loanId, JsonCommand command) {
+    public CommandProcessingResult loanVerificationToTransUnionRwanda(Long loanId, JsonCommand command) {
         Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
 
         Client clientObj = this.clientRepositoryWrapper.findOneWithNotFoundDetection(loan.getClientId());
