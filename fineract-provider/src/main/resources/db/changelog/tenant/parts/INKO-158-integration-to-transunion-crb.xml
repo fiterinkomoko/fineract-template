@@ -1193,7 +1193,7 @@ WHERE l.loan_status_id IN (300, 600, 601, 700)
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="create-m_transunion_crb_personal_profile" author="bosco@fiter.io">
+    <changeSet id="create-m_transunion_crb_personal_profile_2" author="bosco@fiter.io">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="m_transunion_crb_personal_profile"/>
@@ -1204,7 +1204,7 @@ WHERE l.loan_status_id IN (300, 600, 601, 700)
                 <constraints nullable="false" primaryKey="true"  />
             </column>
             <column name="header_id" type="bigint">
-                <constraints nullable="false" foreignKeyName="FK_m_transunion_crb_personal_profile-m_transunion_crb_header_header_id" references="m_transunion_crb_header(id)"/>
+                <constraints nullable="false" foreignKeyName="FK_m_transunion_678_crb_header_header_id" references="m_transunion_crb_header(id)"/>
             </column>
             <column name="crn" type="varchar(255)">
                 <constraints nullable="true" />
