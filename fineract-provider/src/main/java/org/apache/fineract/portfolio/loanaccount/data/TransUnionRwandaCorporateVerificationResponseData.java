@@ -18,39 +18,17 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
-import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "getProduct168Response", namespace = "http://ws.rw.crbws.transunion.ke.co/")
 public class TransUnionRwandaCorporateVerificationResponseData {
 
-    private List<CollateralData> collateralList;
-    private List<EmploymentData> employmentList;
     private HeaderData header;
     private CorporateProfileData corporateProfile;
-    private List<RecentEnquiryData> recentEnquiryList;
     private String responseCode;
     private ScoreOutputData scoreOutput;
     private SummaryData summaryData;
-
-    @XmlElement(name = "collateralList")
-    public List<CollateralData> getCollateralList() {
-        return collateralList;
-    }
-
-    public void setCollateralList(List<CollateralData> collateralList) {
-        this.collateralList = collateralList;
-    }
-
-    @XmlElement(name = "employmentList")
-    public List<EmploymentData> getEmploymentList() {
-        return employmentList;
-    }
-
-    public void setEmploymentList(List<EmploymentData> employmentList) {
-        this.employmentList = employmentList;
-    }
 
     @XmlElement(name = "header")
     public HeaderData getHeader() {
@@ -68,15 +46,6 @@ public class TransUnionRwandaCorporateVerificationResponseData {
 
     public void setCorporateProfile(CorporateProfileData corporateProfile) {
         this.corporateProfile = corporateProfile;
-    }
-
-    @XmlElement(name = "recentEnquiryList")
-    public List<RecentEnquiryData> getRecentEnquiryList() {
-        return recentEnquiryList;
-    }
-
-    public void setRecentEnquiryList(List<RecentEnquiryData> recentEnquiryList) {
-        this.recentEnquiryList = recentEnquiryList;
     }
 
     @XmlElement(name = "responseCode")
@@ -108,8 +77,7 @@ public class TransUnionRwandaCorporateVerificationResponseData {
 
     @Override
     public String toString() {
-        return "TransUnionRwandaClientVerificationResponseData{" + "collateralList=" + collateralList + ", employmentList=" + employmentList
-                + ", header=" + header + ", corporateProfile=" + corporateProfile + ", recentEnquiryList=" + recentEnquiryList
+        return "TransUnionRwandaCorporateVerificationResponseData{" + "header=" + header + ", corporateProfile=" + corporateProfile
                 + ", responseCode='" + responseCode + '\'' + ", scoreOutput=" + scoreOutput + ", summaryData=" + summaryData + '}';
     }
 }
