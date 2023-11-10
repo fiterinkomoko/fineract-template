@@ -22,7 +22,7 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <changeSet author="faheem@fiter.io" id="CI18-355_ADD_PENALTY_JOB_PARAMETERS">
+    <changeSet author="faheem@fiter.io" id="CI18-363_ADD_SAVINGS_ACCRUAL_JOB_JOB_PARAMETERS">
         <insert tableName="job_parameters">
             <column name="job_id" valueComputed="(select id from job where name = 'Post Accrual Interest for Savings')"/>
             <column name="parameter_name" value="thread-pool-size"/>
