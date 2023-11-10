@@ -27,6 +27,7 @@ import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
+import org.apache.fineract.portfolio.loanaccount.service.ApplyChargeToOverdueLoansPoster;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +40,7 @@ import org.springframework.stereotype.Component;
 @Scope("prototype")
 public class AccrualInterestForSavingsPoster implements Callable<Void> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AccrualInterestForSavingsPoster.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ApplyChargeToOverdueLoansPoster.class);
     private static final SecureRandom random = new SecureRandom();
     private List<Long> savingsAccountIds;
     private SavingsAccountWritePlatformService savingsAccountWritePlatformService;
