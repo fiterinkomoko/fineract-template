@@ -52,7 +52,7 @@ public class DatatableReportingProcessService implements ReportingProcessService
     @Autowired
     public DatatableReportingProcessService(final ReadReportingService readExtraDataAndReportingService,
             final GenericDataService genericDataService, final ToApiJsonSerializer<ReportData> toApiJsonSerializer,
-                                            final LoanProductRepository loanProductRepository) {
+            final LoanProductRepository loanProductRepository) {
         this.readExtraDataAndReportingService = readExtraDataAndReportingService;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.genericDataService = genericDataService;
@@ -90,8 +90,8 @@ public class DatatableReportingProcessService implements ReportingProcessService
             final GenericResultsetData result = this.readExtraDataAndReportingService.retrieveGenericResultset(reportName,
                     parameterTypeValue, reportParams, isSelfServiceUserReport);
 
-            //INKO-202
-            if(reportParams.containsKey("${loanProductId}")){
+            // INKO-202
+            if (reportParams.containsKey("${loanProductId}")) {
                 modifyColumnHeaderForProduct(result, Long.valueOf(reportParams.get("${loanProductId}")));
             }
 
@@ -121,11 +121,11 @@ public class DatatableReportingProcessService implements ReportingProcessService
     }
 
     // INKO-202 If loan product is Islamic product we replace column name Interest with Profit
-    private void modifyColumnHeaderForProduct(GenericResultsetData result, Long loanProductId){
+    private void modifyColumnHeaderForProduct(GenericResultsetData result, Long loanProductId) {
         Optional<LoanProduct> productOptional = loanProductRepository.findById(loanProductId);
-        if(productOptional.isPresent()){
+        if (productOptional.isPresent()) {
             LoanProduct product = productOptional.get();
-            if(product.isIslamic()){
+            if (product.isIslamic()) {
                 result.replaceWordInColumHeader("Interest", "Profit");
             }
         }

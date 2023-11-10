@@ -18,11 +18,10 @@
  */
 package org.apache.fineract.infrastructure.Odoo;
 
+import java.util.List;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.portfolio.client.domain.Client;
-
-import java.util.List;
 
 public interface OdooService {
 

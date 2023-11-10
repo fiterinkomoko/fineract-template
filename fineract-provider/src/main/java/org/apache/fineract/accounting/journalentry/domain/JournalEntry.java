@@ -235,11 +235,11 @@ public class JournalEntry extends AbstractAuditableCustom {
     }
 
     public Client getClient() {
-        if(this.loanTransaction != null) {
+        if (this.loanTransaction != null) {
             return this.loanTransaction.getLoan().getClient();
-        }else if(this.savingsTransaction != null) {
+        } else if (this.savingsTransaction != null) {
             return this.savingsTransaction.getSavingsAccount().getClient();
-        }else if(this.clientTransaction != null) {
+        } else if (this.clientTransaction != null) {
             return this.clientTransaction.getClient();
         }
         return null;
@@ -248,12 +248,15 @@ public class JournalEntry extends AbstractAuditableCustom {
     public boolean isOddoPosted() {
         return this.isOddoPosted;
     }
+
     public void setOddoPosted(boolean isOddoPosted) {
         this.isOddoPosted = isOddoPosted;
     }
+
     public Integer getOdooJournalId() {
         return this.odooJournalId;
     }
+
     public void setOdooJournalId(Integer odooJournalId) {
         this.odooJournalId = odooJournalId;
     }
