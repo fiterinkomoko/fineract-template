@@ -16,24 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.infrastructure.jobs.exception;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.springframework.jdbc.core.JdbcTemplate;
+import java.util.Objects;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformException;
 
-public interface LoanArrearsAgingService {
+public class JobExecutionSimpleException extends AbstractPlatformException {
 
-    void updateLoanArrearsAgeingDetails(Map<String, String> jobParameters)
-            throws JobExecutionException, ExecutionException, InterruptedException;
-
-    void updateLoanArrearsAgeingDetailsWithOriginalSchedule(Loan loan);
-
-    void updateLoanArrearsAgeingDetails(Loan loan);
-
-    List<String> updateLoanArrearsAgeingDetailsWithOriginalSchedule(List<Long> loanIdList, JdbcTemplate jdbcTemplate);
-
+    public JobExecutionSimpleException(Exception exception) {
+        super("error.msg.execution.job.exception",
+                (Objects.nonNull(exception.getMessage()) ? exception.getMessage() + " --> Stacktrace: " : "")
+                        + ExceptionUtils.getStackTrace(exception));
+    }
 }
