@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.creditbureau.service;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
@@ -27,6 +28,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import lombok.RequiredArgsConstructor;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
@@ -37,6 +39,7 @@ import okhttp3.Response;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
@@ -70,6 +73,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 @Service
 @RequiredArgsConstructor
@@ -98,6 +102,7 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
         TransUnionRwandaCorporateVerificationData getProduct168 = null;
         Boolean isClient = false;
         String requestToCrb = null;
+        TransunionCrbHeader transunionCrbHeader = null;
 
         if (clientObj.getLegalForm().equals(LegalForm.PERSON.getValue())) {
             isClient = true;
@@ -119,6 +124,7 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
 
         OkHttpClient client = new OkHttpClient();
         Response response = null;
+        String resObject = null;
 
         RequestBody formBody = RequestBody.create(MediaType.parse(FORM_URL_CONTENT_TYPE), requestToCrb);
 
@@ -128,37 +134,38 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
                 .header("Content-Type", "application/xml ").header("Content-Type", "text/xml ").post(formBody).build();
         try {
             response = client.newCall(request).execute();
-            String resObject = response.body().string();
+            resObject = response.body().string();
 
             if (response.isSuccessful()) {
                 LOG.info("Response from TransUnion Rwanda :: >> " + resObject);
                 if (isClient) {
-                    saveConsumerVerificationReport(clientObj, loan, resObject);
+                    transunionCrbHeader = saveConsumerVerificationReport(clientObj, loan, resObject);
                 } else {
-                    saveCorporateVerificationReport(clientObj, loan, resObject);
+                    transunionCrbHeader = saveCorporateVerificationReport(clientObj, loan, resObject);
                 }
-            } else {
-                LOG.error("Response from TransUnion Rwanda  Consumer credit Verification :: >> " + resObject);
+
             }
 
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(clientObj.getId())
+                    .withResourceIdAsString(transunionCrbHeader != null ? transunionCrbHeader.getId().toString() : null).build();
         } catch (Exception e) {
-            e.printStackTrace();
-            LOG.info("Failed to Verify Consumer credit  :: >> " + e.getMessage());
+            throw new GeneralPlatformDomainRuleException("error.msg.crb.client.verification.failed",
+                    "Failed to Verify consumer credit . Response code From TransUnion :- " + e.getMessage());
         }
-
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(clientObj.getId()).build();
     }
 
-    private void saveConsumerVerificationReport(Client clientObj, Loan loan, String resObject) {
+    private TransunionCrbHeader saveConsumerVerificationReport(Client clientObj, Loan loan, String resObject)
+            throws ParserConfigurationException, IOException, SAXException {
         TransUnionRwandaConsumerVerificationResponseData clientVerificationResponseData = convertConsumerReponse(resObject);
+        TransunionCrbHeader transunionCrbHeader = null;
         if (clientVerificationResponseData != null) {
             HeaderData headerData = clientVerificationResponseData.getHeader();
             PersonalProfileData personalProfileData = clientVerificationResponseData.getPersonalProfile();
             ScoreOutputData scoreOutputData = clientVerificationResponseData.getScoreOutput();
             if (headerData != null) {
-                TransunionCrbHeader transunionCrbHeader = new TransunionCrbHeader(clientObj, loan, headerData);
+                transunionCrbHeader = new TransunionCrbHeader(clientObj, loan, headerData);
                 transunionCrbHeaderRepository.saveAndFlush(transunionCrbHeader);
                 if (personalProfileData != null) {
                     TransunionCrbPersonalProfile transunionCrbPersonalProfile = new TransunionCrbPersonalProfile(transunionCrbHeader,
@@ -172,16 +179,18 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
             }
 
         }
+        return transunionCrbHeader;
     }
 
-    private void saveCorporateVerificationReport(Client clientObj, Loan loan, String resObject) {
+    private TransunionCrbHeader saveCorporateVerificationReport(Client clientObj, Loan loan, String resObject) {
         TransUnionRwandaCorporateVerificationResponseData corporateVerificationResponseData = convertCorporateResponse(resObject);
+        TransunionCrbHeader transunionCrbHeader = null;
         if (corporateVerificationResponseData != null) {
             HeaderData headerData = corporateVerificationResponseData.getHeader();
             CorporateProfileData corporateProfileData = corporateVerificationResponseData.getCorporateProfile();
             ScoreOutputData scoreOutputData = corporateVerificationResponseData.getScoreOutput();
             if (headerData != null) {
-                TransunionCrbHeader transunionCrbHeader = new TransunionCrbHeader(clientObj, loan, headerData);
+                transunionCrbHeader = new TransunionCrbHeader(clientObj, loan, headerData);
                 transunionCrbHeaderRepository.saveAndFlush(transunionCrbHeader);
                 if (corporateProfileData != null) {
                     TransunionCrbCorporateProfile transunionCrbCorporateProfile = new TransunionCrbCorporateProfile(transunionCrbHeader,
@@ -195,6 +204,7 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
             }
 
         }
+        return transunionCrbHeader;
     }
 
     private String getConfigProperty(String propertyName) {
@@ -292,34 +302,45 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
         getProduct123.setInfinityCode(getConfigProperty("fineract.integrations.transUnion.crb.rest.infinityCode"));
     }
 
-    public TransUnionRwandaConsumerVerificationResponseData convertConsumerReponse(String xml) {
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.parse(new InputSource(new StringReader(xml)));
+    public TransUnionRwandaConsumerVerificationResponseData convertConsumerReponse(String xml)
+            throws ParserConfigurationException, IOException, SAXException {
+        TransUnionRwandaConsumerVerificationResponseData product123Response = null;
 
-            NodeList product123ResponseNodes = document.getElementsByTagName("ns2:getProduct123Response");
-            if (product123ResponseNodes.getLength() > 0) {
-                Element getProduct123ResponseElement = (Element) product123ResponseNodes.item(0);
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document document = builder.parse(new InputSource(new StringReader(xml)));
 
-                TransUnionRwandaConsumerVerificationResponseData product123Response = new TransUnionRwandaConsumerVerificationResponseData();
+        NodeList product123ResponseNodes = document.getElementsByTagName("ns2:getProduct123Response");
+        if (product123ResponseNodes.getLength() > 0) {
+            Element getProduct123ResponseElement = (Element) product123ResponseNodes.item(0);
 
+            product123Response = new TransUnionRwandaConsumerVerificationResponseData();
+
+            Element responseCodeElement = (Element) getProduct123ResponseElement.getElementsByTagName("responseCode").item(0);
+            if (responseCodeElement != null) {
+                Integer Value = Integer.parseInt(responseCodeElement.getTextContent());
+                if (Value != null) {
+                    product123Response.setResponseCode(Value);
+                }
+            }
+            if (product123Response.getResponseCode() == 200) {
                 product123Response.setHeader(extractHeader(getProduct123ResponseElement));
                 product123Response.setPersonalProfile(extractPersonalProfile(getProduct123ResponseElement));
                 product123Response.setScoreOutput(extractScoreOutputData(getProduct123ResponseElement));
                 product123Response.setSummaryData(extractSummaryData(getProduct123ResponseElement));
                 LOG.info("Response from TransUnion Rwanda  product123Response:: >> " + product123Response.toString());
                 return product123Response;
+            } else {
+                throw new GeneralPlatformDomainRuleException("error.msg.crb.consumer.verification.failed",
+                        "Failed to Verify consumer credit . Response code From TransUnion :- " + product123Response.getResponseCode());
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            LOG.info("Response from TransUnion Rwanda  Extraction:: >> " + e.getMessage());
         }
 
-        return null;
+        return product123Response;
     }
 
     public TransUnionRwandaCorporateVerificationResponseData convertCorporateResponse(String xml) {
+        TransUnionRwandaCorporateVerificationResponseData product168Response = null;
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
@@ -329,20 +350,32 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
             if (product168ResponseNodes.getLength() > 0) {
                 Element getProduct168ResponseElement = (Element) product168ResponseNodes.item(0);
 
-                TransUnionRwandaCorporateVerificationResponseData product168Response = new TransUnionRwandaCorporateVerificationResponseData();
+                product168Response = new TransUnionRwandaCorporateVerificationResponseData();
 
-                product168Response.setHeader(extractHeader(getProduct168ResponseElement));
-                product168Response.setCorporateProfile(extractCorporateProfile(getProduct168ResponseElement));
-                product168Response.setSummaryData(extractSummaryData(getProduct168ResponseElement));
-                LOG.info("Response from TransUnion Rwanda  product168Response:: >> " + product168Response.toString());
-                return product168Response;
+                Element responseCodeElement = (Element) getProduct168ResponseElement.getElementsByTagName("responseCode").item(0);
+                if (responseCodeElement != null) {
+                    Integer Value = Integer.parseInt(responseCodeElement.getTextContent());
+                    if (Value != null) {
+                        product168Response.setResponseCode(Value);
+                    }
+                }
+                if (product168Response.getResponseCode() == 200) {
+
+                    product168Response.setHeader(extractHeader(getProduct168ResponseElement));
+                    product168Response.setCorporateProfile(extractCorporateProfile(getProduct168ResponseElement));
+                    product168Response.setSummaryData(extractSummaryData(getProduct168ResponseElement));
+                    LOG.info("Response from TransUnion Rwanda  product168Response:: >> " + product168Response.toString());
+                    return product168Response;
+                } else {
+                    throw new GeneralPlatformDomainRuleException("error.msg.crb.corporate.verification.failed",
+                            "Failed to Verify Corporate credit . Response code From TransUnion :- " + product168Response.getResponseCode());
+                }
             }
         } catch (Exception e) {
-            e.printStackTrace();
             LOG.info("Response from TransUnion Rwanda  Extraction:: >> " + e.getMessage());
         }
 
-        return null;
+        return product168Response;
     }
 
     private HeaderData extractHeader(Element getProduct123ResponseElement) {
