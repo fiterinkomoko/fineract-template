@@ -20,10 +20,13 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaConsumerVerificationData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCorporateVerificationData;
+import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCrbReportData;
 
 public interface TransUnionCrbConsumerVerificationReadPlatformService {
 
     TransUnionRwandaConsumerVerificationData retrieveConsumerToBeVerifiedToTransUnion(Long clientId);
 
     TransUnionRwandaCorporateVerificationData retrieveCorporateToBeVerifiedToTransUnion(Long clientId);
+
+    TransUnionRwandaCrbReportData fetchCrbReportForTransUnion(Integer loanId);
 }

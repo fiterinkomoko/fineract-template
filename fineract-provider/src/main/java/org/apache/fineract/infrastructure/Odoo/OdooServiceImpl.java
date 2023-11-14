@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository;
 import org.apache.fineract.infrastructure.Odoo.exception.OdooFailedException;
@@ -70,7 +69,7 @@ public class OdooServiceImpl implements OdooService {
 
     @Autowired
     public OdooServiceImpl(ClientRepositoryWrapper clientRepository, ConfigurationDomainService configurationDomainService,
-                           JournalEntryRepository journalEntryRepository) {
+            JournalEntryRepository journalEntryRepository) {
         this.clientRepository = clientRepository;
         this.configurationDomainService = configurationDomainService;
         this.journalEntryRepository = journalEntryRepository;
@@ -98,7 +97,7 @@ public class OdooServiceImpl implements OdooService {
         return 0;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes", "cast"})
+    @SuppressWarnings({ "unchecked", "rawtypes", "cast" })
     @Override
     public Integer createCustomerToOddo(Client client) {
         try {
@@ -311,25 +310,19 @@ public class OdooServiceImpl implements OdooService {
                 // Create journal entry
                 if (debit.getAmount().doubleValue() != 0 || credit.getAmount().doubleValue() != 0) {
                     id = (Integer) models.execute("execute_kw",
-                            Arrays.asList(odooDB, uid,
-                                    password, "account.move", "create",
-                                    Arrays.asList(Map.of("line_ids", Arrays.asList(Arrays.asList(0, 0, Map.of(
-                                                    "account_id", debitAccountId,
-                                                    "amount_currency", currencyId,
-                                                    "credit", 0,
-                                                    "debit", debit.getAmount().doubleValue(),
-                                                    "partner_id", debitPartnerId != null ? debitPartnerId : false,
-                                                    "name", debit.getEntityId() != null ? debit.getEntityId().toString() : false
-                                    )), Arrays.asList(0, 0, Map.of(
-                                                    "account_id", creditAccountId,
-                                                    "amount_currency", currencyId,
-                                                    "credit", credit.getAmount().doubleValue(),
-                                                    "debit", 0,
-                                                    "partner_id", creditPartnerId != null ? creditPartnerId : false,
-                                                    "name", credit.getEntityId() != null ? credit.getEntityId().toString() : false
-                                            ))
-                                    )))
-                            ));
+                            Arrays.asList(
+                                    odooDB, uid, password, "account.move", "create", Arrays.asList(Map.of("line_ids", Arrays.asList(
+                                            Arrays.asList(0, 0,
+                                                    Map.of("account_id", debitAccountId, "amount_currency", currencyId, "credit", 0,
+                                                            "debit", debit.getAmount().doubleValue(), "partner_id",
+                                                            debitPartnerId != null ? debitPartnerId
+                                                                    : false,
+                                                            "name", debit.getEntityId() != null ? debit.getEntityId().toString() : false)),
+                                            Arrays.asList(0, 0,
+                                                    Map.of("account_id", creditAccountId, "amount_currency", currencyId, "credit",
+                                                            credit.getAmount().doubleValue(), "debit", 0, "partner_id",
+                                                            creditPartnerId != null ? creditPartnerId : false, "name",
+                                                            credit.getEntityId() != null ? credit.getEntityId().toString() : false)))))));
                     LOG.info("Odoo Journal Entry created with id " + id);
                     Boolean status = (Boolean) models.execute("execute_kw",
                             Arrays.asList(odooDB, uid, password, "account.move", "action_post", Arrays.asList(Arrays.asList(id))));
@@ -394,13 +387,10 @@ public class OdooServiceImpl implements OdooService {
         try {
             if (uid > 0) {
                 currency = Arrays.asList((Object[]) models.execute("execute_kw",
-                        Arrays.asList(odooDB, uid,
-                                password, "res.currency", "search_read",
+                        Arrays.asList(odooDB, uid, password, "res.currency", "search_read",
                                 Arrays.asList(Arrays.asList(Arrays.asList("name", "=", entry.getCurrencyCode()))), Map.of(
 
-                                        "fields", Arrays.asList("id"),
-                                        "limit", 5
-                                ))));
+                                        "fields", Arrays.asList("id"), "limit", 5))));
                 Integer currencyId = null;
                 if (currency != null && currency.size() > 0) {
                     HashMap currencyData = (HashMap) currency.get(0);
@@ -419,12 +409,9 @@ public class OdooServiceImpl implements OdooService {
         try {
             if (uid > 0) {
                 final List glAccount = Arrays.asList((Object[]) models.execute("execute_kw",
-                        Arrays.asList(odooDB, uid,
-                                password, "account.account", "search_read",
-                                Arrays.asList(Arrays.asList(Arrays.asList("code", "=", entry.getGlAccount().getGlCode()))), Map.of(
-                                        "fields", Arrays.asList("id"),
-                                        "limit", 5
-                                    ))));
+                        Arrays.asList(odooDB, uid, password, "account.account", "search_read",
+                                Arrays.asList(Arrays.asList(Arrays.asList("code", "=", entry.getGlAccount().getGlCode()))),
+                                Map.of("fields", Arrays.asList("id"), "limit", 5))));
                 Integer id = null;
                 if (glAccount != null && glAccount.size() > 0) {
                     HashMap account = (HashMap) glAccount.get(0);
@@ -438,6 +425,5 @@ public class OdooServiceImpl implements OdooService {
         }
         return null;
     }
-
 
 }

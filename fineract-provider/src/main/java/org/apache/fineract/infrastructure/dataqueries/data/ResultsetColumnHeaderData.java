@@ -28,7 +28,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
  */
 public final class ResultsetColumnHeaderData implements Serializable {
 
-    private  String columnName;
+    private String columnName;
     private String columnType;
     private final Long columnLength;
     private final String columnDisplayType;
@@ -235,7 +235,7 @@ public final class ResultsetColumnHeaderData implements Serializable {
         return this.columnName;
     }
 
-    public void setColumnName(String columnName){
+    public void setColumnName(String columnName) {
         this.columnName = columnName;
     }
 

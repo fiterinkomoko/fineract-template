@@ -26,7 +26,7 @@ public class TransUnionRwandaCorporateVerificationResponseData {
 
     private HeaderData header;
     private CorporateProfileData corporateProfile;
-    private String responseCode;
+    private Integer responseCode;
     private ScoreOutputData scoreOutput;
     private SummaryData summaryData;
 
@@ -49,11 +49,11 @@ public class TransUnionRwandaCorporateVerificationResponseData {
     }
 
     @XmlElement(name = "responseCode")
-    public String getResponseCode() {
+    public Integer getResponseCode() {
         return responseCode;
     }
 
-    public void setResponseCode(String responseCode) {
+    public void setResponseCode(Integer responseCode) {
         this.responseCode = responseCode;
     }
 
