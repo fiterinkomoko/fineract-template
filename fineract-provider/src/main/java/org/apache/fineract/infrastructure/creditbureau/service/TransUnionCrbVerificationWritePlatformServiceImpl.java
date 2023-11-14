@@ -18,11 +18,19 @@
  */
 package org.apache.fineract.infrastructure.creditbureau.service;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
+import java.util.Date;
+import java.util.TimeZone;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -45,6 +53,8 @@ import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.apache.fineract.portfolio.loanaccount.data.CorporateProfileData;
 import org.apache.fineract.portfolio.loanaccount.data.CrbAccountsSummaryData;
+import org.apache.fineract.portfolio.loanaccount.data.CrbKenyaMetropolApiHashData;
+import org.apache.fineract.portfolio.loanaccount.data.CrbKenyaMetropolRequestData;
 import org.apache.fineract.portfolio.loanaccount.data.HeaderData;
 import org.apache.fineract.portfolio.loanaccount.data.PersonalProfileData;
 import org.apache.fineract.portfolio.loanaccount.data.ScoreOutputData;
@@ -145,6 +155,8 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
                 }
 
             }
+            // Test-Hash
+            generateMetropolApiHash();
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -154,6 +166,17 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
             throw new GeneralPlatformDomainRuleException("error.msg.crb.client.verification.failed",
                     "Failed to Verify consumer credit . Response code From TransUnion :- " + e.getMessage());
         }
+    }
+
+    @Override
+    public CommandProcessingResult loanVerificationToMetropolKenya(Long loanId, JsonCommand command) {
+        Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+
+        Client clientObj = this.clientRepositoryWrapper.findOneWithNotFoundDetection(loan.getClientId());
+        if (clientObj.getLegalForm().equals(LegalForm.PERSON.getValue())) {
+
+        }
+        return null;
     }
 
     private TransunionCrbHeader saveConsumerVerificationReport(Client clientObj, Loan loan, String resObject)
@@ -213,7 +236,7 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
 
     public String base64EncodeCredentials(String username, String password) {
         String credentials = username + ":" + password;
-        byte[] credentialsBytes = credentials.getBytes(StandardCharsets.UTF_8);
+        byte[] credentialsBytes = credentials.getBytes(UTF_8);
 
         return Base64.getEncoder().encodeToString(credentialsBytes);
     }
@@ -547,4 +570,85 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
         return crbAccountsSummaryData;
     }
 
+    private void generateMetropolApiHash() {
+
+        CrbKenyaMetropolRequestData requestData = new CrbKenyaMetropolRequestData("1", "550000055", "001");
+        String payload = convertRequestPayloadToJson(requestData);
+
+        CrbKenyaMetropolApiHashData apiHashData = preliminaryData(getConfigProperty("fineract.integrations.metropol.crb.rest.privateKey"),
+                payload, getConfigProperty("fineract.integrations.metropol.crb.rest.publicKey"));
+        System.out.println(apiHashData.toString());
+
+        HttpUrl.Builder urlBuilder = HttpUrl.parse(getConfigProperty("fineract.integrations.metropol.crb.rest.clientVerify")).newBuilder();
+        String url = urlBuilder.build().toString();
+
+        OkHttpClient client = new OkHttpClient();
+        Response response = null;
+
+        RequestBody formBody = RequestBody.create(MediaType.parse(FORM_URL_CONTENT_TYPE), payload);
+
+        Request request = new Request.Builder().url(url).header("X-METROPOL-REST-API-KEY", "GniGtBNZqnmokQzMLvfnQRtRhSJbBp")
+                .header("Content-Type", "application/json ").header("X-METROPOL-REST-APIHASH", apiHashData.getHashValue())
+                .header("X-METROPOL-REST-API-TIMESTAMP", apiHashData.getTimeStamp()).post(formBody).build();
+
+        try {
+            response = client.newCall(request).execute();
+            String resObject = response.body().string();
+            if (response.isSuccessful()) {
+
+                LOG.info("Crb Metropol Response :=> " + resObject);
+
+            } else {
+                LOG.error("Verify Client on Metropol CRB Failed:" + resObject);
+
+            }
+        } catch (Exception e) {
+            LOG.error("Verify Client on Metropol CRB Failed - 2: " + e);
+            e.printStackTrace();
+        }
+
+    }
+
+    public static CrbKenyaMetropolApiHashData preliminaryData(String private_key, String payload, String public_key) {
+
+        Date currentUtcTime = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String timestampString = dateFormat.format(currentUtcTime);
+
+        if (timestampString.length() < 20) {
+            timestampString += "0".repeat(20 - timestampString.length());
+        }
+
+        String concatenatedString = private_key + payload + public_key + timestampString;
+
+        String hashHex = calculateSHA256(concatenatedString);
+        return new CrbKenyaMetropolApiHashData(timestampString, hashHex);
+    }
+
+    private static String calculateSHA256(String input) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = digest.digest(input.getBytes(UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte hashByte : hashBytes) {
+                String hex = Integer.toHexString(0xff & hashByte);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private String convertRequestPayloadToJson(CrbKenyaMetropolRequestData requestData) {
+        Gson gson = new GsonBuilder().create();
+        String request = gson.toJson(requestData);
+        LOG.info("Actual Payload to be sent - - >" + request);
+        return request;
+    }
 }

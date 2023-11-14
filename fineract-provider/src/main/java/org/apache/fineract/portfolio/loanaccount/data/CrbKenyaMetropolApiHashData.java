@@ -16,14 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.creditbureau.service;
+package org.apache.fineract.portfolio.loanaccount.data;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.Data;
 
-public interface TransUnionCrbVerificationWritePlatformService {
+@Data
+public class CrbKenyaMetropolApiHashData {
 
-    CommandProcessingResult loanVerificationToTransUnionRwanda(Long loanId, JsonCommand command);
+    private String timeStamp;
+    private String hashValue;
 
-    CommandProcessingResult loanVerificationToMetropolKenya(Long loanId, JsonCommand command);
+    public CrbKenyaMetropolApiHashData(String timeStamp, String hashValue) {
+        this.timeStamp = timeStamp;
+        this.hashValue = hashValue;
+    }
 }

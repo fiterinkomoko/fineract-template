@@ -16,14 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.creditbureau.service;
+package org.apache.fineract.portfolio.loanaccount.data;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.Data;
 
-public interface TransUnionCrbVerificationWritePlatformService {
+@Data
+public class CrbKenyaMetropolRequestData {
 
-    CommandProcessingResult loanVerificationToTransUnionRwanda(Long loanId, JsonCommand command);
+    private String report_type;
+    private String identity_number;
+    private String identity_type;
 
-    CommandProcessingResult loanVerificationToMetropolKenya(Long loanId, JsonCommand command);
+    public CrbKenyaMetropolRequestData(String report_type, String identity_number, String identity_type) {
+        this.report_type = report_type;
+        this.identity_number = identity_number;
+        this.identity_type = identity_type;
+    }
 }
