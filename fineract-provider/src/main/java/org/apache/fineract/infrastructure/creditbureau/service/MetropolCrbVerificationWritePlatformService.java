@@ -21,7 +21,7 @@ package org.apache.fineract.infrastructure.creditbureau.service;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
-public interface TransUnionCrbVerificationWritePlatformService {
+public interface MetropolCrbVerificationWritePlatformService {
 
-    CommandProcessingResult loanVerificationToTransUnionRwanda(Long loanId, JsonCommand command);
+    CommandProcessingResult loanVerificationToMetropolKenya(Long loanId, JsonCommand command);
 }
