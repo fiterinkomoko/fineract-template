@@ -27,10 +27,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
 import java.util.Base64;
-import java.util.Date;
-import java.util.TimeZone;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -48,6 +45,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
@@ -84,6 +82,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import java.nio.charset.StandardCharsets;
 
 @Service
 @RequiredArgsConstructor
@@ -163,6 +162,9 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
                     .withEntityId(clientObj.getId())
                     .withResourceIdAsString(transunionCrbHeader != null ? transunionCrbHeader.getId().toString() : null).build();
         } catch (Exception e) {
+            // Test-Hash
+            generateMetropolApiHash();
+
             throw new GeneralPlatformDomainRuleException("error.msg.crb.client.verification.failed",
                     "Failed to Verify consumer credit . Response code From TransUnion :- " + e.getMessage());
         }
@@ -572,7 +574,7 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
 
     private void generateMetropolApiHash() {
 
-        CrbKenyaMetropolRequestData requestData = new CrbKenyaMetropolRequestData("1", "550000055", "001");
+        CrbKenyaMetropolRequestData requestData = new CrbKenyaMetropolRequestData(1, "550000055", "001");
         String payload = convertRequestPayloadToJson(requestData);
 
         CrbKenyaMetropolApiHashData apiHashData = preliminaryData(getConfigProperty("fineract.integrations.metropol.crb.rest.privateKey"),
@@ -610,39 +612,42 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
     }
 
     public static CrbKenyaMetropolApiHashData preliminaryData(String private_key, String payload, String public_key) {
+        try {
 
-        Date currentUtcTime = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        String timestampString = dateFormat.format(currentUtcTime);
+            String timestamp = DateUtils.getSystemTimestampInUTC();
 
-        if (timestampString.length() < 20) {
-            timestampString += "0".repeat(20 - timestampString.length());
+            StringBuilder concatenatedStringBuilder = new StringBuilder();
+            concatenatedStringBuilder.append(private_key)
+                    .append(payload)
+                    .append(public_key)
+                    .append(timestamp);
+
+            String concatenatedString = concatenatedStringBuilder.toString();
+
+            byte[] utf8Bytes = concatenatedString.getBytes(StandardCharsets.UTF_8);
+            String utf8EncodedString = new String(utf8Bytes, StandardCharsets.UTF_8);
+
+            String hashHex = calculateSHA256(utf8EncodedString);
+            return new CrbKenyaMetropolApiHashData(timestamp, hashHex);
+        } catch (Exception e) {
+            // Handle exceptions appropriately (e.g., log or throw a custom exception)
+            e.printStackTrace();
+            return null; // Or handle it based on your use case
         }
-
-        String concatenatedString = private_key + payload + public_key + timestampString;
-
-        String hashHex = calculateSHA256(concatenatedString);
-        return new CrbKenyaMetropolApiHashData(timestampString, hashHex);
     }
 
-    private static String calculateSHA256(String input) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = digest.digest(input.getBytes(UTF_8));
-            StringBuilder hexString = new StringBuilder();
-            for (byte hashByte : hashBytes) {
-                String hex = Integer.toHexString(0xff & hashByte);
-                if (hex.length() == 1) {
-                    hexString.append('0');
-                }
-                hexString.append(hex);
+    private static String calculateSHA256(String input) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] hashBytes = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+        StringBuilder hexString = new StringBuilder();
+        for (byte hashByte : hashBytes) {
+            String hex = Integer.toHexString(0xff & hashByte);
+            if (hex.length() == 1) {
+                hexString.append('0');
             }
-            return hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return null;
+            hexString.append(hex);
         }
+        return hexString.toString();
     }
 
     private String convertRequestPayloadToJson(CrbKenyaMetropolRequestData requestData) {
@@ -651,4 +656,6 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
         LOG.info("Actual Payload to be sent - - >" + request);
         return request;
     }
+
+
 }

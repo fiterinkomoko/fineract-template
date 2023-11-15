@@ -23,11 +23,11 @@ import lombok.Data;
 @Data
 public class CrbKenyaMetropolRequestData {
 
-    private String report_type;
+    private Integer report_type;
     private String identity_number;
     private String identity_type;
 
-    public CrbKenyaMetropolRequestData(String report_type, String identity_number, String identity_type) {
+    public CrbKenyaMetropolRequestData(Integer report_type, String identity_number, String identity_type) {
         this.report_type = report_type;
         this.identity_number = identity_number;
         this.identity_type = identity_type;

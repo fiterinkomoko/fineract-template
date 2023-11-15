@@ -37,6 +37,7 @@ import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.filters.FilterElement;
 import org.apache.fineract.organisation.teller.util.DateRange;
+import java.time.Instant;
 
 public final class DateUtils {
 
@@ -176,5 +177,19 @@ public final class DateUtils {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
         String formattedDate = localDate.format(formatter);
         return formattedDate;
+    }
+    public static String getSystemTimestampInUTC() {
+        Instant instant = Instant.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSSSSS").withZone(ZoneId.of("UTC"));
+
+        String timestamp = formatter.format(instant);
+
+        if (timestamp.length() < 20) {
+            timestamp += "0".repeat(20 - timestamp.length());
+        } else if (timestamp.length() > 20) {
+            timestamp = timestamp.substring(0, 20);
+        }
+
+        return timestamp;
     }
 }
