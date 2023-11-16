@@ -92,7 +92,7 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
                 metropolCrbIdentityReport = verifyIdentityDocument(corporateClient.getCompanyRegNo(), loan, clientObj);
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new GeneralPlatformDomainRuleException("Verification failed with error: ", e.getMessage());
         }
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -141,7 +141,7 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
             return metropolCrbIdentityReport;
         } else {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.identity.verification.failed",
-                    "Loan identity verification failed with error: " + response.message() + "");
+                    "Loan identity verification failed with error: " + response.code() + ":" + response.message() + "");
         }
 
     }
