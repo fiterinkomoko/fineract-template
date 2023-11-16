@@ -115,5 +115,6 @@
     <include file="parts/INKO_95_update_topup_report_parameters.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO-158-integration-to-transunion-crb.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO_96_update_portfolio_management_and_ic_minutes_report.xml" relativeToChangelogFile="true" />
+    <include file="parts/INKO-220-integration-to-metropol-crb-kenya.xml" relativeToChangelogFile="true" />
     <includeAll path="custom-changelog" relativeToChangelogFile="true"/>
 </databaseChangeLog>
