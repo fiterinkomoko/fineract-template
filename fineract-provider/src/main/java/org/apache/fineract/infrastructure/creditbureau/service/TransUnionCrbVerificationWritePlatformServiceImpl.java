@@ -18,10 +18,11 @@
  */
 package org.apache.fineract.infrastructure.creditbureau.service;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -213,7 +214,7 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
 
     public String base64EncodeCredentials(String username, String password) {
         String credentials = username + ":" + password;
-        byte[] credentialsBytes = credentials.getBytes(StandardCharsets.UTF_8);
+        byte[] credentialsBytes = credentials.getBytes(UTF_8);
 
         return Base64.getEncoder().encodeToString(credentialsBytes);
     }
