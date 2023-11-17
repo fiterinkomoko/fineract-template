@@ -3919,4 +3919,12 @@ public class CommandWrapperBuilder {
         this.href = "/loan/verifyloanontransunioncrbrwanda";
         return this;
     }
+
+    public CommandWrapperBuilder verifyLoanOnMetropolKenya(final long loanId) {
+        this.actionName = "VERIFYLOANONMETROPOLCRBKENYA";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.href = "/loan/verifyloanonmetropolcrbkenya";
+        return this;
+    }
 }
