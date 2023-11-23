@@ -61,7 +61,7 @@ public class ClientNonPerson extends AbstractPersistableCustom {
     @JoinColumn(name = "main_business_line_cv_id", nullable = true)
     private CodeValue mainBusinessLine;
 
-    @Column(name = "remarks", length = 150, nullable = true)
+    @Column(name = "remarks", nullable = true)
     private String remarks;
 
     @Column(name = "in_business_since", nullable = true)
