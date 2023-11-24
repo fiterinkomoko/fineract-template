@@ -601,6 +601,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .build();
     }
 
+    @Override
+    public CommandProcessingResult updateDisbursement(Long loanId, JsonCommand command, Boolean isAccountTransfer,
+            Boolean isGlimBulkDisbursement) {
+
+        return new CommandProcessingResultBuilder().withTransactionId(String.valueOf(1000 + Math.round(Math.random() * 1000))).build();
+    }
+
     public CommandProcessingResult disburseLoanApplicationAssociatedToGLIM(final Long loanId, final JsonCommand command,
             Boolean isAccountTransfer) {
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
