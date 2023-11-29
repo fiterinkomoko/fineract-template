@@ -100,6 +100,37 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
                 .build();
     }
 
+    @Override
+    public CommandProcessingResult loanCreditInfoEnhancedToMetropolKenya(Long loanId, JsonCommand command) {
+        Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+
+        TransUnionRwandaConsumerVerificationData individualClient = null;
+        TransUnionRwandaCorporateVerificationData corporateClient = null;
+
+        if (!loan.getCurrencyCode().equals("KES")) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.currency.is.not.support.on.metropol.crb.credit.info.verification",
+                    "Credit Info verification is only supported for loans in KSH but found " + loan.getCurrencyCode() + " currency ");
+        }
+
+        Client clientObj = this.clientRepositoryWrapper.findOneWithNotFoundDetection(loan.getClientId());
+        MetropolCrbIdentityReport metropolCrbIdentityReport = null;
+        try {
+            if (clientObj.getLegalForm().equals(LegalForm.PERSON.getValue())) {
+                individualClient = this.verificationReadPlatformService.retrieveConsumerToBeVerifiedToTransUnion(clientObj.getId());
+                metropolCrbIdentityReport = verifyCreditInfoEnhanced(individualClient.getNationalID(), loan, clientObj);
+            } else {
+                corporateClient = this.verificationReadPlatformService.retrieveCorporateToBeVerifiedToTransUnion(clientObj.getId());
+                metropolCrbIdentityReport = verifyCreditInfoEnhanced(corporateClient.getCompanyRegNo(), loan, clientObj);
+            }
+        } catch (Exception e) {
+            throw new GeneralPlatformDomainRuleException("Verification failed with error: ", e.getMessage());
+        }
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(clientObj.getId()).withResourceIdAsString(metropolCrbIdentityReport.getId().toString()) //
+                .build();
+    }
+
     private MetropolCrbIdentityReport verifyIdentityDocument(String documentId, Loan loan, Client client)
             throws NoSuchAlgorithmException, IOException {
         CrbKenyaMetropolRequestData requestData = new CrbKenyaMetropolRequestData(1, documentId, "001");
@@ -108,11 +139,32 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
         String timestamp = DateUtils.generateTimestamp();
         String hash = generateHash(jsonPayload, timestamp);
 
-        return sendRequest(getConfigProperty("fineract.integrations.metropol.crb.rest.clientVerify"), jsonPayload, timestamp, hash, loan,
-                client);
+        JsonObject jsonResponse = sendRequest(getConfigProperty("fineract.integrations.metropol.crb.rest.clientVerify"), jsonPayload,
+                timestamp, hash, loan, client);
+
+        MetropolCrbIdentityReport metropolCrbIdentityReport = getMetropolCrbIdentityReport(jsonResponse, loan, client);
+        metropolCrbIdentityReport = metropolCrbIdentityVerificationRepository.saveAndFlush(metropolCrbIdentityReport);
+        return metropolCrbIdentityReport;
     }
 
-    private MetropolCrbIdentityReport sendRequest(String urlStr, String payload, String timestamp, String hash, Loan loan, Client client)
+    private MetropolCrbIdentityReport verifyCreditInfoEnhanced(String documentId, Loan loan, Client client)
+            throws NoSuchAlgorithmException, IOException {
+        CrbKenyaMetropolRequestData requestData = new CrbKenyaMetropolRequestData(10, "45555", documentId, "001",
+                loan.getApprovedPrincipal(), 1);
+        String jsonPayload = convertRequestPayloadToJson(requestData);
+
+        String timestamp = DateUtils.generateTimestamp();
+        String hash = generateHash(jsonPayload, timestamp);
+
+        JsonObject jsonResponse = sendRequest(getConfigProperty("fineract.integrations.metropol.crb.rest.clientVerifyCreditInfoEnhanced"),
+                jsonPayload, timestamp, hash, loan, client);
+
+        MetropolCrbIdentityReport metropolCrbIdentityReport = getMetropolCrbIdentityReport(jsonResponse, loan, client);
+        metropolCrbIdentityReport = metropolCrbIdentityVerificationRepository.saveAndFlush(metropolCrbIdentityReport);
+        return metropolCrbIdentityReport;
+    }
+
+    private JsonObject sendRequest(String urlStr, String payload, String timestamp, String hash, Loan loan, Client client)
             throws IOException {
         OkHttpClient httpClient = new OkHttpClient();
 
@@ -136,9 +188,7 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
                         "Loan identity verification failed with error: " + getStringField(jsonResponse, "api_code_description") + "");
             }
 
-            MetropolCrbIdentityReport metropolCrbIdentityReport = getMetropolCrbIdentityReport(jsonResponse, loan, client);
-            metropolCrbIdentityReport = metropolCrbIdentityVerificationRepository.saveAndFlush(metropolCrbIdentityReport);
-            return metropolCrbIdentityReport;
+            return jsonResponse;
         } else {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.identity.verification.failed",
                     "Loan identity verification failed with error: " + response.code() + ":" + response.message() + "");

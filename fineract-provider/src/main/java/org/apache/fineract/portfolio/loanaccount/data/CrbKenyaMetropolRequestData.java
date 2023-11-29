@@ -18,14 +18,18 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
+import java.math.BigDecimal;
 import lombok.Data;
 
 @Data
 public class CrbKenyaMetropolRequestData {
 
     private Integer report_type;
+    private String application_ref_no;
     private String identity_number;
     private String identity_type;
+    private BigDecimal loan_amount;
+    private Integer report_reason;
     private Integer id;
     private Integer clientId;
     private Integer loanId;
@@ -55,6 +59,16 @@ public class CrbKenyaMetropolRequestData {
         this.report_type = report_type;
         this.identity_number = identity_number;
         this.identity_type = identity_type;
+    }
+
+    public CrbKenyaMetropolRequestData(Integer report_type, String application_ref_no, String identity_number, String identity_type,
+            BigDecimal loan_amount, Integer report_reason) {
+        this.report_type = report_type;
+        this.application_ref_no = application_ref_no;
+        this.identity_number = identity_number;
+        this.identity_type = identity_type;
+        this.loan_amount = loan_amount;
+        this.report_reason = report_reason;
     }
 
     public CrbKenyaMetropolRequestData(Integer id, Integer clientId, Integer loanId, String citizenShip, String clan, String dateOfBirth,

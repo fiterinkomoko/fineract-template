@@ -3936,4 +3936,12 @@ public class CommandWrapperBuilder {
         this.href = "/loan/verifyloanonmetropolcrbkenya";
         return this;
     }
+
+    public CommandWrapperBuilder verifyLoanCreditInfoEnhancedOnMetropolKenya(final long loanId) {
+        this.actionName = "VERIFYLOANCREDITINFOENHANCEDONMETROPOLCRBKENYA";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.href = "/loan/verifyloancreditinfoonmetropolcrbkenya";
+        return this;
+    }
 }

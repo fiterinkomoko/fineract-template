@@ -1304,4 +1304,17 @@ WHERE l.loan_status_id IN (300, 600, 601, 700)
             <column name="action_name" value="VERIFYLOANONMETROPOLCRBKENYA_LOAN" />
         </insert>
     </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_permission_VERIFYLOANCREDITINFOENHANCEDONMETROPOLCRBKENYA_LOAN">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_permission where code = 'VERIFYLOANCREDITINFOENHANCEDONMETROPOLCRBKENYA_LOAN';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio" />
+            <column name="code" value="VERIFYLOANCREDITINFOENHANCEDONMETROPOLCRBKENYA_LOAN" />
+            <column name="entity_name" value="LOAN" />
+            <column name="action_name" value="VERIFYLOANCREDITINFOENHANCEDONMETROPOLCRBKENYA_LOAN" />
+        </insert>
+    </changeSet>
 </databaseChangeLog>

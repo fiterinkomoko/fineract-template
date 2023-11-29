@@ -339,4 +339,18 @@ public class CreditBureauConfigurationAPI {
 
         return this.toApiJsonSerializerCreditBureauLoanProduct.serialize(crbReportData);
     }
+
+    @POST
+    @Path("/verifyLoanCreditInfoEnhancedOnMetropolKenya/{loanId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String verifyLoanCreditInfoEnhancedOnMetropolKenya(@PathParam("loanId") final Long loanId, final String apiRequestBodyAsJson) {
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().verifyLoanCreditInfoEnhancedOnMetropolKenya(loanId)
+                .withJson(apiRequestBodyAsJson).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
 }

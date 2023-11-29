@@ -24,4 +24,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 public interface MetropolCrbVerificationWritePlatformService {
 
     CommandProcessingResult loanVerificationToMetropolKenya(Long loanId, JsonCommand command);
+
+    CommandProcessingResult loanCreditInfoEnhancedToMetropolKenya(Long loanId, JsonCommand command);
 }
