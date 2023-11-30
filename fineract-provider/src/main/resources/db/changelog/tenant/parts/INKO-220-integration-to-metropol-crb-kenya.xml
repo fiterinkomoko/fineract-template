@@ -164,10 +164,10 @@
             <column name="delinquency_code" type="varchar(255)">
                 <constraints nullable="true" />
             </column>
-            <column name="has_error" type="varchar(255)">
+            <column name="has_error" type="BOOLEAN" defaultValueBoolean="false">
                 <constraints nullable="true" />
             </column>
-            <column name="has_fraud" type="varchar(255)">
+            <column name="has_fraud" type="BOOLEAN" defaultValueBoolean="false">
                 <constraints nullable="true" />
             </column>
             <column name="identity_number" type="varchar(255)">
@@ -176,7 +176,7 @@
             <column name="identity_type" type="varchar(255)">
                 <constraints nullable="true" />
             </column>
-            <column name="is_guarantor" type="varchar(255)">
+            <column name="is_guarantor" type="BOOLEAN" defaultValueBoolean="false">
                 <constraints nullable="true" />
             </column>
             <column name="trx_id" type="varchar(255)">

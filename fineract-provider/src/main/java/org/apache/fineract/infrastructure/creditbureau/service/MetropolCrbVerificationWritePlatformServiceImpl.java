@@ -37,6 +37,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.creditbureau.data.CRBREPORTTYPES;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
@@ -45,6 +46,8 @@ import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaConsumerVe
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCorporateVerificationData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolCrbCreditInfoEnhancedReport;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolCrbCreditInfoEnhancedRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.MetropolCrbIdentityReport;
 import org.apache.fineract.portfolio.loanaccount.domain.MetropolCrbIdentityVerificationRepository;
 import org.apache.fineract.portfolio.loanaccount.service.TransUnionCrbConsumerVerificationReadPlatformService;
@@ -65,6 +68,7 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final TransUnionCrbConsumerVerificationReadPlatformService verificationReadPlatformService;
     private final MetropolCrbIdentityVerificationRepository metropolCrbIdentityVerificationRepository;
+    private final MetropolCrbCreditInfoEnhancedRepository metropolCrbCreditInfoEnhancedRepository;
 
     @Autowired
     private final Environment env;
@@ -108,26 +112,26 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
         TransUnionRwandaCorporateVerificationData corporateClient = null;
 
         if (!loan.getCurrencyCode().equals("KES")) {
-            throw new GeneralPlatformDomainRuleException("error.msg.loan.currency.is.not.support.on.metropol.crb.credit.info.verification",
-                    "Credit Info verification is only supported for loans in KSH but found " + loan.getCurrencyCode() + " currency ");
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.currency.is.not.support.on.metropol.crb.credit.info.enhanced",
+                    "Credit Info Enhanced is only supported for loans in KSH but found " + loan.getCurrencyCode() + " currency ");
         }
 
         Client clientObj = this.clientRepositoryWrapper.findOneWithNotFoundDetection(loan.getClientId());
-        MetropolCrbIdentityReport metropolCrbIdentityReport = null;
+        MetropolCrbCreditInfoEnhancedReport metropolCrbCreditInfoEnhancedReport = null;
         try {
             if (clientObj.getLegalForm().equals(LegalForm.PERSON.getValue())) {
                 individualClient = this.verificationReadPlatformService.retrieveConsumerToBeVerifiedToTransUnion(clientObj.getId());
-                metropolCrbIdentityReport = verifyCreditInfoEnhanced(individualClient.getNationalID(), loan, clientObj);
+                metropolCrbCreditInfoEnhancedReport = verifyCreditInfoEnhanced(individualClient.getNationalID(), loan, clientObj);
             } else {
                 corporateClient = this.verificationReadPlatformService.retrieveCorporateToBeVerifiedToTransUnion(clientObj.getId());
-                metropolCrbIdentityReport = verifyCreditInfoEnhanced(corporateClient.getCompanyRegNo(), loan, clientObj);
+                metropolCrbCreditInfoEnhancedReport = verifyCreditInfoEnhanced(corporateClient.getCompanyRegNo(), loan, clientObj);
             }
         } catch (Exception e) {
-            throw new GeneralPlatformDomainRuleException("Verification failed with error: ", e.getMessage());
+            throw new GeneralPlatformDomainRuleException("Credit Info Enhanced report failed with error: ", e.getMessage());
         }
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
-                .withEntityId(clientObj.getId()).withResourceIdAsString(metropolCrbIdentityReport.getId().toString()) //
+                .withEntityId(clientObj.getId()).withResourceIdAsString(metropolCrbCreditInfoEnhancedReport.getId().toString()) //
                 .build();
     }
 
@@ -147,7 +151,7 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
         return metropolCrbIdentityReport;
     }
 
-    private MetropolCrbIdentityReport verifyCreditInfoEnhanced(String documentId, Loan loan, Client client)
+    private MetropolCrbCreditInfoEnhancedReport verifyCreditInfoEnhanced(String documentId, Loan loan, Client client)
             throws NoSuchAlgorithmException, IOException {
         CrbKenyaMetropolRequestData requestData = new CrbKenyaMetropolRequestData(10, "45555", documentId, "001",
                 loan.getApprovedPrincipal().intValue(), 1);
@@ -159,9 +163,10 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
         JsonObject jsonResponse = sendRequest(getConfigProperty("fineract.integrations.metropol.crb.rest.clientVerifyCreditInfoEnhanced"),
                 jsonPayload, timestamp, hash, loan, client);
 
-        MetropolCrbIdentityReport metropolCrbIdentityReport = getMetropolCrbIdentityReport(jsonResponse, loan, client);
-        metropolCrbIdentityReport = metropolCrbIdentityVerificationRepository.saveAndFlush(metropolCrbIdentityReport);
-        return metropolCrbIdentityReport;
+        MetropolCrbCreditInfoEnhancedReport crbCreditInfoEnhancedReport = getMetropolCrbCreditInfoEnhancedReport(jsonResponse, loan,
+                client);
+        crbCreditInfoEnhancedReport = metropolCrbCreditInfoEnhancedRepository.saveAndFlush(crbCreditInfoEnhancedReport);
+        return crbCreditInfoEnhancedReport;
     }
 
     private JsonObject sendRequest(String urlStr, String payload, String timestamp, String hash, Loan loan, Client client)
@@ -180,18 +185,10 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
 
             String resObject = response.body().string();
             LOG.info("Response from Metropol CRB: " + resObject);
-            JsonObject jsonResponse = JsonParser.parseString(resObject).getAsJsonObject();
-
-            Integer apiCode = jsonResponse.get("api_code").getAsInt();
-            if (apiCode != 200) {
-                throw new GeneralPlatformDomainRuleException("error.msg.loan.identity.verification.failed",
-                        "Loan identity verification failed with error: " + getStringField(jsonResponse, "api_code_description") + "");
-            }
-
-            return jsonResponse;
+            return JsonParser.parseString(resObject).getAsJsonObject();
         } else {
-            throw new GeneralPlatformDomainRuleException("error.msg.loan.identity.verification.failed",
-                    "Loan identity verification failed with error: " + response.code() + ":" + response.message() + "");
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.credit.info.enhanced.failed",
+                    "Credit Info Enhanced failed with error: " + response.code() + ":" + response.message() + "");
         }
 
     }
@@ -261,5 +258,34 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
             return jsonObject.get(fieldName).getAsString();
         }
         return null;
+    }
+
+    public Boolean getBooleanField(JsonObject jsonObject, String fieldName) {
+        if (jsonObject != null && jsonObject.has(fieldName) && jsonObject.get(fieldName).isJsonPrimitive()
+                && jsonObject.get(fieldName).getAsJsonPrimitive().isBoolean()) {
+            return jsonObject.get(fieldName).getAsBoolean();
+        }
+        return null;
+    }
+
+    @NotNull
+    private MetropolCrbCreditInfoEnhancedReport getMetropolCrbCreditInfoEnhancedReport(JsonObject jsonResponse, Loan loan, Client client) {
+        MetropolCrbCreditInfoEnhancedReport enhancedReport = new MetropolCrbCreditInfoEnhancedReport();
+
+        enhancedReport.setClientId(client);
+        enhancedReport.setLoanId(loan);
+        enhancedReport.setReportType(CRBREPORTTYPES.CREDIT_INFO_ENHANCED.name());
+        enhancedReport.setApiCode(getStringField(jsonResponse, "api_code"));
+        enhancedReport.setApiCodeDescription(getStringField(jsonResponse, "api_code_description"));
+        enhancedReport.setApplicationRefNo(getStringField(jsonResponse, "application_ref_no"));
+        enhancedReport.setCreditScore(getStringField(jsonResponse, "credit_score"));
+        enhancedReport.setDelinquencyCode(getStringField(jsonResponse, "delinquency_code"));
+        enhancedReport.setHasError(getBooleanField(jsonResponse, "has_error"));
+        enhancedReport.setHasFraud(getBooleanField(jsonResponse, "has_fraud"));
+        enhancedReport.setIdentityNumber(getStringField(jsonResponse, "id_number"));
+        enhancedReport.setIdentityType(getStringField(jsonResponse, "identity_type"));
+        enhancedReport.setIsGuarantor(getBooleanField(jsonResponse, "is_guarantor"));
+        enhancedReport.setTrxId(getStringField(jsonResponse, "trx_id"));
+        return enhancedReport;
     }
 }

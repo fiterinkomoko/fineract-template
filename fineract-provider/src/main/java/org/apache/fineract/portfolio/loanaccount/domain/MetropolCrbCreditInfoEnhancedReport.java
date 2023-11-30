@@ -51,15 +51,15 @@ public class MetropolCrbCreditInfoEnhancedReport extends AbstractAuditableWithUT
     @Column(name = "delinquency_code")
     private String delinquencyCode;
     @Column(name = "has_error")
-    private String hasError;
+    private Boolean hasError;
     @Column(name = "has_fraud")
-    private String hasFraud;
+    private Boolean hasFraud;
     @Column(name = "identity_number")
     private String identityNumber;
     @Column(name = "identity_type")
     private String identityType;
     @Column(name = "is_guarantor")
-    private String isGuarantor;
+    private Boolean isGuarantor;
     @Column(name = "trx_id")
     private String trxId;
 
