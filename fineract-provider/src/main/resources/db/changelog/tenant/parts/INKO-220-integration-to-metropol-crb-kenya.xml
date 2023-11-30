@@ -130,4 +130,75 @@
     <changeSet id="modify-m_client_non_person-remarks-data-type-to-text" author="bosco@fiter.io">
         <modifyDataType tableName="m_client_non_person" columnName="remarks" newDataType="TEXT"/>
     </changeSet>
+    <changeSet id="create-m_metropol_crb_credit_info_enhanced_report" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_metropol_crb_credit_info_enhanced_report"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_metropol_crb_credit_info_enhanced_report">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="client_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_m_metropol_crb_credit_info_enhanced_report_client_id" references="m_client(id)"/>
+            </column>
+            <column name="loan_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_m_metropol_crb_credit_info_enhanced_report_loan_id" references="m_loan(id)"/>
+            </column>
+            <column name="report_type" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="api_code" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="api_code_description" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="application_ref_no" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="credit_score" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="delinquency_code" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="has_error" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="has_fraud" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="identity_number" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="identity_type" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="is_guarantor" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="trx_id" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="create-m_metropol_crb_credit_info_enhanced_report-auditable" context="mysql">
+        <addColumn tableName="m_metropol_crb_credit_info_enhanced_report">
+            <column name="created_on_utc" type="DATETIME"/>
+            <column name="created_by" type="BIGINT"/>
+            <column name="last_modified_by" type="BIGINT"/>
+            <column name="last_modified_on_utc" type="DATETIME"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="create-m_metropol_crb_credit_info_enhanced_report-auditable" context="postgresql">
+        <addColumn tableName="m_metropol_crb_credit_info_enhanced_report">
+            <column name="created_on_utc" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="created_by" type="BIGINT" />
+            <column name="last_modified_by" type="BIGINT"/>
+            <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
