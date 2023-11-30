@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.organisation.office.domain.Office;
+import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
@@ -102,6 +103,12 @@ public class JournalEntry extends AbstractAuditableCustom {
 
     @Column(name = "ref_num")
     private String referenceNumber;
+
+    @Column(name = "is_oddo_posted")
+    private boolean isOddoPosted;
+
+    @Column(name = "odoo_journal_id")
+    private Integer odooJournalId;
 
     public static JournalEntry createNew(final Office office, final PaymentDetail paymentDetail, final GLAccount glAccount,
             final String currencyCode, final String transactionId, final boolean manualEntry, final LocalDate transactionDate,
@@ -225,6 +232,33 @@ public class JournalEntry extends AbstractAuditableCustom {
 
     public String getDescription() {
         return this.description;
+    }
+
+    public Client getClient() {
+        if (this.loanTransaction != null) {
+            return this.loanTransaction.getLoan().getClient();
+        } else if (this.savingsTransaction != null) {
+            return this.savingsTransaction.getSavingsAccount().getClient();
+        } else if (this.clientTransaction != null) {
+            return this.clientTransaction.getClient();
+        }
+        return null;
+    }
+
+    public boolean isOddoPosted() {
+        return this.isOddoPosted;
+    }
+
+    public void setOddoPosted(boolean isOddoPosted) {
+        this.isOddoPosted = isOddoPosted;
+    }
+
+    public Integer getOdooJournalId() {
+        return this.odooJournalId;
+    }
+
+    public void setOdooJournalId(Integer odooJournalId) {
+        this.odooJournalId = odooJournalId;
     }
 
 }

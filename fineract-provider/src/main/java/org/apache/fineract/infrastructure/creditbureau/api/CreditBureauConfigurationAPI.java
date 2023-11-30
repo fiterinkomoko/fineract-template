@@ -50,6 +50,10 @@ import org.apache.fineract.infrastructure.creditbureau.service.CreditBureauReadC
 import org.apache.fineract.infrastructure.creditbureau.service.CreditBureauReadPlatformService;
 import org.apache.fineract.infrastructure.creditbureau.service.OrganisationCreditBureauReadPlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.loanaccount.data.CrbKenyaMetropolRequestData;
+import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCrbReportData;
+import org.apache.fineract.portfolio.loanaccount.service.MetropolCrbReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.service.TransUnionCrbConsumerVerificationReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -74,6 +78,8 @@ public class CreditBureauConfigurationAPI {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final CreditBureauReadConfigurationService creditBureauConfiguration;
+    private final TransUnionCrbConsumerVerificationReadPlatformService transUnionCrbClientVerificationReadPlatformService;
+    private final MetropolCrbReadPlatformService metropolCrbReadPlatformService;
 
     @Autowired
     public CreditBureauConfigurationAPI(final PlatformSecurityContext context, final CreditBureauReadPlatformService readPlatformService,
@@ -86,7 +92,9 @@ public class CreditBureauConfigurationAPI {
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final DefaultToApiJsonSerializer<CreditBureauConfigurationData> toApiJsonSerializerReport,
-            final CreditBureauReadConfigurationService creditBureauConfiguration) {
+            final CreditBureauReadConfigurationService creditBureauConfiguration,
+            final TransUnionCrbConsumerVerificationReadPlatformService transUnionCrbClientVerificationReadPlatformService,
+            final MetropolCrbReadPlatformService metropolCrbReadPlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
@@ -98,6 +106,8 @@ public class CreditBureauConfigurationAPI {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.toApiJsonSerializerReport = toApiJsonSerializerReport;
         this.creditBureauConfiguration = creditBureauConfiguration;
+        this.transUnionCrbClientVerificationReadPlatformService = transUnionCrbClientVerificationReadPlatformService;
+        this.metropolCrbReadPlatformService = metropolCrbReadPlatformService;
 
     }
 
@@ -277,4 +287,56 @@ public class CreditBureauConfigurationAPI {
         return this.toApiJsonSerializer.serialize(result);
     }
 
+    @POST
+    @Path("/verifyLoanOnTransUnionRwanda/{loanId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String verifyLoanOnTransUnionRwanda(@PathParam("loanId") final Long loanId, final String apiRequestBodyAsJson) {
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().verifyLoanOnTransUnionRwanda(loanId)
+                .withJson(apiRequestBodyAsJson).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
+
+    @GET
+    @Path("/crbReportTransUnion/{loanId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String fetchCrbReportForTransUnion(@PathParam("loanId") final Integer loanId) {
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+
+        final TransUnionRwandaCrbReportData crbReportData = this.transUnionCrbClientVerificationReadPlatformService
+                .fetchCrbReportForTransUnion(loanId);
+
+        return this.toApiJsonSerializerCreditBureauLoanProduct.serialize(crbReportData);
+    }
+
+    @POST
+    @Path("/verifyLoanOnMetropolKenya/{loanId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String verifyLoanOnMetropolKenya(@PathParam("loanId") final Long loanId, final String apiRequestBodyAsJson) {
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().verifyLoanOnMetropolKenya(loanId).withJson(apiRequestBodyAsJson)
+                .build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
+
+    @GET
+    @Path("/crbMetropolIdentityVerification/{loanId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String crbMetropolIdentityVerification(@PathParam("loanId") final Integer loanId) {
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+
+        final CrbKenyaMetropolRequestData crbReportData = this.metropolCrbReadPlatformService.fetchIdentityVerificationDetails(loanId);
+
+        return this.toApiJsonSerializerCreditBureauLoanProduct.serialize(crbReportData);
+    }
 }

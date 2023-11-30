@@ -30,6 +30,7 @@ public interface LoanProductConstants {
 
     String DEFAULT_VALUE_PARAMETER_NAME = "defaultValue";
     String LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM = "loanTermIncludesToppedUpLoanTerm";
+    String IS_ISLAMIC = "isIslamic";
     String MIN_VALUE_PARAMETER_NAME = "minValue";
     String MAX_VALUE_PARAMETER_NAME = "maxValue";
     String VALUE_CONDITION_TYPE_PARAM_NAME = "valueConditionType";

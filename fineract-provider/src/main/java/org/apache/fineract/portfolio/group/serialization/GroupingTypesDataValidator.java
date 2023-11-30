@@ -62,6 +62,8 @@ public final class GroupingTypesDataValidator {
             GroupingTypesApiConstants.activeParamName, GroupingTypesApiConstants.activationDateParamName,
             GroupingTypesApiConstants.clientMembersParamName, GroupingTypesApiConstants.collectionMeetingCalendar,
             GroupingTypesApiConstants.submittedOnDateParamName, GroupingTypesApiConstants.datatables, GroupingTypesApiConstants.accountNo));
+            GroupingTypesApiConstants.submittedOnDateParamName, GroupingTypesApiConstants.datatables,
+            GroupingTypesApiConstants.representativeIdParamName));
 
     private static final Set<String> ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(GroupingTypesApiConstants.localeParamName, GroupingTypesApiConstants.dateFormatParamName,
@@ -70,6 +72,9 @@ public final class GroupingTypesDataValidator {
     private static final Set<String> GROUP_CLOSE_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(GroupingTypesApiConstants.localeParamName, GroupingTypesApiConstants.dateFormatParamName,
                     GroupingTypesApiConstants.closureDateParamName, GroupingTypesApiConstants.closureReasonIdParamName));
+
+    private static final Set<String> GROUP_REPRESENTATIVE_REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(GroupingTypesApiConstants.REPRESENTATIVE_ID));
 
     @Autowired
     public GroupingTypesDataValidator(final FromJsonHelper fromApiJsonHelper, final GroupRepositoryWrapper groupRepositoryWrapper) {
@@ -242,10 +247,9 @@ public final class GroupingTypesDataValidator {
         final String name = this.fromApiJsonHelper.extractStringNamed(GroupingTypesApiConstants.nameParamName, element);
         baseDataValidator.reset().parameter(GroupingTypesApiConstants.nameParamName).value(name).notNull().notExceedingLengthOf(100);
 
-        if (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.externalIdParamName, element)) {
-            final String externalId = this.fromApiJsonHelper.extractStringNamed(GroupingTypesApiConstants.externalIdParamName, element);
-            baseDataValidator.reset().parameter(GroupingTypesApiConstants.externalIdParamName).value(externalId).notExceedingLengthOf(100);
-        }
+        final String externalId = this.fromApiJsonHelper.extractStringNamed(GroupingTypesApiConstants.externalIdParamName, element);
+        baseDataValidator.reset().parameter(GroupingTypesApiConstants.externalIdParamName).value(externalId).notNull()
+                .notExceedingLengthOf(100);
 
         // office is inherited from center
         final Long officeId = this.fromApiJsonHelper.extractLongNamed(GroupingTypesApiConstants.officeIdParamName, element);
@@ -285,6 +289,9 @@ public final class GroupingTypesDataValidator {
             final JsonArray datatables = this.fromApiJsonHelper.extractJsonArrayNamed(GroupingTypesApiConstants.datatables, element);
             baseDataValidator.reset().parameter(GroupingTypesApiConstants.datatables).value(datatables).notNull().jsonArrayNotEmpty();
         }
+        final Long representativeId = this.fromApiJsonHelper.extractLongNamed(GroupingTypesApiConstants.representativeIdParamName, element);
+        baseDataValidator.reset().parameter(GroupingTypesApiConstants.representativeIdParamName).value(representativeId).notNull()
+                .integerGreaterThanZero();
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -359,10 +366,9 @@ public final class GroupingTypesDataValidator {
         final String name = this.fromApiJsonHelper.extractStringNamed(GroupingTypesApiConstants.nameParamName, element);
         baseDataValidator.reset().parameter(GroupingTypesApiConstants.nameParamName).value(name).notNull().notExceedingLengthOf(100);
 
-        if (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.externalIdParamName, element)) {
-            final String externalId = this.fromApiJsonHelper.extractStringNamed(GroupingTypesApiConstants.externalIdParamName, element);
-            baseDataValidator.reset().parameter(GroupingTypesApiConstants.externalIdParamName).value(externalId).notExceedingLengthOf(100);
-        }
+        final String externalId = this.fromApiJsonHelper.extractStringNamed(GroupingTypesApiConstants.externalIdParamName, element);
+        baseDataValidator.reset().parameter(GroupingTypesApiConstants.externalIdParamName).value(externalId).notNull()
+                .notExceedingLengthOf(100);
 
         if (this.fromApiJsonHelper.parameterExists(GroupingTypesApiConstants.officeIdParamName, element)) {
             final Long officeId = this.fromApiJsonHelper.extractLongNamed(GroupingTypesApiConstants.officeIdParamName, element);
@@ -539,6 +545,30 @@ public final class GroupingTypesDataValidator {
 
         final Long closureReasonId = this.fromApiJsonHelper.extractLongNamed(GroupingTypesApiConstants.closureReasonIdParamName, element);
         baseDataValidator.reset().parameter(GroupingTypesApiConstants.closureReasonIdParamName).value(closureReasonId).notNull()
+                .longGreaterThanZero();
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+
+    }
+
+    public void validateForUpdateGroupRepresentative(final JsonCommand command) {
+        final String json = command.json();
+
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, GROUP_REPRESENTATIVE_REQUEST_DATA_PARAMETERS);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
+
+        final JsonElement element = command.parsedJson();
+
+        final Long representativeId = this.fromApiJsonHelper.extractLongNamed(GroupingTypesApiConstants.REPRESENTATIVE_ID, element);
+        baseDataValidator.reset().parameter(GroupingTypesApiConstants.REPRESENTATIVE_ID).value(representativeId).notNull()
                 .longGreaterThanZero();
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

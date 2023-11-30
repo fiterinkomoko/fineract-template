@@ -1110,6 +1110,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder updateDisbursement(final Long loanId) {
+        this.actionName = "UPDATEDISBURSEMENT";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId;
+        return this;
+    }
+
     public CommandWrapperBuilder disburseLoanToSavingsApplication(final Long loanId) {
         this.actionName = "DISBURSETOSAVINGS";
         this.entityName = "LOAN";
@@ -3900,6 +3909,31 @@ public class CommandWrapperBuilder {
         this.href = "/loans/decision/prepareAndSignContract/" + loanId;
         this.loanId = loanId;
 
+        return this;
+    }
+
+    public CommandWrapperBuilder updateGroupRepresentative(final Long groupId) {
+        this.actionName = "UPDATEREPRESENTATIVE";
+        this.entityName = "GROUP";
+        this.entityId = groupId;
+        this.groupId = groupId;
+        this.href = "/groups/" + groupId + "?command=updateGroupRepresentative";
+        return this;
+    }
+
+    public CommandWrapperBuilder verifyLoanOnTransUnionRwanda(final long loanId) {
+        this.actionName = "VERIFYLOANONTRANSUNIONCRBRWANDA";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.href = "/loan/verifyloanontransunioncrbrwanda";
+        return this;
+    }
+
+    public CommandWrapperBuilder verifyLoanOnMetropolKenya(final long loanId) {
+        this.actionName = "VERIFYLOANONMETROPOLCRBKENYA";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.href = "/loan/verifyloanonmetropolcrbkenya";
         return this;
     }
 }

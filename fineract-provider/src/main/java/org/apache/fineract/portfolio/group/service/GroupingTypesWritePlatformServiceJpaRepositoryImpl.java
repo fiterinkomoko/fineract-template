@@ -160,8 +160,16 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                 submittedOnDate = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.submittedOnDateParamName);
             }
 
+            Client representative = null;
+            final Long representativeId = command.longValueOfParameterNamed(GroupingTypesApiConstants.representativeIdParamName);
+            if (representativeId != null) {
+                representative = this.clientRepositoryWrapper.findOneWithNotFoundDetection(representativeId);
+            }
+            validateThatGroupRepresentativeIsAMemberOfThisGroup(clientMembers, representativeId);
+
             final Group newGroup = Group.newGroup(groupOffice, staff, parentGroup, groupLevel, name, externalId, active, activationDate,
                     clientMembers, groupMembers, submittedOnDate, currentUser, accountNo);
+            newGroup.setRepresentative(representative);
 
             boolean rollbackTransaction = false;
             if (newGroup.isActive()) {
@@ -225,6 +233,24 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleGroupDataIntegrityIssues(command, throwable, dve, groupingType);
             return CommandProcessingResult.empty();
+        }
+    }
+
+    public void validateThatGroupRepresentativeIsAMemberOfThisGroup(Set<Client> clientMembers, Long representativeId) {
+        clientMembers.stream().filter(client -> client.getId().equals(representativeId)) // Assuming getId() retrieves
+                                                                                         // the ID of the client
+                .findFirst() // Get the first matching client
+                .orElseThrow(() -> new GeneralPlatformDomainRuleException("error.representative.is.not.a.group.member",
+                        String.format("Representative [%s]  is not a group member: ", representativeId)));
+
+    }
+
+    public void validateThatGroupRepresentativeShouldNotBeRemovedFromGroup(Set<Client> clientMembers, Long representativeId) {
+        boolean isRepresentativeMember = clientMembers.stream().anyMatch(client -> client.getId().equals(representativeId));
+
+        if (isRepresentativeMember) {
+            throw new GeneralPlatformDomainRuleException("error.representative.should.not.be.removed.from.group",
+                    String.format("Representative [%s] should not be removed from Group: ", representativeId));
         }
     }
 
@@ -795,6 +821,32 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                 .build();
     }
 
+    @Override
+    public CommandProcessingResult updateGroupRepresentative(Long groupId, JsonCommand command) {
+        this.fromApiJsonDeserializer.validateForUpdateGroupRepresentative(command);
+
+        Client representative = null;
+        final Long representativeId = command.longValueOfParameterNamed(GroupingTypesApiConstants.REPRESENTATIVE_ID);
+        if (representativeId != null) {
+            representative = this.clientRepositoryWrapper.findOneWithNotFoundDetection(representativeId);
+        }
+
+        final Group groupForUpdate = this.groupRepository.findOneWithNotFoundDetection(groupId);
+        Set<Client> clients = groupForUpdate.getClientMembers();
+
+        validateThatGroupRepresentativeIsAMemberOfThisGroup(clients, representativeId);
+        groupForUpdate.setRepresentative(representative);
+
+        this.groupRepository.saveAndFlush(groupForUpdate);
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withOfficeId(groupForUpdate.officeId()) //
+                .withGroupId(groupForUpdate.getId()) //
+                .withEntityId(representativeId) //
+                .build();
+    }
+
     @Transactional
     @Override
     public CommandProcessingResult disassociateClientsFromGroup(final Long groupId, final JsonCommand command) {
@@ -806,6 +858,11 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         // check if any client has got group loans
         checkForActiveJLGLoans(groupForUpdate.getId(), clientMembers);
         validateForJLGSavings(groupForUpdate.getId(), clientMembers);
+
+        if (groupForUpdate.getRepresentative() != null) {
+            validateThatGroupRepresentativeShouldNotBeRemovedFromGroup(clientMembers, groupForUpdate.getRepresentative().getId());
+        }
+
         final Map<String, Object> actualChanges = new HashMap<>();
 
         final List<String> changes = groupForUpdate.disassociateClients(clientMembers);

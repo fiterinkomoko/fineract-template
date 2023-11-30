@@ -228,6 +228,8 @@ public class LoanProduct extends AbstractPersistableCustom {
 
     @Column(name = "maintain_interest_rate_on_loan_term_extension")
     private Boolean maintainInterestRateOnLoanTermExtension;
+    @Column(name = "is_islamic")
+    private Boolean isIslamic;
 
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator, FloatingRate floatingRate,
@@ -254,6 +256,7 @@ public class LoanProduct extends AbstractPersistableCustom {
                 .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.ALLOW_PARTIAL_PERIOD_INTEREST_CALCUALTION_PARAM_NAME);
         final boolean loanTermIncludesToppedUpLoanTerm = command
                 .booleanPrimitiveValueOfParameterNamed(LoanProductConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM);
+        final Boolean isIslamic = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.IS_ISLAMIC);
         final AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.integerValueOfParameterNamed("amortizationType"));
         final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType
                 .fromInt(command.integerValueOfParameterNamed("repaymentFrequencyType"));
@@ -438,7 +441,7 @@ public class LoanProduct extends AbstractPersistableCustom {
                 isEqualAmortization, productRates, fixedPrincipalPercentagePerInstallment, disallowExpectedDisbursements,
                 allowApprovedDisbursedAmountsOverApplied, overAppliedCalculationType, overAppliedNumber, maxNumberOfLoanExtensionsAllowed,
                 loanTermIncludesToppedUpLoanTerm, isAccountLevelArrearsToleranceEnable, isBnplLoanProduct, requiresEquityContribution,
-                equityContributionLoanPercentage, maintainInterest);
+                equityContributionLoanPercentage, maintainInterest, isIslamic);
 
     }
 
@@ -677,7 +680,7 @@ public class LoanProduct extends AbstractPersistableCustom {
             final boolean allowApprovedDisbursedAmountsOverApplied, final String overAppliedCalculationType,
             final Integer overAppliedNumber, final Integer maxNumberOfLoanExtensionsAllowed, final boolean loanTermIncludesToppedUpLoanTerm,
             final boolean isAccountLevelArrearsToleranceEnable, Boolean isBnplLoanProduct, Boolean requiresEquityContribution,
-            BigDecimal equityContributionLoanPercentage, Boolean maintainInterest) {
+            BigDecimal equityContributionLoanPercentage, Boolean maintainInterest, final Boolean isIslamic) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -762,6 +765,7 @@ public class LoanProduct extends AbstractPersistableCustom {
         this.requiresEquityContribution = requiresEquityContribution;
         this.equityContributionLoanPercentage = equityContributionLoanPercentage;
         this.maintainInterestRateOnLoanTermExtension = maintainInterest;
+        this.isIslamic = isIslamic;
 
         if (rates != null) {
             this.rates = rates;
@@ -1303,6 +1307,11 @@ public class LoanProduct extends AbstractPersistableCustom {
             actualChanges.put(LoanProductConstants.equityContributionLoanPercentageParamName, newValue);
             this.equityContributionLoanPercentage = newValue;
         }
+        if (command.isChangeInBooleanParameterNamed(LoanProductConstants.IS_ISLAMIC, this.isIslamic)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(LoanProductConstants.IS_ISLAMIC);
+            actualChanges.put(LoanProductConstants.IS_ISLAMIC, newValue);
+            this.isIslamic = newValue;
+        }
 
         return actualChanges;
     }
@@ -1756,5 +1765,9 @@ public class LoanProduct extends AbstractPersistableCustom {
 
     public void setProductType(CodeValue productType) {
         this.productType = productType;
+    }
+
+    public Boolean isIslamic() {
+        return isIslamic;
     }
 }

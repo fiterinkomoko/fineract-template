@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -167,5 +168,20 @@ public final class DateUtils {
 
     public static LocalDateTime convertToLocalDateTime(Date date) {
         return date.toInstant().atZone(getDateTimeZoneOfTenant()).toLocalDateTime();
+    }
+
+    public static String convertLocalDateToLong(LocalDate localDate) {
+        if (localDate == null) {
+            return "";
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        String formattedDate = localDate.format(formatter);
+        return formattedDate;
+    }
+
+    public static String generateTimestamp() {
+        ZonedDateTime currentUTC = ZonedDateTime.now(ZoneOffset.UTC);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+        return currentUTC.format(formatter);
     }
 }

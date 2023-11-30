@@ -30,4 +30,6 @@ public interface DocumentReadPlatformService {
 
     DocumentData retrieveDocument(String entityType, Long entityId, Long documentId);
 
+    DocumentData retrieveKivaLoanProfileImage(String entityType, Long entityId);
+
 }

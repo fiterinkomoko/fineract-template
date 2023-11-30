@@ -6,11 +6,14 @@
     "firstname": "#(faker.name().firstName())",
     "lastname": "#(faker.name().lastName())",
     "mobileNo": "#(faker.phoneNumber())",
+    "externalId":"#(faker.lorem().characters(70))",
     "active": true,
     "locale": "en",
     "dateFormat": "#(format)",
     "activationDate": "#(clientCreationDate)",
     "submittedOnDate": "#(clientCreationDate)",
+    "externalId": "#(faker.lorem().characters(70))",
+    "genderId": "#(genderCodeId)",
     "dateOfBirth": "#(df.format(faker.date().birthday()))"
   },
   "updateClientPayload": {
@@ -18,11 +21,14 @@
     "firstname": "#(faker.name().firstName())",
     "lastname": "#(faker.name().lastName())",
     "mobileNo": "#(faker.phoneNumber())",
+    "externalId": "#(faker.lorem().characters(70))",
     "active": true,
     "locale": "en",
     "dateFormat": "#(format)",
     "activationDate": "#(df.format(calendar.getTime()))",
     "submittedOnDate": "#(df.format(calendar.getTime()))",
+    "externalId": "#(faker.lorem().characters(70))",
+    "genderId": "#(genderCodeId)",
     "dateOfBirth": "#(df.format(faker.date().birthday()))"
   },
   "activateClientPayload": {
@@ -36,6 +42,7 @@
     "legalFormId": 2,
     "fullname": "Business",
     "mobileNo": "#(faker.phoneNumber().cellPhone())",
+    "externalId": "#(faker.lorem().characters(70))",
     "clientNonPersonDetails": {
       "incorpNumber": "#(faker.number().randomNumber())",
       "locale": "en",
@@ -50,6 +57,8 @@
     "dateOfBirth": "#(df.format(faker.date().birthday()))",
     "savingsProductId": null,
     "mnemonics": "anything",
+    "externalId": "#(faker.lorem().characters(70))",
+    "genderId": "#(genderCodeId)",
     "initials": "1"
   },
   "updateEntityClientPayload": {
@@ -58,6 +67,7 @@
     "isStaff": false,
     "mobileNo": "#(faker.phoneNumber().cellPhone())",
     "fullname": "Business update",
+    "externalId": "#(faker.lorem().characters(70))",
     "clientNonPersonDetails": {
        "incorpNumber": "#(faker.number().randomNumber())",
        "locale": "en",
@@ -75,6 +85,7 @@
     "submittedOnDate": "#(df.format(calendar.getTime()))",
     "externalId": "#(faker.number().randomNumber())",
     "mnemonics": "anything",
+    "genderId": "#(genderCodeId)",
     "initials": "1"
   },
   "createClientWithSavingsPayload" : {
@@ -85,6 +96,7 @@
     "lastname": "#(faker.name().lastName())",
     "mobileNo": "#(faker.phoneNumber().cellPhone())",
     "altMobileNo": "#(faker.phoneNumber().cellPhone())",
+    "externalId": "#(faker.lorem().characters(70))",
     "active": true,
     "dailyWithdrawLimit": "100000",
     "singleWithdrawLimit": "500000",
@@ -95,6 +107,8 @@
     "dateFormat": "#(format)",
     "activationDate": "#(df.format(calendar.getTime()))",
     "submittedOnDate": "#(df.format(calendar.getTime()))",
+    "externalId": "#(faker.lorem().characters(70))",
+    "genderId": "#(genderCodeId)",
     "dateOfBirth": "#(df.format(faker.date().birthday()))"
   },
   "createClientWithdrawalLimitsPayload": {
@@ -103,6 +117,7 @@
     "legalFormId": 1,
     "firstname": "#(faker.name().firstName())",
     "lastname": "#(faker.name().lastName())",
+    "externalId": "#(faker.lorem().characters(70))",
     "mobileNo": "#(faker.phoneNumber().cellPhone())",
     "active": true,
     "locale": "en",
@@ -114,6 +129,8 @@
     "initials": "1",
     "dailyWithdrawLimit": "#(dailyWithdrawLimit)",
     "singleWithdrawLimit": "#(singleWithdrawLimit)",
+    "externalId": "#(faker.lorem().characters(70))",
+    "genderId": "#(genderCodeId)",
     "clientLevelId": "#(clientLevel)"
   }
 }

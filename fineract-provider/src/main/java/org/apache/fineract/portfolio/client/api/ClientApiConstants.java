@@ -203,6 +203,10 @@ public class ClientApiConstants {
     public static final String titleParam = "titleId";
 
     public static final String inBusinessSinceParamName = "inBusinessSince";
+    public static final String KIVA_ID = "kivaId";
+    public static final String PHYSICAL_ADDRESS_DISTRICT = "physicalAddressDistrict";
+    public static final String PHYSICAL_ADDRESS_SECTOR = "physicalAddressSector";
+    public static final String PHYSICAL_ADDRESS_CELL = "physicalAddressCell";
 
     public static final String isRegisteredParam = "isRegistered";
 
@@ -236,6 +240,10 @@ public class ClientApiConstants {
     public static final String guarantor = "guarantor";
     public static final String strataIdParamName = "strataId";
     public static final String nationalityIdParamName = "nationalityId";
+    public static final String NATIONAL_IDENTIFICATION_NUMBER = "nationalIdentificationNumber";
+    public static final String BANK_ACCOUNT_NUMBER = "bankAccountNumber";
+    public static final String BANK_NAME = "bankName";
+    public static final String PASSPORT_NUMBER = "passportNumber";
     public static final String STRATA = "Strata";
     public static final String YEAR_ARRIVED_IN_HOST_COUNTRY = "YearArrivedInHostCountry";
     public static final String coSignors = "coSignorsName";

@@ -304,6 +304,26 @@
         </insert>
     </changeSet>
 
+    <changeSet author="bosco@fiter.io" id="add_is_islamic_column_to_m_product_loan_table">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_product_loan" columnName="is_islamic"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_product_loan">
+            <column name="is_islamic" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="update-m_product_loan_is_islamic_FALSE_AS_Default">
+        <sql>
+            update m_product_loan
+            set is_islamic = false where id > 0 ;
+        </sql>
+    </changeSet>
+
     <changeSet author="bosco@fiter.io" id="add_codes_for_Cohort">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">

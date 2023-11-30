@@ -53,4 +53,7 @@ public interface JournalEntryRepository
      *
      * @Param("loanId") Long loanId, @Param("loanTransactionId") Long loanTransactionId);
      */
+
+    @Query("select journalEntry from JournalEntry journalEntry where journalEntry.isOddoPosted= :isOddoPosted")
+    List<JournalEntry> findJournalEntriesByIsOddoPosted(@Param("isOddoPosted") boolean isOddoPosted);
 }
