@@ -1714,7 +1714,14 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         this.depositAccountTransactionDataValidator.validateTopUp(command);
         FixedDepositAccount account = (FixedDepositAccount) this.depositAccountAssembler.assembleFrom(accountId,
                 DepositAccountType.FIXED_DEPOSIT);
-        AccountAssociations accountAssociations = this.depositAccountDomainService.getLinkedSavingsAccount(accountId);
+        AccountAssociations accountAssociations = this.depositAccountDomainService.getLinkedSavingsAccount(accountId, true);
+        final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
+                .isSavingsInterestPostingAtCurrentPeriodEnd();
+        final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
+
+        final LocalDate today = DateUtils.getLocalDateOfTenant();
+        final MathContext mc = new MathContext(10, MoneyHelper.getRoundingMode());
+        boolean isInterestTransfer = false;
 
         this.checkClientOrGroupActive(account);
         account.setApplyPreclosureCharges(false);
@@ -1722,6 +1729,8 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         FixedDepositApplicationReq fixedDepositApplicationReq = this.generateFixedDepositApplicationReq(account, command);
         fixedDepositApplicationReq.setDepositAmount(command.bigDecimalValueOfParameterNamed(depositAmountParamName));
+        account.postAccrualInterest(mc, today, isInterestTransfer, isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth,
+                today, account.maturityDate());
         fixedDepositApplicationReq.setInterestCarriedForward(this.calculateInterestCarriedForward(account));
         boolean changeTenure = command.booleanPrimitiveValueOfParameterNamed(changeTenureParamName);
         if (!changeTenure) {
@@ -1771,7 +1780,9 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
     private FixedDepositAccount createNewAccount(FixedDepositApplicationReq fixedDepositApplicationReq, FixedDepositAccount account,
             AccountAssociations accountAssociations) {
-        fixedDepositApplicationReq.setSavingsAccountId(accountAssociations.linkedSavingsAccount().getId());
+        if (null != accountAssociations) {
+            fixedDepositApplicationReq.setSavingsAccountId(accountAssociations.linkedSavingsAccount().getId());
+        }
         Set<SavingsAccountCharge> charges = this.generateCharges(account);
         return this.depositApplicationProcessWritePlatformService.createFixedDepositAccount(fixedDepositApplicationReq,
                 account.savingsProduct(), charges);
@@ -1925,8 +1936,10 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 DateTimeFormatter.ofPattern(fixedDepositPreclosureReq.getDateFormat()).withLocale(fixedDepositPreclosureReq.getLocale()));
         fixedDepositPreclosureReq.setClosedDate(command.localDateValueOfParameterNamed(submittedOnDateParamName));
         fixedDepositPreclosureReq.setClosureType(DepositAccountOnClosureType.TRANSFER_TO_SAVINGS);
-        fixedDepositPreclosureReq.setLinkedSavingsAccount(accountAssociations.linkedSavingsAccount());
-        fixedDepositPreclosureReq.setToSavingsAccountId(accountAssociations.linkedSavingsAccount().getId());
+        if (null != accountAssociations) {
+            fixedDepositPreclosureReq.setLinkedSavingsAccount(accountAssociations.linkedSavingsAccount());
+            fixedDepositPreclosureReq.setToSavingsAccountId(accountAssociations.linkedSavingsAccount().getId());
+        }
         fixedDepositPreclosureReq.setTransferDescription("Partial Liquidation");
         fixedDepositPreclosureReq.setTopUp(topUp);
         return fixedDepositPreclosureReq;
@@ -1952,11 +1965,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 AccountAssociations accountAssociation = this.accountAssociationsRepository.findBySavingsIdAndType(account.getId(),
                         AccountAssociationType.LINKED_ACCOUNT_ASSOCIATION.getValue());
 
-                if (accountAssociation == null) {
-                    // Linked accounts are mandatory for FDs, so we are simply going to throw an exception if it's null
-                    ApiParameterError error = ApiParameterError.generalError("linked.account.is.missing", "Linked account is missing");
-                    throw new PlatformApiDataValidationException(Arrays.asList(error));
-                } else {
+                if (accountAssociation != null) {
                     final SavingsAccount fromSavingsAccount = null;
                     boolean isRegularTransaction = false;
                     final boolean isExceptionForBalanceCheck = false;
@@ -1966,6 +1975,10 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                             null, null, AccountTransferType.ACCOUNT_TRANSFER.getValue(), null, null, null, null, account,
                             fromSavingsAccount, isRegularTransaction, isExceptionForBalanceCheck);
                     this.accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
+                } else {
+                    final PaymentDetail paymentDetail = null;
+                    this.depositAccountDomainService.handleFDDeposit(account, fmt, account.getActivationLocalDate(),
+                            amountForDeposit.getAmount(), paymentDetail);
                 }
                 final boolean isInterestTransfer = false;
                 final LocalDate postInterestOnDate = null;
@@ -2072,7 +2085,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         FixedDepositAccount account = (FixedDepositAccount) this.depositAccountAssembler.assembleFrom(accountId,
                 DepositAccountType.FIXED_DEPOSIT);
         this.depositAccountTransactionDataValidator.validatePartialLiquidation(account, command);
-        AccountAssociations accountAssociations = this.depositAccountDomainService.getLinkedSavingsAccount(accountId);
+        AccountAssociations accountAssociations = this.depositAccountDomainService.getLinkedSavingsAccount(accountId, false);
 
         Integer currentTotalLiquidations = depositAccountReadPlatformService
                 .retrieveTotalOfLinkedAccounts(account.getAccountTermAndPreClosure().getLinkedOriginAccountId());

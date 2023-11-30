@@ -95,6 +95,8 @@ public final class GroupingTypesApiConstants {
     public static final String REPRESENTATIVE_ID = "representativeId";
     public static final String REPRESENTATIVE_NAME = "representativeName";
 
+    public static final String accountNo = "accountNo";
+
     /**
      * These parameters will match the class level parameters of {@link CenterData}. Where possible, we try to get
      * response parameters to match those of request parameters.
