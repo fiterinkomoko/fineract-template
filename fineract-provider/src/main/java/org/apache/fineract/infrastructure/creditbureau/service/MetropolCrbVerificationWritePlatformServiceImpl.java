@@ -150,7 +150,7 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
     private MetropolCrbIdentityReport verifyCreditInfoEnhanced(String documentId, Loan loan, Client client)
             throws NoSuchAlgorithmException, IOException {
         CrbKenyaMetropolRequestData requestData = new CrbKenyaMetropolRequestData(10, "45555", documentId, "001",
-                loan.getApprovedPrincipal(), 1);
+                loan.getApprovedPrincipal().intValue(), 1);
         String jsonPayload = convertRequestPayloadToJson(requestData);
 
         String timestamp = DateUtils.generateTimestamp();
