@@ -61,8 +61,7 @@ public final class GroupingTypesDataValidator {
             GroupingTypesApiConstants.officeIdParamName, GroupingTypesApiConstants.staffIdParamName,
             GroupingTypesApiConstants.activeParamName, GroupingTypesApiConstants.activationDateParamName,
             GroupingTypesApiConstants.clientMembersParamName, GroupingTypesApiConstants.collectionMeetingCalendar,
-            GroupingTypesApiConstants.submittedOnDateParamName, GroupingTypesApiConstants.datatables, GroupingTypesApiConstants.accountNo));
-            GroupingTypesApiConstants.submittedOnDateParamName, GroupingTypesApiConstants.datatables,
+            GroupingTypesApiConstants.submittedOnDateParamName, GroupingTypesApiConstants.datatables, GroupingTypesApiConstants.accountNo,
             GroupingTypesApiConstants.representativeIdParamName));
 
     private static final Set<String> ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<>(
