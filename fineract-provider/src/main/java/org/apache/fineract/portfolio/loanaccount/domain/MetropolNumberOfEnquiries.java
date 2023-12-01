@@ -28,41 +28,16 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
 @Data
 @Entity
-@Table(name = "m_metropol_account_info")
-public class MetropolAccountInfo extends AbstractPersistableCustom {
+@Table(name = "m_metropol_number_of_enquiries")
+public class MetropolNumberOfEnquiries extends AbstractPersistableCustom {
 
     @ManyToOne
     @JoinColumn(name = "credit_info_enhanced_id", nullable = true)
     private MetropolCrbCreditInfoEnhancedReport crbCreditInfoEnhancedReport;
-    @Column(name = "account_number")
-    private String accountNumber;
-    @Column(name = "account_status")
-    private String accountStatus;
-    @Column(name = "current_balance")
-    private String currentBalance;
-    @Column(name = "date_opened")
-    private String dateOpened;
-    @Column(name = "days_in_arrears")
-    private Integer daysInArrears;
-    @Column(name = "delinquency_code")
-    private String delinquencyCode;
-    @Column(name = "highest_days_in_arrears")
-    private Integer highestDaysInArrears;
-    @Column(name = "is_your_account")
-    private Boolean isYourAccount;
-    @Column(name = "last_payment_amount")
-    private String lastPaymentAmount;
-    @Column(name = "last_payment_date")
-    private String lastPaymentDate;
-    @Column(name = "loaded_at")
-    private String loadedAt;
-    @Column(name = "original_amount")
-    private String originalAmount;
-    @Column(name = "overdue_balance")
-    private String overdueBalance;
-    @Column(name = "overdue_date")
-    private String overdueDate;
-    @Column(name = "product_type_id")
-    private Integer productTypeId;
-
+    @Column(name = "last_12_months")
+    private Integer last12Months;
+    @Column(name = "last_3_months")
+    private Integer last3Months;
+    @Column(name = "last_6_months")
+    private Integer last6Months;
 }
