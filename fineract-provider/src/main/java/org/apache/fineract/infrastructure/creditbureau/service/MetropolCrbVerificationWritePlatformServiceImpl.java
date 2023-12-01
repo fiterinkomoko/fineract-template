@@ -54,6 +54,12 @@ import org.apache.fineract.portfolio.loanaccount.domain.MetropolCrbCreditInfoEnh
 import org.apache.fineract.portfolio.loanaccount.domain.MetropolCrbCreditInfoEnhancedRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.MetropolCrbIdentityReport;
 import org.apache.fineract.portfolio.loanaccount.domain.MetropolCrbIdentityVerificationRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolLenderSector;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolLenderSectorRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolNumberOfBouncedCheques;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolNumberOfBouncedChequesRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolNumberOfCreditApplication;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolNumberOfCreditApplicationRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.MetropolNumberOfEnquiries;
 import org.apache.fineract.portfolio.loanaccount.domain.MetropolNumberOfEnquiriesRepository;
 import org.apache.fineract.portfolio.loanaccount.service.TransUnionCrbConsumerVerificationReadPlatformService;
@@ -77,6 +83,9 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
     private final MetropolCrbCreditInfoEnhancedRepository metropolCrbCreditInfoEnhancedRepository;
     private final MetropolCrbAccountInfoRepository accountInfoRepository;
     private final MetropolNumberOfEnquiriesRepository numberOfEnquiriesRepository;
+    private final MetropolNumberOfCreditApplicationRepository numberOfCreditApplicationRepository;
+    private final MetropolNumberOfBouncedChequesRepository numberOfBouncedChequesRepository;
+    private final MetropolLenderSectorRepository lenderSectorRepository;
 
     @Autowired
     private final Environment env;
@@ -178,6 +187,12 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
         extractAndSaveAccountInfo(jsonResponse, crbCreditInfoEnhancedReport);
         // NumberOfEnquires
         extractAndSaveNumberOfInquiries(jsonResponse, crbCreditInfoEnhancedReport);
+        // Number of credit Application
+        extractAndSaveNumberOfCreditApplication(jsonResponse, crbCreditInfoEnhancedReport);
+        // Number of bounched checques
+        extractAndSaveNumberOfBouncedCheques(jsonResponse, crbCreditInfoEnhancedReport);
+        // Lender Sector
+        extractAndSaveLenderSector(jsonResponse, crbCreditInfoEnhancedReport);
         return crbCreditInfoEnhancedReport;
     }
 
@@ -361,6 +376,61 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
             num.setLast3Months(getIntegerField(obj, "last_3_months"));
             num.setLast6Months(getIntegerField(obj, "last_6_months"));
             numberOfEnquiriesRepository.saveAndFlush(num);
+        }
+    }
+
+    @NotNull
+    private void extractAndSaveNumberOfCreditApplication(JsonObject jsonResponse,
+            MetropolCrbCreditInfoEnhancedReport crbCreditInfoEnhancedReport) {
+        JsonObject obj = jsonResponse.getAsJsonObject("no_of_credit_applications");
+
+        MetropolNumberOfCreditApplication creditApplication = new MetropolNumberOfCreditApplication();
+        if (obj != null) {
+            creditApplication.setCrbCreditInfoEnhancedReport(crbCreditInfoEnhancedReport);
+            creditApplication.setLast12Months(getIntegerField(obj, "last_12_months"));
+            creditApplication.setLast3Months(getIntegerField(obj, "last_3_months"));
+            creditApplication.setLast6Months(getIntegerField(obj, "last_6_months"));
+            numberOfCreditApplicationRepository.saveAndFlush(creditApplication);
+        }
+    }
+
+    @NotNull
+    private void extractAndSaveNumberOfBouncedCheques(JsonObject jsonResponse,
+            MetropolCrbCreditInfoEnhancedReport crbCreditInfoEnhancedReport) {
+        JsonObject obj = jsonResponse.getAsJsonObject("no_of_bounced_cheques");
+
+        MetropolNumberOfBouncedCheques numberOfBouncedCheques = new MetropolNumberOfBouncedCheques();
+        if (obj != null) {
+            numberOfBouncedCheques.setCrbCreditInfoEnhancedReport(crbCreditInfoEnhancedReport);
+            numberOfBouncedCheques.setLast12Months(getIntegerField(obj, "last_12_months"));
+            numberOfBouncedCheques.setLast3Months(getIntegerField(obj, "last_3_months"));
+            numberOfBouncedCheques.setLast6Months(getIntegerField(obj, "last_6_months"));
+            numberOfBouncedChequesRepository.saveAndFlush(numberOfBouncedCheques);
+        }
+    }
+
+    @NotNull
+    private void extractAndSaveLenderSector(JsonObject jsonResponse, MetropolCrbCreditInfoEnhancedReport crbCreditInfoEnhancedReport) {
+        JsonObject obj = jsonResponse.getAsJsonObject("lender_sector");
+
+        MetropolLenderSector lenderSector = new MetropolLenderSector();
+        if (obj != null) {
+            JsonObject sectorBankJson = obj.getAsJsonObject("sector_bank");
+            JsonObject sectorOtherJson = obj.getAsJsonObject("sector_other");
+
+            lenderSector.setCrbCreditInfoEnhancedReport(crbCreditInfoEnhancedReport);
+            if (sectorBankJson != null) {
+                lenderSector.setBankAccountNpa(getIntegerField(sectorBankJson, "account_npa"));
+                lenderSector.setBankAccountPerforming(getIntegerField(sectorBankJson, "account_performing"));
+                lenderSector.setBankAccountPerformingNpaHistory(getIntegerField(sectorBankJson, "account_performing_npa_history"));
+            }
+
+            if (sectorOtherJson != null) {
+                lenderSector.setOtherAccountNpa(getIntegerField(sectorOtherJson, "account_npa"));
+                lenderSector.setOtherAccountPerforming(getIntegerField(sectorOtherJson, "account_performing"));
+                lenderSector.setOtherAccountPerformingNpaHistory(getIntegerField(sectorOtherJson, "account_performing_npa_history"));
+            }
+            lenderSectorRepository.saveAndFlush(lenderSector);
         }
     }
 }

@@ -284,4 +284,88 @@
             </column>
         </createTable>
     </changeSet>
+
+    <changeSet id="create-m_metropol_no_of_credit_applications" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_metropol_no_of_credit_applications"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_metropol_no_of_credit_applications">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="credit_info_enhanced_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_m_metropol_crb_credit_info_enhanced_report_id" references="m_metropol_crb_credit_info_enhanced_report(id)"/>
+            </column>
+            <column name="last_12_months" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="last_3_months" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="last_6_months" type="int">
+                <constraints nullable="true" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-m_metropol_no_of_bounced_cheques" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_metropol_no_of_bounced_cheques"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_metropol_no_of_bounced_cheques">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="credit_info_enhanced_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_m_metropol_crb_credit_info_enhanced_report_id" references="m_metropol_crb_credit_info_enhanced_report(id)"/>
+            </column>
+            <column name="last_12_months" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="last_3_months" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="last_6_months" type="int">
+                <constraints nullable="true" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-m_metropol_lender_sector" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_metropol_lender_sector"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_metropol_lender_sector">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="credit_info_enhanced_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_m_metropol_crb_credit_info_enhanced_report_id" references="m_metropol_crb_credit_info_enhanced_report(id)"/>
+            </column>
+            <column name="bank_account_npa" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="bank_account_performing" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="bank_account_performing_npa_history" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="other_account_npa" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="other_account_performing" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="other_account_performing_npa_history" type="int">
+                <constraints nullable="true" />
+            </column>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>
