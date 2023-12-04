@@ -20,8 +20,10 @@ package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.loanaccount.data.CrbKenyaMetropolRequestData;
+import org.apache.fineract.portfolio.loanaccount.data.MetropolAccountInfoData;
 import org.apache.fineract.portfolio.loanaccount.data.MetropolCrbCreditInfoEnchancedData;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -45,6 +47,13 @@ public class MetropolCrbReadPlatformServiceImpl implements MetropolCrbReadPlatfo
         final MetropolCrbCreditInfoEnchancedMapper mapper = new MetropolCrbCreditInfoEnchancedMapper();
         final String sql = "SELECT " + mapper.schema() + " order by cie.id DESC LIMIT 1 ";
         return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { loanId });
+    }
+
+    @Override
+    public List<MetropolAccountInfoData> fetchAccountInfoDetails(Integer creditInfoEnhancedId) {
+        final MetropolAccountInfoDataMapper mapper = new MetropolAccountInfoDataMapper();
+        final String sql = "SELECT " + mapper.schema() + "order by info.id ASC ";
+        return this.jdbcTemplate.query(sql, mapper, new Object[] { creditInfoEnhancedId });
     }
 
     private static final class IdentityVerificationCreditMapper implements RowMapper<CrbKenyaMetropolRequestData> {
@@ -193,6 +202,54 @@ public class MetropolCrbReadPlatformServiceImpl implements MetropolCrbReadPlatfo
                     lenderOtherAccountPerforming, lenderOtherAccountPerformingNpaHistory, bChecquesLast12Months, bChecquesLast3Months,
                     bChecquesLast6Months, creditApLast12Months, creditApLast3Months, creditApLast6Months, enquiriesApLast12Months,
                     enquiriesApLast3Months, enquiriesApLast6Months);
+
+        }
+    }
+
+    private static final class MetropolAccountInfoDataMapper implements RowMapper<MetropolAccountInfoData> {
+
+        public String schema() {
+            final StringBuilder sql = new StringBuilder();
+
+            sql.append("   info.id                      AS id,   " + "       info.account_number          AS accountNumber,   "
+                    + "       info.account_status          AS accountStatus,   "
+                    + "       info.current_balance         AS currentBalance,   " + "       info.date_opened             AS dateOpened,   "
+                    + "       info.days_in_arrears         AS daysInArrears,   "
+                    + "       info.delinquency_code        AS delinquencyCode,   "
+                    + "       info.highest_days_in_arrears AS highestDaysInArrears,   "
+                    + "       info.is_your_account         AS isYourAccount,   "
+                    + "       info.last_payment_amount     AS lastPaymentAmount,   "
+                    + "       info.last_payment_date       AS lastPaymentDate,   " + "       info.loaded_at               AS loadedAt,   "
+                    + "       info.original_amount         AS originalAmount,   "
+                    + "       info.overdue_balance         AS overdueBalance,   " + "       info.overdue_date            AS overdueDate,   "
+                    + "       info.product_type_id         AS productTypeId   " + " FROM m_metropol_account_info info   "
+                    + " WHERE info.credit_info_enhanced_id = ?  ");
+            return sql.toString();
+        }
+
+        @Override
+        public MetropolAccountInfoData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final Integer id = rs.getInt("id");
+            final String accountNumber = rs.getString("accountNumber");
+            final String accountStatus = rs.getString("accountStatus");
+            final String currentBalance = rs.getString("currentBalance");
+            final String dateOpened = rs.getString("dateOpened");
+            final Integer daysInArrears = rs.getInt("daysInArrears");
+            final String delinquencyCode = rs.getString("delinquencyCode");
+            final Integer highestDaysInArrears = rs.getInt("highestDaysInArrears");
+            final Boolean isYourAccount = rs.getBoolean("isYourAccount");
+            final String lastPaymentAmount = rs.getString("lastPaymentAmount");
+            final String lastPaymentDate = rs.getString("lastPaymentDate");
+            final String loadedAt = rs.getString("loadedAt");
+            final String originalAmount = rs.getString("originalAmount");
+            final String overdueBalance = rs.getString("overdueBalance");
+            final String overdueDate = rs.getString("overdueDate");
+            final Integer productTypeId = rs.getInt("productTypeId");
+
+            return new MetropolAccountInfoData(id, accountNumber, accountStatus, currentBalance, dateOpened, daysInArrears, delinquencyCode,
+                    highestDaysInArrears, isYourAccount, lastPaymentAmount, lastPaymentDate, loadedAt, originalAmount, overdueBalance,
+                    overdueDate, productTypeId);
 
         }
     }

@@ -39,4 +39,26 @@ public class MetropolAccountInfoData {
     private String overdueBalance;
     private String overdueDate;
     private Integer productTypeId;
+
+    public MetropolAccountInfoData(Integer id, String accountNumber, String accountStatus, String currentBalance, String dateOpened,
+            Integer daysInArrears, String delinquencyCode, Integer highestDaysInArrears, Boolean isYourAccount, String lastPaymentAmount,
+            String lastPaymentDate, String loadedAt, String originalAmount, String overdueBalance, String overdueDate,
+            Integer productTypeId) {
+        this.id = id;
+        this.accountNumber = accountNumber;
+        this.accountStatus = accountStatus;
+        this.currentBalance = currentBalance;
+        this.dateOpened = dateOpened;
+        this.daysInArrears = daysInArrears;
+        this.delinquencyCode = delinquencyCode;
+        this.highestDaysInArrears = highestDaysInArrears;
+        this.isYourAccount = isYourAccount;
+        this.lastPaymentAmount = lastPaymentAmount;
+        this.lastPaymentDate = lastPaymentDate;
+        this.loadedAt = loadedAt;
+        this.originalAmount = originalAmount;
+        this.overdueBalance = overdueBalance;
+        this.overdueDate = overdueDate;
+        this.productTypeId = productTypeId;
+    }
 }
