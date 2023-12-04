@@ -16,14 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.portfolio.loanaccount.data;
 
-import org.apache.fineract.portfolio.loanaccount.data.CrbKenyaMetropolRequestData;
-import org.apache.fineract.portfolio.loanaccount.data.MetropolCrbCreditInfoEnchancedData;
+import lombok.Data;
 
-public interface MetropolCrbReadPlatformService {
+@Data
+public class MetropolAccountInfoData {
 
-    CrbKenyaMetropolRequestData fetchIdentityVerificationDetails(Integer loanId);
-
-    MetropolCrbCreditInfoEnchancedData fetchCreditInfoEnhancedDetails(Integer loanId);
+    private Integer id;
+    private String accountNumber;
+    private String accountStatus;
+    private String currentBalance;
+    private String dateOpened;
+    private Integer daysInArrears;
+    private String delinquencyCode;
+    private Integer highestDaysInArrears;
+    private Boolean isYourAccount;
+    private String lastPaymentAmount;
+    private String lastPaymentDate;
+    private String loadedAt;
+    private String originalAmount;
+    private String overdueBalance;
+    private String overdueDate;
+    private Integer productTypeId;
 }

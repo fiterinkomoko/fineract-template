@@ -53,6 +53,7 @@ public class CrbKenyaMetropolRequestData {
     private String serialNumber;
     private String trxId;
     private String createdOn;
+    private MetropolCrbCreditInfoEnchancedData metropolCrbCreditInfoEnchancedData;
 
     public CrbKenyaMetropolRequestData(Integer report_type, String identity_number, String identity_type) {
         this.report_type = report_type;
