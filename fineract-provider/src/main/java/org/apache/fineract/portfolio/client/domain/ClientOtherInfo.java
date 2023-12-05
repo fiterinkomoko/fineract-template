@@ -226,7 +226,7 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
                 actualChanges.put(ClientApiConstants.incomeGeneratingActivityMonthlyAmountParamName, newValue);
                 this.incomeGeneratingActivityMonthlyAmount = newValue;
             }
-            if (command.isChangeInStringParameterNamed(ClientApiConstants.telephoneNoParamName, this.telephoneNo)) {
+            if (command.isChangeInStringParameterNamed(ClientApiConstants.telephoneNoParamName, this.getTelephoneNo())) {
                 final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.telephoneNoParamName);
                 actualChanges.put(ClientApiConstants.telephoneNoParamName, newValue);
                 this.telephoneNo = newValue;
@@ -287,5 +287,17 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
 
     public Client getClient() {
         return client;
+    }
+
+    public String getTelephoneNo() {
+        return telephoneNo;
+    }
+
+    public String getBankAccountNumber() {
+        return bankAccountNumber;
+    }
+
+    public String getBankName() {
+        return bankName;
     }
 }

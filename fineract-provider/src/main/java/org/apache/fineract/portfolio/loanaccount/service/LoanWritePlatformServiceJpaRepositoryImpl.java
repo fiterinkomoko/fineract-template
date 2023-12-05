@@ -284,6 +284,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final PostDatedChecksRepository postDatedChecksRepository;
     private final LoanRepaymentReminderRepository loanRepaymentReminderRepository;
     private final LoanDecisionStateUtilService loanDecisionStateUtilService;
+    private final DisbursementRequestService disbursementRequestService;
 
     @Autowired
     private ActiveMqNotificationDomainServiceImpl activeMqNotificationDomainService;
@@ -3525,6 +3526,18 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder();
         return commandProcessingResultBuilder.withLoanId(loanId) //
                 .with(changes) //
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public CommandProcessingResult disburseRequestLoan(Long loanId, JsonCommand command) {
+        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        this.disbursementRequestService.disburseRequestLoan(loan, command);
+        loan.handleDisbursementRequest();
+        this.saveLoanWithDataIntegrityViolationChecks(loan);
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(loan.getId())
+                .withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId()).withGroupId(loan.getGroupId()).withLoanId(loanId)
                 .build();
     }
 
