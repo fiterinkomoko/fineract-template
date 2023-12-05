@@ -130,4 +130,242 @@
     <changeSet id="modify-m_client_non_person-remarks-data-type-to-text" author="bosco@fiter.io">
         <modifyDataType tableName="m_client_non_person" columnName="remarks" newDataType="TEXT"/>
     </changeSet>
+    <changeSet id="create-m_metropol_crb_credit_info_enhanced_report" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_metropol_crb_credit_info_enhanced_report"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_metropol_crb_credit_info_enhanced_report">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="client_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_m_metropol_crb_credit_info_enhanced_report_client_id" references="m_client(id)"/>
+            </column>
+            <column name="loan_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_m_metropol_crb_credit_info_enhanced_report_loan_id" references="m_loan(id)"/>
+            </column>
+            <column name="report_type" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="api_code" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="api_code_description" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="application_ref_no" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="credit_score" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="delinquency_code" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="has_error" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="true" />
+            </column>
+            <column name="has_fraud" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="true" />
+            </column>
+            <column name="identity_number" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="identity_type" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="is_guarantor" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="true" />
+            </column>
+            <column name="trx_id" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="create-m_metropol_crb_credit_info_enhanced_report-auditable" context="mysql">
+        <addColumn tableName="m_metropol_crb_credit_info_enhanced_report">
+            <column name="created_on_utc" type="DATETIME"/>
+            <column name="created_by" type="BIGINT"/>
+            <column name="last_modified_by" type="BIGINT"/>
+            <column name="last_modified_on_utc" type="DATETIME"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="create-m_metropol_crb_credit_info_enhanced_report-auditable" context="postgresql">
+        <addColumn tableName="m_metropol_crb_credit_info_enhanced_report">
+            <column name="created_on_utc" type="TIMESTAMP WITH TIME ZONE"/>
+            <column name="created_by" type="BIGINT" />
+            <column name="last_modified_by" type="BIGINT"/>
+            <column name="last_modified_on_utc" type="TIMESTAMP WITH TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="create-m_metropol_account_info" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_metropol_account_info"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_metropol_account_info">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="credit_info_enhanced_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_m_metropol_crb_credit_info_enhanced_report_id" references="m_metropol_crb_credit_info_enhanced_report(id)"/>
+            </column>
+            <column name="account_number" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="account_status" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="current_balance" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="date_opened" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="days_in_arrears" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="delinquency_code" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="highest_days_in_arrears" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="is_your_account" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="true" />
+            </column>
+            <column name="last_payment_amount" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="last_payment_date" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="loaded_at" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="original_amount" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="overdue_balance" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="overdue_date" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="product_type_id" type="int">
+                <constraints nullable="true" />
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="create-m_metropol_number_of_enquiries" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_metropol_number_of_enquiries"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_metropol_number_of_enquiries">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="credit_info_enhanced_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_m_metropol_crb_credit_info_enhanced_report_id" references="m_metropol_crb_credit_info_enhanced_report(id)"/>
+            </column>
+            <column name="last_12_months" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="last_3_months" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="last_6_months" type="int">
+                <constraints nullable="true" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-m_metropol_no_of_credit_applications" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_metropol_no_of_credit_applications"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_metropol_no_of_credit_applications">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="credit_info_enhanced_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_m_metropol_crb_credit_info_enhanced_report_id" references="m_metropol_crb_credit_info_enhanced_report(id)"/>
+            </column>
+            <column name="last_12_months" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="last_3_months" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="last_6_months" type="int">
+                <constraints nullable="true" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-m_metropol_no_of_bounced_cheques" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_metropol_no_of_bounced_cheques"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_metropol_no_of_bounced_cheques">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="credit_info_enhanced_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_m_metropol_crb_credit_info_enhanced_report_id" references="m_metropol_crb_credit_info_enhanced_report(id)"/>
+            </column>
+            <column name="last_12_months" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="last_3_months" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="last_6_months" type="int">
+                <constraints nullable="true" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-m_metropol_lender_sector" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_metropol_lender_sector"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_metropol_lender_sector">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="credit_info_enhanced_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_m_metropol_crb_credit_info_enhanced_report_id" references="m_metropol_crb_credit_info_enhanced_report(id)"/>
+            </column>
+            <column name="bank_account_npa" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="bank_account_performing" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="bank_account_performing_npa_history" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="other_account_npa" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="other_account_performing" type="int">
+                <constraints nullable="true" />
+            </column>
+            <column name="other_account_performing_npa_history" type="int">
+                <constraints nullable="true" />
+            </column>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>

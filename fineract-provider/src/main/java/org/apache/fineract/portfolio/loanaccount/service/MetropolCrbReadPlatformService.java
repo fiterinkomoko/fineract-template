@@ -18,9 +18,16 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import java.util.List;
 import org.apache.fineract.portfolio.loanaccount.data.CrbKenyaMetropolRequestData;
+import org.apache.fineract.portfolio.loanaccount.data.MetropolAccountInfoData;
+import org.apache.fineract.portfolio.loanaccount.data.MetropolCrbCreditInfoEnchancedData;
 
 public interface MetropolCrbReadPlatformService {
 
     CrbKenyaMetropolRequestData fetchIdentityVerificationDetails(Integer loanId);
+
+    MetropolCrbCreditInfoEnchancedData fetchCreditInfoEnhancedDetails(Integer loanId);
+
+    List<MetropolAccountInfoData> fetchAccountInfoDetails(Integer creditInfoEnhancedId);
 }

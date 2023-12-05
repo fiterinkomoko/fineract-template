@@ -16,14 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.creditbureau.service;
+package org.apache.fineract.portfolio.loanaccount.domain;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface MetropolCrbVerificationWritePlatformService {
+public interface MetropolCrbAccountInfoRepository
+        extends JpaRepository<MetropolAccountInfo, Long>, JpaSpecificationExecutor<MetropolAccountInfo> {
 
-    CommandProcessingResult loanVerificationToMetropolKenya(Long loanId, JsonCommand command);
-
-    CommandProcessingResult loanCreditInfoEnhancedToMetropolKenya(Long loanId, JsonCommand command);
 }

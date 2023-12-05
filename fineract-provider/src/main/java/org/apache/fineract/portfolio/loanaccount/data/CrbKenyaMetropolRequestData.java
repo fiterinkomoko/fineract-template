@@ -24,8 +24,11 @@ import lombok.Data;
 public class CrbKenyaMetropolRequestData {
 
     private Integer report_type;
+    private String application_ref_no;
     private String identity_number;
     private String identity_type;
+    private Integer loan_amount;
+    private Integer report_reason;
     private Integer id;
     private Integer clientId;
     private Integer loanId;
@@ -50,11 +53,22 @@ public class CrbKenyaMetropolRequestData {
     private String serialNumber;
     private String trxId;
     private String createdOn;
+    private MetropolCrbCreditInfoEnchancedData metropolCrbCreditInfoEnchancedData;
 
     public CrbKenyaMetropolRequestData(Integer report_type, String identity_number, String identity_type) {
         this.report_type = report_type;
         this.identity_number = identity_number;
         this.identity_type = identity_type;
+    }
+
+    public CrbKenyaMetropolRequestData(Integer report_type, String application_ref_no, String identity_number, String identity_type,
+            Integer loan_amount, Integer report_reason) {
+        this.report_type = report_type;
+        this.application_ref_no = application_ref_no;
+        this.identity_number = identity_number;
+        this.identity_type = identity_type;
+        this.loan_amount = loan_amount;
+        this.report_reason = report_reason;
     }
 
     public CrbKenyaMetropolRequestData(Integer id, Integer clientId, Integer loanId, String citizenShip, String clan, String dateOfBirth,

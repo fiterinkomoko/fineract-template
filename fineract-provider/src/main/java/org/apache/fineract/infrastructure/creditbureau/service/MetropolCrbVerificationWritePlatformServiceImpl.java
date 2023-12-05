@@ -20,6 +20,8 @@ package org.apache.fineract.infrastructure.creditbureau.service;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.IOException;
@@ -37,6 +39,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.creditbureau.data.CRBREPORTTYPES;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
@@ -45,8 +48,20 @@ import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaConsumerVe
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCorporateVerificationData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolAccountInfo;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolCrbAccountInfoRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolCrbCreditInfoEnhancedReport;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolCrbCreditInfoEnhancedRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.MetropolCrbIdentityReport;
 import org.apache.fineract.portfolio.loanaccount.domain.MetropolCrbIdentityVerificationRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolLenderSector;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolLenderSectorRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolNumberOfBouncedCheques;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolNumberOfBouncedChequesRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolNumberOfCreditApplication;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolNumberOfCreditApplicationRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolNumberOfEnquiries;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolNumberOfEnquiriesRepository;
 import org.apache.fineract.portfolio.loanaccount.service.TransUnionCrbConsumerVerificationReadPlatformService;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -65,6 +80,12 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final TransUnionCrbConsumerVerificationReadPlatformService verificationReadPlatformService;
     private final MetropolCrbIdentityVerificationRepository metropolCrbIdentityVerificationRepository;
+    private final MetropolCrbCreditInfoEnhancedRepository metropolCrbCreditInfoEnhancedRepository;
+    private final MetropolCrbAccountInfoRepository accountInfoRepository;
+    private final MetropolNumberOfEnquiriesRepository numberOfEnquiriesRepository;
+    private final MetropolNumberOfCreditApplicationRepository numberOfCreditApplicationRepository;
+    private final MetropolNumberOfBouncedChequesRepository numberOfBouncedChequesRepository;
+    private final MetropolLenderSectorRepository lenderSectorRepository;
 
     @Autowired
     private final Environment env;
@@ -100,6 +121,37 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
                 .build();
     }
 
+    @Override
+    public CommandProcessingResult loanCreditInfoEnhancedToMetropolKenya(Long loanId, JsonCommand command) {
+        Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+
+        TransUnionRwandaConsumerVerificationData individualClient = null;
+        TransUnionRwandaCorporateVerificationData corporateClient = null;
+
+        if (!loan.getCurrencyCode().equals("KES")) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.currency.is.not.support.on.metropol.crb.credit.info.enhanced",
+                    "Credit Info Enhanced is only supported for loans in KSH but found " + loan.getCurrencyCode() + " currency ");
+        }
+
+        Client clientObj = this.clientRepositoryWrapper.findOneWithNotFoundDetection(loan.getClientId());
+        MetropolCrbCreditInfoEnhancedReport metropolCrbCreditInfoEnhancedReport = null;
+        try {
+            if (clientObj.getLegalForm().equals(LegalForm.PERSON.getValue())) {
+                individualClient = this.verificationReadPlatformService.retrieveConsumerToBeVerifiedToTransUnion(clientObj.getId());
+                metropolCrbCreditInfoEnhancedReport = verifyCreditInfoEnhanced(individualClient.getNationalID(), loan, clientObj);
+            } else {
+                corporateClient = this.verificationReadPlatformService.retrieveCorporateToBeVerifiedToTransUnion(clientObj.getId());
+                metropolCrbCreditInfoEnhancedReport = verifyCreditInfoEnhanced(corporateClient.getCompanyRegNo(), loan, clientObj);
+            }
+        } catch (Exception e) {
+            throw new GeneralPlatformDomainRuleException("Credit Info Enhanced report failed with error: ", e.getMessage());
+        }
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(clientObj.getId()).withResourceIdAsString(metropolCrbCreditInfoEnhancedReport.getId().toString()) //
+                .build();
+    }
+
     private MetropolCrbIdentityReport verifyIdentityDocument(String documentId, Loan loan, Client client)
             throws NoSuchAlgorithmException, IOException {
         CrbKenyaMetropolRequestData requestData = new CrbKenyaMetropolRequestData(1, documentId, "001");
@@ -108,11 +160,43 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
         String timestamp = DateUtils.generateTimestamp();
         String hash = generateHash(jsonPayload, timestamp);
 
-        return sendRequest(getConfigProperty("fineract.integrations.metropol.crb.rest.clientVerify"), jsonPayload, timestamp, hash, loan,
-                client);
+        JsonObject jsonResponse = sendRequest(getConfigProperty("fineract.integrations.metropol.crb.rest.clientVerify"), jsonPayload,
+                timestamp, hash, loan, client);
+
+        MetropolCrbIdentityReport metropolCrbIdentityReport = getMetropolCrbIdentityReport(jsonResponse, loan, client);
+        metropolCrbIdentityReport = metropolCrbIdentityVerificationRepository.saveAndFlush(metropolCrbIdentityReport);
+        return metropolCrbIdentityReport;
     }
 
-    private MetropolCrbIdentityReport sendRequest(String urlStr, String payload, String timestamp, String hash, Loan loan, Client client)
+    private MetropolCrbCreditInfoEnhancedReport verifyCreditInfoEnhanced(String documentId, Loan loan, Client client)
+            throws NoSuchAlgorithmException, IOException {
+        CrbKenyaMetropolRequestData requestData = new CrbKenyaMetropolRequestData(10, "45555", documentId, "001",
+                loan.getApprovedPrincipal().intValue(), 1);
+        String jsonPayload = convertRequestPayloadToJson(requestData);
+
+        String timestamp = DateUtils.generateTimestamp();
+        String hash = generateHash(jsonPayload, timestamp);
+
+        JsonObject jsonResponse = sendRequest(getConfigProperty("fineract.integrations.metropol.crb.rest.clientVerifyCreditInfoEnhanced"),
+                jsonPayload, timestamp, hash, loan, client);
+
+        MetropolCrbCreditInfoEnhancedReport crbCreditInfoEnhancedReport = getMetropolCrbCreditInfoEnhancedReport(jsonResponse, loan,
+                client);
+        crbCreditInfoEnhancedReport = metropolCrbCreditInfoEnhancedRepository.saveAndFlush(crbCreditInfoEnhancedReport);
+        // Save Account Info
+        extractAndSaveAccountInfo(jsonResponse, crbCreditInfoEnhancedReport);
+        // NumberOfEnquires
+        extractAndSaveNumberOfInquiries(jsonResponse, crbCreditInfoEnhancedReport);
+        // Number of credit Application
+        extractAndSaveNumberOfCreditApplication(jsonResponse, crbCreditInfoEnhancedReport);
+        // Number of bounched checques
+        extractAndSaveNumberOfBouncedCheques(jsonResponse, crbCreditInfoEnhancedReport);
+        // Lender Sector
+        extractAndSaveLenderSector(jsonResponse, crbCreditInfoEnhancedReport);
+        return crbCreditInfoEnhancedReport;
+    }
+
+    private JsonObject sendRequest(String urlStr, String payload, String timestamp, String hash, Loan loan, Client client)
             throws IOException {
         OkHttpClient httpClient = new OkHttpClient();
 
@@ -128,20 +212,10 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
 
             String resObject = response.body().string();
             LOG.info("Response from Metropol CRB: " + resObject);
-            JsonObject jsonResponse = JsonParser.parseString(resObject).getAsJsonObject();
-
-            Integer apiCode = jsonResponse.get("api_code").getAsInt();
-            if (apiCode != 200) {
-                throw new GeneralPlatformDomainRuleException("error.msg.loan.identity.verification.failed",
-                        "Loan identity verification failed with error: " + getStringField(jsonResponse, "api_code_description") + "");
-            }
-
-            MetropolCrbIdentityReport metropolCrbIdentityReport = getMetropolCrbIdentityReport(jsonResponse, loan, client);
-            metropolCrbIdentityReport = metropolCrbIdentityVerificationRepository.saveAndFlush(metropolCrbIdentityReport);
-            return metropolCrbIdentityReport;
+            return JsonParser.parseString(resObject).getAsJsonObject();
         } else {
-            throw new GeneralPlatformDomainRuleException("error.msg.loan.identity.verification.failed",
-                    "Loan identity verification failed with error: " + response.code() + ":" + response.message() + "");
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.credit.info.enhanced.failed",
+                    "Credit Info Enhanced failed with error: " + response.code() + ":" + response.message() + "");
         }
 
     }
@@ -211,5 +285,152 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
             return jsonObject.get(fieldName).getAsString();
         }
         return null;
+    }
+
+    public Boolean getBooleanField(JsonObject jsonObject, String fieldName) {
+        if (jsonObject != null && jsonObject.has(fieldName) && jsonObject.get(fieldName).isJsonPrimitive()
+                && jsonObject.get(fieldName).getAsJsonPrimitive().isBoolean()) {
+            return jsonObject.get(fieldName).getAsBoolean();
+        }
+        return null;
+    }
+
+    public Integer getIntegerField(JsonObject jsonObject, String fieldName) {
+        if (jsonObject != null && jsonObject.has(fieldName) && jsonObject.get(fieldName).isJsonPrimitive()
+                && jsonObject.get(fieldName).getAsJsonPrimitive().isNumber()) {
+            return jsonObject.get(fieldName).getAsInt();
+        }
+        return null;
+    }
+
+    @NotNull
+    private MetropolCrbCreditInfoEnhancedReport getMetropolCrbCreditInfoEnhancedReport(JsonObject jsonResponse, Loan loan, Client client) {
+        MetropolCrbCreditInfoEnhancedReport enhancedReport = new MetropolCrbCreditInfoEnhancedReport();
+
+        enhancedReport.setClientId(client);
+        enhancedReport.setLoanId(loan);
+        enhancedReport.setReportType(CRBREPORTTYPES.CREDIT_INFO_ENHANCED.name());
+        enhancedReport.setApiCode(getStringField(jsonResponse, "api_code"));
+        enhancedReport.setApiCodeDescription(getStringField(jsonResponse, "api_code_description"));
+        enhancedReport.setApplicationRefNo(getStringField(jsonResponse, "application_ref_no"));
+        enhancedReport.setCreditScore(getStringField(jsonResponse, "credit_score"));
+        enhancedReport.setDelinquencyCode(getStringField(jsonResponse, "delinquency_code"));
+        enhancedReport.setHasError(getBooleanField(jsonResponse, "has_error"));
+        enhancedReport.setHasFraud(getBooleanField(jsonResponse, "has_fraud"));
+        enhancedReport.setIdentityNumber(getStringField(jsonResponse, "id_number"));
+        enhancedReport.setIdentityType(getStringField(jsonResponse, "identity_type"));
+        enhancedReport.setIsGuarantor(getBooleanField(jsonResponse, "is_guarantor"));
+        enhancedReport.setTrxId(getStringField(jsonResponse, "trx_id"));
+        return enhancedReport;
+    }
+
+    private void extractAndSaveAccountInfo(JsonObject jsonResponse, MetropolCrbCreditInfoEnhancedReport crbCreditInfoEnhancedReport) {
+
+        JsonArray accountInfoArray = jsonResponse.getAsJsonArray("account_info");
+
+        if (accountInfoArray != null) {
+            for (JsonElement accountInfoElement : accountInfoArray) {
+                if (accountInfoElement.isJsonObject()) {
+                    MetropolAccountInfo enhancedReport = getMetropolCrbCreditInfoEnhancedReport(accountInfoElement.getAsJsonObject(),
+                            crbCreditInfoEnhancedReport);
+                    accountInfoRepository.saveAndFlush(enhancedReport);
+                }
+            }
+        }
+
+    }
+
+    @NotNull
+    private MetropolAccountInfo getMetropolCrbCreditInfoEnhancedReport(JsonObject jsonResponse,
+            MetropolCrbCreditInfoEnhancedReport crbCreditInfoEnhancedReport) {
+
+        MetropolAccountInfo acc = new MetropolAccountInfo();
+
+        acc.setCrbCreditInfoEnhancedReport(crbCreditInfoEnhancedReport);
+        acc.setAccountNumber(getStringField(jsonResponse, "account_number"));
+        acc.setAccountStatus(getStringField(jsonResponse, "account_status"));
+        acc.setCurrentBalance(getStringField(jsonResponse, "current_balance"));
+        acc.setDateOpened(getStringField(jsonResponse, "date_opened"));
+        acc.setDaysInArrears(getIntegerField(jsonResponse, "days_in_arrears"));
+        acc.setDelinquencyCode(getStringField(jsonResponse, "delinquency_code"));
+        acc.setHighestDaysInArrears(getIntegerField(jsonResponse, "highest_days_in_arrears"));
+        acc.setIsYourAccount(getBooleanField(jsonResponse, "is_your_account"));
+        acc.setLastPaymentAmount(getStringField(jsonResponse, "last_payment_amount"));
+        acc.setLastPaymentDate(getStringField(jsonResponse, "last_payment_date"));
+        acc.setLoadedAt(getStringField(jsonResponse, "loaded_at"));
+        acc.setOriginalAmount(getStringField(jsonResponse, "original_amount"));
+        acc.setOverdueBalance(getStringField(jsonResponse, "overdue_balance"));
+        acc.setOverdueDate(getStringField(jsonResponse, "overdue_date"));
+        acc.setProductTypeId(getIntegerField(jsonResponse, "product_type_id"));
+        return acc;
+    }
+
+    @NotNull
+    private void extractAndSaveNumberOfInquiries(JsonObject jsonResponse, MetropolCrbCreditInfoEnhancedReport crbCreditInfoEnhancedReport) {
+        JsonObject obj = jsonResponse.getAsJsonObject("no_of_enquiries");
+
+        MetropolNumberOfEnquiries num = new MetropolNumberOfEnquiries();
+        if (obj != null) {
+            num.setCrbCreditInfoEnhancedReport(crbCreditInfoEnhancedReport);
+            num.setLast12Months(getIntegerField(obj, "last_12_months"));
+            num.setLast3Months(getIntegerField(obj, "last_3_months"));
+            num.setLast6Months(getIntegerField(obj, "last_6_months"));
+            numberOfEnquiriesRepository.saveAndFlush(num);
+        }
+    }
+
+    @NotNull
+    private void extractAndSaveNumberOfCreditApplication(JsonObject jsonResponse,
+            MetropolCrbCreditInfoEnhancedReport crbCreditInfoEnhancedReport) {
+        JsonObject obj = jsonResponse.getAsJsonObject("no_of_credit_applications");
+
+        MetropolNumberOfCreditApplication creditApplication = new MetropolNumberOfCreditApplication();
+        if (obj != null) {
+            creditApplication.setCrbCreditInfoEnhancedReport(crbCreditInfoEnhancedReport);
+            creditApplication.setLast12Months(getIntegerField(obj, "last_12_months"));
+            creditApplication.setLast3Months(getIntegerField(obj, "last_3_months"));
+            creditApplication.setLast6Months(getIntegerField(obj, "last_6_months"));
+            numberOfCreditApplicationRepository.saveAndFlush(creditApplication);
+        }
+    }
+
+    @NotNull
+    private void extractAndSaveNumberOfBouncedCheques(JsonObject jsonResponse,
+            MetropolCrbCreditInfoEnhancedReport crbCreditInfoEnhancedReport) {
+        JsonObject obj = jsonResponse.getAsJsonObject("no_of_bounced_cheques");
+
+        MetropolNumberOfBouncedCheques numberOfBouncedCheques = new MetropolNumberOfBouncedCheques();
+        if (obj != null) {
+            numberOfBouncedCheques.setCrbCreditInfoEnhancedReport(crbCreditInfoEnhancedReport);
+            numberOfBouncedCheques.setLast12Months(getIntegerField(obj, "last_12_months"));
+            numberOfBouncedCheques.setLast3Months(getIntegerField(obj, "last_3_months"));
+            numberOfBouncedCheques.setLast6Months(getIntegerField(obj, "last_6_months"));
+            numberOfBouncedChequesRepository.saveAndFlush(numberOfBouncedCheques);
+        }
+    }
+
+    @NotNull
+    private void extractAndSaveLenderSector(JsonObject jsonResponse, MetropolCrbCreditInfoEnhancedReport crbCreditInfoEnhancedReport) {
+        JsonObject obj = jsonResponse.getAsJsonObject("lender_sector");
+
+        MetropolLenderSector lenderSector = new MetropolLenderSector();
+        if (obj != null) {
+            JsonObject sectorBankJson = obj.getAsJsonObject("sector_bank");
+            JsonObject sectorOtherJson = obj.getAsJsonObject("sector_other");
+
+            lenderSector.setCrbCreditInfoEnhancedReport(crbCreditInfoEnhancedReport);
+            if (sectorBankJson != null) {
+                lenderSector.setBankAccountNpa(getIntegerField(sectorBankJson, "account_npa"));
+                lenderSector.setBankAccountPerforming(getIntegerField(sectorBankJson, "account_performing"));
+                lenderSector.setBankAccountPerformingNpaHistory(getIntegerField(sectorBankJson, "account_performing_npa_history"));
+            }
+
+            if (sectorOtherJson != null) {
+                lenderSector.setOtherAccountNpa(getIntegerField(sectorOtherJson, "account_npa"));
+                lenderSector.setOtherAccountPerforming(getIntegerField(sectorOtherJson, "account_performing"));
+                lenderSector.setOtherAccountPerformingNpaHistory(getIntegerField(sectorOtherJson, "account_performing_npa_history"));
+            }
+            lenderSectorRepository.saveAndFlush(lenderSector);
+        }
     }
 }
