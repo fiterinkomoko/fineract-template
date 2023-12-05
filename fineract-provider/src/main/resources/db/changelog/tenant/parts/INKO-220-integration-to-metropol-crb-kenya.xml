@@ -368,4 +368,156 @@
             </column>
         </createTable>
     </changeSet>
+
+    <changeSet id="insert-x_registered_table-for-loan-due-diligence" author="bosco@fiter.io">
+        <preConditions>
+            <sqlCheck expectedResult="0">select count(*) from x_registered_table where registered_table_name = 'loan_due_diligence'</sqlCheck>
+        </preConditions>
+        <sql>
+            <![CDATA[
+          INSERT INTO  x_registered_table (registered_table_name,application_table_name,entity_subtype,category) VALUES ('loan_due_diligence','m_loan',null,100);
+             ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="create-loan_due_diligence-data_table" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="loan_due_diligence"/>
+            </not>
+        </preConditions>
+        <createTable tableName="loan_due_diligence">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="loan_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_loan_due_diligence-data_table_m_loan" references="m_loan(id)"/>
+            </column>
+            <column name="survey_name" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="COUNTRY_cd_Country" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="SurveyLocation_cd_survey_location" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="Program_cd_Program" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="Cohort_cd_Cohort" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="state_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="update_at" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_m_permission_CREATE_loan_due_diligence">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'CREATE_loan_due_diligence'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="CREATE_loan_due_diligence" />
+            <column name="entity_name" value="loan_due_diligence" />
+            <column name="action_name" value="CREATE" />
+            <column name="can_maker_checker" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_CREATE_loan_due_diligence_CHECKER">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'CREATE_loan_due_diligence_CHECKER'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="CREATE_loan_due_diligence_CHECKER" />
+            <column name="entity_name" value="loan_due_diligence" />
+            <column name="action_name" value="CREATE" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_READ_loan_due_diligence">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'READ_loan_due_diligence'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="READ_loan_due_diligence" />
+            <column name="entity_name" value="loan_due_diligence" />
+            <column name="action_name" value="READ" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_CUPDATE_loan_due_diligence">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'UPDATE_loan_due_diligence'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="UPDATE_loan_due_diligence" />
+            <column name="entity_name" value="loan_due_diligence" />
+            <column name="action_name" value="UPDATE" />
+            <column name="can_maker_checker" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_UPDATE_loan_due_diligence_CHECKER">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'UPDATE_loan_due_diligence_CHECKER'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="UPDATE_loan_due_diligence_CHECKER" />
+            <column name="entity_name" value="loan_due_diligence" />
+            <column name="action_name" value="UPDATE" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_DELETE_loan_due_diligence">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'DELETE_loan_due_diligence'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="DELETE_loan_due_diligence" />
+            <column name="entity_name" value="loan_due_diligence" />
+            <column name="action_name" value="DELETE" />
+            <column name="can_maker_checker" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_DELETE_loan_due_diligence_CHECKER">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'DELETE_loan_due_diligence_CHECKER'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="DELETE_loan_due_diligence_CHECKER" />
+            <column name="entity_name" value="loan_due_diligence" />
+            <column name="action_name" value="DELETE" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>
