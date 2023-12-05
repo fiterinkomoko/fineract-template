@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -34,6 +35,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -51,6 +53,8 @@ import org.apache.fineract.infrastructure.creditbureau.service.CreditBureauReadP
 import org.apache.fineract.infrastructure.creditbureau.service.OrganisationCreditBureauReadPlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.data.CrbKenyaMetropolRequestData;
+import org.apache.fineract.portfolio.loanaccount.data.MetropolAccountInfoData;
+import org.apache.fineract.portfolio.loanaccount.data.MetropolCrbCreditInfoEnchancedData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCrbReportData;
 import org.apache.fineract.portfolio.loanaccount.service.MetropolCrbReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.service.TransUnionCrbConsumerVerificationReadPlatformService;
@@ -336,7 +340,33 @@ public class CreditBureauConfigurationAPI {
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         final CrbKenyaMetropolRequestData crbReportData = this.metropolCrbReadPlatformService.fetchIdentityVerificationDetails(loanId);
+        final MetropolCrbCreditInfoEnchancedData crbCreditInfoEnchancedData = this.metropolCrbReadPlatformService
+                .fetchCreditInfoEnhancedDetails(loanId);
+        if (crbCreditInfoEnchancedData != null) {
 
+            final List<MetropolAccountInfoData> accountInfoDataList = this.metropolCrbReadPlatformService
+                    .fetchAccountInfoDetails(crbCreditInfoEnchancedData.getId());
+
+            if (!CollectionUtils.isEmpty(accountInfoDataList)) {
+                crbCreditInfoEnchancedData.setAccountInfoDataList(accountInfoDataList);
+            }
+            crbReportData.setMetropolCrbCreditInfoEnchancedData(crbCreditInfoEnchancedData);
+
+        }
         return this.toApiJsonSerializerCreditBureauLoanProduct.serialize(crbReportData);
+    }
+
+    @POST
+    @Path("/verifyLoanCreditInfoEnhancedOnMetropolKenya/{loanId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String verifyLoanCreditInfoEnhancedOnMetropolKenya(@PathParam("loanId") final Long loanId, final String apiRequestBodyAsJson) {
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().verifyLoanCreditInfoEnhancedOnMetropolKenya(loanId)
+                .withJson(apiRequestBodyAsJson).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
     }
 }

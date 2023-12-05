@@ -16,14 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.creditbureau.service;
+package org.apache.fineract.infrastructure.creditbureau.data;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+public enum CRBREPORTTYPES {
 
-public interface MetropolCrbVerificationWritePlatformService {
+    CREDIT_INFO_ENHANCED, JSON_REPORT,;
 
-    CommandProcessingResult loanVerificationToMetropolKenya(Long loanId, JsonCommand command);
-
-    CommandProcessingResult loanCreditInfoEnhancedToMetropolKenya(Long loanId, JsonCommand command);
 }

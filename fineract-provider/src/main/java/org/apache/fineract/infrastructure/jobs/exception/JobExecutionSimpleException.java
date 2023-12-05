@@ -16,14 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.creditbureau.service;
+package org.apache.fineract.infrastructure.jobs.exception;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import java.util.Objects;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformException;
 
-public interface MetropolCrbVerificationWritePlatformService {
+public class JobExecutionSimpleException extends AbstractPlatformException {
 
-    CommandProcessingResult loanVerificationToMetropolKenya(Long loanId, JsonCommand command);
-
-    CommandProcessingResult loanCreditInfoEnhancedToMetropolKenya(Long loanId, JsonCommand command);
+    public JobExecutionSimpleException(Exception exception) {
+        super("error.msg.execution.job.exception",
+                (Objects.nonNull(exception.getMessage()) ? exception.getMessage() + " --> Stacktrace: " : "")
+                        + ExceptionUtils.getStackTrace(exception));
+    }
 }
