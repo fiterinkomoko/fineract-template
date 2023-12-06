@@ -392,7 +392,7 @@
             <column name="loan_id" type="bigint">
                 <constraints nullable="false" foreignKeyName="FK_loan_due_diligence-data_table_m_loan" references="m_loan(id)"/>
             </column>
-            <column name="survey_name" type="int">
+            <column name="survey_name" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
             <column name="COUNTRY_cd_Country" type="int">
