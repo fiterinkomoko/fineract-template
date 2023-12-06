@@ -260,7 +260,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="create-m_metropol_number_of_enquiries" author="bosco@fiter.io">
+    <changeSet id="create-m_metropol_number_of_enquiries_2" author="bosco@fiter.io">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="m_metropol_number_of_enquiries"/>
@@ -271,7 +271,7 @@
                 <constraints nullable="false" primaryKey="true"  />
             </column>
             <column name="credit_info_enhanced_id" type="bigint">
-                <constraints nullable="false" foreignKeyName="FK_m_metropol_crb_credit_info_enhanced_report_id" references="m_metropol_crb_credit_info_enhanced_report(id)"/>
+                <constraints nullable="false" foreignKeyName="FK_m_metropol_crb_info_enhanced_report_id" references="m_metropol_crb_credit_info_enhanced_report(id)"/>
             </column>
             <column name="last_12_months" type="int">
                 <constraints nullable="true" />
@@ -285,7 +285,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="create-m_metropol_no_of_credit_applications" author="bosco@fiter.io">
+    <changeSet id="create-m_metropol_no_of_credit_applications_2" author="bosco@fiter.io">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="m_metropol_no_of_credit_applications"/>
@@ -296,7 +296,7 @@
                 <constraints nullable="false" primaryKey="true"  />
             </column>
             <column name="credit_info_enhanced_id" type="bigint">
-                <constraints nullable="false" foreignKeyName="FK_m_metropol_crb_credit_info_enhanced_report_id" references="m_metropol_crb_credit_info_enhanced_report(id)"/>
+                <constraints nullable="false" foreignKeyName="FK_m_metropol_crb_credit_enhanced_report_id" references="m_metropol_crb_credit_info_enhanced_report(id)"/>
             </column>
             <column name="last_12_months" type="int">
                 <constraints nullable="true" />
@@ -310,7 +310,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="create-m_metropol_no_of_bounced_cheques" author="bosco@fiter.io">
+    <changeSet id="create-m_metropol_no_of_bounced_cheques_2" author="bosco@fiter.io">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="m_metropol_no_of_bounced_cheques"/>
@@ -321,7 +321,7 @@
                 <constraints nullable="false" primaryKey="true"  />
             </column>
             <column name="credit_info_enhanced_id" type="bigint">
-                <constraints nullable="false" foreignKeyName="FK_m_metropol_crb_credit_info_enhanced_report_id" references="m_metropol_crb_credit_info_enhanced_report(id)"/>
+                <constraints nullable="false" foreignKeyName="FK_m_metropol_crb_credit_info_enhanced_id" references="m_metropol_crb_credit_info_enhanced_report(id)"/>
             </column>
             <column name="last_12_months" type="int">
                 <constraints nullable="true" />
@@ -335,7 +335,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="create-m_metropol_lender_sector" author="bosco@fiter.io">
+    <changeSet id="create-m_metropol_lender_sector_2" author="bosco@fiter.io">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="m_metropol_lender_sector"/>
@@ -346,7 +346,7 @@
                 <constraints nullable="false" primaryKey="true"  />
             </column>
             <column name="credit_info_enhanced_id" type="bigint">
-                <constraints nullable="false" foreignKeyName="FK_m_metropol_crb_credit_info_enhanced_report_id" references="m_metropol_crb_credit_info_enhanced_report(id)"/>
+                <constraints nullable="false" foreignKeyName="FK_metropol_crb_credit_info_enhanced_report" references="m_metropol_crb_credit_info_enhanced_report(id)"/>
             </column>
             <column name="bank_account_npa" type="int">
                 <constraints nullable="true" />
