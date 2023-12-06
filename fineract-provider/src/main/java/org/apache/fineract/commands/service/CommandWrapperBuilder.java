@@ -3944,4 +3944,13 @@ public class CommandWrapperBuilder {
         this.href = "/loan/verifyloancreditinfoonmetropolcrbkenya";
         return this;
     }
+
+    public CommandWrapperBuilder disburseRequestLoanApplication(final Long loanId) {
+        this.actionName = "DISBURSEMENTREQUEST";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId;
+        return this;
+    }
 }

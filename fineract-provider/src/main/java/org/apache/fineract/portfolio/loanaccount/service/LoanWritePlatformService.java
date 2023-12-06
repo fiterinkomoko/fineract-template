@@ -125,4 +125,6 @@ public interface LoanWritePlatformService {
     CommandProcessingResult runCloneJobForLoanPenalty(Long loanId);
 
     CommandProcessingResult payOffLoan(Long loanId, JsonCommand command);
+
+    CommandProcessingResult disburseRequestLoan(Long loanId, JsonCommand command);
 }
