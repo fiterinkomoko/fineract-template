@@ -520,4 +520,17 @@
             <column name="can_maker_checker" valueBoolean="false"/>
         </insert>
     </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_permission_VERIFYLOANREPORTJSONONMETROPOLCRBKENYA_LOAN">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_permission where code = 'VERIFYLOANREPORTJSONONMETROPOLCRBKENYA_LOAN';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio" />
+            <column name="code" value="VERIFYLOANREPORTJSONONMETROPOLCRBKENYA_LOAN" />
+            <column name="entity_name" value="LOAN" />
+            <column name="action_name" value="VERIFYLOANREPORTJSONONMETROPOLCRBKENYA_LOAN" />
+        </insert>
+    </changeSet>
 </databaseChangeLog>

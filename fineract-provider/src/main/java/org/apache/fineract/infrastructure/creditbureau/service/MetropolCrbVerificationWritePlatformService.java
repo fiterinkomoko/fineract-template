@@ -26,4 +26,6 @@ public interface MetropolCrbVerificationWritePlatformService {
     CommandProcessingResult loanVerificationToMetropolKenya(Long loanId, JsonCommand command);
 
     CommandProcessingResult loanCreditInfoEnhancedToMetropolKenya(Long loanId, JsonCommand command);
+
+    CommandProcessingResult verifyLoanReportJsonOnMetropolKenya(Long loanId, JsonCommand command);
 }
