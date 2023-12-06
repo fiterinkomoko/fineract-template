@@ -7100,4 +7100,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     public void setStopConsumerCreditUploadToTransUnionOn(LocalDate stopConsumerCreditUploadToTransUnionOn) {
         this.stopConsumerCreditUploadToTransUnionOn = stopConsumerCreditUploadToTransUnionOn;
     }
+
+    public void handleDisbursementRequest() {
+        LoanEvent event = LoanEvent.LOAN_DISBURSEMENT_REQUEST;
+        validateAccountStatus(event);
+        this.loanSubStatus = LoanSubStatus.PENDINGDISBURSEMENT.getValue();
+    }
 }
