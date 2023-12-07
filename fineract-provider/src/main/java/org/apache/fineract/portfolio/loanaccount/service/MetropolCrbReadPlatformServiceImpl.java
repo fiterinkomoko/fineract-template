@@ -152,12 +152,20 @@ public class MetropolCrbReadPlatformServiceImpl implements MetropolCrbReadPlatfo
                     + "       mmnoca.last_6_months                      AS creditApLast6Months,  " + "  "
                     + "       mmnoe.last_12_months                      AS enquiriesApLast12Months,  "
                     + "       mmnoe.last_3_months                       AS enquiriesApLast3Months,  "
-                    + "       mmnoe.last_6_months                       AS enquiriesApLast6Months  " + "  "
+                    + "       mmnoe.last_6_months                       AS enquiriesApLast6Months , "
+                    + "         ppi.month                                 AS ppiAnalysisMonth, "
+                    + "         ppi.ppi                                   AS ppiAnalysisPpi, "
+                    + "         ppi.ppi_rank                              AS ppiAnalysisPpiRank, "
+                    + "         mmvn.first_name                           AS verifiedNameFirstName, "
+                    + "         mmvn.other_name                           AS verifiedNameOthername, "
+                    + "         mmvn.surname                              AS verifiedNameSurname "
                     + " FROM m_metropol_crb_credit_info_enhanced_report cie  "
                     + "         LEFT JOIN m_metropol_lender_sector mmls on cie.id = mmls.credit_info_enhanced_id  "
                     + "         LEFT JOIN m_metropol_no_of_bounced_cheques mmnobc on cie.id = mmnobc.credit_info_enhanced_id  "
                     + "         LEFT JOIN m_metropol_no_of_credit_applications mmnoca on cie.id = mmnoca.credit_info_enhanced_id  "
-                    + "         LEFT JOIN m_metropol_number_of_enquiries mmnoe on cie.id = mmnoe.credit_info_enhanced_id  " + "  "
+                    + "         LEFT JOIN m_metropol_number_of_enquiries mmnoe on cie.id = mmnoe.credit_info_enhanced_id  " + " "
+                    + "           LEFT JOIN m_metropol_ppi_analysis ppi ON cie.id = ppi.credit_info_enhanced_id "
+                    + "           LEFT JOIN m_metropol_verified_name mmvn on cie.id = mmvn.credit_info_enhanced_id "
                     + "WHERE loan_id = ? ");
             return sql.toString();
         }
@@ -196,12 +204,21 @@ public class MetropolCrbReadPlatformServiceImpl implements MetropolCrbReadPlatfo
             final Integer enquiriesApLast3Months = rs.getInt("enquiriesApLast3Months");
             final Integer enquiriesApLast6Months = rs.getInt("enquiriesApLast6Months");
 
+            final String ppiAnalysisMonth = rs.getString("ppiAnalysisMonth");
+            final Double ppiAnalysisPpi = rs.getDouble("ppiAnalysisPpi");
+            final String ppiAnalysisPpiRank = rs.getString("ppiAnalysisPpiRank");
+
+            final String verifiedNameFirstName = rs.getString("verifiedNameFirstName");
+            final String verifiedNameOthername = rs.getString("verifiedNameOthername");
+            final String verifiedNameSurname = rs.getString("verifiedNameSurname");
+
             return new MetropolCrbCreditInfoEnchancedData(id, clientId, loanId, reportType, apiCode, apiCodeDescription, applicationRefNo,
                     creditScore, delinquencyCode, hasError, hasFraud, identityNumber, identityType, isGuarantor, trxId,
                     lenderBankAccountNpa, lenderBankAccountPerforming, lenderBankAccountPerformingNpaHistory, lenderOtherAccountNpa,
                     lenderOtherAccountPerforming, lenderOtherAccountPerformingNpaHistory, bChecquesLast12Months, bChecquesLast3Months,
                     bChecquesLast6Months, creditApLast12Months, creditApLast3Months, creditApLast6Months, enquiriesApLast12Months,
-                    enquiriesApLast3Months, enquiriesApLast6Months);
+                    enquiriesApLast3Months, enquiriesApLast6Months, ppiAnalysisMonth, ppiAnalysisPpi, ppiAnalysisPpiRank,
+                    verifiedNameFirstName, verifiedNameOthername, verifiedNameSurname);
 
         }
     }
