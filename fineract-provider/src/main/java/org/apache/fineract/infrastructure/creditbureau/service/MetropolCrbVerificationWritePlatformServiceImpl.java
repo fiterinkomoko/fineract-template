@@ -62,6 +62,10 @@ import org.apache.fineract.portfolio.loanaccount.domain.MetropolNumberOfCreditAp
 import org.apache.fineract.portfolio.loanaccount.domain.MetropolNumberOfCreditApplicationRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.MetropolNumberOfEnquiries;
 import org.apache.fineract.portfolio.loanaccount.domain.MetropolNumberOfEnquiriesRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolPpiAnalysis;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolPpiAnalysisRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolVerifiedName;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolVerifiedNameRepository;
 import org.apache.fineract.portfolio.loanaccount.service.TransUnionCrbConsumerVerificationReadPlatformService;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -86,6 +90,8 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
     private final MetropolNumberOfCreditApplicationRepository numberOfCreditApplicationRepository;
     private final MetropolNumberOfBouncedChequesRepository numberOfBouncedChequesRepository;
     private final MetropolLenderSectorRepository lenderSectorRepository;
+    private final MetropolPpiAnalysisRepository ppiAnalysisRepository;
+    private final MetropolVerifiedNameRepository verifiedNameRepository;
 
     @Autowired
     private final Environment env;
@@ -334,6 +340,14 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
         return null;
     }
 
+    public Double getDoubleField(JsonObject jsonObject, String fieldName) {
+        if (jsonObject != null && jsonObject.has(fieldName) && jsonObject.get(fieldName).isJsonPrimitive()
+                && jsonObject.get(fieldName).getAsJsonPrimitive().isNumber()) {
+            return jsonObject.get(fieldName).getAsDouble();
+        }
+        return null;
+    }
+
     @NotNull
     private MetropolCrbCreditInfoEnhancedReport getMetropolCrbCreditInfoEnhancedReport(JsonObject jsonResponse, Loan loan, Client client,
             String reportType) {
@@ -466,6 +480,34 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
         }
     }
 
+    @NotNull
+    private void extractAndSavePpiAnalysis(JsonObject jsonResponse, MetropolCrbCreditInfoEnhancedReport crbCreditInfoEnhancedReport) {
+        JsonObject obj = jsonResponse.getAsJsonObject("ppi_analysis");
+
+        MetropolPpiAnalysis ppiAnalysis = new MetropolPpiAnalysis();
+        if (obj != null) {
+            ppiAnalysis.setCrbCreditInfoEnhancedReport(crbCreditInfoEnhancedReport);
+            ppiAnalysis.setMonth(getStringField(obj, "month"));
+            ppiAnalysis.setPpi(getDoubleField(obj, "ppi"));
+            ppiAnalysis.setPpiRank(getStringField(obj, "ppi_rank"));
+            ppiAnalysisRepository.saveAndFlush(ppiAnalysis);
+        }
+    }
+
+    @NotNull
+    private void extractAndSaveVerifiedName(JsonObject jsonResponse, MetropolCrbCreditInfoEnhancedReport crbCreditInfoEnhancedReport) {
+        JsonObject obj = jsonResponse.getAsJsonObject("verified_name");
+
+        MetropolVerifiedName verifiedName = new MetropolVerifiedName();
+        if (obj != null) {
+            verifiedName.setCrbCreditInfoEnhancedReport(crbCreditInfoEnhancedReport);
+            verifiedName.setFirstName(getStringField(obj, "first_name"));
+            verifiedName.setOtherName(getStringField(obj, "other_name"));
+            verifiedName.setSurname(getStringField(obj, "surname"));
+            verifiedNameRepository.saveAndFlush(verifiedName);
+        }
+    }
+
     private MetropolCrbCreditInfoEnhancedReport verifyReportJson(String documentId, Loan loan, Client client)
             throws NoSuchAlgorithmException, IOException {
         CrbKenyaMetropolRequestData requestData = new CrbKenyaMetropolRequestData(5, documentId, "001",
@@ -491,6 +533,10 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
         extractAndSaveNumberOfBouncedCheques(jsonResponse, crbCreditInfoEnhancedReport);
         // Lender Sector
         extractAndSaveLenderSector(jsonResponse, crbCreditInfoEnhancedReport);
+        // PPI Analysis
+        extractAndSavePpiAnalysis(jsonResponse, crbCreditInfoEnhancedReport);
+        // Verified Name
+        extractAndSaveVerifiedName(jsonResponse, crbCreditInfoEnhancedReport);
         return crbCreditInfoEnhancedReport;
     }
 }
