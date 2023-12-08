@@ -16,17 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.portfolio.loanaccount.domain;
 
-import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaConsumerVerificationData;
-import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCorporateVerificationData;
-import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCrbReportData;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import lombok.Data;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
-public interface TransUnionCrbConsumerVerificationReadPlatformService {
+@Data
+@Entity
+@Table(name = "m_metropol_verified_name")
+public class MetropolVerifiedName extends AbstractPersistableCustom {
 
-    TransUnionRwandaConsumerVerificationData retrieveConsumer(Long clientId);
-
-    TransUnionRwandaCorporateVerificationData retrieveCorporate(Long clientId);
-
-    TransUnionRwandaCrbReportData fetchCrbReportForTransUnion(Integer loanId);
+    @ManyToOne
+    @JoinColumn(name = "credit_info_enhanced_id", nullable = true)
+    private MetropolCrbCreditInfoEnhancedReport crbCreditInfoEnhancedReport;
+    @Column(name = "first_name")
+    private String firstName;
+    @Column(name = "other_name")
+    private String otherName;
+    @Column(name = "surname")
+    private String surname;
 }

@@ -369,4 +369,18 @@ public class CreditBureauConfigurationAPI {
 
         return this.toApiJsonSerializer.serialize(result);
     }
+
+    @POST
+    @Path("/verifyLoanReportJsonOnMetropolKenya/{loanId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String verifyLoanReportJsonOnMetropolKenya(@PathParam("loanId") final Long loanId, final String apiRequestBodyAsJson) {
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().verifyLoanReportJsonOnMetropolKenya(loanId)
+                .withJson(apiRequestBodyAsJson).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
 }

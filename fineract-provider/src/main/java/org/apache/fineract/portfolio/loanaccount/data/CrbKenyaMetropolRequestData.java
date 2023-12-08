@@ -71,6 +71,15 @@ public class CrbKenyaMetropolRequestData {
         this.report_reason = report_reason;
     }
 
+    public CrbKenyaMetropolRequestData(Integer report_type, String identity_number, String identity_type, Integer loan_amount,
+            Integer report_reason) {
+        this.report_type = report_type;
+        this.identity_number = identity_number;
+        this.identity_type = identity_type;
+        this.loan_amount = loan_amount;
+        this.report_reason = report_reason;
+    }
+
     public CrbKenyaMetropolRequestData(Integer id, Integer clientId, Integer loanId, String citizenShip, String clan, String dateOfBirth,
             String dateOfDeath, String dateOfIssue, String ethnicGroup, String family, String firstName, String gender,
             String identityNumber, String identityType, String lastName, String occupation, String otherName, String placeOfBirth,

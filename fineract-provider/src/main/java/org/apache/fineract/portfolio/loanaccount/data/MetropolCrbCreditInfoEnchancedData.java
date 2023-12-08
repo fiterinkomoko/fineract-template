@@ -55,6 +55,12 @@ public class MetropolCrbCreditInfoEnchancedData {
     private Integer enquiriesApLast12Months;
     private Integer enquiriesApLast3Months;
     private Integer enquiriesApLast6Months;
+    private String ppiAnalysisMonth;
+    private Double ppiAnalysisPpi;
+    private String ppiAnalysisPpiRank;
+    private String verifiedNameFirstName;
+    private String verifiedNameOthername;
+    private String verifiedNameSurname;
 
     public MetropolCrbCreditInfoEnchancedData(Integer id, Integer clientId, Integer loanId, String reportType, String apiCode,
             String apiCodeDescription, String applicationRefNo, String creditScore, String delinquencyCode, Boolean hasError,
@@ -62,7 +68,9 @@ public class MetropolCrbCreditInfoEnchancedData {
             Integer lenderBankAccountPerforming, Integer lenderBankAccountPerformingNpaHistory, Integer lenderOtherAccountNpa,
             Integer lenderOtherAccountPerforming, Integer lenderOtherAccountPerformingNpaHistory, Integer bChecquesLast12Months,
             Integer bChecquesLast3Months, Integer bChecquesLast6Months, Integer creditApLast12Months, Integer creditApLast3Months,
-            Integer creditApLast6Months, Integer enquiriesApLast12Months, Integer enquiriesApLast3Months, Integer enquiriesApLast6Months) {
+            Integer creditApLast6Months, Integer enquiriesApLast12Months, Integer enquiriesApLast3Months, Integer enquiriesApLast6Months,
+            String ppiAnalysisMonth, Double ppiAnalysisPpi, String ppiAnalysisPpiRank, String verifiedNameFirstName,
+            String verifiedNameOthername, String verifiedNameSurname) {
         this.id = id;
         this.clientId = clientId;
         this.loanId = loanId;
@@ -93,5 +101,11 @@ public class MetropolCrbCreditInfoEnchancedData {
         this.enquiriesApLast12Months = enquiriesApLast12Months;
         this.enquiriesApLast3Months = enquiriesApLast3Months;
         this.enquiriesApLast6Months = enquiriesApLast6Months;
+        this.ppiAnalysisMonth = ppiAnalysisMonth;
+        this.ppiAnalysisPpi = ppiAnalysisPpi;
+        this.ppiAnalysisPpiRank = ppiAnalysisPpiRank;
+        this.verifiedNameFirstName = verifiedNameFirstName;
+        this.verifiedNameOthername = verifiedNameOthername;
+        this.verifiedNameSurname = verifiedNameSurname;
     }
 }
