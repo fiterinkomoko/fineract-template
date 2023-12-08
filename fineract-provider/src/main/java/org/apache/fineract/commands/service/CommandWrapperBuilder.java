@@ -3953,4 +3953,12 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId;
         return this;
     }
+
+    public CommandWrapperBuilder verifyLoanReportJsonOnMetropolKenya(final long loanId) {
+        this.actionName = "VERIFYLOANREPORTJSONONMETROPOLCRBKENYA";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.href = "/loan/verifyloanreportjsononmetropolcrbkenya";
+        return this;
+    }
 }

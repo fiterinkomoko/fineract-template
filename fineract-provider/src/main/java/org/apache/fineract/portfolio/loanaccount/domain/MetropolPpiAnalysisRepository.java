@@ -16,17 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.portfolio.loanaccount.domain;
 
-import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaConsumerVerificationData;
-import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCorporateVerificationData;
-import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCrbReportData;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface TransUnionCrbConsumerVerificationReadPlatformService {
+public interface MetropolPpiAnalysisRepository
+        extends JpaRepository<MetropolPpiAnalysis, Long>, JpaSpecificationExecutor<MetropolPpiAnalysis> {
 
-    TransUnionRwandaConsumerVerificationData retrieveConsumer(Long clientId);
-
-    TransUnionRwandaCorporateVerificationData retrieveCorporate(Long clientId);
-
-    TransUnionRwandaCrbReportData fetchCrbReportForTransUnion(Integer loanId);
 }

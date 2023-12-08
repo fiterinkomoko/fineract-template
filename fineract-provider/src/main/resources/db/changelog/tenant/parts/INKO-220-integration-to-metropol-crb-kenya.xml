@@ -520,4 +520,67 @@
             <column name="can_maker_checker" valueBoolean="false"/>
         </insert>
     </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_permission_VERIFYLOANREPORTJSONONMETROPOLCRBKENYA_LOAN">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_permission where code = 'VERIFYLOANREPORTJSONONMETROPOLCRBKENYA_LOAN';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio" />
+            <column name="code" value="VERIFYLOANREPORTJSONONMETROPOLCRBKENYA_LOAN" />
+            <column name="entity_name" value="LOAN" />
+            <column name="action_name" value="VERIFYLOANREPORTJSONONMETROPOLCRBKENYA_LOAN" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="create-m_metropol_ppi_analysis" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_metropol_ppi_analysis"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_metropol_ppi_analysis">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="credit_info_enhanced_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_m_metropol_ppi_analysis_info_id" references="m_metropol_crb_credit_info_enhanced_report(id)"/>
+            </column>
+            <column name="month" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="ppi" type="double">
+                <constraints nullable="true" />
+            </column>
+            <column name="ppi_rank" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-m_metropol_verified_name" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_metropol_verified_name"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_metropol_verified_name">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="credit_info_enhanced_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_m_metropol_verified_name_info_id" references="m_metropol_crb_credit_info_enhanced_report(id)"/>
+            </column>
+            <column name="first_name" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="other_name" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="surname" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>

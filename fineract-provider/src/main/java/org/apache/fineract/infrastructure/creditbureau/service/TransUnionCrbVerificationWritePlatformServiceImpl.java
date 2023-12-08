@@ -107,14 +107,12 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
 
         if (clientObj.getLegalForm().equals(LegalForm.PERSON.getValue())) {
             isClient = true;
-            getProduct123 = this.transUnionCrbClientVerificationReadPlatformService
-                    .retrieveConsumerToBeVerifiedToTransUnion(clientObj.getId());
+            getProduct123 = this.transUnionCrbClientVerificationReadPlatformService.retrieveConsumer(clientObj.getId());
             requestToCrb = convertConsumerDataToJAXBRequest(getProduct123);
             LOG.info("Verifying clients to TransUnion Rwanda Request :: >> " + getProduct123.toString());
         } else {
             isClient = false;
-            getProduct168 = this.transUnionCrbClientVerificationReadPlatformService
-                    .retrieveCorporateToBeVerifiedToTransUnion(clientObj.getId());
+            getProduct168 = this.transUnionCrbClientVerificationReadPlatformService.retrieveCorporate(clientObj.getId());
             requestToCrb = convertCorporateDataToJAXBRequest(getProduct168);
             LOG.info("Verifying clients to TransUnion Rwanda Request :: >> " + getProduct168.toString());
         }
