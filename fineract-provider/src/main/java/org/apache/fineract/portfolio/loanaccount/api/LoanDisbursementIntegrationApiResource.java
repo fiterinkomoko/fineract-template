@@ -82,12 +82,10 @@ public class LoanDisbursementIntegrationApiResource {
         CommandProcessingResult result = null;
         final String extractedJson = extractJson(allElement);
         final CommandWrapperBuilder updateBuilder = new CommandWrapperBuilder().withJson(extractedJson);
-
+        final CommandWrapper updateWrapper = updateBuilder.updateDisbursement(loanId).build();
+        result = this.commandsSourceWritePlatformService.logCommandSource(updateWrapper);
         if (Integer.valueOf(resultCode) == 200) {
             final CommandWrapper disburseWrapper = updateBuilder.disburseLoanApplication(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(disburseWrapper);
-        } else {
-            final CommandWrapper disburseWrapper = updateBuilder.updateDisbursement(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(disburseWrapper);
         }
 
