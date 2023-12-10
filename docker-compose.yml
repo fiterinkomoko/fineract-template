@@ -90,4 +90,8 @@ services:
       - FINERACT_DEFAULT_TENANTDB_IDENTIFIER=default
       - FINERACT_DEFAULT_TENANTDB_NAME=fineract_default
       - FINERACT_DEFAULT_TENANTDB_DESCRIPTION=Default Demo Tenant
+      - INKOMOKO_REST_USERNAME=api
+      - INKOMOKO_REST_PASSWORD=@123testCBS
+      - INKOMOKO_REST_AUTHENTICATION_URL=https://41.242.142.227:6093/inkomoko-integrations/api/v1/auth/generateToken
+      - INKOMOKO_REST_INITIATE_DISBURSEMENT=https://41.242.142.227:6093/inkomoko-integrations/api/v1/disbursement/initiate
       - JAVA_TOOL_OPTIONS="-Xmx1G"

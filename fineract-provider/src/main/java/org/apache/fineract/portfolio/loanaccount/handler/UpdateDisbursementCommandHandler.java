@@ -41,10 +41,8 @@ public class UpdateDisbursementCommandHandler implements NewCommandSourceHandler
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-
         try {
-            // TODO: 23/11/2023 To implement the disbursement update logic
-            return this.writePlatformService.updateDisbursement(command.entityId(), command, false, false);
+            return this.writePlatformService.updateDisbursement(command.entityId(), command);
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             dataIntegrityErrorHandler.handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve, "loan.disbursement",
                     "Disbursement");

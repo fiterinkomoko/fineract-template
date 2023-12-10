@@ -1,0 +1,108 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package org.apache.fineract.portfolio.loanaccount.api;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import io.swagger.v3.oas.annotations.Parameter;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import org.apache.fineract.commands.domain.CommandWrapper;
+import org.apache.fineract.commands.service.CommandWrapperBuilder;
+import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+@Path("/loans/{loanId}/disbursements-integration")
+@Component
+@Scope("singleton")
+public class LoanDisbursementIntegrationApiResource {
+
+    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+
+    private final DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer;
+
+    private final PlatformSecurityContext context;
+
+    private final String resourceNameForPermissions = "LOAN";
+
+    private final FromJsonHelper fromApiJsonHelper;
+
+    public LoanDisbursementIntegrationApiResource(PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+            DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer, PlatformSecurityContext context,
+            FromJsonHelper fromApiJsonHelper) {
+        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+        this.toApiJsonSerializer = toApiJsonSerializer;
+        this.context = context;
+        this.fromApiJsonHelper = fromApiJsonHelper;
+    }
+
+    @POST
+    @Path("update")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String stateTransitions(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+        this.context.authenticatedUser().validateHasUpdatePermission(this.resourceNameForPermissions);
+        CommandWrapperBuilder resourceDetails = new CommandWrapperBuilder();
+        resourceDetails.withLoanId(loanId).withEntityName("LOANNOTE");
+        JsonObject newJsonObject = new JsonObject();
+        newJsonObject.addProperty("note", apiRequestBodyAsJson);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createNote(resourceDetails.build(), "loans", loanId)
+                .withJson(newJsonObject.toString()).build();
+        this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        final JsonElement allElement = this.fromApiJsonHelper.parse(apiRequestBodyAsJson);
+        final String resultCode = allElement.getAsJsonObject().get("resultCode").getAsString();
+        CommandProcessingResult result = null;
+        final String extractedJson = extractJson(allElement);
+        final CommandWrapperBuilder updateBuilder = new CommandWrapperBuilder().withJson(extractedJson);
+
+        if (Integer.valueOf(resultCode) == 200) {
+            final CommandWrapper disburseWrapper = updateBuilder.disburseLoanApplication(loanId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(disburseWrapper);
+        } else {
+            final CommandWrapper disburseWrapper = updateBuilder.updateDisbursement(loanId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(disburseWrapper);
+        }
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
+
+    private String extractJson(JsonElement element) {
+        JsonObject originalJsonObject = element.getAsJsonObject();
+        JsonObject newJsonObject = new JsonObject();
+        newJsonObject.add("paymentTypeId", originalJsonObject.get("paymentTypeId"));
+        newJsonObject.add("transactionAmount", originalJsonObject.get("transactionAmount"));
+        newJsonObject.add("actualDisbursementDate", originalJsonObject.get("actualDisbursementDate"));
+        newJsonObject.add("locale", originalJsonObject.get("locale"));
+        newJsonObject.add("dateFormat", originalJsonObject.get("dateFormat"));
+        return newJsonObject.toString();
+    }
+
+}
