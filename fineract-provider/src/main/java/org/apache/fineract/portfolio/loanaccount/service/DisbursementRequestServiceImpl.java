@@ -24,6 +24,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.IOException;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import okhttp3.Credentials;
 import okhttp3.MediaType;
@@ -37,6 +38,8 @@ import org.apache.fineract.portfolio.client.domain.ClientOtherInfoRepository;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementRequestData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanDisbursementRequestException;
+import org.apache.fineract.portfolio.note.domain.Note;
+import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
 import org.slf4j.Logger;
@@ -55,6 +58,7 @@ public class DisbursementRequestServiceImpl implements DisbursementRequestServic
 
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
 
+    private final NoteRepository noteRepository;
     private OkHttpClient client = new OkHttpClient();
     private Gson gson = new Gson();
     @Autowired
@@ -100,24 +104,27 @@ public class DisbursementRequestServiceImpl implements DisbursementRequestServic
         final ClientOtherInfo clientOtherInfo = this.clientOtherInfoRepository.getByClientId(loan.client().getId());
         final PaymentTypeData paymentTypes = this.paymentTypeReadPlatformService
                 .retrieveOne(command.longValueOfParameterNamed("paymentTypeId"));
-        // FIXME: 5/12/23 Logic to manage request id incremental and saving to notes/ new table
-        final String requestId = "cbs_" + loan.getId();
+        String uniqueId = UUID.randomUUID().toString() + "-" + System.currentTimeMillis();
+        final String requestId = "cbs_" + loan.getId() + "_" + uniqueId;
         DisbursementRequestData disbursementRequestData = new DisbursementRequestData(requestId, loan.getAccountNumber(),
                 loan.getPrincpal().getAmount(), loan.getPrincpal().getCurrencyCode(), paymentTypes.getName(),
-                clientOtherInfo.getTelephoneNo(), clientOtherInfo.getBankAccountNumber(), clientOtherInfo.getBankName());
+                clientOtherInfo.getTelephoneNo(), clientOtherInfo.getBankAccountNumber(), clientOtherInfo.getBankName(), "CBS");
 
         MediaType JSON = MediaType.get("application/json; charset=utf-8");
-        String json = gson.toJson(disbursementRequestData);
+        String requestJson = gson.toJson(disbursementRequestData);
 
-        RequestBody body = RequestBody.create(json, JSON);
+        RequestBody body = RequestBody.create(requestJson, JSON);
         Request request = new Request.Builder().url(getConfigProperty("fineract.integrations.inkomoko.rest.initiate.disbursement"))
                 .addHeader("Authorization", "Bearer " + token).post(body).build();
-
+        final Note requestNote = Note.loanNote(loan, requestJson);
+        this.noteRepository.saveAndFlush(requestNote);
         try (Response response = client.newCall(request).execute()) {
-            LOG.info("Received Response from Inkomoko for request  {0} and  loanid {1}  ", loan.getId(), requestId);
-            // FIXME: 5/12/23 Save it to notes or new table part of INKO-240
+            LOG.info("Received Response from Inkomoko for request   " + loan.getId() + " and  loanid  " + requestId);
+            final Note responseNote = Note.loanNote(loan, response.toString());
+            this.noteRepository.saveAndFlush(responseNote);
         } catch (IOException e) {
             throw new LoanDisbursementRequestException("Unexpected response received  from  inkomoko ", "loan", e);
         }
     }
+
 }

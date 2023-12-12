@@ -7106,4 +7106,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         validateAccountStatus(event);
         this.loanSubStatus = LoanSubStatus.PENDINGDISBURSEMENT.getValue();
     }
+
+    public void handleRejectDisbursementRequest() {
+        LoanEvent event = LoanEvent.LOAN_DISBURSEMENT_REQUEST_REJECT;
+        validateAccountStatus(event);
+        this.loanSubStatus = null;
+    }
 }

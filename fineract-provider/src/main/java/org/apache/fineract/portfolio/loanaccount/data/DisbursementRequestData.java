@@ -24,7 +24,7 @@ import java.math.BigDecimal;
 public class DisbursementRequestData {
 
     private final String requestId;
-    private final String loanAccount;
+    private final String externalId;
     private final BigDecimal amount;
     private final String currencyCode;
     private final String paymentMethod;
@@ -32,16 +32,19 @@ public class DisbursementRequestData {
     private final String clientAccountNumber;
     private final String clientBankName;
 
+    private final String origin;
+
     public DisbursementRequestData(String requestId, String loanAccount, BigDecimal amount, String currencyCode, String paymentMethod,
-            String clientPhoneNumber, String clientAccountNumber, String clientBankName) {
+            String clientPhoneNumber, String clientAccountNumber, String clientBankName, String origin) {
         this.requestId = requestId;
-        this.loanAccount = loanAccount;
+        this.externalId = loanAccount;
         this.amount = amount;
         this.currencyCode = currencyCode;
         this.paymentMethod = paymentMethod;
         this.clientPhoneNumber = clientPhoneNumber;
         this.clientAccountNumber = clientAccountNumber;
         this.clientBankName = clientBankName;
+        this.origin = origin;
     }
 
     public String getRequestId() {
@@ -49,7 +52,7 @@ public class DisbursementRequestData {
     }
 
     public String getLoanAccount() {
-        return loanAccount;
+        return externalId;
     }
 
     public BigDecimal getAmount() {
@@ -74,5 +77,9 @@ public class DisbursementRequestData {
 
     public String getClientBankName() {
         return clientBankName;
+    }
+
+    public String getOrigin() {
+        return origin;
     }
 }
