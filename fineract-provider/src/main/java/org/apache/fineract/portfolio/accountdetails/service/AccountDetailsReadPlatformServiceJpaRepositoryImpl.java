@@ -39,6 +39,7 @@ import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.group.service.GroupReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApplicationTimelineData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanStatusEnumData;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanSubStatus;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountApplicationTimelineData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountStatusEnumData;
@@ -596,7 +597,9 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
                     .append(" la.overdue_since_date_derived as overdueSinceDate,")
                     .append(" l.writtenoffon_date as writtenOffOnDate, l.expected_maturedon_date as expectedMaturityDate, ")
                     .append(" ds.loan_decision_state as loanDecisionState , ")
-                    .append(" glim.actual_principal_amount as actualPrincipalAmount ")
+                    .append(" glim.actual_principal_amount as actualPrincipalAmount,")
+
+                    .append(" l.loan_sub_status_id as loanSubStatusId ")
 
                     .append(" from m_loan l ").append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id")
                     .append(" left join m_appuser sbu on sbu.id = l.created_by")
@@ -681,6 +684,12 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
                 loanDecisionStateEnumData = LoanEnumerations.loanDecisionState(loanDecisionStateId.intValue());
             }
 
+            final Integer loanSubStatusId = JdbcSupport.getInteger(rs, "loanSubStatusId");
+            EnumOptionData loanSubStatus = null;
+            if (loanSubStatusId != null) {
+                loanSubStatus = LoanSubStatus.loanSubStatus(loanSubStatusId);
+            }
+
             final LoanApplicationTimelineData timeline = new LoanApplicationTimelineData(submittedOnDate, submittedByUsername,
                     submittedByFirstname, submittedByLastname, rejectedOnDate, rejectedByUsername, rejectedByFirstname, rejectedByLastname,
                     withdrawnOnDate, withdrawnByUsername, withdrawnByFirstname, withdrawnByLastname, approvedOnDate, approvedByUsername,
@@ -690,7 +699,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
 
             LoanAccountSummaryData loanAccountSummaryData = new LoanAccountSummaryData(id, accountNo, parentAccountNumber, externalId,
                     productId, loanProductName, shortLoanProductName, loanStatus, loanType, loanCycle, timeline, inArrears, originalLoan,
-                    loanBalance, amountPaid, loanDecisionStateEnumData, actualPrincipalAmount);
+                    loanBalance, amountPaid, loanDecisionStateEnumData, actualPrincipalAmount, loanSubStatus);
             loanAccountSummaryData.setLoanProductDescription(loanProductDescription);
             return loanAccountSummaryData;
         }
