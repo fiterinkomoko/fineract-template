@@ -586,7 +586,8 @@
 
     <changeSet id="drop-uk.m_client_mobile_no_mysql" author="bosco@fiter.io" context="mysql">
         <dropUniqueConstraint tableName="m_client"
-                              uniqueColumns="mobile_no"/>
+                              uniqueColumns="mobile_no"
+                              constraintName="mobile_no"/>
     </changeSet>
 
 </databaseChangeLog>
