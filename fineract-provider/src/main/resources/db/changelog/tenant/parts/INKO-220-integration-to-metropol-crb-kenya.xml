@@ -583,4 +583,11 @@
             </column>
         </createTable>
     </changeSet>
+
+    <changeSet id="drop-uk.m_client_mobile_no" author="bosco@fiter.io">
+        <dropUniqueConstraint tableName="m_client"
+                              uniqueColumns="mobile_no"
+                              constraintName="m_client_mobile_no_key"/>
+    </changeSet>
+
 </databaseChangeLog>

@@ -39,7 +39,7 @@ public interface LoanWritePlatformService {
 
     CommandProcessingResult disburseLoan(Long loanId, JsonCommand command, Boolean isAccountTransfer, Boolean isGlimBulkDisbursement);
 
-    CommandProcessingResult updateDisbursement(Long loanId, JsonCommand command, Boolean isAccountTransfer, Boolean isGlimBulkDisbursement);
+    CommandProcessingResult updateDisbursement(Long loanId, JsonCommand command);
 
     Map<String, Object> bulkLoanDisbursal(JsonCommand command, CollectionSheetBulkDisbursalCommand bulkDisbursalCommand,
             Boolean isAccountTransfer);

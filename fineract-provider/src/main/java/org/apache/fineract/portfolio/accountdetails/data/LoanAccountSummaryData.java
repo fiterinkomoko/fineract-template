@@ -48,6 +48,7 @@ public class LoanAccountSummaryData {
     private final BigDecimal amountPaid;
     private final BigDecimal actualPrincipalAmount;
     private EnumOptionData loanDecisionState;
+    private EnumOptionData subStatus;
 
     public LoanAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
             final String loanProductName, final String shortLoanProductName, final LoanStatusEnumData loanStatus,
@@ -94,6 +95,31 @@ public class LoanAccountSummaryData {
         this.amountPaid = amountPaid;
         this.loanDecisionState = loanDecisionState;
         this.actualPrincipalAmount = actualPrincipalAmount;
+    }
+
+    public LoanAccountSummaryData(final Long id, final String accountNo, final String parentAccountNumber, final String externalId,
+            final Long productId, final String loanProductName, final String shortLoanProductName, final LoanStatusEnumData loanStatus,
+            final EnumOptionData loanType, final Integer loanCycle, final LoanApplicationTimelineData timeline, final Boolean inArrears,
+            final BigDecimal originalLoan, final BigDecimal loanBalance, final BigDecimal amountPaid, EnumOptionData loanDecisionState,
+            final BigDecimal actualPrincipalAmount, final EnumOptionData subStatus) {
+        this.id = id;
+        this.accountNo = accountNo;
+        this.parentAccountNumber = parentAccountNumber;
+        this.externalId = externalId;
+        this.productId = productId;
+        this.productName = loanProductName;
+        this.shortProductName = shortLoanProductName;
+        this.status = loanStatus;
+        this.loanType = loanType;
+        this.loanCycle = loanCycle;
+        this.timeline = timeline;
+        this.inArrears = inArrears;
+        this.loanBalance = loanBalance;
+        this.originalLoan = originalLoan;
+        this.amountPaid = amountPaid;
+        this.loanDecisionState = loanDecisionState;
+        this.actualPrincipalAmount = actualPrincipalAmount;
+        this.subStatus = subStatus;
     }
 
     public LoanStatusEnumData getStatus() {
