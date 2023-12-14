@@ -98,10 +98,10 @@ public class LoanAccountSummaryData {
     }
 
     public LoanAccountSummaryData(final Long id, final String accountNo, final String parentAccountNumber, final String externalId,
-          final Long productId, final String loanProductName, final String shortLoanProductName, final LoanStatusEnumData loanStatus,
-          final EnumOptionData loanType, final Integer loanCycle, final LoanApplicationTimelineData timeline, final Boolean inArrears,
-          final BigDecimal originalLoan, final BigDecimal loanBalance, final BigDecimal amountPaid, EnumOptionData loanDecisionState,
-          final BigDecimal actualPrincipalAmount, final EnumOptionData subStatus) {
+            final Long productId, final String loanProductName, final String shortLoanProductName, final LoanStatusEnumData loanStatus,
+            final EnumOptionData loanType, final Integer loanCycle, final LoanApplicationTimelineData timeline, final Boolean inArrears,
+            final BigDecimal originalLoan, final BigDecimal loanBalance, final BigDecimal amountPaid, EnumOptionData loanDecisionState,
+            final BigDecimal actualPrincipalAmount, final EnumOptionData subStatus) {
         this.id = id;
         this.accountNo = accountNo;
         this.parentAccountNumber = parentAccountNumber;
