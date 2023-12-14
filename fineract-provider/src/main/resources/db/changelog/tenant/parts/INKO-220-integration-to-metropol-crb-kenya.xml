@@ -584,10 +584,9 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="drop-uk.m_client_mobile_no" author="bosco@fiter.io">
+    <changeSet id="drop-uk.m_client_mobile_no_mysql" author="bosco@fiter.io" context="mysql">
         <dropUniqueConstraint tableName="m_client"
-                              uniqueColumns="mobile_no"
-                              constraintName="m_client_mobile_no_key"/>
+                              uniqueColumns="mobile_no"/>
     </changeSet>
 
 </databaseChangeLog>
