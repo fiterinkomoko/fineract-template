@@ -35,6 +35,7 @@ import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSer
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
+import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -53,22 +54,27 @@ public class LoanDisbursementIntegrationApiResource {
 
     private final FromJsonHelper fromApiJsonHelper;
 
+    private final LoanReadPlatformService loanReadPlatformService;
+
     public LoanDisbursementIntegrationApiResource(PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer, PlatformSecurityContext context,
-            FromJsonHelper fromApiJsonHelper) {
+            FromJsonHelper fromApiJsonHelper, LoanReadPlatformService loanReadPlatformService) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.context = context;
         this.fromApiJsonHelper = fromApiJsonHelper;
+        this.loanReadPlatformService = loanReadPlatformService;
     }
 
     @POST
     @Path("update")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String stateTransitions(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+    public String stateTransitions(@PathParam("accountNo") @Parameter(description = "accountNo") final String accountNo,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
         this.context.authenticatedUser().validateHasUpdatePermission(this.resourceNameForPermissions);
+        LoanAccountData loanAccountData = this.loanReadPlatformService.retrieveLoanByLoanAccount(accountNo);
+        Long loanId = loanAccountData.getId();
         CommandWrapperBuilder resourceDetails = new CommandWrapperBuilder();
         resourceDetails.withLoanId(loanId).withEntityName("LOANNOTE");
         JsonObject newJsonObject = new JsonObject();

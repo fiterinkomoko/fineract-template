@@ -2202,4 +2202,8 @@ public final class LoanAccountData {
     public void setKivaUUId(String kivaUUId) {
         this.kivaUUId = kivaUUId;
     }
+
+    public Long getId() {
+        return id;
+    }
 }
