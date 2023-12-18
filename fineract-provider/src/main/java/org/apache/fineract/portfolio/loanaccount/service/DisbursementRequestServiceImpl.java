@@ -102,13 +102,14 @@ public class DisbursementRequestServiceImpl implements DisbursementRequestServic
     public void disburseRequestLoan(Loan loan, JsonCommand command) {
         String token = authenticateToIntegrationApi();
         final ClientOtherInfo clientOtherInfo = this.clientOtherInfoRepository.getByClientId(loan.client().getId());
-        final PaymentTypeData paymentTypes = this.paymentTypeReadPlatformService
-                .retrieveOne(command.longValueOfParameterNamed("paymentTypeId"));
+        Long paymentTypeId = command.longValueOfParameterNamed("paymentTypeId");
+        final PaymentTypeData paymentTypes = this.paymentTypeReadPlatformService.retrieveOne(paymentTypeId);
         String uniqueId = UUID.randomUUID().toString() + "-" + System.currentTimeMillis();
         final String requestId = "cbs_" + loan.getId() + "_" + uniqueId;
         DisbursementRequestData disbursementRequestData = new DisbursementRequestData(requestId, loan.getAccountNumber(),
                 loan.getPrincpal().getAmount(), loan.getPrincpal().getCurrencyCode(), paymentTypes.getName(),
-                clientOtherInfo.getTelephoneNo(), clientOtherInfo.getBankAccountNumber(), clientOtherInfo.getBankName(), "CBS");
+                clientOtherInfo.getTelephoneNo(), clientOtherInfo.getBankAccountNumber(), clientOtherInfo.getBankName(), "CBS",
+                paymentTypeId);
 
         MediaType JSON = MediaType.get("application/json; charset=utf-8");
         String requestJson = gson.toJson(disbursementRequestData);

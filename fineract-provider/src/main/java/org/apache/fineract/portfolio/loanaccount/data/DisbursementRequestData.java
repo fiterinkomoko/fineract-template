@@ -34,8 +34,10 @@ public class DisbursementRequestData {
 
     private final String origin;
 
+    private final Long paymentTypeId;
+
     public DisbursementRequestData(String requestId, String loanAccount, BigDecimal amount, String currencyCode, String paymentMethod,
-            String clientPhoneNumber, String clientAccountNumber, String clientBankName, String origin) {
+            String clientPhoneNumber, String clientAccountNumber, String clientBankName, String origin, Long paymentTypeId) {
         this.requestId = requestId;
         this.externalId = loanAccount;
         this.amount = amount;
@@ -45,6 +47,7 @@ public class DisbursementRequestData {
         this.clientAccountNumber = clientAccountNumber;
         this.clientBankName = clientBankName;
         this.origin = origin;
+        this.paymentTypeId = paymentTypeId;
     }
 
     public String getRequestId() {
