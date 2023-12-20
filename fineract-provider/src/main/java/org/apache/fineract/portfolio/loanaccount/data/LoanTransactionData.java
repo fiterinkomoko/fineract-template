@@ -92,6 +92,8 @@ public class LoanTransactionData {
 
     private final LocalDateTime createdDate;
 
+    private Boolean isLoanDisbursementRequestEnabled;
+
     public static LoanTransactionData importInstance(BigDecimal repaymentAmount, LocalDate lastRepaymentDate, Long repaymentTypeId,
             Integer rowIndex, String locale, String dateFormat, final LocalDateTime createdDate) {
         return new LoanTransactionData(repaymentAmount, lastRepaymentDate, repaymentTypeId, rowIndex, locale, dateFormat, createdDate);
@@ -387,5 +389,9 @@ public class LoanTransactionData {
 
     public void setLoanExternalId(String loanExternalId) {
         this.loanExternalId = loanExternalId;
+    }
+
+    public void setLoanDisbursementRequestEnabled(Boolean loanDisbursementRequestEnabled) {
+        this.isLoanDisbursementRequestEnabled = loanDisbursementRequestEnabled;
     }
 }
