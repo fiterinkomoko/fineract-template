@@ -49,6 +49,8 @@ import org.apache.fineract.accounting.journalentry.api.DateParam;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
+import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
@@ -85,6 +87,7 @@ public class LoanTransactionsApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
     private final LoanChargePaidByReadPlatformService loanChargePaidByReadPlatformService;
+    private final ConfigurationReadPlatformService configurationReadPlatformService;
 
     @Autowired
     public LoanTransactionsApiResource(final PlatformSecurityContext context, final LoanReadPlatformService loanReadPlatformService,
@@ -92,7 +95,8 @@ public class LoanTransactionsApiResource {
             final DefaultToApiJsonSerializer<LoanTransactionData> toApiJsonSerializer,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             PaymentTypeReadPlatformService paymentTypeReadPlatformService,
-            LoanChargePaidByReadPlatformService loanChargePaidByReadPlatformService) {
+            LoanChargePaidByReadPlatformService loanChargePaidByReadPlatformService,
+            ConfigurationReadPlatformService configurationReadPlatformService) {
         this.context = context;
         this.loanReadPlatformService = loanReadPlatformService;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
@@ -100,6 +104,7 @@ public class LoanTransactionsApiResource {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.paymentTypeReadPlatformService = paymentTypeReadPlatformService;
         this.loanChargePaidByReadPlatformService = loanChargePaidByReadPlatformService;
+        this.configurationReadPlatformService = configurationReadPlatformService;
     }
 
     private boolean is(final String commandParam, final String commandValue) {
@@ -162,6 +167,9 @@ public class LoanTransactionsApiResource {
             final List<LoanRepaymentScheduleInstallmentData> loanRepaymentScheduleInstallmentData = this.loanReadPlatformService
                     .getRepaymentDataResponse(loanId);
             transactionData.setLoanRepaymentScheduleInstallments(loanRepaymentScheduleInstallmentData);
+            final GlobalConfigurationPropertyData enableLoanDisbursementRequest = this.configurationReadPlatformService
+                    .retrieveGlobalConfiguration("Enable-loan-disbursement-request");
+            transactionData.setLoanDisbursementRequestEnabled(enableLoanDisbursementRequest.isEnabled());
         } else if (is(commandParam, "disburseToSavings")) {
             transactionData = this.loanReadPlatformService.retrieveDisbursalTemplate(loanId, false);
         } else if (is(commandParam, "recoverypayment")) {
