@@ -40,6 +40,8 @@ public class DocumentCommand {
     private final Set<String> modifiedParameters;
     private final Boolean isKivaProfileImage;
 
+    private final Long documentType;
+
     public DocumentCommand(final Set<String> modifiedParameters, final Long id, final String parentEntityType, final Long parentEntityId,
             final String name, final String fileName, final Long size, final String type, final String description, final String location,
             final Boolean isKivaProfileImage) {
@@ -54,6 +56,24 @@ public class DocumentCommand {
         this.description = description;
         this.location = location;
         this.isKivaProfileImage = isKivaProfileImage;
+        this.documentType = null;
+    }
+
+    public DocumentCommand(final Set<String> modifiedParameters, final Long id, final String parentEntityType, final Long parentEntityId,
+            final String name, final String fileName, final Long size, final String type, final String description, final String location,
+            final Boolean isKivaProfileImage, final Long documentType) {
+        this.modifiedParameters = modifiedParameters;
+        this.id = id;
+        this.parentEntityType = parentEntityType;
+        this.parentEntityId = parentEntityId;
+        this.name = name;
+        this.fileName = fileName;
+        this.size = size;
+        this.type = type;
+        this.description = description;
+        this.location = location;
+        this.isKivaProfileImage = isKivaProfileImage;
+        this.documentType = documentType;
     }
 
     public Long getId() {
@@ -152,4 +172,7 @@ public class DocumentCommand {
         return this.modifiedParameters.contains("isKivaProfileImage");
     }
 
+    public Long getDocumentType() {
+        return documentType;
+    }
 }

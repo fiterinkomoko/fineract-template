@@ -28,9 +28,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -45,6 +47,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import org.apache.fineract.infrastructure.codes.data.CodeValueData;
+import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
@@ -55,6 +59,7 @@ import org.apache.fineract.infrastructure.documentmanagement.data.FileData;
 import org.apache.fineract.infrastructure.documentmanagement.service.DocumentReadPlatformService;
 import org.apache.fineract.infrastructure.documentmanagement.service.DocumentWritePlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.account.data.DocumentTemplateData;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -82,18 +87,20 @@ public class DocumentManagementApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final ToApiJsonSerializer<DocumentData> toApiJsonSerializer;
     private final FileUploadValidator fileUploadValidator;
+    private final CodeValueReadPlatformService codeValueReadPlatformService;
 
     @Autowired
     public DocumentManagementApiResource(final PlatformSecurityContext context,
             final DocumentReadPlatformService documentReadPlatformService, final DocumentWritePlatformService documentWritePlatformService,
             final ApiRequestParameterHelper apiRequestParameterHelper, final ToApiJsonSerializer<DocumentData> toApiJsonSerializer,
-            final FileUploadValidator fileUploadValidator) {
+            final FileUploadValidator fileUploadValidator, CodeValueReadPlatformService codeValueReadPlatformService) {
         this.context = context;
         this.documentReadPlatformService = documentReadPlatformService;
         this.documentWritePlatformService = documentWritePlatformService;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.fileUploadValidator = fileUploadValidator;
+        this.codeValueReadPlatformService = codeValueReadPlatformService;
     }
 
     @GET
@@ -131,14 +138,15 @@ public class DocumentManagementApiResource {
             @HeaderParam("Content-Length") @Parameter(description = "Content-Length") final Long fileSize,
             @FormDataParam("file") final InputStream inputStream, @FormDataParam("file") final FormDataContentDisposition fileDetails,
             @FormDataParam("file") final FormDataBodyPart bodyPart, @FormDataParam("name") final String name,
-            @FormDataParam("description") final String description, @FormDataParam("isKivaProfileImage") final Boolean isKivaProfileImage) {
+            @FormDataParam("description") final String description, @FormDataParam("isKivaProfileImage") final Boolean isKivaProfileImage,
+            @FormDataParam("documentType") final Long documentType) {
 
         // TODO: stop reading from stream after max size is reached to protect against malicious clients
         // TODO: need to extract the actual file type and determine if they are permissible
 
         fileUploadValidator.validate(fileSize, inputStream, fileDetails, bodyPart);
         final DocumentCommand documentCommand = new DocumentCommand(null, null, entityType, entityId, name, fileDetails.getFileName(),
-                fileSize, bodyPart.getMediaType().toString(), description, null, isKivaProfileImage);
+                fileSize, bodyPart.getMediaType().toString(), description, null, isKivaProfileImage, documentType);
         final Long documentId = this.documentWritePlatformService.createDocument(documentCommand, inputStream);
         return this.toApiJsonSerializer.serialize(CommandProcessingResult.resourceResult(documentId, null));
     }
@@ -243,5 +251,19 @@ public class DocumentManagementApiResource {
         final CommandProcessingResult documentIdentifier = this.documentWritePlatformService.deleteDocument(documentCommand);
 
         return this.toApiJsonSerializer.serialize(documentIdentifier);
+    }
+
+    @GET
+    @Path("template")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve Document Template", description = "")
+    public String template() {
+        this.context.authenticatedUser().validateHasReadPermission(this.systemEntityType);
+        final List<CodeValueData> documentTypeOptions = new ArrayList<>(
+                this.codeValueReadPlatformService.retrieveCodeValuesByCode(DocumentApiConstant.DOCUMENT_TYPE));
+
+        DocumentTemplateData documentTemplateData = DocumentTemplateData.template(documentTypeOptions);
+        return this.toApiJsonSerializer.serialize(documentTemplateData);
     }
 }

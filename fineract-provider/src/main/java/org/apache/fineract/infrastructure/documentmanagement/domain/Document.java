@@ -20,8 +20,12 @@ package org.apache.fineract.infrastructure.documentmanagement.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCommand;
 
@@ -59,18 +63,22 @@ public class Document extends AbstractPersistableCustom {
     @Column(name = "is_kiva_profile_image")
     private Boolean isKivaProfileImage;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "document_type_cv_id", nullable = true)
+    private CodeValue documentType;
+
     public Document() {}
 
     public static Document createNew(final String parentEntityType, final Long parentEntityId, final String name, final String fileName,
             final Long size, final String type, final String description, final String location, final StorageType storageType,
-            final Boolean isKivaProfileImage) {
+            final Boolean isKivaProfileImage, final CodeValue documentType) {
         return new Document(parentEntityType, parentEntityId, name, fileName, size, type, description, location, storageType,
-                isKivaProfileImage);
+                isKivaProfileImage, documentType);
     }
 
     private Document(final String parentEntityType, final Long parentEntityId, final String name, final String fileName, final Long size,
             final String type, final String description, final String location, final StorageType storageType,
-            final Boolean isKivaProfileImage) {
+            final Boolean isKivaProfileImage, final CodeValue documentType) {
         this.parentEntityType = StringUtils.defaultIfEmpty(parentEntityType, null);
         this.parentEntityId = parentEntityId;
         this.name = StringUtils.defaultIfEmpty(name, null);
@@ -81,6 +89,7 @@ public class Document extends AbstractPersistableCustom {
         this.location = StringUtils.defaultIfEmpty(location, null);
         this.storageType = storageType.getValue();
         this.isKivaProfileImage = isKivaProfileImage;
+        this.documentType = documentType;
     }
 
     public void update(final DocumentCommand command) {
