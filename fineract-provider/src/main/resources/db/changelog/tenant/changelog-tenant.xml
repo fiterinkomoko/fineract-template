@@ -118,4 +118,5 @@
     <include file="parts/INKO-220-integration-to-metropol-crb-kenya.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO-240_loan_pending_disbursement.xml" relativeToChangelogFile="true" />
     <includeAll path="custom-changelog" relativeToChangelogFile="true"/>
+    <include file="parts/INKO-250_loan_document_type.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

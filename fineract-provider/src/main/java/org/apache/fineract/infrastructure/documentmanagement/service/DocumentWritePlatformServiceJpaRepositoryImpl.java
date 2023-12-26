@@ -19,9 +19,12 @@
 package org.apache.fineract.infrastructure.documentmanagement.service;
 
 import java.io.InputStream;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.apache.fineract.infrastructure.documentmanagement.api.DocumentApiConstant;
 import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCommand;
 import org.apache.fineract.infrastructure.documentmanagement.command.DocumentCommandValidator;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepository;
@@ -49,13 +52,15 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
     private final PlatformSecurityContext context;
     private final DocumentRepository documentRepository;
     private final ContentRepositoryFactory contentRepositoryFactory;
+    private final CodeValueRepositoryWrapper codeValueRepository;
 
     @Autowired
     public DocumentWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final DocumentRepository documentRepository,
-            final ContentRepositoryFactory documentStoreFactory) {
+            final ContentRepositoryFactory documentStoreFactory, CodeValueRepositoryWrapper codeValueRepository) {
         this.context = context;
         this.documentRepository = documentRepository;
         this.contentRepositoryFactory = documentStoreFactory;
+        this.codeValueRepository = codeValueRepository;
     }
 
     @Transactional
@@ -81,11 +86,16 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
             final ContentRepository contentRepository = this.contentRepositoryFactory.getRepository();
 
             final String fileLocation = contentRepository.saveFile(inputStream, documentCommand);
-
+            CodeValue documentType = null;
+            final Long documentTypeId = documentCommand.getDocumentType();
+            if (documentTypeId != null) {
+                documentType = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(DocumentApiConstant.DOCUMENT_TYPE,
+                        documentTypeId);
+            }
             final Document document = Document.createNew(documentCommand.getParentEntityType(), documentCommand.getParentEntityId(),
                     documentCommand.getName(), documentCommand.getFileName(), documentCommand.getSize(), documentCommand.getType(),
                     documentCommand.getDescription(), fileLocation, contentRepository.getStorageType(),
-                    documentCommand.getKivaProfileImage());
+                    documentCommand.getKivaProfileImage(), documentType);
 
             this.documentRepository.saveAndFlush(document);
 
