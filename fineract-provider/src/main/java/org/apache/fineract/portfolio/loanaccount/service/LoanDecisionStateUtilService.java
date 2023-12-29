@@ -123,11 +123,6 @@ public class LoanDecisionStateUtilService {
                         "Approval on  date" + approveOnDate + " should be after IC ReviewDecision Level One date "
                                 + loanDecision.getIcReviewDecisionLevelOneOn());
             }
-            if (approveOnDate.isBefore(loanDecision.getCollateralReviewOn())) {
-                throw new GeneralPlatformDomainRuleException("error.msg.loan.Approval.date.should.be.after.collateral.review.date",
-                        "Approval on  date" + approveOnDate + " should be after Collateral Review Approved date "
-                                + loanDecision.getCollateralReviewOn());
-            }
             if (approveOnDate.isBefore(loanDecision.getDueDiligenceOn())) {
                 throw new GeneralPlatformDomainRuleException("error.msg.loan.Approval.date.should.be.after.Due.Diligence.date",
                         "Approval on date" + approveOnDate + " should be after Loan Due Diligence Approved date "
@@ -214,11 +209,6 @@ public class LoanDecisionStateUtilService {
                         "error.msg.loan.Disbursement.date.should.be.after.Ic.Review.decision.level.one.date",
                         "Disbursement on  date" + actualDisbursementDate + " should be after IC ReviewDecision Level One date "
                                 + loanDecision.getIcReviewDecisionLevelOneOn());
-            }
-            if (actualDisbursementDate.isBefore(loanDecision.getCollateralReviewOn())) {
-                throw new GeneralPlatformDomainRuleException("error.msg.loan.Disbursement.date.should.be.after.collateral.review.date",
-                        "Disbursement on  date" + actualDisbursementDate + " should be after Collateral Review Approved date "
-                                + loanDecision.getCollateralReviewOn());
             }
             if (actualDisbursementDate.isBefore(loanDecision.getDueDiligenceOn())) {
                 throw new GeneralPlatformDomainRuleException("error.msg.loan.Disbursement.date.should.be.after.Due.Diligence.date",
@@ -620,14 +610,8 @@ public class LoanDecisionStateUtilService {
 
         validateLoanDisbursementDataWithMeetingDate(loan);
         validateLoanTopUp(loan);
-        // Ic Review Decision Level One should not be before other stages below it like Collateral Review , Due
-        // Diligence and Review Application
-        if (icReviewOn.isBefore(loanDecision.getCollateralReviewOn())) {
-            throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.ic.review.decision.level.one.date.should.be.after.collateral.review.date",
-                    "Approve IC ReviewDecision Level One on  date" + icReviewOn + " should be after Collateral Review Approved date "
-                            + loanDecision.getCollateralReviewOn());
-        }
+        // Ic Review Decision Level One should not be before other stages below it like Due Diligence
+        // and Review Application
         if (icReviewOn.isBefore(loanDecision.getDueDiligenceOn())) {
             throw new GeneralPlatformDomainRuleException(
                     "error.msg.loan.ic.review.decision.level.one.date.should.be.after.Due.Diligence.date",
@@ -649,11 +633,11 @@ public class LoanDecisionStateUtilService {
 
         if (!loan.status().isSubmittedAndPendingApproval()) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.current.status.is.invalid",
-                    "Loan Account current status is invalid. Expected" + loan.status().getCode() + " but found " + loan.status().getCode());
+                    "Loan Account current status is invalid. Expected " + loan.status().getCode() + " but found " + loan.status().getCode());
         }
-        if (!LoanDecisionState.fromInt(loan.getLoanDecisionState()).isCollateralReview()) {
+        if (!LoanDecisionState.fromInt(loan.getLoanDecisionState()).isDueDiligence()) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.decision.state.is.invalid",
-                    "Loan Account Decision state is invalid. Expected" + LoanDecisionState.COLLATERAL_REVIEW.getValue() + " but found "
+                    "Loan Account Decision state is invalid. Expected " + LoanDecisionState.DUE_DILIGENCE.getValue() + " but found "
                             + loan.getLoanDecisionState());
         }
         if (!loan.getLoanDecisionState().equals(loanDecision.getLoanDecisionState())) {
@@ -680,19 +664,12 @@ public class LoanDecisionStateUtilService {
         validateLoanDisbursementDataWithMeetingDate(loan);
         validateLoanTopUp(loan);
         // Ic Review Decision Level One should not be before other stages below it like IC Review Decision Level
-        // One,Collateral Review , Due
-        // Diligence and Review Application
+        // One, Due Diligence and Review Application
         if (icReviewOn.isBefore(loanDecision.getIcReviewDecisionLevelOneOn())) {
             throw new GeneralPlatformDomainRuleException(
                     "error.msg.loan.ic.review.decision.level.Two.date.should.be.after.Ic.Review.decision.level.one.date",
                     "Approve IC ReviewDecision Level Two on  date" + icReviewOn + " should be after IC ReviewDecision Level One date "
                             + loanDecision.getIcReviewDecisionLevelOneOn());
-        }
-        if (icReviewOn.isBefore(loanDecision.getCollateralReviewOn())) {
-            throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.ic.review.decision.level.Two.date.should.be.after.collateral.review.date",
-                    "Approve IC ReviewDecision Level Two on  date" + icReviewOn + " should be after Collateral Review Approved date "
-                            + loanDecision.getCollateralReviewOn());
         }
         if (icReviewOn.isBefore(loanDecision.getDueDiligenceOn())) {
             throw new GeneralPlatformDomainRuleException(
@@ -746,8 +723,7 @@ public class LoanDecisionStateUtilService {
         validateLoanDisbursementDataWithMeetingDate(loan);
         validateLoanTopUp(loan);
         // Ic Review Decision Level One should not be before other stages below it like IC Review Decision Level
-        // One,Collateral Review , Due
-        // Diligence and Review Application
+        // One, Due Diligence and Review Application
         if (icReviewOn.isBefore(loanDecision.getIcReviewDecisionLevelTwoOn())) {
             throw new GeneralPlatformDomainRuleException(
                     "error.msg.loan.ic.review.decision.level.Three.date.should.be.after.Ic.Review.decision.level.Two.date",
@@ -759,12 +735,6 @@ public class LoanDecisionStateUtilService {
                     "error.msg.loan.ic.review.decision.level.Three.date.should.be.after.Ic.Review.decision.level.one.date",
                     "Approve IC ReviewDecision Level Three on  date" + icReviewOn + " should be after IC ReviewDecision Level One date "
                             + loanDecision.getIcReviewDecisionLevelOneOn());
-        }
-        if (icReviewOn.isBefore(loanDecision.getCollateralReviewOn())) {
-            throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.ic.review.decision.level.Three.date.should.be.after.collateral.review.date",
-                    "Approve IC ReviewDecision Level Three on  date" + icReviewOn + " should be after Collateral Review Approved date "
-                            + loanDecision.getCollateralReviewOn());
         }
         if (icReviewOn.isBefore(loanDecision.getDueDiligenceOn())) {
             throw new GeneralPlatformDomainRuleException(
@@ -819,8 +789,7 @@ public class LoanDecisionStateUtilService {
         validateLoanDisbursementDataWithMeetingDate(loan);
         validateLoanTopUp(loan);
         // Ic Review Decision Level One should not be before other stages below it like IC Review Decision Level
-        // One,Collateral Review , Due
-        // Diligence and Review Application
+        // One, Due Diligence and Review Application
         if (icReviewOn.isBefore(loanDecision.getIcReviewDecisionLevelThreeOn())) {
             throw new GeneralPlatformDomainRuleException(
                     "error.msg.loan.ic.review.decision.level.Four.date.should.be.after.Ic.Review.decision.level.Three.date",
@@ -839,12 +808,6 @@ public class LoanDecisionStateUtilService {
                     "error.msg.loan.ic.review.decision.level.Four.date.should.be.after.Ic.Review.decision.level.one.date",
                     "Approve IC ReviewDecision Level Four on  date" + icReviewOn + " should be after IC ReviewDecision Level One date "
                             + loanDecision.getIcReviewDecisionLevelOneOn());
-        }
-        if (icReviewOn.isBefore(loanDecision.getCollateralReviewOn())) {
-            throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.ic.review.decision.level.Four.date.should.be.after.collateral.review.date",
-                    "Approve IC ReviewDecision Level Four on  date" + icReviewOn + " should be after Collateral Review Approved date "
-                            + loanDecision.getCollateralReviewOn());
         }
         if (icReviewOn.isBefore(loanDecision.getDueDiligenceOn())) {
             throw new GeneralPlatformDomainRuleException(
@@ -899,8 +862,7 @@ public class LoanDecisionStateUtilService {
         validateLoanDisbursementDataWithMeetingDate(loan);
         validateLoanTopUp(loan);
         // Ic Review Decision Level One should not be before other stages below it like IC Review Decision Level
-        // One,Collateral Review , Due
-        // Diligence and Review Application
+        // One, Due Diligence and Review Application
         if (icReviewOn.isBefore(loanDecision.getIcReviewDecisionLevelFourOn())) {
             throw new GeneralPlatformDomainRuleException(
                     "error.msg.loan.ic.review.decision.level.Five.date.should.be.after.Ic.Review.decision.level.Four.date",
@@ -925,12 +887,6 @@ public class LoanDecisionStateUtilService {
                     "error.msg.loan.ic.review.decision.level.Five.date.should.be.after.Ic.Review.decision.level.one.date",
                     "Approve IC ReviewDecision Level Five on  date" + icReviewOn + " should be after IC ReviewDecision Level One date "
                             + loanDecision.getIcReviewDecisionLevelOneOn());
-        }
-        if (icReviewOn.isBefore(loanDecision.getCollateralReviewOn())) {
-            throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.ic.review.decision.level.Five.date.should.be.after.collateral.review.date",
-                    "Approve IC ReviewDecision Level Five on  date" + icReviewOn + " should be after Collateral Review Approved date "
-                            + loanDecision.getCollateralReviewOn());
         }
         if (icReviewOn.isBefore(loanDecision.getDueDiligenceOn())) {
             throw new GeneralPlatformDomainRuleException(
@@ -1016,12 +972,6 @@ public class LoanDecisionStateUtilService {
                     "error.msg.loan.prepare.and.sign.contract.date.should.be.after.Ic.Review.decision.level.one.date",
                     "Approve Prepare And Sign Contract on  date" + icReviewOn + " should be after IC ReviewDecision Level One date "
                             + loanDecision.getIcReviewDecisionLevelOneOn());
-        }
-        if (icReviewOn.isBefore(loanDecision.getCollateralReviewOn())) {
-            throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.prepare.and.sign.contract.date.should.be.after.collateral.review.date",
-                    "Approve Prepare And Sign Contract on  date" + icReviewOn + " should be after Collateral Review Approved date "
-                            + loanDecision.getCollateralReviewOn());
         }
         if (icReviewOn.isBefore(loanDecision.getDueDiligenceOn())) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.prepare.and.sign.contract.date.should.be.after.Due.Diligence.date",
