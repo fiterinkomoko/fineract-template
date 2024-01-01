@@ -23,7 +23,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -54,6 +57,10 @@ import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaConsumerVe
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaConsumerVerificationResponseData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCorporateVerificationData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCorporateVerificationResponseData;
+import org.apache.fineract.portfolio.loanaccount.data.AccountListData;
+import org.apache.fineract.portfolio.loanaccount.data.PhoneListData;
+import org.apache.fineract.portfolio.loanaccount.data.RecentEnquiryListData;
+import org.apache.fineract.portfolio.loanaccount.data.PhysicalAddressListData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.TransunionCrbCorporateProfile;
@@ -314,24 +321,37 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
             Element getProduct123ResponseElement = (Element) product123ResponseNodes.item(0);
 
             product123Response = new TransUnionRwandaConsumerVerificationResponseData();
+            Element returnElement = (Element) getProduct123ResponseElement.getElementsByTagName("return").item(0);
+            if (returnElement != null) {
 
-            Element responseCodeElement = (Element) getProduct123ResponseElement.getElementsByTagName("responseCode").item(0);
+            Element responseCodeElement = (Element) returnElement.getElementsByTagName("responseCode").item(0);
             if (responseCodeElement != null) {
                 Integer Value = Integer.parseInt(responseCodeElement.getTextContent());
                 if (Value != null) {
                     product123Response.setResponseCode(Value);
                 }
+            }else {
+                throw new GeneralPlatformDomainRuleException("error.msg.crb.consumer.verification.failed",
+                        "Failed to get 'responseCode' element from 'return' element.");
             }
             if (product123Response.getResponseCode() == 200) {
                 product123Response.setHeader(extractHeader(getProduct123ResponseElement));
                 product123Response.setPersonalProfile(extractPersonalProfile(getProduct123ResponseElement));
                 product123Response.setScoreOutput(extractScoreOutputData(getProduct123ResponseElement));
                 product123Response.setSummaryData(extractSummaryData(getProduct123ResponseElement));
-                LOG.info("Response from TransUnion Rwanda  product123Response:: >> " + product123Response.toString());
+                product123Response.setAccountListData(extractAccountList(getProduct123ResponseElement));
+                product123Response.setPhoneListData(extractPhoneList(getProduct123ResponseElement));
+                product123Response.setRecentEnquiryListData(extractRecentEnquiryList(getProduct123ResponseElement));
+                product123Response.setPhysicalAddressListDataList(extractPhysicalAddressList(getProduct123ResponseElement));
+                LOG.info("Response from TransUnion Rwanda  product123Response:: >> " + product123Response);
                 return product123Response;
             } else {
                 throw new GeneralPlatformDomainRuleException("error.msg.crb.consumer.verification.failed",
                         "Failed to Verify consumer credit . Response code From TransUnion :- " + product123Response.getResponseCode());
+            }
+        }else {
+                throw new GeneralPlatformDomainRuleException("error.msg.crb.consumer.verification.failed",
+                        "No 'return' element found in the XML.");
             }
         }
 
@@ -380,59 +400,119 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
     private HeaderData extractHeader(Element getProduct123ResponseElement) {
         HeaderData header = new HeaderData();
         Element headerElement = (Element) getProduct123ResponseElement.getElementsByTagName("header").item(0);
-
-        header.setCrbName(headerElement.getElementsByTagName("crbName").item(0).getTextContent());
-        header.setPdfId(headerElement.getElementsByTagName("pdfId").item(0).getTextContent());
-        header.setProductDisplayName(headerElement.getElementsByTagName("productDisplayName").item(0).getTextContent());
-        header.setReportDate(headerElement.getElementsByTagName("reportDate").item(0).getTextContent());
-        header.setReportType(headerElement.getElementsByTagName("reportType").item(0).getTextContent());
-        header.setRequestNo(headerElement.getElementsByTagName("requestNo").item(0).getTextContent());
-        header.setRequester(headerElement.getElementsByTagName("requester").item(0).getTextContent());
-
+        if(headerElement != null) {
+            header.setCrbName(getElementTextContent(headerElement,"crbName"));
+            header.setPdfId(getElementTextContent(headerElement,"pdfId"));
+            header.setProductDisplayName(getElementTextContent(headerElement,"productDisplayName"));
+            header.setReportDate(getElementTextContent(headerElement,"reportDate"));
+            header.setReportType(getElementTextContent(headerElement,"reportType"));
+            header.setRequestNo(getElementTextContent(headerElement,"requestNo"));
+            header.setRequester(getElementTextContent(headerElement,"requester"));
+        }
         return header;
     }
 
     private PersonalProfileData extractPersonalProfile(Element getProduct123ResponseElement) {
         PersonalProfileData personalProfileData = new PersonalProfileData();
-        Element headerElement = (Element) getProduct123ResponseElement.getElementsByTagName("personalProfile").item(0);
-
-        personalProfileData.setCrn(headerElement.getElementsByTagName("crn").item(0).getTextContent());
-        personalProfileData.setDateOfBirth(headerElement.getElementsByTagName("dateOfBirth").item(0).getTextContent());
-        personalProfileData.setFullName(headerElement.getElementsByTagName("fullName").item(0).getTextContent());
-        personalProfileData.setGender(headerElement.getElementsByTagName("gender").item(0).getTextContent());
-        personalProfileData.setHealthInsuranceNo(headerElement.getElementsByTagName("healthInsuranceNo").item(0).getTextContent());
-        personalProfileData.setMaritalStatus(headerElement.getElementsByTagName("maritalStatus").item(0).getTextContent());
-        personalProfileData.setNationalID(headerElement.getElementsByTagName("nationalID").item(0).getTextContent());
-        personalProfileData.setOtherNames(headerElement.getElementsByTagName("otherNames").item(0).getTextContent());
-        personalProfileData.setSalutation(headerElement.getElementsByTagName("salutation").item(0).getTextContent());
-        personalProfileData.setSurname(headerElement.getElementsByTagName("surname").item(0).getTextContent());
-
+        Element personalProfile = (Element) getProduct123ResponseElement.getElementsByTagName("personalProfile").item(0);
+        if (personalProfile != null) {
+        personalProfileData.setCrn(getElementTextContent(personalProfile,"crn"));
+        personalProfileData.setDateOfBirth(getElementTextContent(personalProfile,"dateOfBirth"));
+        personalProfileData.setFullName(getElementTextContent(personalProfile,"fullName"));
+        personalProfileData.setGender(getElementTextContent(personalProfile,"gender"));
+        personalProfileData.setHealthInsuranceNo(getElementTextContent(personalProfile,"healthInsuranceNo"));
+        personalProfileData.setMaritalStatus(getElementTextContent(personalProfile,"maritalStatus"));
+        personalProfileData.setNationalID(getElementTextContent(personalProfile,"nationalID"));
+        personalProfileData.setOtherNames(getElementTextContent(personalProfile,"otherNames"));
+        personalProfileData.setSalutation(getElementTextContent(personalProfile,"salutation"));
+        personalProfileData.setSurname(getElementTextContent(personalProfile,"surname"));
+        }
         return personalProfileData;
     }
+    private String getElementTextContent(Element parentElement, String tagName) {
+        Element element = (Element) parentElement.getElementsByTagName(tagName).item(0);
+        return (element != null) ? element.getTextContent() : null;
+    }
+    private BigDecimal getElementBigDecimalContent(Element parentElement, String tagName) {
+        Element element = (Element) parentElement.getElementsByTagName(tagName).item(0);
+
+        if (element != null) {
+            String textContent = element.getTextContent();
+
+            if (textContent != null && !textContent.isEmpty()) {
+                try {
+                    return new BigDecimal(textContent);
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+    private Integer getElementIntegerContent(Element parentElement, String tagName) {
+        Element element = (Element) parentElement.getElementsByTagName(tagName).item(0);
+
+        if (element != null) {
+            String textContent = element.getTextContent();
+
+            if (textContent != null && !textContent.isEmpty()) {
+                try {
+                    return Integer.parseInt(textContent);
+                } catch (NumberFormatException e) {
+                    // Handle the case where text content cannot be converted to Integer
+                    // You can log a warning or take other appropriate action
+                    return null;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private Boolean getElementBooleanContent(Element parentElement, String tagName) {
+        Element element = (Element) parentElement.getElementsByTagName(tagName).item(0);
+
+        if (element != null) {
+            String textContent = element.getTextContent();
+
+            if (textContent != null && !textContent.isEmpty()) {
+                if ("true".equalsIgnoreCase(textContent.trim())) {
+                    return true;
+                } else if ("false".equalsIgnoreCase(textContent.trim())) {
+                    return false;
+                }
+            }
+        }
+
+        return null;
+    }
+
+
 
     private CorporateProfileData extractCorporateProfile(Element corporateProfile) {
         CorporateProfileData corporateProfileData = new CorporateProfileData();
-        Element headerElement = (Element) corporateProfile.getElementsByTagName("corporateProfile").item(0);
-
-        corporateProfileData.setCrn(headerElement.getElementsByTagName("crn").item(0).getTextContent());
-        corporateProfileData.setCompanyName(headerElement.getElementsByTagName("companyName").item(0).getTextContent());
-        corporateProfileData.setCompanyRegNo(headerElement.getElementsByTagName("companyRegNo").item(0).getTextContent());
-
+        Element corporateProfile1 = (Element) corporateProfile.getElementsByTagName("corporateProfile").item(0);
+        if(corporateProfile1 != null) {
+            corporateProfileData.setCrn(corporateProfile1.getElementsByTagName("crn").item(0).getTextContent());
+            corporateProfileData.setCompanyName(corporateProfile1.getElementsByTagName("companyName").item(0).getTextContent());
+            corporateProfileData.setCompanyRegNo(corporateProfile1.getElementsByTagName("companyRegNo").item(0).getTextContent());
+        }
         return corporateProfileData;
     }
 
     private ScoreOutputData extractScoreOutputData(Element getProduct123ResponseElement) {
         ScoreOutputData scoreOutputData = new ScoreOutputData();
-        Element headerElement = (Element) getProduct123ResponseElement.getElementsByTagName("scoreOutput").item(0);
-
-        scoreOutputData.setGrade(headerElement.getElementsByTagName("grade").item(0).getTextContent());
-        scoreOutputData.setPositiveScore(headerElement.getElementsByTagName("positiveScore").item(0).getTextContent());
-        scoreOutputData.setProbability(headerElement.getElementsByTagName("probability").item(0).getTextContent());
-        scoreOutputData.setReasonCodeAARC1(headerElement.getElementsByTagName("reasonCodeAARC1").item(0).getTextContent());
-        scoreOutputData.setReasonCodeAARC2(headerElement.getElementsByTagName("reasonCodeAARC2").item(0).getTextContent());
-        scoreOutputData.setReasonCodeAARC3(headerElement.getElementsByTagName("reasonCodeAARC3").item(0).getTextContent());
-        scoreOutputData.setReasonCodeAARC4(headerElement.getElementsByTagName("reasonCodeAARC4").item(0).getTextContent());
-
+        Element scoreOutput = (Element) getProduct123ResponseElement.getElementsByTagName("scoreOutput").item(0);
+        if(scoreOutput != null) {
+            scoreOutputData.setGrade(getElementTextContent(scoreOutput,"grade"));
+            scoreOutputData.setPositiveScore(getElementTextContent(scoreOutput,"positiveScore"));
+            scoreOutputData.setProbability(getElementTextContent(scoreOutput,"probability"));
+            scoreOutputData.setReasonCodeAARC1(getElementTextContent(scoreOutput,"reasonCodeAARC1"));
+            scoreOutputData.setReasonCodeAARC2(getElementTextContent(scoreOutput,"reasonCodeAARC2"));
+            scoreOutputData.setReasonCodeAARC3(getElementTextContent(scoreOutput,"reasonCodeAARC3"));
+            scoreOutputData.setReasonCodeAARC4(getElementTextContent(scoreOutput,"reasonCodeAARC4"));
+        }
         return scoreOutputData;
     }
 
@@ -545,5 +625,127 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
 
         return crbAccountsSummaryData;
     }
+    private List<AccountListData> extractAccountList(Element returnElement) {
+        List<AccountListData> accountList = new ArrayList<>();
 
+        NodeList accountNodes = returnElement.getElementsByTagName("accountList");
+
+        for (int i = 0; i < accountNodes.getLength(); i++) {
+            Element accountElement = (Element) accountNodes.item(i);
+            AccountListData accountData = extractAccountListData(accountElement);
+
+            if (accountData != null) {
+                accountList.add(accountData);
+            }
+        }
+
+        return accountList;
+    }
+    private AccountListData extractAccountListData(Element account) {
+        AccountListData accountListData = new AccountListData();
+
+            accountListData.setAccountNo(getElementTextContent(account,"accountNo"));
+            accountListData.setAccountOpeningDate(getElementTextContent(account,"accountOpeningDate"));
+            accountListData.setAccountOwner(getElementTextContent(account,"accountOwner"));
+            accountListData.setAccountStatus(getElementTextContent(account,"accountStatus"));
+            accountListData.setAccountType(getElementTextContent(account,"accountType"));
+            accountListData.setArrearAmount(getElementBigDecimalContent(account,"arrearAmount"));
+            accountListData.setArrearDays(getElementIntegerContent(account,"arrearDays"));
+            accountListData.setBalanceAmount(getElementBigDecimalContent(account,"balanceAmount"));
+            accountListData.setCurrency(getElementTextContent(account,"currency"));
+            accountListData.setDisputed(getElementBooleanContent(account,"disputed"));
+            accountListData.setMyAccount(getElementBooleanContent(account,"isMyAccount"));
+            accountListData.setLastPaymentDate(getElementTextContent(account,"lastPaymentDate"));
+            accountListData.setListingDate(getElementTextContent(account,"listingDate"));
+            accountListData.setPrincipalAmount(getElementBigDecimalContent(account,"principalAmount"));
+            accountListData.setRepaymentDuration(getElementIntegerContent(account,"repaymentDuration"));
+            accountListData.setRepaymentTerm(getElementTextContent(account,"repaymentTerm"));
+            accountListData.setScheduledPaymentAmount(getElementBigDecimalContent(account,"scheduledPaymentAmount"));
+            accountListData.setTradeSector(getElementTextContent(account,"tradeSector"));
+            accountListData.setWorstArrear(getElementIntegerContent(account,"worstArrear"));
+
+        return accountListData;
+    }
+
+    private List<PhoneListData> extractPhoneList(Element returnElement) {
+        List<PhoneListData> phoneList = new ArrayList<>();
+
+        NodeList accountNodes = returnElement.getElementsByTagName("phoneList");
+
+        for (int i = 0; i < accountNodes.getLength(); i++) {
+            Element accountElement = (Element) accountNodes.item(i);
+            PhoneListData phoneData = extractPhoneListData(accountElement);
+
+            if (phoneData != null) {
+                phoneList.add(phoneData);
+            }
+        }
+
+        return phoneList;
+    }
+
+    private PhoneListData extractPhoneListData(Element account) {
+        PhoneListData phoneListData = new PhoneListData();
+
+        phoneListData.setCreateDate(getElementTextContent(account,"createDate"));
+        phoneListData.setPhoneExchange(getElementTextContent(account,"phoneExchange"));
+        phoneListData.setPhoneNo(getElementTextContent(account,"phoneNo"));
+        phoneListData.setPhoneType(getElementTextContent(account,"phoneType"));
+
+        return phoneListData;
+    }
+    private List<RecentEnquiryListData> extractRecentEnquiryList(Element returnElement) {
+        List<RecentEnquiryListData> recentEnquiryList = new ArrayList<>();
+
+        NodeList accountNodes = returnElement.getElementsByTagName("recentEnquiryList");
+
+        for (int i = 0; i < accountNodes.getLength(); i++) {
+            Element accountElement = (Element) accountNodes.item(i);
+            RecentEnquiryListData recentEnquiryData = extractRecentEnquiryData(accountElement);
+
+            if (recentEnquiryData != null) {
+                recentEnquiryList.add(recentEnquiryData);
+            }
+        }
+
+        return recentEnquiryList;
+    }
+
+    private RecentEnquiryListData extractRecentEnquiryData(Element account) {
+        RecentEnquiryListData recentEnquiryListData = new RecentEnquiryListData();
+
+        recentEnquiryListData.setEnquiryDate(getElementTextContent(account,"enquiryDate"));
+        recentEnquiryListData.setEnquiryReason(getElementTextContent(account,"enquiryReason"));
+        recentEnquiryListData.setTradeSector(getElementTextContent(account,"tradeSector"));
+
+        return recentEnquiryListData;
+    }
+    private List<PhysicalAddressListData> extractPhysicalAddressList(Element returnElement) {
+        List<PhysicalAddressListData> physicalAddressListDataList = new ArrayList<>();
+
+        NodeList accountNodes = returnElement.getElementsByTagName("physicalAddressList");
+
+        for (int i = 0; i < accountNodes.getLength(); i++) {
+            Element accountElement = (Element) accountNodes.item(i);
+            PhysicalAddressListData physicalAddressData = extractPhysicalAddressData(accountElement);
+
+            if (physicalAddressData != null) {
+                physicalAddressListDataList.add(physicalAddressData);
+            }
+        }
+
+        return physicalAddressListDataList;
+    }
+
+    private PhysicalAddressListData extractPhysicalAddressData(Element account) {
+        PhysicalAddressListData physicalAddressListData = new PhysicalAddressListData();
+
+        physicalAddressListData.setAddress(getElementTextContent(account,"address"));
+        physicalAddressListData.setCreateDate(getElementTextContent(account,"createDate"));
+        physicalAddressListData.setDurationInMonths(getElementTextContent(account,"durationInMonths"));
+        physicalAddressListData.setDurationInYears(getElementTextContent(account,"durationInYears"));
+        physicalAddressListData.setTown(getElementTextContent(account,"town"));
+
+        return physicalAddressListData;
+    }
 }
