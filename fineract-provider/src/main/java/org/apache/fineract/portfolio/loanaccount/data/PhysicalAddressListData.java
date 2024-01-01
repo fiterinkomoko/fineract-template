@@ -38,6 +38,7 @@ public class PhysicalAddressListData {
     public void setAddress(String address) {
         this.address = address;
     }
+
     @XmlElement(name = "createDate")
     public String getCreateDate() {
         return createDate;
@@ -46,6 +47,7 @@ public class PhysicalAddressListData {
     public void setCreateDate(String createDate) {
         this.createDate = createDate;
     }
+
     @XmlElement(name = "durationInMonths")
     public String getDurationInMonths() {
         return durationInMonths;
@@ -54,6 +56,7 @@ public class PhysicalAddressListData {
     public void setDurationInMonths(String durationInMonths) {
         this.durationInMonths = durationInMonths;
     }
+
     @XmlElement(name = "durationInYears")
     public String getDurationInYears() {
         return durationInYears;
@@ -62,6 +65,7 @@ public class PhysicalAddressListData {
     public void setDurationInYears(String durationInYears) {
         this.durationInYears = durationInYears;
     }
+
     @XmlElement(name = "town")
     public String getTown() {
         return town;

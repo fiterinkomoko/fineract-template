@@ -36,6 +36,7 @@ public class RecentEnquiryListData {
     public void setEnquiryDate(String enquiryDate) {
         this.enquiryDate = enquiryDate;
     }
+
     @XmlElement(name = "enquiryReason")
     public String getEnquiryReason() {
         return enquiryReason;
@@ -44,6 +45,7 @@ public class RecentEnquiryListData {
     public void setEnquiryReason(String enquiryReason) {
         this.enquiryReason = enquiryReason;
     }
+
     @XmlElement(name = "tradeSector")
     public String getTradeSector() {
         return tradeSector;

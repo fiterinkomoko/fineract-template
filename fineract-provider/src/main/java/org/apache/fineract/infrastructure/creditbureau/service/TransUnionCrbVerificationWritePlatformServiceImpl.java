@@ -47,20 +47,21 @@ import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRu
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
+import org.apache.fineract.portfolio.loanaccount.data.AccountListData;
 import org.apache.fineract.portfolio.loanaccount.data.CorporateProfileData;
 import org.apache.fineract.portfolio.loanaccount.data.CrbAccountsSummaryData;
 import org.apache.fineract.portfolio.loanaccount.data.HeaderData;
 import org.apache.fineract.portfolio.loanaccount.data.PersonalProfileData;
+import org.apache.fineract.portfolio.loanaccount.data.PhoneListData;
+import org.apache.fineract.portfolio.loanaccount.data.PhysicalAddressListData;
+import org.apache.fineract.portfolio.loanaccount.data.PostalAddressListData;
+import org.apache.fineract.portfolio.loanaccount.data.RecentEnquiryListData;
 import org.apache.fineract.portfolio.loanaccount.data.ScoreOutputData;
 import org.apache.fineract.portfolio.loanaccount.data.SummaryData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaConsumerVerificationData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaConsumerVerificationResponseData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCorporateVerificationData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCorporateVerificationResponseData;
-import org.apache.fineract.portfolio.loanaccount.data.AccountListData;
-import org.apache.fineract.portfolio.loanaccount.data.PhoneListData;
-import org.apache.fineract.portfolio.loanaccount.data.RecentEnquiryListData;
-import org.apache.fineract.portfolio.loanaccount.data.PhysicalAddressListData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.TransunionCrbCorporateProfile;
@@ -324,32 +325,33 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
             Element returnElement = (Element) getProduct123ResponseElement.getElementsByTagName("return").item(0);
             if (returnElement != null) {
 
-            Element responseCodeElement = (Element) returnElement.getElementsByTagName("responseCode").item(0);
-            if (responseCodeElement != null) {
-                Integer Value = Integer.parseInt(responseCodeElement.getTextContent());
-                if (Value != null) {
-                    product123Response.setResponseCode(Value);
+                Element responseCodeElement = (Element) returnElement.getElementsByTagName("responseCode").item(0);
+                if (responseCodeElement != null) {
+                    Integer Value = Integer.parseInt(responseCodeElement.getTextContent());
+                    if (Value != null) {
+                        product123Response.setResponseCode(Value);
+                    }
+                } else {
+                    throw new GeneralPlatformDomainRuleException("error.msg.crb.consumer.verification.failed",
+                            "Failed to get 'responseCode' element from 'return' element.");
                 }
-            }else {
-                throw new GeneralPlatformDomainRuleException("error.msg.crb.consumer.verification.failed",
-                        "Failed to get 'responseCode' element from 'return' element.");
-            }
-            if (product123Response.getResponseCode() == 200) {
-                product123Response.setHeader(extractHeader(getProduct123ResponseElement));
-                product123Response.setPersonalProfile(extractPersonalProfile(getProduct123ResponseElement));
-                product123Response.setScoreOutput(extractScoreOutputData(getProduct123ResponseElement));
-                product123Response.setSummaryData(extractSummaryData(getProduct123ResponseElement));
-                product123Response.setAccountListData(extractAccountList(getProduct123ResponseElement));
-                product123Response.setPhoneListData(extractPhoneList(getProduct123ResponseElement));
-                product123Response.setRecentEnquiryListData(extractRecentEnquiryList(getProduct123ResponseElement));
-                product123Response.setPhysicalAddressListDataList(extractPhysicalAddressList(getProduct123ResponseElement));
-                LOG.info("Response from TransUnion Rwanda  product123Response:: >> " + product123Response);
-                return product123Response;
+                if (product123Response.getResponseCode() == 200) {
+                    product123Response.setHeader(extractHeader(getProduct123ResponseElement));
+                    product123Response.setPersonalProfile(extractPersonalProfile(getProduct123ResponseElement));
+                    product123Response.setScoreOutput(extractScoreOutputData(getProduct123ResponseElement));
+                    product123Response.setSummaryData(extractSummaryData(getProduct123ResponseElement));
+                    product123Response.setAccountListData(extractAccountList(getProduct123ResponseElement));
+                    product123Response.setPhoneListData(extractPhoneList(getProduct123ResponseElement));
+                    product123Response.setRecentEnquiryListData(extractRecentEnquiryList(getProduct123ResponseElement));
+                    product123Response.setPhysicalAddressListDataList(extractPhysicalAddressList(getProduct123ResponseElement));
+                    product123Response.setPostalAddressListDataList(extractPostalAddressList(getProduct123ResponseElement));
+                    LOG.info("Response from TransUnion Rwanda  product123Response:: >> " + product123Response);
+                    return product123Response;
+                } else {
+                    throw new GeneralPlatformDomainRuleException("error.msg.crb.consumer.verification.failed",
+                            "Failed to Verify consumer credit . Response code From TransUnion :- " + product123Response.getResponseCode());
+                }
             } else {
-                throw new GeneralPlatformDomainRuleException("error.msg.crb.consumer.verification.failed",
-                        "Failed to Verify consumer credit . Response code From TransUnion :- " + product123Response.getResponseCode());
-            }
-        }else {
                 throw new GeneralPlatformDomainRuleException("error.msg.crb.consumer.verification.failed",
                         "No 'return' element found in the XML.");
             }
@@ -400,14 +402,14 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
     private HeaderData extractHeader(Element getProduct123ResponseElement) {
         HeaderData header = new HeaderData();
         Element headerElement = (Element) getProduct123ResponseElement.getElementsByTagName("header").item(0);
-        if(headerElement != null) {
-            header.setCrbName(getElementTextContent(headerElement,"crbName"));
-            header.setPdfId(getElementTextContent(headerElement,"pdfId"));
-            header.setProductDisplayName(getElementTextContent(headerElement,"productDisplayName"));
-            header.setReportDate(getElementTextContent(headerElement,"reportDate"));
-            header.setReportType(getElementTextContent(headerElement,"reportType"));
-            header.setRequestNo(getElementTextContent(headerElement,"requestNo"));
-            header.setRequester(getElementTextContent(headerElement,"requester"));
+        if (headerElement != null) {
+            header.setCrbName(getElementTextContent(headerElement, "crbName"));
+            header.setPdfId(getElementTextContent(headerElement, "pdfId"));
+            header.setProductDisplayName(getElementTextContent(headerElement, "productDisplayName"));
+            header.setReportDate(getElementTextContent(headerElement, "reportDate"));
+            header.setReportType(getElementTextContent(headerElement, "reportType"));
+            header.setRequestNo(getElementTextContent(headerElement, "requestNo"));
+            header.setRequester(getElementTextContent(headerElement, "requester"));
         }
         return header;
     }
@@ -416,23 +418,25 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
         PersonalProfileData personalProfileData = new PersonalProfileData();
         Element personalProfile = (Element) getProduct123ResponseElement.getElementsByTagName("personalProfile").item(0);
         if (personalProfile != null) {
-        personalProfileData.setCrn(getElementTextContent(personalProfile,"crn"));
-        personalProfileData.setDateOfBirth(getElementTextContent(personalProfile,"dateOfBirth"));
-        personalProfileData.setFullName(getElementTextContent(personalProfile,"fullName"));
-        personalProfileData.setGender(getElementTextContent(personalProfile,"gender"));
-        personalProfileData.setHealthInsuranceNo(getElementTextContent(personalProfile,"healthInsuranceNo"));
-        personalProfileData.setMaritalStatus(getElementTextContent(personalProfile,"maritalStatus"));
-        personalProfileData.setNationalID(getElementTextContent(personalProfile,"nationalID"));
-        personalProfileData.setOtherNames(getElementTextContent(personalProfile,"otherNames"));
-        personalProfileData.setSalutation(getElementTextContent(personalProfile,"salutation"));
-        personalProfileData.setSurname(getElementTextContent(personalProfile,"surname"));
+            personalProfileData.setCrn(getElementTextContent(personalProfile, "crn"));
+            personalProfileData.setDateOfBirth(getElementTextContent(personalProfile, "dateOfBirth"));
+            personalProfileData.setFullName(getElementTextContent(personalProfile, "fullName"));
+            personalProfileData.setGender(getElementTextContent(personalProfile, "gender"));
+            personalProfileData.setHealthInsuranceNo(getElementTextContent(personalProfile, "healthInsuranceNo"));
+            personalProfileData.setMaritalStatus(getElementTextContent(personalProfile, "maritalStatus"));
+            personalProfileData.setNationalID(getElementTextContent(personalProfile, "nationalID"));
+            personalProfileData.setOtherNames(getElementTextContent(personalProfile, "otherNames"));
+            personalProfileData.setSalutation(getElementTextContent(personalProfile, "salutation"));
+            personalProfileData.setSurname(getElementTextContent(personalProfile, "surname"));
         }
         return personalProfileData;
     }
+
     private String getElementTextContent(Element parentElement, String tagName) {
         Element element = (Element) parentElement.getElementsByTagName(tagName).item(0);
         return (element != null) ? element.getTextContent() : null;
     }
+
     private BigDecimal getElementBigDecimalContent(Element parentElement, String tagName) {
         Element element = (Element) parentElement.getElementsByTagName(tagName).item(0);
 
@@ -488,12 +492,10 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
         return null;
     }
 
-
-
     private CorporateProfileData extractCorporateProfile(Element corporateProfile) {
         CorporateProfileData corporateProfileData = new CorporateProfileData();
         Element corporateProfile1 = (Element) corporateProfile.getElementsByTagName("corporateProfile").item(0);
-        if(corporateProfile1 != null) {
+        if (corporateProfile1 != null) {
             corporateProfileData.setCrn(corporateProfile1.getElementsByTagName("crn").item(0).getTextContent());
             corporateProfileData.setCompanyName(corporateProfile1.getElementsByTagName("companyName").item(0).getTextContent());
             corporateProfileData.setCompanyRegNo(corporateProfile1.getElementsByTagName("companyRegNo").item(0).getTextContent());
@@ -504,14 +506,14 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
     private ScoreOutputData extractScoreOutputData(Element getProduct123ResponseElement) {
         ScoreOutputData scoreOutputData = new ScoreOutputData();
         Element scoreOutput = (Element) getProduct123ResponseElement.getElementsByTagName("scoreOutput").item(0);
-        if(scoreOutput != null) {
-            scoreOutputData.setGrade(getElementTextContent(scoreOutput,"grade"));
-            scoreOutputData.setPositiveScore(getElementTextContent(scoreOutput,"positiveScore"));
-            scoreOutputData.setProbability(getElementTextContent(scoreOutput,"probability"));
-            scoreOutputData.setReasonCodeAARC1(getElementTextContent(scoreOutput,"reasonCodeAARC1"));
-            scoreOutputData.setReasonCodeAARC2(getElementTextContent(scoreOutput,"reasonCodeAARC2"));
-            scoreOutputData.setReasonCodeAARC3(getElementTextContent(scoreOutput,"reasonCodeAARC3"));
-            scoreOutputData.setReasonCodeAARC4(getElementTextContent(scoreOutput,"reasonCodeAARC4"));
+        if (scoreOutput != null) {
+            scoreOutputData.setGrade(getElementTextContent(scoreOutput, "grade"));
+            scoreOutputData.setPositiveScore(getElementTextContent(scoreOutput, "positiveScore"));
+            scoreOutputData.setProbability(getElementTextContent(scoreOutput, "probability"));
+            scoreOutputData.setReasonCodeAARC1(getElementTextContent(scoreOutput, "reasonCodeAARC1"));
+            scoreOutputData.setReasonCodeAARC2(getElementTextContent(scoreOutput, "reasonCodeAARC2"));
+            scoreOutputData.setReasonCodeAARC3(getElementTextContent(scoreOutput, "reasonCodeAARC3"));
+            scoreOutputData.setReasonCodeAARC4(getElementTextContent(scoreOutput, "reasonCodeAARC4"));
         }
         return scoreOutputData;
     }
@@ -625,6 +627,7 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
 
         return crbAccountsSummaryData;
     }
+
     private List<AccountListData> extractAccountList(Element returnElement) {
         List<AccountListData> accountList = new ArrayList<>();
 
@@ -641,28 +644,29 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
 
         return accountList;
     }
+
     private AccountListData extractAccountListData(Element account) {
         AccountListData accountListData = new AccountListData();
 
-            accountListData.setAccountNo(getElementTextContent(account,"accountNo"));
-            accountListData.setAccountOpeningDate(getElementTextContent(account,"accountOpeningDate"));
-            accountListData.setAccountOwner(getElementTextContent(account,"accountOwner"));
-            accountListData.setAccountStatus(getElementTextContent(account,"accountStatus"));
-            accountListData.setAccountType(getElementTextContent(account,"accountType"));
-            accountListData.setArrearAmount(getElementBigDecimalContent(account,"arrearAmount"));
-            accountListData.setArrearDays(getElementIntegerContent(account,"arrearDays"));
-            accountListData.setBalanceAmount(getElementBigDecimalContent(account,"balanceAmount"));
-            accountListData.setCurrency(getElementTextContent(account,"currency"));
-            accountListData.setDisputed(getElementBooleanContent(account,"disputed"));
-            accountListData.setMyAccount(getElementBooleanContent(account,"isMyAccount"));
-            accountListData.setLastPaymentDate(getElementTextContent(account,"lastPaymentDate"));
-            accountListData.setListingDate(getElementTextContent(account,"listingDate"));
-            accountListData.setPrincipalAmount(getElementBigDecimalContent(account,"principalAmount"));
-            accountListData.setRepaymentDuration(getElementIntegerContent(account,"repaymentDuration"));
-            accountListData.setRepaymentTerm(getElementTextContent(account,"repaymentTerm"));
-            accountListData.setScheduledPaymentAmount(getElementBigDecimalContent(account,"scheduledPaymentAmount"));
-            accountListData.setTradeSector(getElementTextContent(account,"tradeSector"));
-            accountListData.setWorstArrear(getElementIntegerContent(account,"worstArrear"));
+        accountListData.setAccountNo(getElementTextContent(account, "accountNo"));
+        accountListData.setAccountOpeningDate(getElementTextContent(account, "accountOpeningDate"));
+        accountListData.setAccountOwner(getElementTextContent(account, "accountOwner"));
+        accountListData.setAccountStatus(getElementTextContent(account, "accountStatus"));
+        accountListData.setAccountType(getElementTextContent(account, "accountType"));
+        accountListData.setArrearAmount(getElementBigDecimalContent(account, "arrearAmount"));
+        accountListData.setArrearDays(getElementIntegerContent(account, "arrearDays"));
+        accountListData.setBalanceAmount(getElementBigDecimalContent(account, "balanceAmount"));
+        accountListData.setCurrency(getElementTextContent(account, "currency"));
+        accountListData.setDisputed(getElementBooleanContent(account, "disputed"));
+        accountListData.setMyAccount(getElementBooleanContent(account, "isMyAccount"));
+        accountListData.setLastPaymentDate(getElementTextContent(account, "lastPaymentDate"));
+        accountListData.setListingDate(getElementTextContent(account, "listingDate"));
+        accountListData.setPrincipalAmount(getElementBigDecimalContent(account, "principalAmount"));
+        accountListData.setRepaymentDuration(getElementIntegerContent(account, "repaymentDuration"));
+        accountListData.setRepaymentTerm(getElementTextContent(account, "repaymentTerm"));
+        accountListData.setScheduledPaymentAmount(getElementBigDecimalContent(account, "scheduledPaymentAmount"));
+        accountListData.setTradeSector(getElementTextContent(account, "tradeSector"));
+        accountListData.setWorstArrear(getElementIntegerContent(account, "worstArrear"));
 
         return accountListData;
     }
@@ -687,13 +691,14 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
     private PhoneListData extractPhoneListData(Element account) {
         PhoneListData phoneListData = new PhoneListData();
 
-        phoneListData.setCreateDate(getElementTextContent(account,"createDate"));
-        phoneListData.setPhoneExchange(getElementTextContent(account,"phoneExchange"));
-        phoneListData.setPhoneNo(getElementTextContent(account,"phoneNo"));
-        phoneListData.setPhoneType(getElementTextContent(account,"phoneType"));
+        phoneListData.setCreateDate(getElementTextContent(account, "createDate"));
+        phoneListData.setPhoneExchange(getElementTextContent(account, "phoneExchange"));
+        phoneListData.setPhoneNo(getElementTextContent(account, "phoneNo"));
+        phoneListData.setPhoneType(getElementTextContent(account, "phoneType"));
 
         return phoneListData;
     }
+
     private List<RecentEnquiryListData> extractRecentEnquiryList(Element returnElement) {
         List<RecentEnquiryListData> recentEnquiryList = new ArrayList<>();
 
@@ -714,12 +719,13 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
     private RecentEnquiryListData extractRecentEnquiryData(Element account) {
         RecentEnquiryListData recentEnquiryListData = new RecentEnquiryListData();
 
-        recentEnquiryListData.setEnquiryDate(getElementTextContent(account,"enquiryDate"));
-        recentEnquiryListData.setEnquiryReason(getElementTextContent(account,"enquiryReason"));
-        recentEnquiryListData.setTradeSector(getElementTextContent(account,"tradeSector"));
+        recentEnquiryListData.setEnquiryDate(getElementTextContent(account, "enquiryDate"));
+        recentEnquiryListData.setEnquiryReason(getElementTextContent(account, "enquiryReason"));
+        recentEnquiryListData.setTradeSector(getElementTextContent(account, "tradeSector"));
 
         return recentEnquiryListData;
     }
+
     private List<PhysicalAddressListData> extractPhysicalAddressList(Element returnElement) {
         List<PhysicalAddressListData> physicalAddressListDataList = new ArrayList<>();
 
@@ -740,12 +746,42 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
     private PhysicalAddressListData extractPhysicalAddressData(Element account) {
         PhysicalAddressListData physicalAddressListData = new PhysicalAddressListData();
 
-        physicalAddressListData.setAddress(getElementTextContent(account,"address"));
-        physicalAddressListData.setCreateDate(getElementTextContent(account,"createDate"));
-        physicalAddressListData.setDurationInMonths(getElementTextContent(account,"durationInMonths"));
-        physicalAddressListData.setDurationInYears(getElementTextContent(account,"durationInYears"));
-        physicalAddressListData.setTown(getElementTextContent(account,"town"));
+        physicalAddressListData.setAddress(getElementTextContent(account, "address"));
+        physicalAddressListData.setCreateDate(getElementTextContent(account, "createDate"));
+        physicalAddressListData.setDurationInMonths(getElementTextContent(account, "durationInMonths"));
+        physicalAddressListData.setDurationInYears(getElementTextContent(account, "durationInYears"));
+        physicalAddressListData.setTown(getElementTextContent(account, "town"));
 
         return physicalAddressListData;
+    }
+
+    private List<PostalAddressListData> extractPostalAddressList(Element returnElement) {
+        List<PostalAddressListData> postalAddressListDataList = new ArrayList<>();
+
+        NodeList accountNodes = returnElement.getElementsByTagName("postalAddressList");
+
+        for (int i = 0; i < accountNodes.getLength(); i++) {
+            Element accountElement = (Element) accountNodes.item(i);
+            PostalAddressListData postalAddressListData = extractPostalAddressListData(accountElement);
+
+            if (postalAddressListData != null) {
+                postalAddressListDataList.add(postalAddressListData);
+            }
+        }
+
+        return postalAddressListDataList;
+    }
+
+    private PostalAddressListData extractPostalAddressListData(Element account) {
+        PostalAddressListData postalAddressListData = new PostalAddressListData();
+
+        postalAddressListData.setCountry(getElementTextContent(account, "country"));
+        postalAddressListData.setCreateDate(getElementTextContent(account, "createDate"));
+        postalAddressListData.setPostalCode(getElementTextContent(account, "postalCode"));
+        postalAddressListData.setPostalNo(getElementTextContent(account, "postalNo"));
+        postalAddressListData.setPostalType(getElementTextContent(account, "postalType"));
+        postalAddressListData.setTown(getElementTextContent(account, "town"));
+
+        return postalAddressListData;
     }
 }

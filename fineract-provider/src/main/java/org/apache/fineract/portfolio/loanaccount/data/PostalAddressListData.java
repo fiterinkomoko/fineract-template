@@ -21,13 +21,24 @@ package org.apache.fineract.portfolio.loanaccount.data;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name = "phoneList")
-public class PhoneListData {
+@XmlRootElement(name = "postalAddressList")
+public class PostalAddressListData {
 
+    private String country;
     private String createDate;
-    private String phoneExchange;
-    private String phoneNo;
-    private String phoneType;
+    private String postalCode;
+    private String postalNo;
+    private String postalType;
+    private String town;
+
+    @XmlElement(name = "country")
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
 
     @XmlElement(name = "createDate")
     public String getCreateDate() {
@@ -38,30 +49,39 @@ public class PhoneListData {
         this.createDate = createDate;
     }
 
-    @XmlElement(name = "phoneExchange")
-    public String getPhoneExchange() {
-        return phoneExchange;
+    @XmlElement(name = "postalCode")
+    public String getPostalCode() {
+        return postalCode;
     }
 
-    public void setPhoneExchange(String phoneExchange) {
-        this.phoneExchange = phoneExchange;
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
     }
 
-    @XmlElement(name = "phoneNo")
-    public String getPhoneNo() {
-        return phoneNo;
+    @XmlElement(name = "postalNo")
+    public String getPostalNo() {
+        return postalNo;
     }
 
-    public void setPhoneNo(String phoneNo) {
-        this.phoneNo = phoneNo;
+    public void setPostalNo(String postalNo) {
+        this.postalNo = postalNo;
     }
 
-    @XmlElement(name = "phoneType")
-    public String getPhoneType() {
-        return phoneType;
+    @XmlElement(name = "postalType")
+    public String getPostalType() {
+        return postalType;
     }
 
-    public void setPhoneType(String phoneType) {
-        this.phoneType = phoneType;
+    public void setPostalType(String postalType) {
+        this.postalType = postalType;
+    }
+
+    @XmlElement(name = "town")
+    public String getTown() {
+        return town;
+    }
+
+    public void setTown(String town) {
+        this.town = town;
     }
 }

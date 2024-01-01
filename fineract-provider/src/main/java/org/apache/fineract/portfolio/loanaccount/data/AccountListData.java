@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
+import java.math.BigDecimal;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.math.BigDecimal;
 
 @XmlRootElement(name = "accountList")
 public class AccountListData {
@@ -53,6 +53,7 @@ public class AccountListData {
     public void setAccountNo(String accountNo) {
         this.accountNo = accountNo;
     }
+
     @XmlElement(name = "accountOpeningDate")
     public String getAccountOpeningDate() {
         return accountOpeningDate;
@@ -61,6 +62,7 @@ public class AccountListData {
     public void setAccountOpeningDate(String accountOpeningDate) {
         this.accountOpeningDate = accountOpeningDate;
     }
+
     @XmlElement(name = "accountOwner")
     public String getAccountOwner() {
         return accountOwner;
@@ -69,6 +71,7 @@ public class AccountListData {
     public void setAccountOwner(String accountOwner) {
         this.accountOwner = accountOwner;
     }
+
     @XmlElement(name = "accountStatus")
     public String getAccountStatus() {
         return accountStatus;
@@ -77,6 +80,7 @@ public class AccountListData {
     public void setAccountStatus(String accountStatus) {
         this.accountStatus = accountStatus;
     }
+
     @XmlElement(name = "arrearAmount")
     public BigDecimal getArrearAmount() {
         return arrearAmount;
@@ -85,6 +89,7 @@ public class AccountListData {
     public void setArrearAmount(BigDecimal arrearAmount) {
         this.arrearAmount = arrearAmount;
     }
+
     @XmlElement(name = "arrearDays")
     public Integer getArrearDays() {
         return arrearDays;
@@ -93,6 +98,7 @@ public class AccountListData {
     public void setArrearDays(Integer arrearDays) {
         this.arrearDays = arrearDays;
     }
+
     @XmlElement(name = "balanceAmount")
     public BigDecimal getBalanceAmount() {
         return balanceAmount;
@@ -101,6 +107,7 @@ public class AccountListData {
     public void setBalanceAmount(BigDecimal balanceAmount) {
         this.balanceAmount = balanceAmount;
     }
+
     @XmlElement(name = "currency")
     public String getCurrency() {
         return currency;
@@ -109,6 +116,7 @@ public class AccountListData {
     public void setCurrency(String currency) {
         this.currency = currency;
     }
+
     @XmlElement(name = "disputed")
     public Boolean getDisputed() {
         return disputed;
@@ -117,6 +125,7 @@ public class AccountListData {
     public void setDisputed(Boolean disputed) {
         this.disputed = disputed;
     }
+
     @XmlElement(name = "isMyAccount")
     public Boolean getMyAccount() {
         return isMyAccount;
@@ -125,6 +134,7 @@ public class AccountListData {
     public void setMyAccount(Boolean myAccount) {
         isMyAccount = myAccount;
     }
+
     @XmlElement(name = "lastPaymentDate")
     public String getLastPaymentDate() {
         return lastPaymentDate;
@@ -133,6 +143,7 @@ public class AccountListData {
     public void setLastPaymentDate(String lastPaymentDate) {
         this.lastPaymentDate = lastPaymentDate;
     }
+
     @XmlElement(name = "listingDate")
     public String getListingDate() {
         return listingDate;
@@ -141,6 +152,7 @@ public class AccountListData {
     public void setListingDate(String listingDate) {
         this.listingDate = listingDate;
     }
+
     @XmlElement(name = "principalAmount")
     public BigDecimal getPrincipalAmount() {
         return principalAmount;
@@ -149,6 +161,7 @@ public class AccountListData {
     public void setPrincipalAmount(BigDecimal principalAmount) {
         this.principalAmount = principalAmount;
     }
+
     @XmlElement(name = "repaymentDuration")
     public Integer getRepaymentDuration() {
         return repaymentDuration;
@@ -157,6 +170,7 @@ public class AccountListData {
     public void setRepaymentDuration(Integer repaymentDuration) {
         this.repaymentDuration = repaymentDuration;
     }
+
     @XmlElement(name = "repaymentTerm")
     public String getRepaymentTerm() {
         return repaymentTerm;
@@ -165,6 +179,7 @@ public class AccountListData {
     public void setRepaymentTerm(String repaymentTerm) {
         this.repaymentTerm = repaymentTerm;
     }
+
     @XmlElement(name = "scheduledPaymentAmount")
     public BigDecimal getScheduledPaymentAmount() {
         return scheduledPaymentAmount;
@@ -173,6 +188,7 @@ public class AccountListData {
     public void setScheduledPaymentAmount(BigDecimal scheduledPaymentAmount) {
         this.scheduledPaymentAmount = scheduledPaymentAmount;
     }
+
     @XmlElement(name = "tradeSector")
     public String getTradeSector() {
         return tradeSector;
@@ -181,6 +197,7 @@ public class AccountListData {
     public void setTradeSector(String tradeSector) {
         this.tradeSector = tradeSector;
     }
+
     @XmlElement(name = "worstArrear")
     public Integer getWorstArrear() {
         return worstArrear;
@@ -189,6 +206,7 @@ public class AccountListData {
     public void setWorstArrear(Integer worstArrear) {
         this.worstArrear = worstArrear;
     }
+
     @XmlElement(name = "accountType")
     public String getAccountType() {
         return accountType;
