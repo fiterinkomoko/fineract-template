@@ -633,7 +633,8 @@ public class LoanDecisionStateUtilService {
 
         if (!loan.status().isSubmittedAndPendingApproval()) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.current.status.is.invalid",
-                    "Loan Account current status is invalid. Expected " + loan.status().getCode() + " but found " + loan.status().getCode());
+                    "Loan Account current status is invalid. Expected " + loan.status().getCode() + " but found "
+                            + loan.status().getCode());
         }
         if (!LoanDecisionState.fromInt(loan.getLoanDecisionState()).isDueDiligence()) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.decision.state.is.invalid",
