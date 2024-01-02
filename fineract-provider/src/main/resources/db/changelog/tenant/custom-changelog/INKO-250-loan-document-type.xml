@@ -21,7 +21,7 @@
 -->
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
-    <changeSet author="tabrez@fiter.io" id="add_loan_document_type">
+    <changeSet author="tabrez@fiter.io" id="add_loan_document_type_cv_id">
         <preConditions onFail="MARK_RAN">
             <not>
                 <columnExists tableName="m_document" columnName="document_type_cv_id"/>
@@ -34,7 +34,7 @@
             </column>
         </addColumn>
     </changeSet>
-    <changeSet author="tabrez@fiter.io" id="add_document_type_code">
+    <changeSet author="tabrez@fiter.io" id="add_document_type_code_name">
         <preConditions onFail="MARK_RAN">
             <not>
                 <sqlCheck expectedResult="1">
