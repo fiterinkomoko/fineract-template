@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet id="insert-x_registered_table-for-loan-balancesheet" author="bosco@fiter.io">
+        <preConditions>
+            <sqlCheck expectedResult="0">select count(*) from x_registered_table where registered_table_name = 'loan_balancesheet'</sqlCheck>
+        </preConditions>
+        <sql>
+            <![CDATA[
+          INSERT INTO  x_registered_table (registered_table_name,application_table_name,entity_subtype,category) VALUES ('loan_balancesheet','m_loan',null,100);
+             ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="create-loan_balancesheet-data_table" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="loan_balancesheet"/>
+            </not>
+        </preConditions>
+        <createTable tableName="loan_balancesheet">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="loan_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_loan_balancesheet-data_table_m_loan" references="m_loan(id)"/>
+            </column>
+            <column name="cash" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="inventory_stock" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="receivables" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="chama_tontines" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="other_current_assets" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_current_assets" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="goods_bought_on_credit" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="any_other_pending_payables" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_short_term" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="equipment_tools" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="furniture" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="business_premises" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="other_fixed_assets" type="decimal(19,6)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="total_fixed_assets" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_assets" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="equity" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="unsecured_loans" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="asset_financing" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_long_term" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_liabilities" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bss_deposits" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bss_withdrawals" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bss_monthly_turn_over" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_m_permission_CREATE_loan_balancesheet">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'CREATE_loan_balancesheet'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="CREATE_loan_balancesheet" />
+            <column name="entity_name" value="loan_balancesheet" />
+            <column name="action_name" value="CREATE" />
+            <column name="can_maker_checker" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_CREATE_loan_balancesheet_CHECKER">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'CREATE_loan_balancesheet_CHECKER'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="CREATE_loan_balancesheet_CHECKER" />
+            <column name="entity_name" value="loan_balancesheet" />
+            <column name="action_name" value="CREATE" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_READ_loan_balancesheet">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'READ_loan_balancesheet'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="READ_loan_balancesheet" />
+            <column name="entity_name" value="loan_balancesheet" />
+            <column name="action_name" value="READ" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_CUPDATE_loan_balancesheet">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'UPDATE_loan_balancesheet'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="UPDATE_loan_balancesheet" />
+            <column name="entity_name" value="loan_balancesheet" />
+            <column name="action_name" value="UPDATE" />
+            <column name="can_maker_checker" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_UPDATE_loan_balancesheet_CHECKER">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'UPDATE_loan_balancesheet_CHECKER'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="UPDATE_loan_balancesheet_CHECKER" />
+            <column name="entity_name" value="loan_balancesheet" />
+            <column name="action_name" value="UPDATE" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_DELETE_loan_balancesheet">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'DELETE_loan_balancesheet'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="DELETE_loan_balancesheet" />
+            <column name="entity_name" value="loan_balancesheet" />
+            <column name="action_name" value="DELETE" />
+            <column name="can_maker_checker" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_DELETE_loan_balancesheet_CHECKER">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'DELETE_loan_balancesheet_CHECKER'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="DELETE_loan_balancesheet_CHECKER" />
+            <column name="entity_name" value="loan_balancesheet" />
+            <column name="action_name" value="DELETE" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
