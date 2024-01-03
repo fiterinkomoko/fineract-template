@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
+import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -29,6 +30,11 @@ public class TransUnionRwandaConsumerVerificationResponseData {
     private Integer responseCode;
     private ScoreOutputData scoreOutput;
     private SummaryData summaryData;
+    private List<AccountListData> accountListData;
+    private List<PhoneListData> phoneListData;
+    private List<RecentEnquiryListData> recentEnquiryListData;
+    private List<PhysicalAddressListData> physicalAddressListDataList;
+    private List<PostalAddressListData> postalAddressListDataList;
 
     @XmlElement(name = "header")
     public HeaderData getHeader() {
@@ -75,9 +81,55 @@ public class TransUnionRwandaConsumerVerificationResponseData {
         this.summaryData = summaryData;
     }
 
+    @XmlElement(name = "accountList")
+    public List<AccountListData> getAccountListData() {
+        return accountListData;
+    }
+
+    public void setAccountListData(List<AccountListData> accountListData) {
+        this.accountListData = accountListData;
+    }
+
+    @XmlElement(name = "phoneListData")
+    public List<PhoneListData> getPhoneListData() {
+        return phoneListData;
+    }
+
+    public void setPhoneListData(List<PhoneListData> phoneListData) {
+        this.phoneListData = phoneListData;
+    }
+
+    @XmlElement(name = "recentEnquiryListData")
+    public List<RecentEnquiryListData> getRecentEnquiryListData() {
+        return recentEnquiryListData;
+    }
+
+    public void setRecentEnquiryListData(List<RecentEnquiryListData> recentEnquiryListData) {
+        this.recentEnquiryListData = recentEnquiryListData;
+    }
+
+    @XmlElement(name = "physicalAddressListDataList")
+    public List<PhysicalAddressListData> getPhysicalAddressListDataList() {
+        return physicalAddressListDataList;
+    }
+
+    public void setPhysicalAddressListDataList(List<PhysicalAddressListData> physicalAddressListDataList) {
+        this.physicalAddressListDataList = physicalAddressListDataList;
+    }
+
+    @XmlElement(name = "postalAddressListDataList")
+    public List<PostalAddressListData> getPostalAddressListDataList() {
+        return postalAddressListDataList;
+    }
+
+    public void setPostalAddressListDataList(List<PostalAddressListData> postalAddressListDataList) {
+        this.postalAddressListDataList = postalAddressListDataList;
+    }
+
     @Override
     public String toString() {
         return "TransUnionRwandaConsumerVerificationResponseData{" + "header=" + header + ", personalProfile=" + personalProfile
-                + ", responseCode='" + responseCode + '\'' + ", scoreOutput=" + scoreOutput + ", summaryData=" + summaryData + '}';
+                + ", responseCode=" + responseCode + ", scoreOutput=" + scoreOutput + ", summaryData=" + summaryData + ", accountListData="
+                + accountListData + ", phoneListData=" + phoneListData + '}';
     }
 }
