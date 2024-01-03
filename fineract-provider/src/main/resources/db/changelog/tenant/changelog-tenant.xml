@@ -119,5 +119,6 @@
     <include file="parts/INKO-240_loan_pending_disbursement.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO-250_loan_document_type.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO-257_add_cashflow_data.xml" relativeToChangelogFile="true" />
+    <include file="parts/INKO-258_add_balancesheet_data.xml" relativeToChangelogFile="true" />
     <includeAll path="custom-changelog" relativeToChangelogFile="true"/>
 </databaseChangeLog>
