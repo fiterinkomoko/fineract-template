@@ -80,6 +80,212 @@
             <column name="is_mandatory" valueBoolean="false"/>
         </insert>
     </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_codes_for_MonthType">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code where code_name = 'MonthType';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code">
+            <column name="code_name" value="MonthType" />
+            <column name="is_system_defined" valueBoolean="true" />
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_code_value_for_MonthType_JANUARY">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code_value where code_value = 'JANUARY';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueComputed="(select id from m_code where code_name='MonthType')"/>
+            <column name="code_value" value="JANUARY"/>
+            <column name="code_description"/>
+            <column name="order_position" valueNumeric="1"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_code_value_for_MonthType_FEBRUARY">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code_value where code_value = 'FEBRUARY';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueComputed="(select id from m_code where code_name='MonthType')"/>
+            <column name="code_value" value="FEBRUARY"/>
+            <column name="code_description"/>
+            <column name="order_position" valueNumeric="2"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_code_value_for_MonthType_MARCH">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code_value where code_value = 'MARCH';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueComputed="(select id from m_code where code_name='MonthType')"/>
+            <column name="code_value" value="MARCH"/>
+            <column name="code_description"/>
+            <column name="order_position" valueNumeric="3"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_code_value_for_MonthType_APRIL">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code_value where code_value = 'APRIL';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueComputed="(select id from m_code where code_name='MonthType')"/>
+            <column name="code_value" value="APRIL"/>
+            <column name="code_description"/>
+            <column name="order_position" valueNumeric="4"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_code_value_for_MonthType_MAY">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code_value where code_value = 'MAY';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueComputed="(select id from m_code where code_name='MonthType')"/>
+            <column name="code_value" value="MAY"/>
+            <column name="code_description"/>
+            <column name="order_position" valueNumeric="5"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_code_value_for_MonthType_JUNE">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code_value where code_value = 'JUNE';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueComputed="(select id from m_code where code_name='MonthType')"/>
+            <column name="code_value" value="JUNE"/>
+            <column name="code_description"/>
+            <column name="order_position" valueNumeric="6"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_code_value_for_MonthType_JULY">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code_value where code_value = 'JULY';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueComputed="(select id from m_code where code_name='MonthType')"/>
+            <column name="code_value" value="JULY"/>
+            <column name="code_description"/>
+            <column name="order_position" valueNumeric="7"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_code_value_for_MonthType_AUGUST">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+            select count(1) from m_code_value where code_value = 'AUGUST';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueComputed="(select id from m_code where code_name='MonthType')"/>
+            <column name="code_value" value="AUGUST"/>
+            <column name="code_description"/>
+            <column name="order_position" valueNumeric="8"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_code_value_for_MonthType_SEPTEMBER">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code_value where code_value = 'SEPTEMBER';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueComputed="(select id from m_code where code_name='MonthType')"/>
+            <column name="code_value" value="SEPTEMBER"/>
+            <column name="code_description"/>
+            <column name="order_position" valueNumeric="9"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_code_value_for_MonthType_OCTOBER">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code_value where code_value = 'OCTOBER';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueComputed="(select id from m_code where code_name='MonthType')"/>
+            <column name="code_value" value="OCTOBER"/>
+            <column name="code_description"/>
+            <column name="order_position" valueNumeric="10"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_code_value_for_MonthType_NOVEMBER">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code_value where code_value = 'NOVEMBER';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueComputed="(select id from m_code where code_name='MonthType')"/>
+            <column name="code_value" value="NOVEMBER"/>
+            <column name="code_description"/>
+            <column name="order_position" valueNumeric="11"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_code_value_for_MonthType_DECEMBER">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code_value where code_value = 'DECEMBER';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueComputed="(select id from m_code where code_name='MonthType')"/>
+            <column name="code_value" value="DECEMBER"/>
+            <column name="code_description"/>
+            <column name="order_position" valueNumeric="12"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+
     <changeSet id="insert-x_registered_table-for-loan-cashflow" author="bosco@fiter.io">
         <preConditions>
             <sqlCheck expectedResult="0">select count(*) from x_registered_table where registered_table_name = 'loan_cashflow'</sqlCheck>
@@ -106,9 +312,6 @@
             <column name="CashFlowMonthType_cd_Cashflow_month" type="int">
                 <constraints nullable="false"/>
             </column>
-
-
-
             <column name="total_purchases" type="int">
                 <constraints nullable="false"/>
             </column>
@@ -136,13 +339,22 @@
             <column name="wages" type="decimal(19,6)">
                 <constraints nullable="true"/>
             </column>
-            <column name="often_do_you_purchase" type="decimal(19,6)">
+            <column name="often_do_you_purchase" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="MonthType_cd_Purchase_last_month" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="MonthType_cd_When_last_purchase" type="int">
                 <constraints nullable="false"/>
             </column>
             <column name="purchase_for_last_month_but_1" type="decimal(19,6)">
                 <constraints nullable="false"/>
             </column>
             <column name="last_purchase_amount" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="other_expenses_monthly" type="decimal(19,6)">
                 <constraints nullable="false"/>
             </column>
             <column name="rent_monthly" type="decimal(19,6)">
