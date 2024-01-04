@@ -1223,4 +1223,20 @@ public class LoansApiResource {
         return this.loanRepaymentScheduleInstallmentDataDefaultToApiJsonSerializer.serialize(settings,
                 loanRepaymentScheduleInstallmentDataPage, this.loanRepaymentInstallmentDataParameters);
     }
+
+    @POST
+    @Path("generateCashFlow/{loanId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Generate CashFlow for Loan Application", description = "Note: Only loans in \"Due Diligence Stage\" can generate cashflow.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = LoansApiResourceSwagger.DeleteLoansLoanIdResponse.class))) })
+    public String generateCashFlow(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId) {
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().generateCashFlow(loanId).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
 }

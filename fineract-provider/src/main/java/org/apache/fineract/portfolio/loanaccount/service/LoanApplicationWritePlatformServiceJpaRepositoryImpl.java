@@ -2257,6 +2257,11 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         return new CommandProcessingResultBuilder().withEntityId(loanId).withLoanId(loanId).build();
     }
 
+    @Override
+    public CommandProcessingResult generateCashFlow(Long loanId) {
+        return null;
+    }
+
     @Transactional
     private CommandProcessingResult approveLoanApplicationAssociatedToGLIM(final Long loanId, final JsonCommand command) {
         final Loan loan = retrieveLoanBy(loanId);

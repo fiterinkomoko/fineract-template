@@ -3961,4 +3961,13 @@ public class CommandWrapperBuilder {
         this.href = "/loan/verifyloanreportjsononmetropolcrbkenya";
         return this;
     }
+
+    public CommandWrapperBuilder generateCashFlow(final Long loanId) {
+        this.actionName = "GENERATE_CASHFLOW";
+        this.entityName = "LOAN";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId;
+        return this;
+    }
 }
