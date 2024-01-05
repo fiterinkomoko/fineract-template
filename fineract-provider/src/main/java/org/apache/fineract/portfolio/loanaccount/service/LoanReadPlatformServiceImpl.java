@@ -87,23 +87,7 @@ import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.fineract.portfolio.group.data.GroupRoleData;
 import org.apache.fineract.portfolio.group.service.GroupReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
-import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
-import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanApplicationTimelineData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanDueDiligenceData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanInterestRecalculationData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentScheduleInstallmentData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanStatusEnumData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanSummaryData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
-import org.apache.fineract.portfolio.loanaccount.data.PaidInAdvanceData;
-import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
-import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
+import org.apache.fineract.portfolio.loanaccount.data.*;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDueDiligenceInfo;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDueDiligenceInfoRepository;
@@ -3138,6 +3122,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             return this.jdbcTemplate.query(sqlBuilder.toString(), rm, loanDecisionState); // NOSONAR
         }
 
+    }
+
+    @Override
+    public LoanCashFlowData retrieveCashFlow(Long loanId) {
+        return null;
     }
 
 }
