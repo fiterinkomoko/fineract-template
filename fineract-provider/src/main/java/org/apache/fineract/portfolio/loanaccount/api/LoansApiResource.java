@@ -1225,7 +1225,7 @@ public class LoansApiResource {
     }
 
     @POST
-    @Path("generateCashFlow/{loanId}")
+    @Path("/generateCashFlow/{loanId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Generate CashFlow for Loan Application", description = "Note: Only loans in \"Due Diligence Stage\" can generate cashflow.")

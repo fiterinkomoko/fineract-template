@@ -494,4 +494,18 @@
             <column name="can_maker_checker" valueBoolean="false"/>
         </insert>
     </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permissions_GENERATE_CASHFLOW_LOAN">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(1) FROM m_permission WHERE code = 'GENERATE_CASHFLOW_LOAN'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio" />
+            <column name="code" value="GENERATE_CASHFLOW_LOAN" />
+            <column name="entity_name" value="LOAN" />
+            <column name="action_name" value="GENERATE_CASHFLOW" />
+            <column name="can_maker_checker" valueBoolean="false" />
+        </insert>
+    </changeSet>
 </databaseChangeLog>
