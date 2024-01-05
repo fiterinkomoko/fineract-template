@@ -81,7 +81,7 @@ public enum LoanSubStatus {
             break;
             case PENDINGDISBURSEMENT:
                 optionData = new EnumOptionData(LoanSubStatus.PENDINGDISBURSEMENT.getValue().longValue(),
-                        codePrefix + LoanSubStatus.PENDINGDISBURSEMENT.getCode(), "PendingDisbursement");
+                        codePrefix + LoanSubStatus.PENDINGDISBURSEMENT.getCode(), "Pending Disbursement");
             break;
             default:
                 optionData = new EnumOptionData(LoanSubStatus.INVALID.getValue().longValue(), LoanSubStatus.INVALID.getCode(), "Invalid");
