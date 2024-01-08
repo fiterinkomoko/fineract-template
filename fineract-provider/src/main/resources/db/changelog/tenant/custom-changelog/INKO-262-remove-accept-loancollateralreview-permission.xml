@@ -23,6 +23,15 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
+    <changeSet author="tabrez@fiter.io" id="INKO-262-remove-accept-loancollateralreview-role-permission">
+        <sql>
+            DELETE rp
+            FROM m_role_permission rp
+            JOIN m_permission p ON p.id = rp.permission_id
+            WHERE p.code = 'ACCEPT_LOANCOLLATERALREVIEW';
+        </sql>
+    </changeSet>
+
     <changeSet author="tabrez@fiter.io" id="INKO-262-remove-accept-loancollateralreview-permission">
         <preConditions onFail="MARK_RAN">
             <and>
