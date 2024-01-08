@@ -104,6 +104,7 @@ import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.group.exception.GroupMemberNotFoundInGSIMException;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
+import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
@@ -2258,8 +2259,32 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     }
 
     @Override
-    public CommandProcessingResult generateCashFlow(Long loanId) {
-        return null;
+    public CommandProcessingResult generateCashFlow(Long loanId, JsonCommand command) {
+        final Loan loan = retrieveLoanBy(loanId);
+
+        if (loan.getLoanDecisionState() == null || !loan.status().isSubmittedAndPendingApproval()
+                || !loan.getLoanDecisionState().equals(LoanDecisionState.REVIEW_APPLICATION.getValue())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.not.in.due.diligence.stage.so.cashflow.cannot.be.generated",
+                    "Loan is not in Due Diligence Stage so CashFlow cannot be generated");
+        }
+        List<LoanCashFlowData> cashFlowData = this.loanReadPlatformService.retrieveCashFlow(loanId);
+        if (CollectionUtils.isEmpty(cashFlowData)) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.cashflow.data.is.not.available.so.cashflow.cannot.be.generated",
+                    "Loan CashFlow data is not available so CashFlow cannot be generated");
+        }
+        if (cashFlowData.size() != 3) {
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.loan.cashflow.data.is.not.equal.to.three.attributes.so.cashflow.cannot.be.generated",
+                    "Loan CashFlow data is not equal to three attributes so CashFlow cannot be generated");
+        }
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(loan.getId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId).build();
     }
 
     @Transactional

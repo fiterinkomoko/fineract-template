@@ -3142,8 +3142,76 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
-    public LoanCashFlowData retrieveCashFlow(Long loanId) {
-        return null;
+    public List<LoanCashFlowData> retrieveCashFlow(Long loanId) {
+        this.context.authenticatedUser();
+        final LoanCashFlowMapper rm = new LoanCashFlowMapper(sqlGenerator);
+
+        final String sql = "select " + rm.loanCashFlow();
+
+        return this.jdbcTemplate.query(sql, rm, loanId); // NOSONAR
+    }
+
+    private static final class LoanCashFlowMapper implements RowMapper<LoanCashFlowData> {
+
+        private final DatabaseSpecificSQLGenerator sqlGenerator;
+
+        LoanCashFlowMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
+            this.sqlGenerator = sqlGenerator;
+        }
+
+        public String loanCashFlow() {
+            return "        cf.id                            as id, " + "       cf.loan_id                       as loanId, "
+                    + "       cv.code_value                    as monthType, "
+                    + "       cf.total_purchases               as expTotalPurchases, "
+                    + "       cf.tax                           as expTax, " + "       cf.transport                     as expTransport, "
+                    + "       cf.rent                          as expRent, "
+                    + "       cf.communications                as expCommunication, "
+                    + "       cf.other_expense_amount          as otherExpenseAmount, "
+                    + "       cf.utilities                     as expUtility, "
+                    + "       cf.worker_salary                 as expWorkerSalary, "
+                    + "       cf.wages                         as expWages, "
+                    + "       cf.purchase_for_last_month_but_1 as expPurchaseLastMonth1, "
+                    + "       cf.rent_monthly                  as expRentMonthly, "
+                    + "       cf.utilities_monthly             as expUtilitiesMonthly, "
+                    + "       cf.average_monthly_revenue as incomeAverageMonthlyRevenue, "
+                    + "       cf.amount_in_cash as incomeAmountInCash, " + "       cf.amount_in_savings as incomeAmountInSavings, "
+                    + "       cf.amount_in_inventory as incomeAmountInInventory, " + "       cf.business_asset as incomeBusinessAsset, "
+                    + "       cf.fixed_assets_cost as incomeFixedAssetsCost, "
+                    + "       cf.income_generating_activity_amount as incomeGeneratingActivity " + " FROM loan_cashflow cf "
+                    + " INNER JOIN m_code_value cv ON cf.\"CashFlowMonthType_cd_Cashflow_month\"   = cv.id " + " WHERE loan_id = ? ";
+        }
+
+        @Override
+        public LoanCashFlowData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+            final Long id = rs.getLong("id");
+            final Long loanId = rs.getLong("loanId");
+            final String monthType = rs.getString("monthType");
+            final BigDecimal expTotalPurchases = rs.getBigDecimal("expTotalPurchases");
+            final BigDecimal expTax = rs.getBigDecimal("expTax");
+            final BigDecimal expTransport = rs.getBigDecimal("expTransport");
+            final BigDecimal expRent = rs.getBigDecimal("expRent");
+            final BigDecimal expCommunication = rs.getBigDecimal("expCommunication");
+            final BigDecimal otherExpenseAmount = rs.getBigDecimal("otherExpenseAmount");
+            final BigDecimal expUtility = rs.getBigDecimal("expUtility");
+            final BigDecimal expWorkerSalary = rs.getBigDecimal("expWorkerSalary");
+            final BigDecimal expWages = rs.getBigDecimal("expWages");
+            final BigDecimal expPurchaseLastMonth1 = rs.getBigDecimal("expPurchaseLastMonth1");
+            final BigDecimal expRentMonthly = rs.getBigDecimal("expRentMonthly");
+            final BigDecimal expUtilitiesMonthly = rs.getBigDecimal("expUtilitiesMonthly");
+
+            final BigDecimal incomeAverageMonthlyRevenue = rs.getBigDecimal("incomeAverageMonthlyRevenue");
+            final BigDecimal incomeAmountInCash = rs.getBigDecimal("incomeAmountInCash");
+            final BigDecimal incomeAmountInSavings = rs.getBigDecimal("incomeAmountInSavings");
+            final BigDecimal incomeAmountInInventory = rs.getBigDecimal("incomeAmountInInventory");
+            final BigDecimal incomeBusinessAsset = rs.getBigDecimal("incomeBusinessAsset");
+            final BigDecimal incomeFixedAssetsCost = rs.getBigDecimal("incomeFixedAssetsCost");
+            final BigDecimal incomeGeneratingActivity = rs.getBigDecimal("incomeGeneratingActivity");
+
+            return new LoanCashFlowData(id, monthType, loanId, expTotalPurchases, expTax, expTransport, expRent, expCommunication,
+                    otherExpenseAmount, expUtility, expWorkerSalary, expWages, expPurchaseLastMonth1, expRentMonthly, expUtilitiesMonthly,
+                    incomeAverageMonthlyRevenue, incomeAmountInCash, incomeAmountInSavings, incomeAmountInInventory, incomeBusinessAsset,
+                    incomeFixedAssetsCost, incomeGeneratingActivity);
+        }
     }
 
 }

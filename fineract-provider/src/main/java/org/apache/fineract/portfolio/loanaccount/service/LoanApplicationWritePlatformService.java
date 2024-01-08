@@ -49,5 +49,5 @@ public interface LoanApplicationWritePlatformService {
 
     CommandProcessingResult applyRedrawPayment(final Long loanId, final JsonCommand command);
 
-    CommandProcessingResult generateCashFlow(Long loanId);
+    CommandProcessingResult generateCashFlow(final Long loanId, final JsonCommand command);
 }

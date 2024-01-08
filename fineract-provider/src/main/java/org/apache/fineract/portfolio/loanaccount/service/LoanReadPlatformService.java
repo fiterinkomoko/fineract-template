@@ -192,5 +192,5 @@ public interface LoanReadPlatformService {
 
     Collection<LoanAccountData> getAllLoansPendingDecisionEngine(Integer nextLoanDecisionState);
 
-    LoanCashFlowData retrieveCashFlow(Long loanId);
+    List<LoanCashFlowData> retrieveCashFlow(Long loanId);
 }

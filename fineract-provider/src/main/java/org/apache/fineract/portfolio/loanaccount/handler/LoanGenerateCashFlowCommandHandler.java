@@ -38,6 +38,6 @@ public class LoanGenerateCashFlowCommandHandler implements NewCommandSourceHandl
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.generateCashFlow(command.entityId());
+        return this.writePlatformService.generateCashFlow(command.entityId(), command);
     }
 }
