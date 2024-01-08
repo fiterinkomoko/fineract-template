@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
-
 public final class LoanCashFlowData {
+
     private Long loanId;
 }

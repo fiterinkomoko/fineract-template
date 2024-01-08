@@ -111,7 +111,19 @@ import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.fineract.portfolio.group.service.GroupReadPlatformService;
 import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartData;
 import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartReadPlatformService;
-import org.apache.fineract.portfolio.loanaccount.data.*;
+import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
+import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
+import org.apache.fineract.portfolio.loanaccount.data.GlimRepaymentTemplate;
+import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanCollateralManagementData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanDueDiligenceData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
+import org.apache.fineract.portfolio.loanaccount.data.PaidInAdvanceData;
+import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTermVariationType;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanTemplateTypeRequiredException;
@@ -306,7 +318,7 @@ public class LoansApiResource {
             DefaultToApiJsonSerializer<LoanTransactionData> loanTransactionApiJsonSerializer,
             final ConfigurationReadPlatformService configurationReadPlatformService,
             final DefaultToApiJsonSerializer<LoanSchedulePeriodData> loanRepaymentScheduleInstallmentDataDefaultToApiJsonSerializer,
-                            final DefaultToApiJsonSerializer<LoanCashFlowData> loanCashFlowDataDefaultToApiJsonSerializer) {
+            final DefaultToApiJsonSerializer<LoanCashFlowData> loanCashFlowDataDefaultToApiJsonSerializer) {
         this.context = context;
         this.loanReadPlatformService = loanReadPlatformService;
         this.loanProductReadPlatformService = loanProductReadPlatformService;
@@ -1228,22 +1240,20 @@ public class LoansApiResource {
 
         return this.toApiJsonSerializer.serialize(result);
     }
+
     @GET
     @Path("/retrieveCashFlow/{loanId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveCashFlow(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,@Context final UriInfo uriInfo) {
+    public String retrieveCashFlow(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+            @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         LoanCashFlowData cashFlowData = this.loanReadPlatformService.retrieveCashFlow(loanId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.loanCashFlowDataDefaultToApiJsonSerializer.serialize(settings,cashFlowData,this.loanDataParameters);
+        return this.loanCashFlowDataDefaultToApiJsonSerializer.serialize(settings, cashFlowData, this.loanDataParameters);
     }
-}
-
-
-
 
 }
