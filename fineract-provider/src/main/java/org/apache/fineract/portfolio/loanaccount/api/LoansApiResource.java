@@ -117,7 +117,6 @@ import org.apache.fineract.portfolio.loanaccount.data.GlimRepaymentTemplate;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowHistoricalInformation;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanCollateralManagementData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDueDiligenceData;
@@ -286,7 +285,7 @@ public class LoansApiResource {
     private final ClientReadPlatformService clientReadPlatformService;
 
     private final DefaultToApiJsonSerializer<LoanTransactionData> loanTransactionApiJsonSerializer;
-    private final DefaultToApiJsonSerializer<LoanCashFlowHistoricalInformation> loanCashFlowDataDefaultToApiJsonSerializer;
+    private final DefaultToApiJsonSerializer<LoanCashFlowData> loanCashFlowDataDefaultToApiJsonSerializer;
     private final ConfigurationReadPlatformService configurationReadPlatformService;
 
     private final DefaultToApiJsonSerializer<LoanSchedulePeriodData> loanRepaymentScheduleInstallmentDataDefaultToApiJsonSerializer;
@@ -319,7 +318,7 @@ public class LoansApiResource {
             DefaultToApiJsonSerializer<LoanTransactionData> loanTransactionApiJsonSerializer,
             final ConfigurationReadPlatformService configurationReadPlatformService,
             final DefaultToApiJsonSerializer<LoanSchedulePeriodData> loanRepaymentScheduleInstallmentDataDefaultToApiJsonSerializer,
-            final DefaultToApiJsonSerializer<LoanCashFlowHistoricalInformation> loanCashFlowDataDefaultToApiJsonSerializer) {
+            final DefaultToApiJsonSerializer<LoanCashFlowData> loanCashFlowDataDefaultToApiJsonSerializer) {
         this.context = context;
         this.loanReadPlatformService = loanReadPlatformService;
         this.loanProductReadPlatformService = loanProductReadPlatformService;
@@ -1252,21 +1251,9 @@ public class LoansApiResource {
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         List<LoanCashFlowData> cashFlowData = this.loanReadPlatformService.retrieveCashFlow(loanId);
-        LoanCashFlowHistoricalInformation historicalInformation = new LoanCashFlowHistoricalInformation();
-        for (LoanCashFlowData cashFlow : cashFlowData) {
-            if (cashFlow.getMonthType().equals("Month 0")) {
-                historicalInformation.setMonth0(cashFlow);
-            }
-            if (cashFlow.getMonthType().equals("Previous Month 1")) {
-                historicalInformation.setPreviousMonth1(cashFlow);
-            }
-            if (cashFlow.getMonthType().equals("Previous Month 2")) {
-                historicalInformation.setPreviousMonth2(cashFlow);
-            }
-        }
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.loanCashFlowDataDefaultToApiJsonSerializer.serialize(settings, historicalInformation, this.loanDataParameters);
+        return this.loanCashFlowDataDefaultToApiJsonSerializer.serialize(settings, cashFlowData, this.loanDataParameters);
     }
 
 }
