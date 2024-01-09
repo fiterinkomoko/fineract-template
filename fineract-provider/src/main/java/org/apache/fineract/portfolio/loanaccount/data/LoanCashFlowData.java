@@ -27,55 +27,23 @@ import lombok.NoArgsConstructor;
 public final class LoanCashFlowData {
 
     private Long id;
-    private String monthType;
     private Long loanId;
-    private BigDecimal expTotalPurchases;
-    private BigDecimal expTax;
-    private BigDecimal expTransport;
-    private BigDecimal expRent;
-    private BigDecimal expCommunication;
-    private BigDecimal otherExpenseAmount;
-    private BigDecimal expUtility;
-    private BigDecimal expWorkerSalary;
-    private BigDecimal expWages;
-    private BigDecimal expPurchaseLastMonth1;
-    private BigDecimal expRentMonthly;
-    private BigDecimal expUtilitiesMonthly;
-    private BigDecimal incomeAverageMonthlyRevenue;
-    private BigDecimal incomeAmountInCash;
-    private BigDecimal incomeAmountInSavings;
-    private BigDecimal incomeAmountInInventory;
-    private BigDecimal incomeBusinessAsset;
-    private BigDecimal incomeFixedAssetsCost;
-    private BigDecimal incomeGeneratingActivity;
+    private String cashFlowType;
+    private String particularType;
+    private String name;
+    private BigDecimal previousMonth2;
+    private BigDecimal previousMonth1;
+    private BigDecimal month0;
 
-    public LoanCashFlowData(Long id, String monthType, Long loanId, BigDecimal expTotalPurchases, BigDecimal expTax,
-            BigDecimal expTransport, BigDecimal expRent, BigDecimal expCommunication, BigDecimal otherExpenseAmount, BigDecimal expUtility,
-            BigDecimal expWorkerSalary, BigDecimal expWages, BigDecimal expPurchaseLastMonth1, BigDecimal expRentMonthly,
-            BigDecimal expUtilitiesMonthly, BigDecimal incomeAverageMonthlyRevenue, BigDecimal incomeAmountInCash,
-            BigDecimal incomeAmountInSavings, BigDecimal incomeAmountInInventory, BigDecimal incomeBusinessAsset,
-            BigDecimal incomeFixedAssetsCost, BigDecimal incomeGeneratingActivity) {
+    public LoanCashFlowData(Long id, Long loanId, String cashFlowType, String particularType, String name, BigDecimal previousMonth2,
+            BigDecimal previousMonth1, BigDecimal month0) {
         this.id = id;
-        this.monthType = monthType;
         this.loanId = loanId;
-        this.expTotalPurchases = expTotalPurchases;
-        this.expTax = expTax;
-        this.expTransport = expTransport;
-        this.expRent = expRent;
-        this.expCommunication = expCommunication;
-        this.otherExpenseAmount = otherExpenseAmount;
-        this.expUtility = expUtility;
-        this.expWorkerSalary = expWorkerSalary;
-        this.expWages = expWages;
-        this.expPurchaseLastMonth1 = expPurchaseLastMonth1;
-        this.expRentMonthly = expRentMonthly;
-        this.expUtilitiesMonthly = expUtilitiesMonthly;
-        this.incomeAverageMonthlyRevenue = incomeAverageMonthlyRevenue;
-        this.incomeAmountInCash = incomeAmountInCash;
-        this.incomeAmountInSavings = incomeAmountInSavings;
-        this.incomeAmountInInventory = incomeAmountInInventory;
-        this.incomeBusinessAsset = incomeBusinessAsset;
-        this.incomeFixedAssetsCost = incomeFixedAssetsCost;
-        this.incomeGeneratingActivity = incomeGeneratingActivity;
+        this.cashFlowType = cashFlowType;
+        this.particularType = particularType;
+        this.name = name;
+        this.previousMonth2 = previousMonth2;
+        this.previousMonth1 = previousMonth1;
+        this.month0 = month0;
     }
 }
