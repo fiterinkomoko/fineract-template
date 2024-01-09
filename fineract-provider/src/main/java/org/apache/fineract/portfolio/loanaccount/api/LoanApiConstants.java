@@ -172,4 +172,6 @@ public interface LoanApiConstants {
     String linkedVendorAccountAssociateParamName = "linkedVendorAccount";
 
     String withdrawFromRedraw = "withdrawFromRedraw";
+    String loanEntityType = "loans";
+    String loanDocumentTypeContract = "Contract";
 }
