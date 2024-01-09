@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.PersistenceException;
@@ -30,6 +31,8 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
+import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
+import org.apache.fineract.infrastructure.documentmanagement.service.DocumentReadPlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApprovalMatrixConstants;
@@ -67,6 +70,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
     private final LoanApprovalMatrixRepository loanApprovalMatrixRepository;
     private final LoanCollateralManagementRepository loanCollateralManagementRepository;
     private final LoanDecisionStateUtilService loanDecisionStateUtilService;
+    private final DocumentReadPlatformService documentReadPlatformService;
 
     @Override
     public CommandProcessingResult acceptLoanApplicationReview(final Long loanId, final JsonCommand command) {
@@ -576,6 +580,12 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
     @Override
     public CommandProcessingResult acceptPrepareAndSignContract(Long loanId, JsonCommand command) {
         final AppUser currentUser = getAppUserIfPresent();
+
+        final Collection<DocumentData> documentData = this.documentReadPlatformService.retrieveLoanDocumentsFilterByDocumentType(LoanApiConstants.loanEntityType, loanId, LoanApiConstants.loanDocumentTypeContract);
+        if (documentData.size() < 1) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.document.with.type.contract.not.found",
+                    "Loan contract document not found. Please upload loan document with type Contract");
+        }
 
         this.loanDecisionTransitionApiJsonValidator.validateIcReviewStage(command.json());
 

@@ -90,6 +90,13 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
         return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { entityType, entityId, documentId }); // NOSONAR
     }
 
+    @Override
+    public Collection<DocumentData> retrieveLoanDocumentsFilterByDocumentType(final String entityType, final Long entityId, final String documentType) {
+        final DocumentMapper mapper = new DocumentMapper(false, false);
+        final String sql = "select " + mapper.schema() + " and cv.code_value=? ";
+        return this.jdbcTemplate.query(sql, mapper, new Object[] {entityType, entityId, documentType}); // NOSONAR
+    }
+
     private static final class DocumentMapper implements RowMapper<DocumentData> {
 
         private final boolean hideLocation;
@@ -103,8 +110,10 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
         public String schema() {
             return "d.id as id, d.parent_entity_type as parentEntityType, d.parent_entity_id as parentEntityId, d.name as name, "
                     + " d.file_name as fileName, d.size as fileSize, d.type as fileType, "
-                    + " d.description as description, d.location as location," + " d.storage_type_enum as storageType"
-                    + " from m_document d where d.parent_entity_type=? and d.parent_entity_id=? ";
+                    + " d.description as description, d.location as location, "
+                    + " d.storage_type_enum as storageType, cv.code_value as documentType "
+                    + " from m_document d left join m_code_value cv on cv.id = d.document_type_cv_id "
+                    + " where d.parent_entity_type=? and d.parent_entity_id=? ";
         }
 
         @Override
@@ -117,6 +126,7 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
             final String fileName = rs.getString("fileName");
             final String fileType = rs.getString("fileType");
             final String description = rs.getString("description");
+            final String documentType = rs.getString("documentType");
             String location = null;
             Integer storageType = null;
             if (!this.hideLocation) {
@@ -126,7 +136,7 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
                 storageType = rs.getInt("storageType");
             }
             return new DocumentData(id, parentEntityType, parentEntityId, name, fileName, fileSize, fileType, description, location,
-                    storageType);
+                    storageType, documentType);
         }
     }
 }
