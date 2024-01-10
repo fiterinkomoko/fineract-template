@@ -2272,11 +2272,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             throw new GeneralPlatformDomainRuleException("error.msg.loan.cashflow.data.is.not.available.so.cashflow.cannot.be.generated",
                     "Loan CashFlow data is not available so CashFlow cannot be generated");
         }
-        if (cashFlowData.size() != 3) {
-            throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.cashflow.data.is.not.equal.to.three.attributes.so.cashflow.cannot.be.generated",
-                    "Loan CashFlow data is not equal to three attributes so CashFlow cannot be generated");
-        }
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
