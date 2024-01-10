@@ -1809,7 +1809,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_FIVE);
 
         LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelFiveFrom(command, currentUser, loanDecision,
-                Boolean.TRUE, rejectedOnDate);
+                Boolean.TRUE, rejectedOnDate, null, null, null);
         loanDecisionRepository.saveAndFlush(loanDecisionObj);
 
         Loan loanObj = loan;
@@ -1855,7 +1855,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 LoanDecisionState.IC_REVIEW_LEVEL_FOUR);
 
         LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelFourFrom(command, currentUser, loanDecision,
-                Boolean.TRUE, rejectedOnDate);
+                Boolean.TRUE, rejectedOnDate, null, null, null);
         loanDecisionRepository.saveAndFlush(loanDecisionObj);
 
         Loan loanObj = loan;
@@ -1903,7 +1903,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 LoanDecisionState.IC_REVIEW_LEVEL_THREE);
 
         LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelThreeFrom(command, currentUser, loanDecision,
-                Boolean.TRUE, rejectedOnDate);
+                Boolean.TRUE, rejectedOnDate, null, null, null);
         loanDecisionRepository.saveAndFlush(loanDecisionObj);
 
         Loan loanObj = loan;
@@ -1952,7 +1952,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 LoanDecisionState.IC_REVIEW_LEVEL_TWO);
 
         LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelTwoFrom(command, currentUser, loanDecision,
-                Boolean.TRUE, rejectedOnDate);
+                Boolean.TRUE, rejectedOnDate, null, null, null);
         loanDecisionRepository.saveAndFlush(loanDecisionObj);
 
         Loan loanObj = loan;
@@ -1998,7 +1998,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 LoanDecisionState.IC_REVIEW_LEVEL_ONE);
 
         LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelOneFrom(command, currentUser, loanDecision,
-                Boolean.TRUE, rejectedOnDate);
+                Boolean.TRUE, rejectedOnDate, null, null, null);
         loanDecisionRepository.saveAndFlush(loanDecisionObj);
 
         Loan loanObj = loan;

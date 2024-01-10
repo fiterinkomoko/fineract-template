@@ -381,6 +381,8 @@ public class LoansApiResource {
             throw new LoanTemplateTypeRequiredException(errorMsg);
         } else if (templateType.equals("approval")) {
             loanApprovalTemplate = this.loanReadPlatformService.retrieveApprovalTemplate(loanId);
+        } else if (templateType.equals("icreview")) {
+            loanApprovalTemplate = this.loanReadPlatformService.retrieveICReviewTemplate(loanId);
         }
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());

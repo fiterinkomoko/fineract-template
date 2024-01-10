@@ -57,6 +57,7 @@ import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
@@ -79,6 +80,7 @@ import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
+import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
 import org.apache.fineract.portfolio.floatingrates.data.InterestRatePeriodData;
 import org.apache.fineract.portfolio.floatingrates.service.FloatingRatesReadPlatformService;
 import org.apache.fineract.portfolio.fund.data.FundData;
@@ -93,6 +95,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApplicationTimelineData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanDecisionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDueDiligenceData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInterestRecalculationData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentScheduleInstallmentData;
@@ -182,6 +185,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private final SearchReadPlatformService searchReadPlatformService;
     private final ConfigurationReadPlatformService configurationReadPlatformService;
     private final LoanDueDiligenceInfoRepository loanDueDiligenceInfoRepository;
+    private final DropdownReadPlatformService dropdownReadPlatformService;
+    private final CurrencyReadPlatformService currencyReadPlatformService;
 
     @Autowired
     public LoanReadPlatformServiceImpl(final PlatformSecurityContext context,
@@ -199,7 +204,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final AccountDetailsReadPlatformService accountDetailsReadPlatformService, final LoanRepositoryWrapper loanRepositoryWrapper,
             final ColumnValidator columnValidator, DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper,
             SearchReadPlatformService searchReadPlatformService, final LoanDueDiligenceInfoRepository loanDueDiligenceInfoRepository,
-            final ConfigurationReadPlatformService configurationReadPlatformService) {
+            final ConfigurationReadPlatformService configurationReadPlatformService, final DropdownReadPlatformService dropdownReadPlatformService, final CurrencyReadPlatformService currencyReadPlatformService) {
         this.context = context;
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
@@ -228,6 +233,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         this.searchReadPlatformService = searchReadPlatformService;
         this.loanDueDiligenceInfoRepository = loanDueDiligenceInfoRepository;
         this.configurationReadPlatformService = configurationReadPlatformService;
+        this.dropdownReadPlatformService = dropdownReadPlatformService;
+        this.currencyReadPlatformService = currencyReadPlatformService;
     }
 
     @Override
@@ -581,6 +588,17 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     public LoanApprovalData retrieveApprovalTemplate(final Long loanId) {
         final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
         return new LoanApprovalData(loan.getProposedPrincipal(), DateUtils.getBusinessLocalDate(), loan.getNetDisbursalAmount());
+    }
+
+    @Override
+    public LoanApprovalData retrieveICReviewTemplate(final Long loanId) {
+        final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
+        final String currencyCode = loan.getCurrencyCode();
+        final CurrencyData currency = currencyReadPlatformService.retrieveCurrency(currencyCode);
+        final Collection<EnumOptionData> termFrequencyTypeOptions = this.dropdownReadPlatformService.retrievePeriodFrequencyTypeOptions();
+        final LoanDecisionData loanDecisionData = this.retrieveLoanDecisionByLoanId(loan.getId());
+        return new LoanApprovalData(loan.getProposedPrincipal(), DateUtils.getBusinessLocalDate(), loan.getNetDisbursalAmount(),
+                termFrequencyTypeOptions, currency, loanDecisionData);
     }
 
     @Override
@@ -3188,6 +3206,50 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
             return new LoanCashFlowData(id, loanId, cashFlowType, particularType, name, previousMonth2, previousMonth1, month0);
         }
+    }
+
+    @Override
+    public LoanDecisionData retrieveLoanDecisionByLoanId(Long loanId) {
+        final LoanDecisionDataMapper mapper = new LoanDecisionDataMapper(sqlGenerator);
+        String sql = "select " + mapper.schema();
+        LoanDecisionData loanDecisionData = this.jdbcTemplate.queryForObject(sql, mapper, loanId);
+        return loanDecisionData;
+    }
+
+    public static final class LoanDecisionDataMapper implements RowMapper<LoanDecisionData> {
+        private final DatabaseSpecificSQLGenerator sqlGenerator;
+
+        LoanDecisionDataMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
+            this.sqlGenerator = sqlGenerator;
+        }
+
+        public String schema() {
+            StringBuilder sb = new StringBuilder();
+            sb.append(" ld.loan_id as loanId, "
+                    + "ld.ic_review_decision_level_one_recommended_amount as icReviewDecisionLevelOneRecommendedAmount, "
+                    + "ld.ic_review_decision_level_two_recommended_amount as icReviewDecisionLevelTwoRecommendedAmount, "
+                    + "ld.ic_review_decision_level_three_recommended_amount as icReviewDecisionLevelThreeRecommendedAmount, "
+                    + "ld.ic_review_decision_level_four_recommended_amount as icReviewDecisionLevelFourRecommendedAmount, "
+                    + "ld.ic_review_decision_level_five_recommended_amount as icReviewDecisionLevelFiveRecommendedAmount ");
+            sb.append(" FROM m_loan_decision ld ");
+            sb.append(" WHERE ld.loan_id= ? ");
+            return sb.toString();
+        }
+
+        @Override
+        public LoanDecisionData mapRow(ResultSet rs, int rowNum) throws SQLException {
+            final Long loanId = rs.getLong("loanId");
+            final BigDecimal icReviewDecisionLevelOneRecommendedAmount = rs.getBigDecimal("icReviewDecisionLevelOneRecommendedAmount");
+            final BigDecimal icReviewDecisionLevelTwoRecommendedAmount = rs.getBigDecimal("icReviewDecisionLevelTwoRecommendedAmount");
+            final BigDecimal icReviewDecisionLevelThreeRecommendedAmount = rs.getBigDecimal("icReviewDecisionLevelThreeRecommendedAmount");
+            final BigDecimal icReviewDecisionLevelFourRecommendedAmount = rs.getBigDecimal("icReviewDecisionLevelFourRecommendedAmount");
+            final BigDecimal icReviewDecisionLevelFiveRecommendedAmount = rs.getBigDecimal("icReviewDecisionLevelFiveRecommendedAmount");
+
+            return new LoanDecisionData(loanId, icReviewDecisionLevelOneRecommendedAmount,
+                    icReviewDecisionLevelTwoRecommendedAmount, icReviewDecisionLevelThreeRecommendedAmount,
+                    icReviewDecisionLevelFourRecommendedAmount, icReviewDecisionLevelFiveRecommendedAmount);
+        }
+
     }
 
 }
