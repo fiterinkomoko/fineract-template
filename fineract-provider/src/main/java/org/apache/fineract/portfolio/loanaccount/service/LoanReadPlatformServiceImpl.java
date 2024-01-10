@@ -92,6 +92,7 @@ import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApplicationTimelineData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDueDiligenceData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInterestRecalculationData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentScheduleInstallmentData;
@@ -3138,6 +3139,55 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             return this.jdbcTemplate.query(sqlBuilder.toString(), rm, loanDecisionState); // NOSONAR
         }
 
+    }
+
+    @Override
+    public List<LoanCashFlowData> retrieveCashFlow(Long loanId) {
+        this.context.authenticatedUser();
+        final LoanCashFlowMapper rm = new LoanCashFlowMapper(sqlGenerator);
+
+        final String sql = "select " + rm.loanCashFlow();
+
+        return this.jdbcTemplate.query(sql, rm, loanId); // NOSONAR
+    }
+
+    private static final class LoanCashFlowMapper implements RowMapper<LoanCashFlowData> {
+
+        private final DatabaseSpecificSQLGenerator sqlGenerator;
+
+        LoanCashFlowMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
+            this.sqlGenerator = sqlGenerator;
+        }
+
+        public String loanCashFlow() {
+            return "                            cf.id                                           as id,          "
+                    + "                           cf.loan_id                                      as loanId,  "
+                    + "                           cashFlowT.code_value                            as cashFlowType,"
+                    + "                           particularT.code_value                          as particularType,"
+                    + "                           cf.\"Name\"                                     as name,"
+                    + "                           cf.\"PreviousMonth2\"                           as previousMonth2,"
+                    + "                           cf.\"PreviousMonth1\"                           as previousMonth1,"
+                    + "                           cf.\"Month0\"                                   as month0"
+                    + "  FROM loan_cashflow_information cf"
+                    + "  INNER JOIN m_code_value cashFlowT ON cf.\"CashFlowType_cd_CashFlowType\"   = cashFlowT.id"
+                    + "  INNER JOIN m_code_value particularT ON cf.\"ParticularType_cd_ParticularType\"   = particularT.id\n"
+                    + "  WHERE loan_id = ? ";
+        }
+
+        @Override
+        public LoanCashFlowData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+            final Long id = rs.getLong("id");
+            final Long loanId = rs.getLong("loanId");
+            final String cashFlowType = rs.getString("cashFlowType");
+            final String particularType = rs.getString("particularType");
+            final String name = rs.getString("name");
+
+            final BigDecimal previousMonth2 = rs.getBigDecimal("previousMonth2");
+            final BigDecimal previousMonth1 = rs.getBigDecimal("previousMonth1");
+            final BigDecimal month0 = rs.getBigDecimal("month0");
+
+            return new LoanCashFlowData(id, loanId, cashFlowType, particularType, name, previousMonth2, previousMonth1, month0);
+        }
     }
 
 }

@@ -494,4 +494,433 @@
             <column name="can_maker_checker" valueBoolean="false"/>
         </insert>
     </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permissions_GENERATE_CASHFLOW_LOAN">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(1) FROM m_permission WHERE code = 'GENERATE_CASHFLOW_LOAN'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="portfolio" />
+            <column name="code" value="GENERATE_CASHFLOW_LOAN" />
+            <column name="entity_name" value="LOAN" />
+            <column name="action_name" value="GENERATE_CASHFLOW" />
+            <column name="can_maker_checker" valueBoolean="false" />
+        </insert>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_codes_for_CashFlowType">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code where code_name = 'CashFlowType';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code">
+            <column name="code_name" value="CashFlowType" />
+            <column name="is_system_defined" valueBoolean="true" />
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_code_value_for_cashFlowType_INCOME">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code_value where code_value = 'INCOME';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueComputed="(select id from m_code where code_name='CashFlowType')"/>
+            <column name="code_value" value="INCOME"/>
+            <column name="code_description"/>
+            <column name="order_position" valueNumeric="1"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_code_value_for_cashFlowType_EXPENSE">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+            select count(1) from m_code_value where code_value = 'EXPENSE';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueComputed="(select id from m_code where code_name='CashFlowType')"/>
+            <column name="code_value" value="EXPENSE"/>
+            <column name="code_description"/>
+            <column name="order_position" valueNumeric="2"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_codes_for_ParticularType">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code where code_name = 'ParticularType';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code">
+            <column name="code_name" value="ParticularType" />
+            <column name="is_system_defined" valueBoolean="true" />
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_code_value_for_ParticularType_Sales_Income">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code_value where code_value = 'Sales Income';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueComputed="(select id from m_code where code_name='ParticularType')"/>
+            <column name="code_value" value="Sales Income"/>
+            <column name="code_description"/>
+            <column name="order_position" valueNumeric="1"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_code_value_for_ParticularType_Other_Income">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code_value where code_value = 'Other Income';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueComputed="(select id from m_code where code_name='ParticularType')"/>
+            <column name="code_value" value="Other Income"/>
+            <column name="code_description"/>
+            <column name="order_position" valueNumeric="2"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_code_value_for_ParticularType_Purchases">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code_value where code_value = 'Purchases';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueComputed="(select id from m_code where code_name='ParticularType')"/>
+            <column name="code_value" value="Purchases"/>
+            <column name="code_description"/>
+            <column name="order_position" valueNumeric="3"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_code_value_for_ParticularType_Business_Expenses">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code_value where code_value = 'Business Expenses';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueComputed="(select id from m_code where code_name='ParticularType')"/>
+            <column name="code_value" value="Business Expenses"/>
+            <column name="code_description"/>
+            <column name="order_position" valueNumeric="4"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_code_value_for_ParticularType_Household_Expenses">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(1) from m_code_value where code_value = 'Household Expenses';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_code_value">
+            <column name="code_id" valueComputed="(select id from m_code where code_name='ParticularType')"/>
+            <column name="code_value" value="Household Expenses"/>
+            <column name="code_description"/>
+            <column name="order_position" valueNumeric="5"/>
+            <column name="code_score"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_mandatory" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet id="insert-x_registered_table-for-loan-cashflow-information" author="bosco@fiter.io">
+        <preConditions>
+            <sqlCheck expectedResult="0">select count(*) from x_registered_table where registered_table_name = 'loan_cashflow_information'</sqlCheck>
+        </preConditions>
+        <sql>
+            <![CDATA[
+          INSERT INTO  x_registered_table (registered_table_name,application_table_name,entity_subtype,category) VALUES ('loan_cashflow_information','m_loan',null,100);
+             ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="create-loan_loan_cashflow_information-data_table" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="loan_cashflow_information"/>
+            </not>
+        </preConditions>
+        <createTable tableName="loan_cashflow_information">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="loan_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_loan_cashflow_info-data_loan" references="m_loan(id)"/>
+            </column>
+            <column name="CashFlowType_cd_CashFlowType" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ParticularType_cd_ParticularType" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="Name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PreviousMonth2" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PreviousMonth1" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="Month0" type="decimal(19,6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+
+    <changeSet author="bosco@fiter.io" id="add_m_permission_CREATE_loan_cashflow_information">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'CREATE_loan_cashflow_information'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="CREATE_loan_cashflow_information" />
+            <column name="entity_name" value="loan_cashflow_information" />
+            <column name="action_name" value="CREATE" />
+            <column name="can_maker_checker" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_CREATE_loan_cashflow_information_CHECKER">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'CREATE_loan_cashflow_information_CHECKER'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="CREATE_loan_cashflow_information_CHECKER" />
+            <column name="entity_name" value="loan_cashflow_information" />
+            <column name="action_name" value="CREATE" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_READ_loan_cashflow_information">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'READ_loan_cashflow_information'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="READ_loan_cashflow_information" />
+            <column name="entity_name" value="loan_cashflow_information" />
+            <column name="action_name" value="READ" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_CUPDATE_loan_cashflow_information">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'UPDATE_loan_cashflow_information'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="UPDATE_loan_cashflow_information" />
+            <column name="entity_name" value="loan_cashflow_information" />
+            <column name="action_name" value="UPDATE" />
+            <column name="can_maker_checker" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_UPDATE_loan_cashflow_information_CHECKER">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'UPDATE_loan_cashflow_information_CHECKER'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="UPDATE_loan_cashflow_information_CHECKER" />
+            <column name="entity_name" value="loan_cashflow_information" />
+            <column name="action_name" value="UPDATE" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_DELETE_loan_cashflow_information">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'DELETE_loan_cashflow_information'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="DELETE_loan_cashflow_information" />
+            <column name="entity_name" value="loan_cashflow_information" />
+            <column name="action_name" value="DELETE" />
+            <column name="can_maker_checker" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_DELETE_loan_cashflow_information_CHECKER">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'DELETE_loan_cashflow_information_CHECKER'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="DELETE_loan_cashflow_information_CHECKER" />
+            <column name="entity_name" value="loan_cashflow_information" />
+            <column name="action_name" value="DELETE" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="insert-x_registered_table-for-ProjectionRate" author="bosco@fiter.io">
+        <preConditions>
+            <sqlCheck expectedResult="0">select count(*) from x_registered_table where registered_table_name = 'ProjectionRate'</sqlCheck>
+        </preConditions>
+        <sql>
+            <![CDATA[
+          INSERT INTO  x_registered_table (registered_table_name,application_table_name,entity_subtype,category) VALUES ('ProjectionRate','m_loan',null,100);
+             ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="create-loan_ProjectionRate-data_table" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="ProjectionRate"/>
+            </not>
+        </preConditions>
+        <createTable tableName="ProjectionRate">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="loan_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="FK_ProjectionRate-data_loan" references="m_loan(id)"/>
+            </column>
+            <column name="DefaultRate" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+
+    <changeSet author="bosco@fiter.io" id="add_m_permission_CREATE_ProjectionRate">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'CREATE_ProjectionRate'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="CREATE_ProjectionRate" />
+            <column name="entity_name" value="ProjectionRate" />
+            <column name="action_name" value="CREATE" />
+            <column name="can_maker_checker" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_CREATE_ProjectionRate_CHECKER">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'CREATE_ProjectionRate_CHECKER'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="CREATE_ProjectionRate_CHECKER" />
+            <column name="entity_name" value="ProjectionRate" />
+            <column name="action_name" value="CREATE" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_READ_ProjectionRate">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'READ_ProjectionRate'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="READ_ProjectionRate" />
+            <column name="entity_name" value="ProjectionRate" />
+            <column name="action_name" value="READ" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_UPDATE_ProjectionRate">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'UPDATE_ProjectionRate'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="UPDATE_ProjectionRate" />
+            <column name="entity_name" value="ProjectionRate" />
+            <column name="action_name" value="UPDATE" />
+            <column name="can_maker_checker" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_UPDATE_ProjectionRate_CHECKER">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'UPDATE_ProjectionRate_CHECKER'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="UPDATE_ProjectionRate_CHECKER" />
+            <column name="entity_name" value="ProjectionRate" />
+            <column name="action_name" value="UPDATE" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_DELETE_ProjectionRate">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'DELETE_ProjectionRate'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="DELETE_ProjectionRate" />
+            <column name="entity_name" value="ProjectionRate" />
+            <column name="action_name" value="DELETE" />
+            <column name="can_maker_checker" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_DELETE_ProjectionRate_CHECKER">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'DELETE_ProjectionRate_CHECKER'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="DELETE_ProjectionRate_CHECKER" />
+            <column name="entity_name" value="ProjectionRate" />
+            <column name="action_name" value="DELETE" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

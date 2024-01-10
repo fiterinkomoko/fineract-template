@@ -116,6 +116,7 @@ import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.apache.fineract.portfolio.loanaccount.data.GlimRepaymentTemplate;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanCollateralManagementData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDueDiligenceData;
@@ -284,6 +285,7 @@ public class LoansApiResource {
     private final ClientReadPlatformService clientReadPlatformService;
 
     private final DefaultToApiJsonSerializer<LoanTransactionData> loanTransactionApiJsonSerializer;
+    private final DefaultToApiJsonSerializer<LoanCashFlowData> loanCashFlowDataDefaultToApiJsonSerializer;
     private final ConfigurationReadPlatformService configurationReadPlatformService;
 
     private final DefaultToApiJsonSerializer<LoanSchedulePeriodData> loanRepaymentScheduleInstallmentDataDefaultToApiJsonSerializer;
@@ -315,7 +317,8 @@ public class LoansApiResource {
             final ClientReadPlatformService clientReadPlatformService, InterestRateChartReadPlatformService chartReadPlatformService,
             DefaultToApiJsonSerializer<LoanTransactionData> loanTransactionApiJsonSerializer,
             final ConfigurationReadPlatformService configurationReadPlatformService,
-            final DefaultToApiJsonSerializer<LoanSchedulePeriodData> loanRepaymentScheduleInstallmentDataDefaultToApiJsonSerializer) {
+            final DefaultToApiJsonSerializer<LoanSchedulePeriodData> loanRepaymentScheduleInstallmentDataDefaultToApiJsonSerializer,
+            final DefaultToApiJsonSerializer<LoanCashFlowData> loanCashFlowDataDefaultToApiJsonSerializer) {
         this.context = context;
         this.loanReadPlatformService = loanReadPlatformService;
         this.loanProductReadPlatformService = loanProductReadPlatformService;
@@ -352,6 +355,7 @@ public class LoansApiResource {
         this.loanTransactionApiJsonSerializer = loanTransactionApiJsonSerializer;
         this.configurationReadPlatformService = configurationReadPlatformService;
         this.loanRepaymentScheduleInstallmentDataDefaultToApiJsonSerializer = loanRepaymentScheduleInstallmentDataDefaultToApiJsonSerializer;
+        this.loanCashFlowDataDefaultToApiJsonSerializer = loanCashFlowDataDefaultToApiJsonSerializer;
     }
 
     /*
@@ -1223,4 +1227,33 @@ public class LoansApiResource {
         return this.loanRepaymentScheduleInstallmentDataDefaultToApiJsonSerializer.serialize(settings,
                 loanRepaymentScheduleInstallmentDataPage, this.loanRepaymentInstallmentDataParameters);
     }
+
+    @POST
+    @Path("/generateCashFlow/{loanId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String generateCashFlow(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId) {
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().generateCashFlow(loanId).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
+
+    @GET
+    @Path("/retrieveCashFlow/{loanId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveCashFlow(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
+            @Context final UriInfo uriInfo) {
+
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+
+        List<LoanCashFlowData> cashFlowData = this.loanReadPlatformService.retrieveCashFlow(loanId);
+
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.loanCashFlowDataDefaultToApiJsonSerializer.serialize(settings, cashFlowData, this.loanDataParameters);
+    }
+
 }
