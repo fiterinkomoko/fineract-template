@@ -129,6 +129,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTopupDetails;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCashFlowProjectionRepository;
 import org.apache.fineract.portfolio.loanaccount.exception.GLIMLoanCannotBeApprovedException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationDateException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
@@ -222,6 +223,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final LoanDecisionRepository loanDecisionRepository;
     private final LoanApprovalMatrixRepository loanApprovalMatrixRepository;
     private final LoanDecisionAssembler loanDecisionAssembler;
+    private final LoanCashFlowProjectionRepository loanCashFlowProjectionRepository;
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
         final List<LoanStatus> allowedLoanStatuses = Arrays.asList(LoanStatus.values());
@@ -2272,7 +2274,10 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             throw new GeneralPlatformDomainRuleException("error.msg.loan.cashflow.data.is.not.available.so.cashflow.cannot.be.generated",
                     "Loan CashFlow data is not available so CashFlow cannot be generated");
         }
-
+        loan.getRepaymentScheduleInstallments().forEach(installment -> {
+            LOG.info("installment id: " + installment.getId());
+        });
+//        List<LoanCashFlowProjection> projection = this.loanCashFlowProjectionRepository.findAll();
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(loan.getId()) //
