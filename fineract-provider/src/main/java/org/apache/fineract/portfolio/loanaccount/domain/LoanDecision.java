@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -89,6 +90,12 @@ public class LoanDecision extends AbstractAuditableCustom {
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "ic_review_decision_level_one_by")
     private AppUser icReviewDecisionLevelOneBy;
+    @Column(name = "ic_review_decision_level_one_recommended_amount")
+    private BigDecimal icReviewDecisionLevelOneRecommendedAmount;
+    @Column(name = "ic_review_decision_level_one_term_frequency")
+    private Integer icReviewDecisionLevelOneTermFrequency;
+    @Column(name = "ic_review_decision_level_one_term_period_frequency_enum")
+    private Integer icReviewDecisionLevelOneTermPeriodFrequencyEnum;
 
     @Column(name = "next_loan_ic_review_decision_state")
     private Integer nextLoanIcReviewDecisionState;
@@ -105,6 +112,12 @@ public class LoanDecision extends AbstractAuditableCustom {
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "ic_review_decision_level_two_by")
     private AppUser icReviewDecisionLevelTwoBy;
+    @Column(name = "ic_review_decision_level_two_recommended_amount")
+    private BigDecimal icReviewDecisionLevelTwoRecommendedAmount;
+    @Column(name = "ic_review_decision_level_two_term_frequency")
+    private Integer icReviewDecisionLevelTwoTermFrequency;
+    @Column(name = "ic_review_decision_level_two_term_period_frequency_enum")
+    private Integer icReviewDecisionLevelTwoTermPeriodFrequencyEnum;
 
     // IC review Decision Level Three
     @Column(name = "ic_review_decision_level_three_note")
@@ -118,6 +131,12 @@ public class LoanDecision extends AbstractAuditableCustom {
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "ic_review_decision_level_three_by")
     private AppUser icReviewDecisionLevelThreeBy;
+    @Column(name = "ic_review_decision_level_three_recommended_amount")
+    private BigDecimal icReviewDecisionLevelThreeRecommendedAmount;
+    @Column(name = "ic_review_decision_level_three_term_frequency")
+    private Integer icReviewDecisionLevelThreeTermFrequency;
+    @Column(name = "ic_review_decision_level_three_term_period_frequency_enum")
+    private Integer icReviewDecisionLevelThreeTermPeriodFrequencyEnum;
 
     // IC review Decision Level Four
     @Column(name = "ic_review_decision_level_four_note")
@@ -131,6 +150,12 @@ public class LoanDecision extends AbstractAuditableCustom {
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "ic_review_decision_level_four_by")
     private AppUser icReviewDecisionLevelFourBy;
+    @Column(name = "ic_review_decision_level_four_recommended_amount")
+    private BigDecimal icReviewDecisionLevelFourRecommendedAmount;
+    @Column(name = "ic_review_decision_level_four_term_frequency")
+    private Integer icReviewDecisionLevelFourTermFrequency;
+    @Column(name = "ic_review_decision_level_four_term_period_frequency_enum")
+    private Integer icReviewDecisionLevelFourTermPeriodFrequencyEnum;
 
     // IC review Decision Level Five
     @Column(name = "ic_review_decision_level_five_note")
@@ -144,6 +169,12 @@ public class LoanDecision extends AbstractAuditableCustom {
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "ic_review_decision_level_five_by")
     private AppUser icReviewDecisionLevelFiveBy;
+    @Column(name = "ic_review_decision_level_five_recommended_amount")
+    private BigDecimal icReviewDecisionLevelFiveRecommendedAmount;
+    @Column(name = "ic_review_decision_level_five_term_frequency")
+    private Integer icReviewDecisionLevelFiveTermFrequency;
+    @Column(name = "ic_review_decision_level_five_term_period_frequency_enum")
+    private Integer icReviewDecisionLevelFiveTermPeriodFrequencyEnum;
 
     // Prepare and sign contract
     @Column(name = "prepare_and_sign_contract_note")
