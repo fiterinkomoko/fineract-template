@@ -18,16 +18,15 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
-import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
-import org.springframework.stereotype.Component;
-
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.ManyToOne;
-import javax.persistence.JoinColumn;
-import javax.persistence.Column;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
+import org.springframework.stereotype.Component;
 
 @Entity
 @Component

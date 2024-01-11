@@ -114,6 +114,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanApprovalMatrix;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanApprovalMatrixRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCashFlowProjectionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDecision;
@@ -129,7 +130,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTopupDetails;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanCashFlowProjectionRepository;
 import org.apache.fineract.portfolio.loanaccount.exception.GLIMLoanCannotBeApprovedException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationDateException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
@@ -2274,10 +2274,16 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             throw new GeneralPlatformDomainRuleException("error.msg.loan.cashflow.data.is.not.available.so.cashflow.cannot.be.generated",
                     "Loan CashFlow data is not available so CashFlow cannot be generated");
         }
+        validateCashFlowType(cashFlowData, "Sales Income");
+        validateCashFlowType(cashFlowData, "Purchases");
+
         loan.getRepaymentScheduleInstallments().forEach(installment -> {
             LOG.info("installment id: " + installment.getId());
+
+            cashFlowData.forEach(cashFlow -> {
+                LOG.info("cashflow Data :- " + cashFlow.getName() + " " + cashFlow.getMonth0() + "    * *" + cashFlow.getCashFlowType());
+            });
         });
-//        List<LoanCashFlowProjection> projection = this.loanCashFlowProjectionRepository.findAll();
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(loan.getId()) //
@@ -2301,6 +2307,18 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         }
         return approveApplication(loanId, command, Boolean.TRUE);
 
+    }
+
+    public void validateCashFlowType(List<LoanCashFlowData> cashFlowData, String particularType) {
+        long particular = cashFlowData.stream().filter(data -> particularType.equals(data.getParticularType())).count();
+
+        if (particular != 1 && particularType.equals("Sales Income")) {
+            throw new GeneralPlatformDomainRuleException("error.msg.cashflow.expects.only.one.sales-income",
+                    "There should be exactly one sales-income type in the cash flow data.");
+        } else if (particular != 1 && particularType.equals("Purchases")) {
+            throw new GeneralPlatformDomainRuleException("error.msg.cashflow.expects.only.one.Purchases",
+                    "There should be exactly one Purchases type in the cash flow data.");
+        }
     }
 
 }

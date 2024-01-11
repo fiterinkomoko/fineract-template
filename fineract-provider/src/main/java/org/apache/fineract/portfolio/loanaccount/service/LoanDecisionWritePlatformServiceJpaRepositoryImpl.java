@@ -581,7 +581,8 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
     public CommandProcessingResult acceptPrepareAndSignContract(Long loanId, JsonCommand command) {
         final AppUser currentUser = getAppUserIfPresent();
 
-        final Collection<DocumentData> documentData = this.documentReadPlatformService.retrieveLoanDocumentsFilterByDocumentType(LoanApiConstants.loanEntityType, loanId, LoanApiConstants.loanDocumentTypeContract);
+        final Collection<DocumentData> documentData = this.documentReadPlatformService.retrieveLoanDocumentsFilterByDocumentType(
+                LoanApiConstants.loanEntityType, loanId, LoanApiConstants.loanDocumentTypeContract);
         if (documentData.size() < 1) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.document.with.type.contract.not.found",
                     "Loan contract document not found. Please upload loan document with type Contract");

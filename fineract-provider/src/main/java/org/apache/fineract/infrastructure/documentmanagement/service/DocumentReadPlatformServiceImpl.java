@@ -91,10 +91,11 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
     }
 
     @Override
-    public Collection<DocumentData> retrieveLoanDocumentsFilterByDocumentType(final String entityType, final Long entityId, final String documentType) {
+    public Collection<DocumentData> retrieveLoanDocumentsFilterByDocumentType(final String entityType, final Long entityId,
+            final String documentType) {
         final DocumentMapper mapper = new DocumentMapper(false, false);
         final String sql = "select " + mapper.schema() + " and cv.code_value=? ";
-        return this.jdbcTemplate.query(sql, mapper, new Object[] {entityType, entityId, documentType}); // NOSONAR
+        return this.jdbcTemplate.query(sql, mapper, new Object[] { entityType, entityId, documentType }); // NOSONAR
     }
 
     private static final class DocumentMapper implements RowMapper<DocumentData> {
