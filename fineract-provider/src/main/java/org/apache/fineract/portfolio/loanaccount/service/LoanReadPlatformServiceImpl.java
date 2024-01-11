@@ -3151,6 +3151,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         return this.jdbcTemplate.query(sql, rm, loanId); // NOSONAR
     }
 
+    @Override
+    public Integer retrieveProjectionRate(Long loanId) {
+        final String sql = "SELECT rate.\"DefaultRate\" as rate FROM \"ProjectionRate\" rate WHERE rate.loan_id = ? ORDER BY rate.id DESC LIMIT 1";
+        return this.jdbcTemplate.queryForObject(sql, new Object[] { loanId }, Integer.class);
+    }
+
     private static final class LoanCashFlowMapper implements RowMapper<LoanCashFlowData> {
 
         private final DatabaseSpecificSQLGenerator sqlGenerator;

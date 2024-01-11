@@ -2276,12 +2276,25 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         }
         validateCashFlowType(cashFlowData, "Sales Income");
         validateCashFlowType(cashFlowData, "Purchases");
-
+        Integer projectionRate = this.loanReadPlatformService.retrieveProjectionRate(loanId);
+        if (projectionRate == null || projectionRate <= 0) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.projection.rate.is.not.available.so.cashflow.cannot.be.generated",
+                    "Loan Projection Rate is not available so CashFlow cannot be generated");
+        }
+        LOG.info("projectionRate: " + projectionRate);
         loan.getRepaymentScheduleInstallments().forEach(installment -> {
-            LOG.info("installment id: " + installment.getId());
+            LOG.info("installment id: " + installment.getId() + " Month " + installment.getInstallmentNumber());
 
             cashFlowData.forEach(cashFlow -> {
-                LOG.info("cashflow Data :- " + cashFlow.getName() + " " + cashFlow.getMonth0() + "    * *" + cashFlow.getCashFlowType());
+
+                if (cashFlow.getCashFlowType().equals("INCOME") && cashFlow.getParticularType().equals("Sales Income")) {
+                    LOG.info("INCOME -- cashflow Data :- " + cashFlow.getName() + " " + cashFlow.getMonth0() + "    * *"
+                            + cashFlow.getCashFlowType());
+                }
+                if (cashFlow.getCashFlowType().equals("EXPENSE") && cashFlow.getParticularType().equals("Purchases")) {
+                    LOG.info("EXPENSE -- cashflow Data :- " + cashFlow.getName() + " " + cashFlow.getMonth0() + "    * *"
+                            + cashFlow.getCashFlowType());
+                }
             });
         });
         return new CommandProcessingResultBuilder() //
