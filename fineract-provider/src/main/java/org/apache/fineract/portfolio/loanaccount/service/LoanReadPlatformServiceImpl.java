@@ -23,6 +23,8 @@ import static org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -43,6 +45,7 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.filters.FilterConstraint;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -57,6 +60,7 @@ import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
@@ -92,6 +96,7 @@ import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApplicationTimelineData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanFinancialRatioData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDueDiligenceData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInterestRecalculationData;
@@ -3187,6 +3192,124 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final BigDecimal month0 = rs.getBigDecimal("month0");
 
             return new LoanCashFlowData(id, loanId, cashFlowType, particularType, name, previousMonth2, previousMonth1, month0);
+        }
+    }
+
+    @Override
+    public LoanFinancialRatioData retrieveLoanFinancialRatioData(Long loanId) {
+        List<LoanCashFlowData> cashFlowData = retrieveCashFlow(loanId);
+        if (CollectionUtils.isEmpty(cashFlowData)) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.cashflow.data.is.not.available.financialratio.cannot.be.generated",
+                    "Financial Ratio report cannot be created. CashFlow data not available.");
+        }
+        LoanFinancialRatioData financialRatioData = findLoanFinancialRatioDataByLoanId(loanId);
+        if (financialRatioData == null) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.balancesheet.data.is.not.available.financialratio.cannot.be.generated",
+                    "Financial Ratio report cannot be created. Balance Sheet data not available.");
+        }
+
+        generateFinancialRatioData(cashFlowData, financialRatioData);
+
+        return financialRatioData;
+    }
+
+    private void generateFinancialRatioData(List<LoanCashFlowData> cashFlowData, LoanFinancialRatioData financialRatioData) {
+        final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
+        final MathContext mc = new MathContext(8, roundingMode);
+        List<String> incomeParticularTypes = Arrays.asList("Sales Income", "Other Income");
+        List<String> expenseParticularTypes = Arrays.asList("Purchases", "Business Expenses","Household Expenses");
+        BigDecimal totalIncome = cashFlowData.stream()
+                .filter(cashFlow ->
+                        cashFlow.getCashFlowType().equals("INCOME") && incomeParticularTypes.contains(cashFlow.getParticularType()))
+                .map(LoanCashFlowData::getMonth0)
+                .reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+
+        BigDecimal totalExpense = cashFlowData.stream()
+                .filter(cashFlow ->
+                        cashFlow.getCashFlowType().equals("EXPENSE") && expenseParticularTypes.contains(cashFlow.getParticularType()))
+                .map(LoanCashFlowData::getMonth0)
+                .reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+
+        BigDecimal netCashFlow = totalIncome.subtract(totalExpense);
+        BigDecimal purchases = cashFlowData.stream()
+                .filter(cashFlow ->
+                        cashFlow.getCashFlowType().equals("EXPENSE") && cashFlow.getParticularType().equals("Purchases"))
+                .map(LoanCashFlowData::getMonth0)
+                .reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+
+        BigDecimal netMargin = netCashFlow.divide(purchases, mc);
+
+        BigDecimal rotation = netCashFlow.divide(financialRatioData.getInventoryStock(), mc);
+        BigDecimal liquidity = financialRatioData.getTotalCurrentAssets().divide(financialRatioData.getTotalShortTerm(), mc);
+        BigDecimal leverage = financialRatioData.getTotalShortTerm().divide(financialRatioData.getEquity(), mc);
+        BigDecimal capitalization = financialRatioData.getEquity().divide(financialRatioData.getTotalFixedAssets(), mc);
+        // BigDecimal dscr = financialRatioData.getEquity().divide(financialRatioData.getTotalFixedAssets(), mc);
+
+        financialRatioData.setNetMargin(netMargin);
+        financialRatioData.setRotation(rotation);
+        financialRatioData.setLiquidity(liquidity);
+        financialRatioData.setLeverage(leverage);
+        financialRatioData.setCapitalization(capitalization);
+    }
+    @Override
+    public LoanFinancialRatioData findLoanFinancialRatioDataByLoanId(Long loanId) {
+        this.context.authenticatedUser();
+        final LoanFinancialRatioMapper rm = new LoanFinancialRatioMapper();
+
+        final String sql = " SELECT loan_id, sum(cash) as cash, sum(inventory_stock) as inventory_stock, sum(receivables) as receivables, sum(chama_tontines) as chama_tontines," +
+                " sum(other_current_assets) as other_current_assets, sum(total_current_assets) as total_current_assets, " +
+                "  sum(goods_bought_on_credit) as goods_bought_on_credit, sum(any_other_pending_payables) as any_other_pending_payables, sum(total_short_term) as total_short_term," +
+                " sum(equipment_tools) as equipment_tools, sum(furniture) as furniture, sum(business_premises) as business_premises, " +
+                "  sum(other_fixed_assets) as other_fixed_assets, sum(total_fixed_assets) as total_fixed_assets, sum(total_assets) as total_assets, sum(equity) as equity," +
+                " sum(unsecured_loans) as unsecured_loans, sum(asset_financing) as asset_financing, sum(total_long_term) as total_long_term, " +
+                "  sum(total_liabilities) as total_liabilities, sum(bss_deposits) as bss_deposits, sum(bss_withdrawals) as bss_withdrawals," +
+                " sum(bss_monthly_turn_over) as bss_monthly_turn_over " +
+                "FROM loan_balancesheet " +
+                "WHERE loan_id= ? " +
+                "group by loan_id  ";
+
+        List<LoanFinancialRatioData> data = this.jdbcTemplate.query(sql, rm, loanId);
+        if (!data.isEmpty()) {
+            return data.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    private static final class LoanFinancialRatioMapper implements RowMapper<LoanFinancialRatioData> {
+
+        @Override
+        public LoanFinancialRatioData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+            final Long id = null;
+            final Long loanId = rs.getLong("loan_id");
+
+            final BigDecimal cash = rs.getBigDecimal("cash");
+            final BigDecimal inventory_stock = rs.getBigDecimal("inventory_stock");
+            final BigDecimal receivables = rs.getBigDecimal("receivables");
+            final BigDecimal chama_tontines = rs.getBigDecimal("chama_tontines");
+            final BigDecimal other_current_assets = rs.getBigDecimal("other_current_assets");
+            final BigDecimal total_current_assets = rs.getBigDecimal("total_current_assets");
+            final BigDecimal goods_bought_on_credit = rs.getBigDecimal("goods_bought_on_credit");
+            final BigDecimal any_other_pending_payables = rs.getBigDecimal("any_other_pending_payables");
+            final BigDecimal total_short_term = rs.getBigDecimal("total_short_term");
+            final BigDecimal equipment_tools = rs.getBigDecimal("equipment_tools");
+            final BigDecimal furniture = rs.getBigDecimal("furniture");
+            final BigDecimal business_premises = rs.getBigDecimal("business_premises");
+            final BigDecimal other_fixed_assets = rs.getBigDecimal("other_fixed_assets");
+            final BigDecimal total_fixed_assets = rs.getBigDecimal("total_fixed_assets");
+            final BigDecimal total_assets = rs.getBigDecimal("total_assets");
+            final BigDecimal equity = rs.getBigDecimal("equity");
+            final BigDecimal unsecured_loans = rs.getBigDecimal("unsecured_loans");
+            final BigDecimal asset_financing = rs.getBigDecimal("asset_financing");
+            final BigDecimal total_long_term = rs.getBigDecimal("total_long_term");
+            final BigDecimal total_liabilities = rs.getBigDecimal("total_liabilities");
+            final BigDecimal bss_deposits = rs.getBigDecimal("bss_deposits");
+            final BigDecimal bss_withdrawals = rs.getBigDecimal("bss_withdrawals");
+            final BigDecimal bss_monthly_turn_over = rs.getBigDecimal("bss_monthly_turn_over");
+
+            return new LoanFinancialRatioData(id, loanId, cash, inventory_stock, receivables, chama_tontines, other_current_assets, total_current_assets,
+                    goods_bought_on_credit, any_other_pending_payables, total_short_term, equipment_tools, furniture, business_premises, other_fixed_assets, total_fixed_assets,
+                    total_assets, equity, unsecured_loans, asset_financing,  total_long_term, total_liabilities, bss_deposits, bss_withdrawals, bss_monthly_turn_over);
         }
     }
 
