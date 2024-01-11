@@ -18,10 +18,28 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
+import java.math.BigDecimal;
+
 public final class LoanDecisionData {
 
     private Long loanId;
     private Long clientId;
     private Long loanStatus;
     private Long loanSubStatus;
+    private BigDecimal icReviewDecisionLevelOneRecommendedAmount;
+    private BigDecimal icReviewDecisionLevelTwoRecommendedAmount;
+    private BigDecimal icReviewDecisionLevelThreeRecommendedAmount;
+    private BigDecimal icReviewDecisionLevelFourRecommendedAmount;
+    private BigDecimal icReviewDecisionLevelFiveRecommendedAmount;
+
+    public LoanDecisionData(Long loanId, BigDecimal icReviewDecisionLevelOneRecommendedAmount, BigDecimal icReviewDecisionLevelTwoRecommendedAmount,
+                            BigDecimal icReviewDecisionLevelThreeRecommendedAmount, BigDecimal icReviewDecisionLevelFourRecommendedAmount,
+                            BigDecimal icReviewDecisionLevelFiveRecommendedAmount) {
+        this.loanId = loanId;
+        this.icReviewDecisionLevelOneRecommendedAmount = icReviewDecisionLevelOneRecommendedAmount;
+        this.icReviewDecisionLevelTwoRecommendedAmount = icReviewDecisionLevelTwoRecommendedAmount;
+        this.icReviewDecisionLevelThreeRecommendedAmount = icReviewDecisionLevelThreeRecommendedAmount;
+        this.icReviewDecisionLevelFourRecommendedAmount = icReviewDecisionLevelFourRecommendedAmount;
+        this.icReviewDecisionLevelFiveRecommendedAmount = icReviewDecisionLevelFiveRecommendedAmount;
+    }
 }
