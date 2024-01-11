@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -1260,7 +1261,8 @@ public final class LoanDecisionTransitionApiJsonValidator {
 
         final Set<String> reviewParameters = new HashSet<>(
                 Arrays.asList(LoanApiConstants.loanId, LoanApiConstants.icReviewOnDateParameterName, LoanApiConstants.noteParameterName,
-                        LoanApiConstants.localeParameterName, LoanApiConstants.dateFormatParameterName));
+                        LoanApiConstants.localeParameterName, LoanApiConstants.dateFormatParameterName, LoanApiConstants.icReviewRecommendedAmount,
+                        LoanApiConstants.icReviewTermFrequency, LoanApiConstants.icReviewTermPeriodFrequencyEnum));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, reviewParameters);
@@ -1272,7 +1274,12 @@ public final class LoanDecisionTransitionApiJsonValidator {
 
         final LocalDate icReviewOn = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.icReviewOnDateParameterName, element);
         baseDataValidator.reset().parameter(LoanApiConstants.icReviewOnDateParameterName).value(icReviewOn).notNull();
-
+        final BigDecimal icReviewRecommendedAmount = this.fromApiJsonHelper.extractBigDecimalNamed(LoanApiConstants.icReviewRecommendedAmount, element, Locale.US);
+        baseDataValidator.reset().parameter(LoanApiConstants.icReviewRecommendedAmount).value(icReviewRecommendedAmount).integerGreaterThanZero().notNull();
+        final Integer icReviewTermFrequency = this.fromApiJsonHelper.extractIntegerNamed(LoanApiConstants.icReviewTermFrequency, element, Locale.US);
+        baseDataValidator.reset().parameter(LoanApiConstants.icReviewTermFrequency).value(icReviewTermFrequency).integerGreaterThanZero().notNull();
+        final Integer icReviewTermPeriodFrequencyEnum = this.fromApiJsonHelper.extractIntegerNamed(LoanApiConstants.icReviewTermPeriodFrequencyEnum, element, Locale.US);
+        baseDataValidator.reset().parameter(LoanApiConstants.icReviewTermPeriodFrequencyEnum).value(icReviewTermPeriodFrequencyEnum).notNull();
         final String note = this.fromApiJsonHelper.extractStringNamed(LoanApiConstants.noteParameterName, element);
         baseDataValidator.reset().parameter(LoanApiConstants.noteParameterName).value(note).notExceedingLengthOf(1000).notNull();
 
