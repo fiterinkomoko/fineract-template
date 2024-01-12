@@ -114,6 +114,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanApprovalMatrix;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanApprovalMatrixRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCashFlowProjection;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCashFlowProjectionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
@@ -2269,34 +2270,65 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             throw new GeneralPlatformDomainRuleException("error.msg.loan.not.in.due.diligence.stage.so.cashflow.cannot.be.generated",
                     "Loan is not in Due Diligence Stage so CashFlow cannot be generated");
         }
-        List<LoanCashFlowData> cashFlowData = this.loanReadPlatformService.retrieveCashFlow(loanId);
-        if (CollectionUtils.isEmpty(cashFlowData)) {
+        List<LoanCashFlowData> loanCashFlowDataList = this.loanReadPlatformService.retrieveCashFlow(loanId);
+        if (CollectionUtils.isEmpty(loanCashFlowDataList)) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.cashflow.data.is.not.available.so.cashflow.cannot.be.generated",
                     "Loan CashFlow data is not available so CashFlow cannot be generated");
         }
-        validateCashFlowType(cashFlowData, "Sales Income");
-        validateCashFlowType(cashFlowData, "Purchases");
+        validateCashFlowType(loanCashFlowDataList, "Sales Income");
+        validateCashFlowType(loanCashFlowDataList, "Purchases");
+
         Integer projectionRate = this.loanReadPlatformService.retrieveProjectionRate(loanId);
         if (projectionRate == null || projectionRate <= 0) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.projection.rate.is.not.available.so.cashflow.cannot.be.generated",
                     "Loan Projection Rate is not available so CashFlow cannot be generated");
         }
-        LOG.info("projectionRate: " + projectionRate);
-        loan.getRepaymentScheduleInstallments().forEach(installment -> {
-            LOG.info("installment id: " + installment.getId() + " Month " + installment.getInstallmentNumber());
 
-            cashFlowData.forEach(cashFlow -> {
+        LOG.info("projectionRate: " + projectionRate);
+
+        BigDecimal previousSales = BigDecimal.ZERO;
+        BigDecimal previousPurchases = BigDecimal.ZERO;
+
+        BigDecimal salesComputed;
+        BigDecimal purchaseComputed;
+
+        for (LoanRepaymentScheduleInstallment installment : loan.getRepaymentScheduleInstallments()) {
+            LOG.info("installment id: " + installment.getId() + " Month " + installment.getInstallmentNumber());
+            for (LoanCashFlowData cashFlow : loanCashFlowDataList) {
 
                 if (cashFlow.getCashFlowType().equals("INCOME") && cashFlow.getParticularType().equals("Sales Income")) {
                     LOG.info("INCOME -- cashflow Data :- " + cashFlow.getName() + " " + cashFlow.getMonth0() + "    * *"
                             + cashFlow.getCashFlowType());
+                    if (installment.getInstallmentNumber() == 1) {
+                        salesComputed = computeProjection(projectionRate, cashFlow.getMonth0());
+                        previousSales = salesComputed;
+                    } else {
+                        salesComputed = computeProjection(projectionRate, previousSales);
+                        previousSales = salesComputed;
+                    }
+                    saveCashFlowProjection(projectionRate, salesComputed, installment, cashFlow);
+
+                    LOG.info("INCOME -- Computed :- " + salesComputed + "Previous sales" + previousSales);
                 }
+
                 if (cashFlow.getCashFlowType().equals("EXPENSE") && cashFlow.getParticularType().equals("Purchases")) {
                     LOG.info("EXPENSE -- cashflow Data :- " + cashFlow.getName() + " " + cashFlow.getMonth0() + "    * *"
                             + cashFlow.getCashFlowType());
+
+                    if (installment.getInstallmentNumber() == 1) {
+                        purchaseComputed = computeProjection(projectionRate, cashFlow.getMonth0());
+                        previousPurchases = purchaseComputed;
+                    } else {
+                        purchaseComputed = computeProjection(projectionRate, previousPurchases);
+                        previousPurchases = purchaseComputed;
+                    }
+                    saveCashFlowProjection(projectionRate, purchaseComputed, installment, cashFlow);
+
+                    LOG.info("EXPENSE -- Computed :- " + purchaseComputed + "Previous purchase" + previousPurchases);
+
                 }
-            });
-        });
+            }
+        }
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(loan.getId()) //
@@ -2304,6 +2336,17 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 .withClientId(loan.getClientId()) //
                 .withGroupId(loan.getGroupId()) //
                 .withLoanId(loanId).build();
+    }
+
+    private void saveCashFlowProjection(Integer projectionRate, BigDecimal amount, LoanRepaymentScheduleInstallment installment,
+            LoanCashFlowData cashFlow) {
+        LoanCashFlowProjection projection = new LoanCashFlowProjection(installment, cashFlow.getId(), projectionRate, amount);
+        this.loanCashFlowProjectionRepository.saveAndFlush(projection);
+    }
+
+    @NotNull
+    private BigDecimal computeProjection(Integer projectionRate, BigDecimal amount) {
+        return amount.add(BigDecimal.valueOf(projectionRate).divide(BigDecimal.valueOf(100)).multiply(amount));
     }
 
     @Transactional
