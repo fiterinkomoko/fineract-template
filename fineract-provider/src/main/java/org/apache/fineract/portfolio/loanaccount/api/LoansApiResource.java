@@ -117,6 +117,8 @@ import org.apache.fineract.portfolio.loanaccount.data.GlimRepaymentTemplate;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowProjectionData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowReport;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanCollateralManagementData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDueDiligenceData;
@@ -285,7 +287,7 @@ public class LoansApiResource {
     private final ClientReadPlatformService clientReadPlatformService;
 
     private final DefaultToApiJsonSerializer<LoanTransactionData> loanTransactionApiJsonSerializer;
-    private final DefaultToApiJsonSerializer<LoanCashFlowData> loanCashFlowDataDefaultToApiJsonSerializer;
+    private final DefaultToApiJsonSerializer<LoanCashFlowReport> loanCashFlowDataDefaultToApiJsonSerializer;
     private final ConfigurationReadPlatformService configurationReadPlatformService;
 
     private final DefaultToApiJsonSerializer<LoanSchedulePeriodData> loanRepaymentScheduleInstallmentDataDefaultToApiJsonSerializer;
@@ -318,7 +320,7 @@ public class LoansApiResource {
             DefaultToApiJsonSerializer<LoanTransactionData> loanTransactionApiJsonSerializer,
             final ConfigurationReadPlatformService configurationReadPlatformService,
             final DefaultToApiJsonSerializer<LoanSchedulePeriodData> loanRepaymentScheduleInstallmentDataDefaultToApiJsonSerializer,
-            final DefaultToApiJsonSerializer<LoanCashFlowData> loanCashFlowDataDefaultToApiJsonSerializer) {
+            final DefaultToApiJsonSerializer<LoanCashFlowReport> loanCashFlowDataDefaultToApiJsonSerializer) {
         this.context = context;
         this.loanReadPlatformService = loanReadPlatformService;
         this.loanProductReadPlatformService = loanProductReadPlatformService;
@@ -1249,11 +1251,16 @@ public class LoansApiResource {
             @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        LoanCashFlowReport loanCashFlowReport = new LoanCashFlowReport();
 
         List<LoanCashFlowData> cashFlowData = this.loanReadPlatformService.retrieveCashFlow(loanId);
+        List<LoanCashFlowProjectionData> cashFlowProjectionDataList = this.loanReadPlatformService.retrieveCashFlowProjection(loanId);
+
+        loanCashFlowReport.setCashFlowDataList(cashFlowData);
+        loanCashFlowReport.setCashFlowProjectionDataList(cashFlowProjectionDataList);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.loanCashFlowDataDefaultToApiJsonSerializer.serialize(settings, cashFlowData, this.loanDataParameters);
+        return this.loanCashFlowDataDefaultToApiJsonSerializer.serialize(settings, loanCashFlowReport, this.loanDataParameters);
     }
 
 }
