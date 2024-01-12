@@ -114,6 +114,7 @@ import org.apache.fineract.portfolio.loanaccount.data.PaidInAdvanceData;
 import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanDecisionState;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDueDiligenceInfo;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDueDiligenceInfoRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -3270,12 +3271,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     "Financial Ratio report cannot be created. Balance Sheet data not available.");
         }
 
-        generateFinancialRatioData(cashFlowData, financialRatioData);
+        Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+        generateFinancialRatioData(loan, cashFlowData, financialRatioData);
 
         return financialRatioData;
     }
 
-    private void generateFinancialRatioData(List<LoanCashFlowData> cashFlowData, LoanFinancialRatioData financialRatioData) {
+    private void generateFinancialRatioData(Loan loan, List<LoanCashFlowData> cashFlowData, LoanFinancialRatioData financialRatioData) {
         final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
         final MathContext mc = new MathContext(8, roundingMode);
         List<String> incomeParticularTypes = Arrays.asList("Sales Income", "Other Income");
@@ -3305,30 +3307,36 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         BigDecimal liquidity = financialRatioData.getTotalCurrentAssets().divide(financialRatioData.getTotalShortTerm(), mc);
         BigDecimal leverage = financialRatioData.getTotalShortTerm().divide(financialRatioData.getEquity(), mc);
         BigDecimal capitalization = financialRatioData.getEquity().divide(financialRatioData.getTotalFixedAssets(), mc);
-        // BigDecimal dscr = financialRatioData.getEquity().divide(financialRatioData.getTotalFixedAssets(), mc);
+        BigDecimal dscr = null;
+        if (loan.getLoanDecisionState().equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())) {
+            LoanRepaymentScheduleInstallment installment = loan.getRepaymentScheduleInstallments().get(0);
+            BigDecimal emi = installment.getTotalPrincipalAndInterest(loan.getCurrency()).getAmount();
+             dscr = emi.divide(netCashFlow, mc);
+        }
 
         financialRatioData.setNetMargin(netMargin);
         financialRatioData.setRotation(rotation);
         financialRatioData.setLiquidity(liquidity);
         financialRatioData.setLeverage(leverage);
         financialRatioData.setCapitalization(capitalization);
+        financialRatioData.setDscr(dscr);
     }
     @Override
     public LoanFinancialRatioData findLoanFinancialRatioDataByLoanId(Long loanId) {
         this.context.authenticatedUser();
         final LoanFinancialRatioMapper rm = new LoanFinancialRatioMapper();
 
-        final String sql = " SELECT loan_id, sum(cash) as cash, sum(inventory_stock) as inventory_stock, sum(receivables) as receivables, sum(chama_tontines) as chama_tontines," +
-                " sum(other_current_assets) as other_current_assets, sum(total_current_assets) as total_current_assets, " +
-                "  sum(goods_bought_on_credit) as goods_bought_on_credit, sum(any_other_pending_payables) as any_other_pending_payables, sum(total_short_term) as total_short_term," +
-                " sum(equipment_tools) as equipment_tools, sum(furniture) as furniture, sum(business_premises) as business_premises, " +
-                "  sum(other_fixed_assets) as other_fixed_assets, sum(total_fixed_assets) as total_fixed_assets, sum(total_assets) as total_assets, sum(equity) as equity," +
-                " sum(unsecured_loans) as unsecured_loans, sum(asset_financing) as asset_financing, sum(total_long_term) as total_long_term, " +
-                "  sum(total_liabilities) as total_liabilities, sum(bss_deposits) as bss_deposits, sum(bss_withdrawals) as bss_withdrawals," +
-                " sum(bss_monthly_turn_over) as bss_monthly_turn_over " +
-                "FROM loan_balancesheet " +
-                "WHERE loan_id= ? " +
-                "group by loan_id  ";
+        final String sql = "select id, loan_id, cash as cash, inventory_stock as inventory_stock, receivables as receivables, chama_tontines as chama_tontines, " +
+                "  other_current_assets as other_current_assets, total_current_assets as total_current_assets,  " +
+                "  goods_bought_on_credit as goods_bought_on_credit, any_other_pending_payables as any_other_pending_payables, total_short_term as total_short_term, " +
+                "  equipment_tools as equipment_tools, furniture as furniture, business_premises as business_premises,  " +
+                "  other_fixed_assets as other_fixed_assets, total_fixed_assets as total_fixed_assets, total_assets as total_assets, equity as equity, " +
+                "  unsecured_loans as unsecured_loans, asset_financing as asset_financing, total_long_term as total_long_term,  " +
+                "  total_liabilities as total_liabilities, bss_deposits as bss_deposits, bss_withdrawals as bss_withdrawals, " +
+                "  bss_monthly_turn_over as bss_monthly_turn_over  " +
+                " FROM loan_balancesheet  " +
+                " WHERE loan_id= ? " +
+                " order by id desc limit 1 ";
 
         List<LoanFinancialRatioData> data = this.jdbcTemplate.query(sql, rm, loanId);
         if (!data.isEmpty()) {
