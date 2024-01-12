@@ -105,6 +105,7 @@ import org.apache.fineract.portfolio.group.exception.GroupMemberNotFoundInGSIMEx
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowProjectionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
@@ -2283,7 +2284,13 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             throw new GeneralPlatformDomainRuleException("error.msg.loan.projection.rate.is.not.available.so.cashflow.cannot.be.generated",
                     "Loan Projection Rate is not available so CashFlow cannot be generated");
         }
+        List<LoanCashFlowProjectionData> cashFlowProjectionList = this.loanReadPlatformService.retrieveCashFlowProjection(loanId);
 
+        if (!CollectionUtils.isEmpty(cashFlowProjectionList)) {
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.loan.cashflow.projection.data.is.already.available.so.cashflow.cannot.be.regenerated",
+                    "Loan CashFlow Projection data is already Generated so CashFlow cannot be regenerated");
+        }
         LOG.info("projectionRate: " + projectionRate);
 
         BigDecimal previousSales = BigDecimal.ZERO;

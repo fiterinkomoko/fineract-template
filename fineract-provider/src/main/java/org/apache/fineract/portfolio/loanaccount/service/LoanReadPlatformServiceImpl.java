@@ -93,6 +93,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApplicationTimelineData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowProjectionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDueDiligenceData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInterestRecalculationData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentScheduleInstallmentData;
@@ -3157,6 +3158,16 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         return this.jdbcTemplate.queryForObject(sql, new Object[] { loanId }, Integer.class);
     }
 
+    @Override
+    public List<LoanCashFlowProjectionData> retrieveCashFlowProjection(Long loanId) {
+        this.context.authenticatedUser();
+        final LoanCashFlowProjectionMapper rm = new LoanCashFlowProjectionMapper(sqlGenerator);
+
+        final String sql = "select " + rm.loanCashFlowProjection();
+
+        return this.jdbcTemplate.query(sql, rm, loanId); // NOSONAR
+    }
+
     private static final class LoanCashFlowMapper implements RowMapper<LoanCashFlowData> {
 
         private final DatabaseSpecificSQLGenerator sqlGenerator;
@@ -3193,6 +3204,44 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final BigDecimal month0 = rs.getBigDecimal("month0");
 
             return new LoanCashFlowData(id, loanId, cashFlowType, particularType, name, previousMonth2, previousMonth1, month0);
+        }
+    }
+
+    private static final class LoanCashFlowProjectionMapper implements RowMapper<LoanCashFlowProjectionData> {
+
+        private final DatabaseSpecificSQLGenerator sqlGenerator;
+
+        LoanCashFlowProjectionMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
+            this.sqlGenerator = sqlGenerator;
+        }
+
+        public String loanCashFlowProjection() {
+            return "        proj.id AS id," + "       proj.cashflow_info_id AS cashflowInfoId, "
+                    + "       proj.amount           AS amount, " + "       proj.schedule_id      AS scheduleInstallmentId, "
+                    + "       proj.projection_rate      AS projectionRate, " + "       info.loan_id          AS loanId, "
+                    + "        cashFlowT.code_value   as cashFlowType, " + "       particularT.code_value as particularType, "
+                    + "       info.\"Name\"              as name " + " FROM m_loan_cashflow_projection proj "
+                    + "         INNER JOIN loan_cashflow_information info ON proj.cashflow_info_id = info.id "
+                    + "         INNER JOIN m_code_value cashFlowT ON info.\"CashFlowType_cd_CashFlowType\" = cashFlowT.id "
+                    + "         INNER JOIN m_code_value particularT ON info.\"ParticularType_cd_ParticularType\" = particularT.id "
+                    + " WHERE info.loan_id = ? " + " ORDER BY proj.schedule_id ASC ";
+        }
+
+        @Override
+        public LoanCashFlowProjectionData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+            final Long id = rs.getLong("id");
+            final Long cashflowInfoId = rs.getLong("cashflowInfoId");
+            final Long scheduleInstallmentId = rs.getLong("scheduleInstallmentId");
+            final Long projectionRate = rs.getLong("projectionRate");
+            final Long loanId = rs.getLong("loanId");
+            final String cashFlowType = rs.getString("cashFlowType");
+            final String particularType = rs.getString("particularType");
+            final String name = rs.getString("name");
+
+            final BigDecimal amount = rs.getBigDecimal("amount");
+
+            return new LoanCashFlowProjectionData(id, cashflowInfoId, scheduleInstallmentId, projectionRate, loanId, cashFlowType,
+                    particularType, name, amount);
         }
     }
 
