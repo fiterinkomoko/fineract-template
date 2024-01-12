@@ -27,8 +27,8 @@
             </not>
         </preConditions>
         <addColumn tableName="m_product_loan">
-            <column name="allowable_dscr" type="DOUBLE">
-                <constraints nullable="true"/>
+            <column name="allowable_dscr" type="DOUBLE" defaultValueNumeric="0.0">
+                <constraints nullable="false"/>
             </column>
         </addColumn>
     </changeSet>
