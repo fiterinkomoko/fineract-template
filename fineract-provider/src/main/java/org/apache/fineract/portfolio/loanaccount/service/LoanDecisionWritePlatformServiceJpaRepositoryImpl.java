@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
@@ -34,6 +35,7 @@ import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRu
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
 import org.apache.fineract.infrastructure.documentmanagement.service.DocumentReadPlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApprovalMatrixConstants;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -305,6 +307,9 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
 
         LocalDate icReviewOn = command.localDateValueOfParameterNamed(LoanApiConstants.icReviewOnDateParameterName);
+        final BigDecimal recommendedAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.icReviewRecommendedAmount);
+        final Integer termFrequency = command.integerValueOfParameterNamed(LoanApiConstants.icReviewTermFrequency);
+        final Integer termPeriodFrequencyEnum = command.integerValueOfParameterNamed(LoanApiConstants.icReviewTermPeriodFrequencyEnum);
 
         loanDecisionStateUtilService.validateIcReviewDecisionLevelOneBusinessRule(command, loan, loanDecision, icReviewOn);
         LoanApprovalMatrix approvalMatrix = this.loanApprovalMatrixRepository.findLoanApprovalMatrixByCurrency(loan.getCurrencyCode());
@@ -330,7 +335,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                 LoanDecisionState.IC_REVIEW_LEVEL_ONE);
 
         LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelOneFrom(command, currentUser, loanDecision, false,
-                icReviewOn);
+                icReviewOn, recommendedAmount, termFrequency, termPeriodFrequencyEnum);
         LoanDecision savedObj = loanDecisionRepository.saveAndFlush(loanDecisionObj);
 
         Loan loanObj = loan;
@@ -339,7 +344,9 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         if (StringUtils.isNotBlank(loanDecisionObj.getIcReviewDecisionLevelOneNote())) {
             final Note note = Note.loanNote(loanObj,
-                    "Approve IC Review-Decision Level One : " + loanDecisionObj.getIcReviewDecisionLevelOneNote());
+                    "Approve IC Review-Decision Level One : " + loanDecisionObj.getIcReviewDecisionLevelOneNote() + " Recommended Amount : "
+                            + recommendedAmount + " " + loan.getCurrencyCode() + " Loan Term : " + termFrequency + " "
+                            + PeriodFrequencyType.fromInt(termPeriodFrequencyEnum));
             this.noteRepository.save(note);
         }
 
@@ -361,7 +368,11 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
         final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
+
         LocalDate icReviewOn = command.localDateValueOfParameterNamed(LoanApiConstants.icReviewOnDateParameterName);
+        final BigDecimal recommendedAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.icReviewRecommendedAmount);
+        final Integer termFrequency = command.integerValueOfParameterNamed(LoanApiConstants.icReviewTermFrequency);
+        final Integer termPeriodFrequencyEnum = command.integerValueOfParameterNamed(LoanApiConstants.icReviewTermPeriodFrequencyEnum);
 
         loanDecisionStateUtilService.validateIcReviewDecisionLevelTwoBusinessRule(command, loan, loanDecision, icReviewOn);
         LoanApprovalMatrix approvalMatrix = this.loanApprovalMatrixRepository.findLoanApprovalMatrixByCurrency(loan.getCurrencyCode());
@@ -387,7 +398,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                 LoanDecisionState.IC_REVIEW_LEVEL_TWO);
 
         LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelTwoFrom(command, currentUser, loanDecision,
-                Boolean.FALSE, icReviewOn);
+                Boolean.FALSE, icReviewOn, recommendedAmount, termFrequency, termPeriodFrequencyEnum);
         LoanDecision savedObj = loanDecisionRepository.saveAndFlush(loanDecisionObj);
 
         Loan loanObj = loan;
@@ -396,7 +407,9 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         if (StringUtils.isNotBlank(loanDecisionObj.getIcReviewDecisionLevelTwoNote())) {
             final Note note = Note.loanNote(loanObj,
-                    "Approve IC Review-Decision Level Two : " + loanDecisionObj.getIcReviewDecisionLevelTwoNote());
+                    "Approve IC Review-Decision Level Two : " + loanDecisionObj.getIcReviewDecisionLevelTwoNote() + " Recommended Amount : "
+                            + recommendedAmount + " " + loan.getCurrencyCode() + " Loan Term : " + termFrequency + " "
+                            + PeriodFrequencyType.fromInt(termPeriodFrequencyEnum));
             this.noteRepository.save(note);
         }
 
@@ -418,7 +431,12 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
         final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
+
         LocalDate icReviewOn = command.localDateValueOfParameterNamed(LoanApiConstants.icReviewOnDateParameterName);
+        final BigDecimal recommendedAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.icReviewRecommendedAmount);
+        final Integer termFrequency = command.integerValueOfParameterNamed(LoanApiConstants.icReviewTermFrequency);
+        final Integer termPeriodFrequencyEnum = command.integerValueOfParameterNamed(LoanApiConstants.icReviewTermPeriodFrequencyEnum);
+
         loanDecisionStateUtilService.validateIcReviewDecisionLevelThreeBusinessRule(command, loan, loanDecision, icReviewOn);
         LoanApprovalMatrix approvalMatrix = this.loanApprovalMatrixRepository.findLoanApprovalMatrixByCurrency(loan.getCurrencyCode());
 
@@ -443,7 +461,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                 LoanDecisionState.IC_REVIEW_LEVEL_THREE);
 
         LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelThreeFrom(command, currentUser, loanDecision,
-                Boolean.FALSE, icReviewOn);
+                Boolean.FALSE, icReviewOn, recommendedAmount, termFrequency, termPeriodFrequencyEnum);
         LoanDecision savedObj = loanDecisionRepository.saveAndFlush(loanDecisionObj);
 
         Loan loanObj = loan;
@@ -452,7 +470,9 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         if (StringUtils.isNotBlank(loanDecisionObj.getIcReviewDecisionLevelThreeNote())) {
             final Note note = Note.loanNote(loanObj,
-                    "Approve IC Review-Decision Level Three : " + loanDecisionObj.getIcReviewDecisionLevelThreeNote());
+                    "Approve IC Review-Decision Level Three : " + loanDecisionObj.getIcReviewDecisionLevelThreeNote()
+                            + " Recommended Amount : " + recommendedAmount + " " + loan.getCurrencyCode() + " Loan Term : " + termFrequency
+                            + " " + PeriodFrequencyType.fromInt(termPeriodFrequencyEnum));
             this.noteRepository.save(note);
         }
 
@@ -474,7 +494,11 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
         final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
+
         LocalDate icReviewOn = command.localDateValueOfParameterNamed(LoanApiConstants.icReviewOnDateParameterName);
+        final BigDecimal recommendedAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.icReviewRecommendedAmount);
+        final Integer termFrequency = command.integerValueOfParameterNamed(LoanApiConstants.icReviewTermFrequency);
+        final Integer termPeriodFrequencyEnum = command.integerValueOfParameterNamed(LoanApiConstants.icReviewTermPeriodFrequencyEnum);
 
         loanDecisionStateUtilService.validateIcReviewDecisionLevelFourBusinessRule(command, loan, loanDecision, icReviewOn);
         LoanApprovalMatrix approvalMatrix = this.loanApprovalMatrixRepository.findLoanApprovalMatrixByCurrency(loan.getCurrencyCode());
@@ -500,7 +524,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                 LoanDecisionState.IC_REVIEW_LEVEL_FOUR);
 
         LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelFourFrom(command, currentUser, loanDecision,
-                Boolean.FALSE, icReviewOn);
+                Boolean.FALSE, icReviewOn, recommendedAmount, termFrequency, termPeriodFrequencyEnum);
         LoanDecision savedObj = loanDecisionRepository.saveAndFlush(loanDecisionObj);
 
         Loan loanObj = loan;
@@ -509,7 +533,9 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         if (StringUtils.isNotBlank(loanDecisionObj.getIcReviewDecisionLevelFourNote())) {
             final Note note = Note.loanNote(loanObj,
-                    "Approve IC Review-Decision Level Four : " + loanDecisionObj.getIcReviewDecisionLevelFourNote());
+                    "Approve IC Review-Decision Level Four : " + loanDecisionObj.getIcReviewDecisionLevelFourNote()
+                            + " Recommended Amount : " + recommendedAmount + " " + loan.getCurrencyCode() + " Loan Term : " + termFrequency
+                            + " " + PeriodFrequencyType.fromInt(termPeriodFrequencyEnum));
             this.noteRepository.save(note);
         }
 
@@ -531,7 +557,11 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
         final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
+
         LocalDate icReviewOn = command.localDateValueOfParameterNamed(LoanApiConstants.icReviewOnDateParameterName);
+        final BigDecimal recommendedAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.icReviewRecommendedAmount);
+        final Integer termFrequency = command.integerValueOfParameterNamed(LoanApiConstants.icReviewTermFrequency);
+        final Integer termPeriodFrequencyEnum = command.integerValueOfParameterNamed(LoanApiConstants.icReviewTermPeriodFrequencyEnum);
 
         loanDecisionStateUtilService.validateIcReviewDecisionLevelFiveBusinessRule(command, loan, loanDecision, icReviewOn);
         LoanApprovalMatrix approvalMatrix = this.loanApprovalMatrixRepository.findLoanApprovalMatrixByCurrency(loan.getCurrencyCode());
@@ -554,7 +584,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                 isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_FIVE);
 
         LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelFiveFrom(command, currentUser, loanDecision,
-                Boolean.FALSE, icReviewOn);
+                Boolean.FALSE, icReviewOn, recommendedAmount, termFrequency, termPeriodFrequencyEnum);
         LoanDecision savedObj = loanDecisionRepository.saveAndFlush(loanDecisionObj);
 
         Loan loanObj = loan;
@@ -563,7 +593,9 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         if (StringUtils.isNotBlank(loanDecisionObj.getIcReviewDecisionLevelFiveNote())) {
             final Note note = Note.loanNote(loanObj,
-                    "Approve IC Review-Decision Level Five : " + loanDecisionObj.getIcReviewDecisionLevelFiveNote());
+                    "Approve IC Review-Decision Level Five : " + loanDecisionObj.getIcReviewDecisionLevelFiveNote()
+                            + " Recommended Amount : " + recommendedAmount + " " + loan.getCurrencyCode() + " Loan Term : " + termFrequency
+                            + " " + PeriodFrequencyType.fromInt(termPeriodFrequencyEnum));
             this.noteRepository.save(note);
         }
 

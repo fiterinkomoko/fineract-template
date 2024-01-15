@@ -174,4 +174,7 @@ public interface LoanApiConstants {
     String withdrawFromRedraw = "withdrawFromRedraw";
     String loanEntityType = "loans";
     String loanDocumentTypeContract = "Contract";
+    String icReviewRecommendedAmount = "icReviewRecommendedAmount";
+    String icReviewTermFrequency = "icReviewTermFrequency";
+    String icReviewTermPeriodFrequencyEnum = "icReviewTermPeriodFrequencyEnum";
 }

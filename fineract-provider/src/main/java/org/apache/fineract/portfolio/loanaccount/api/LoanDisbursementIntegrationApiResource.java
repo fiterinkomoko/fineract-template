@@ -39,7 +39,7 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/loans/{loanId}/disbursements-integration")
+@Path("/loans/{accountNo}/disbursements-integration")
 @Component
 @Scope("singleton")
 public class LoanDisbursementIntegrationApiResource {
