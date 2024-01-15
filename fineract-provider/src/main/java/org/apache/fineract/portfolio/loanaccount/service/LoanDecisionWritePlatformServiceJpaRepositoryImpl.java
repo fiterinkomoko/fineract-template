@@ -619,7 +619,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                     "Loan contract document not found. Please upload loan document with type Contract");
         }
 
-        this.loanDecisionTransitionApiJsonValidator.validateIcReviewStage(command.json());
+        this.loanDecisionTransitionApiJsonValidator.validatePrepareAndSignContractStage(command.json());
 
         final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
         final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
