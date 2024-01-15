@@ -3396,7 +3396,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + "         INNER JOIN loan_cashflow_information info ON proj.cashflow_info_id = info.id "
                     + "         INNER JOIN m_code_value cashFlowT ON info.\"CashFlowType_cd_CashFlowType\" = cashFlowT.id "
                     + "         INNER JOIN m_code_value particularT ON info.\"ParticularType_cd_ParticularType\" = particularT.id "
-                    + " WHERE info.loan_id = ? " + " ORDER BY proj.schedule_id ASC ";
+                    + " WHERE info.loan_id = ? " + " ORDER BY proj.id ASC ";
         }
 
         @Override
