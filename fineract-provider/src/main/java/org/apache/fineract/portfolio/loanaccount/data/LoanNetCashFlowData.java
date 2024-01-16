@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
-import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -30,6 +29,5 @@ public final class LoanNetCashFlowData {
     private BigDecimal previousMonth2;
     private BigDecimal previousMonth1;
     private BigDecimal month0;
-    List<LoanCashFlowProjectionData> netProfitCashFlowProjectionDataList;
 
 }
