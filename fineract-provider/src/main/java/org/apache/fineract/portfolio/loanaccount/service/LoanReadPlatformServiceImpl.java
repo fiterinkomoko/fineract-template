@@ -3184,17 +3184,17 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
 
         public String loanCashFlow() {
-            return "                            cf.id                                           as id,          "
-                    + "                           cf.loan_id                                      as loanId,  "
-                    + "                           cashFlowT.code_value                            as cashFlowType,"
-                    + "                           particularT.code_value                          as particularType,"
-                    + "                           cf.\"Name\"                                     as name,"
-                    + "                           cf.\"PreviousMonth2\"                           as previousMonth2,"
-                    + "                           cf.\"PreviousMonth1\"                           as previousMonth1,"
-                    + "                           cf.\"Month0\"                                   as month0"
+            return "   cf.id as id, "
+                    + " cf.loan_id as loanId,  "
+                    + " cashFlowT.code_value as cashFlowType,"
+                    + " particularT.code_value as particularType,"
+                    + " cf." + sqlGenerator.escape("Name") + " as name,"
+                    + " cf." + sqlGenerator.escape("PreviousMonth2") + " as previousMonth2,"
+                    + " cf." + sqlGenerator.escape("PreviousMonth1") + " as previousMonth1,"
+                    + " cf." + sqlGenerator.escape("Month0") + " as month0 "
                     + "  FROM loan_cashflow_information cf"
-                    + "  INNER JOIN m_code_value cashFlowT ON cf.\"CashFlowType_cd_CashFlowType\"   = cashFlowT.id"
-                    + "  INNER JOIN m_code_value particularT ON cf.\"ParticularType_cd_ParticularType\"   = particularT.id\n"
+                    + "  INNER JOIN m_code_value cashFlowT ON cf." + sqlGenerator.escape("CashFlowType_cd_CashFlowType") + "   = cashFlowT.id"
+                    + "  INNER JOIN m_code_value particularT ON cf." + sqlGenerator.escape("ParticularType_cd_ParticularType") + "   = particularT.id"
                     + "  WHERE loan_id = ? ";
         }
 
