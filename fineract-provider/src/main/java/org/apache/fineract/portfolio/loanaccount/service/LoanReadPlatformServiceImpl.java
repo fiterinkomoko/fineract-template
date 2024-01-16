@@ -98,10 +98,12 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanApplicationTimelineDat
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowProjectionData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowReport;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDecisionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDueDiligenceData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanFinancialRatioData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInterestRecalculationData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanNetCashFlowData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentScheduleInstallmentData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanStatusEnumData;
@@ -732,7 +734,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " l.total_recovered_derived as totalRecovered" + ", topuploan.account_no as closureLoanAccountNo, "
                     + " topup.topup_amount as topupAmount ,l.department_cv_id as departmentId,departmentV.code_value as departmentCode, "
                     + " ds.loan_decision_state as loanDecisionState , ds.next_loan_ic_review_decision_state as nextLoanIcReviewDecisionState, "
-                    + " l.description as description , l.kiva_id as kivaId , l.kiva_uuid as kivaUUId  " + " from m_loan l" //
+                    + " l.description as description , l.kiva_id as kivaId , l.kiva_uuid as kivaUUId , lp.allowable_dscr as allowableDscr "
+                    + " from m_loan l" //
                     + " join m_product_loan lp on lp.id = l.product_id" //
                     + " left join m_loan_recalculation_details lir on lir.loan_id = l.id " + " join m_currency rc on rc."
                     + sqlGenerator.escape("code") + " = l.currency_code" //
@@ -775,6 +778,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String description = rs.getString("description");
             final String kivaId = rs.getString("kivaId");
             final String kivaUUId = rs.getString("kivaUUId");
+            final Double allowableDscr = rs.getDouble("allowableDscr");
 
             final Long clientId = JdbcSupport.getLong(rs, "clientId");
             final String clientAccountNo = rs.getString("clientAccountNo");
@@ -1105,6 +1109,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             loanAccountData.setDescription(description);
             loanAccountData.setKivaId(kivaId);
             loanAccountData.setKivaUUId(kivaUUId);
+            loanAccountData.setAllowableDscr(allowableDscr);
             return loanAccountData;
         }
     }
@@ -3175,6 +3180,20 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         return this.jdbcTemplate.query(sql, rm, loanId); // NOSONAR
     }
 
+    @Override
+    public LoanCashFlowReport retrieveCashFlowReport(Long loanId) {
+        LoanCashFlowReport loanCashFlowReport = new LoanCashFlowReport();
+        LoanNetCashFlowData netCashFlowData = new LoanNetCashFlowData();
+
+        List<LoanCashFlowData> cashFlowData = this.retrieveCashFlow(loanId);
+        List<LoanCashFlowProjectionData> cashFlowProjectionDataList = this.retrieveCashFlowProjection(loanId);
+
+        loanCashFlowReport.setCashFlowDataList(cashFlowData);
+        loanCashFlowReport.setCashFlowProjectionDataList(cashFlowProjectionDataList);
+        loanCashFlowReport.setNetCashFlowData(generateNetCashFlow(cashFlowData, netCashFlowData));
+        return loanCashFlowReport;
+    }
+
     private static final class LoanCashFlowMapper implements RowMapper<LoanCashFlowData> {
 
         private final DatabaseSpecificSQLGenerator sqlGenerator;
@@ -3415,6 +3434,42 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             return new LoanCashFlowProjectionData(id, cashflowInfoId, scheduleInstallmentId, projectionRate, loanId, cashFlowType,
                     particularType, name, amount);
         }
+    }
+
+    private LoanNetCashFlowData generateNetCashFlow(List<LoanCashFlowData> cashFlowData, LoanNetCashFlowData netCashFlowData) {
+
+        List<String> incomeParticularTypes = Arrays.asList("Sales Income", "Other Income");
+        List<String> expenseParticularTypes = Arrays.asList("Purchases", "Business Expenses", "Household Expenses");
+
+        BigDecimal totalIncomeMonth0 = cashFlowData.stream().filter(
+                cashFlow -> cashFlow.getCashFlowType().equals("INCOME") && incomeParticularTypes.contains(cashFlow.getParticularType()))
+                .map(LoanCashFlowData::getMonth0).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+
+        BigDecimal totalExpenseMonth0 = cashFlowData.stream().filter(
+                cashFlow -> cashFlow.getCashFlowType().equals("EXPENSE") && expenseParticularTypes.contains(cashFlow.getParticularType()))
+                .map(LoanCashFlowData::getMonth0).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+
+        BigDecimal totalIncomePreviousMonth1 = cashFlowData.stream().filter(
+                cashFlow -> cashFlow.getCashFlowType().equals("INCOME") && incomeParticularTypes.contains(cashFlow.getParticularType()))
+                .map(LoanCashFlowData::getPreviousMonth1).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+
+        BigDecimal totalExpensePreviousMonth1 = cashFlowData.stream().filter(
+                cashFlow -> cashFlow.getCashFlowType().equals("EXPENSE") && expenseParticularTypes.contains(cashFlow.getParticularType()))
+                .map(LoanCashFlowData::getPreviousMonth1).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+
+        BigDecimal totalIncomePreviousMonth2 = cashFlowData.stream().filter(
+                cashFlow -> cashFlow.getCashFlowType().equals("INCOME") && incomeParticularTypes.contains(cashFlow.getParticularType()))
+                .map(LoanCashFlowData::getPreviousMonth2).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+
+        BigDecimal totalExpensePreviousMonth2 = cashFlowData.stream().filter(
+                cashFlow -> cashFlow.getCashFlowType().equals("EXPENSE") && expenseParticularTypes.contains(cashFlow.getParticularType()))
+                .map(LoanCashFlowData::getPreviousMonth2).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+
+        netCashFlowData.setMonth0(totalIncomeMonth0.subtract(totalExpenseMonth0));
+        netCashFlowData.setPreviousMonth1(totalIncomePreviousMonth1.subtract(totalExpensePreviousMonth1));
+        netCashFlowData.setPreviousMonth2(totalIncomePreviousMonth2.subtract(totalExpensePreviousMonth2));
+
+        return netCashFlowData;
     }
 
 }

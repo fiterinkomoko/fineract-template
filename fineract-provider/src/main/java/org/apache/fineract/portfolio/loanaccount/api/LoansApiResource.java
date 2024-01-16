@@ -116,8 +116,6 @@ import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.apache.fineract.portfolio.loanaccount.data.GlimRepaymentTemplate;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowProjectionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowReport;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanCollateralManagementData;
@@ -1255,13 +1253,8 @@ public class LoansApiResource {
             @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
-        LoanCashFlowReport loanCashFlowReport = new LoanCashFlowReport();
 
-        List<LoanCashFlowData> cashFlowData = this.loanReadPlatformService.retrieveCashFlow(loanId);
-        List<LoanCashFlowProjectionData> cashFlowProjectionDataList = this.loanReadPlatformService.retrieveCashFlowProjection(loanId);
-
-        loanCashFlowReport.setCashFlowDataList(cashFlowData);
-        loanCashFlowReport.setCashFlowProjectionDataList(cashFlowProjectionDataList);
+        LoanCashFlowReport loanCashFlowReport = this.loanReadPlatformService.retrieveCashFlowReport(loanId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.loanCashFlowDataDefaultToApiJsonSerializer.serialize(settings, loanCashFlowReport, this.loanDataParameters);

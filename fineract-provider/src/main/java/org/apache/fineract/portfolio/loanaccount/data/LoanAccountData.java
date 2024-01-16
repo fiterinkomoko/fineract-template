@@ -264,6 +264,7 @@ public final class LoanAccountData {
     private String description;
     private String kivaId;
     private String kivaUUId;
+    private Double allowableDscr;
 
     public static LoanAccountData importInstanceIndividual(EnumOptionData loanTypeEnumOption, Long clientId, Long productId,
             Long loanOfficerId, LocalDate submittedOnDate, Long fundId, BigDecimal principal, Integer numberOfRepayments,
@@ -831,6 +832,7 @@ public final class LoanAccountData {
         loanAccountData.setDescription(acc.description);
         loanAccountData.setKivaId(acc.kivaId);
         loanAccountData.setKivaUUId(acc.kivaUUId);
+        loanAccountData.setAllowableDscr(acc.allowableDscr);
         return loanAccountData;
     }
 
@@ -1412,6 +1414,7 @@ public final class LoanAccountData {
         loanAccountData.setDescription(acc.description);
         loanAccountData.setKivaId(acc.kivaId);
         loanAccountData.setKivaUUId(acc.kivaUUId);
+        loanAccountData.setAllowableDscr(acc.allowableDscr);
         return loanAccountData;
     }
 
@@ -1442,6 +1445,7 @@ public final class LoanAccountData {
         loanAccountData.setDescription(acc.description);
         loanAccountData.setKivaId(acc.kivaId);
         loanAccountData.setKivaUUId(acc.kivaUUId);
+        loanAccountData.setAllowableDscr(acc.allowableDscr);
         return loanAccountData;
     }
 
@@ -1489,6 +1493,7 @@ public final class LoanAccountData {
         loanAccountData.setDescription(acc.description);
         loanAccountData.setKivaId(acc.kivaId);
         loanAccountData.setKivaUUId(acc.kivaUUId);
+        loanAccountData.setAllowableDscr(acc.allowableDscr);
         return loanAccountData;
     }
 
@@ -1607,6 +1612,7 @@ public final class LoanAccountData {
         loanAccountData.setDescription(acc.description);
         loanAccountData.setKivaId(acc.kivaId);
         loanAccountData.setKivaUUId(acc.kivaUUId);
+        loanAccountData.setAllowableDscr(acc.allowableDscr);
         return loanAccountData;
     }
 
@@ -1651,6 +1657,7 @@ public final class LoanAccountData {
         loanAccountData.setDescription(acc.description);
         loanAccountData.setKivaId(acc.kivaId);
         loanAccountData.setKivaUUId(acc.kivaUUId);
+        loanAccountData.setAllowableDscr(acc.allowableDscr);
         return loanAccountData;
     }
 
@@ -2205,5 +2212,13 @@ public final class LoanAccountData {
 
     public Long getId() {
         return id;
+    }
+
+    public Double getAllowableDscr() {
+        return allowableDscr;
+    }
+
+    public void setAllowableDscr(Double allowableDscr) {
+        this.allowableDscr = allowableDscr;
     }
 }

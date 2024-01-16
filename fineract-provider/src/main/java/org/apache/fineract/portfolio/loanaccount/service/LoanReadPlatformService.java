@@ -34,6 +34,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowProjectionData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowReport;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDecisionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDueDiligenceData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanFinancialRatioData;
@@ -206,4 +207,6 @@ public interface LoanReadPlatformService {
     Integer retrieveProjectionRate(Long loanId);
 
     List<LoanCashFlowProjectionData> retrieveCashFlowProjection(Long loanId);
+
+    LoanCashFlowReport retrieveCashFlowReport(Long loanId);
 }
