@@ -337,6 +337,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     @Column(name = "approved_principal", scale = 6, precision = 19, nullable = false)
     private BigDecimal approvedPrincipal;
 
+    @Column(name = "approved_icreview", scale = 6, precision = 19, nullable = false)
+    private BigDecimal approvedICReview;
+
     @Column(name = "net_disbursal_amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal netDisbursalAmount;
 
@@ -561,6 +564,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
          */
 
         this.proposedPrincipal = this.loanRepaymentScheduleDetail.getPrincipal().getAmount();
+        this.approvedICReview = this.loanRepaymentScheduleDetail.getPrincipal().getAmount();
 
         // rates added here
         this.rates = rates;
@@ -7111,5 +7115,30 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         LoanEvent event = LoanEvent.LOAN_DISBURSEMENT_REQUEST_REJECT;
         validateAccountStatus(event);
         this.loanSubStatus = null;
+    }
+
+    public BigDecimal getApprovedICReview() {
+        return approvedICReview;
+    }
+
+    public Map<String, Object> loanApplicationICReview(final AppUser currentUser, final JsonCommand command) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>();
+
+        BigDecimal icReviewRecommendedAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.icReviewRecommendedAmount);
+        if (icReviewRecommendedAmount != null) {
+            compareApprovedToProposedPrincipal(icReviewRecommendedAmount);
+
+            /*
+             * All the calculations are done based on the principal amount, so it is necessary to set principal
+             * amount to approved amount
+             */
+            this.approvedPrincipal = icReviewRecommendedAmount;
+            this.approvedICReview = icReviewRecommendedAmount;
+            this.netDisbursalAmount = icReviewRecommendedAmount;
+
+            this.loanRepaymentScheduleDetail.setPrincipal(icReviewRecommendedAmount);
+            actualChanges.put(LoanApiConstants.icReviewRecommendedAmount, icReviewRecommendedAmount);
+        }
+        return actualChanges;
     }
 }

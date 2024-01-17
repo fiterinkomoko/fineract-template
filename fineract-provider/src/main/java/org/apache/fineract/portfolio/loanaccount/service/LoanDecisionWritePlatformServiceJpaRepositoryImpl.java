@@ -44,6 +44,7 @@ import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApprovalMatrixConstants;
 import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanFinancialRatioData;
+import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanApprovalMatrix;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanApprovalMatrixRepository;
@@ -86,6 +87,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
     private final DocumentReadPlatformService documentReadPlatformService;
     private final MetropolCrbIdentityVerificationRepository metropolCrbIdentityVerificationRepository;
     private final TransunionCrbHeaderRepository transunionCrbHeaderRepository;
+    private final LoanUtilService loanUtilService;
 
     @Override
     public CommandProcessingResult acceptLoanApplicationReview(final Long loanId, final JsonCommand command) {
@@ -395,6 +397,16 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         loanDecisionStateUtilService.determineTheNextDecisionStage(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
                 LoanDecisionState.IC_REVIEW_LEVEL_ONE);
 
+        final Integer nextDecisionStage = loanDecision.getNextLoanIcReviewDecisionState();
+        if (nextDecisionStage.equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())) {
+            final Map<String, Object> changes = loan.loanApplicationICReview(currentUser, command);
+            if (!changes.isEmpty()) {
+                LocalDate recalculateFrom = null;
+                ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
+                loan.regenerateRepaymentSchedule(scheduleGeneratorDTO);
+            }
+        }
+
         LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelOneFrom(command, currentUser, loanDecision, false,
                 icReviewOn, recommendedAmount, termFrequency, termPeriodFrequencyEnum);
         LoanDecision savedObj = loanDecisionRepository.saveAndFlush(loanDecisionObj);
@@ -465,6 +477,16 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         // generate the next stage based on loan approval matrix via amounts to be disbursed
         loanDecisionStateUtilService.determineTheNextDecisionStage(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
                 LoanDecisionState.IC_REVIEW_LEVEL_TWO);
+
+        final Integer nextDecisionStage = loanDecision.getNextLoanIcReviewDecisionState();
+        if (nextDecisionStage.equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())) {
+            final Map<String, Object> changes = loan.loanApplicationICReview(currentUser, command);
+            if (!changes.isEmpty()) {
+                LocalDate recalculateFrom = null;
+                ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
+                loan.regenerateRepaymentSchedule(scheduleGeneratorDTO);
+            }
+        }
 
         LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelTwoFrom(command, currentUser, loanDecision,
                 Boolean.FALSE, icReviewOn, recommendedAmount, termFrequency, termPeriodFrequencyEnum);
@@ -537,6 +559,16 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         loanDecisionStateUtilService.determineTheNextDecisionStage(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
                 LoanDecisionState.IC_REVIEW_LEVEL_THREE);
 
+        final Integer nextDecisionStage = loanDecision.getNextLoanIcReviewDecisionState();
+        if (nextDecisionStage.equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())) {
+            final Map<String, Object> changes = loan.loanApplicationICReview(currentUser, command);
+            if (!changes.isEmpty()) {
+                LocalDate recalculateFrom = null;
+                ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
+                loan.regenerateRepaymentSchedule(scheduleGeneratorDTO);
+            }
+        }
+
         LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelThreeFrom(command, currentUser, loanDecision,
                 Boolean.FALSE, icReviewOn, recommendedAmount, termFrequency, termPeriodFrequencyEnum);
         LoanDecision savedObj = loanDecisionRepository.saveAndFlush(loanDecisionObj);
@@ -608,6 +640,16 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         loanDecisionStateUtilService.determineTheNextDecisionStage(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
                 LoanDecisionState.IC_REVIEW_LEVEL_FOUR);
 
+        final Integer nextDecisionStage = loanDecision.getNextLoanIcReviewDecisionState();
+        if (nextDecisionStage.equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())) {
+            final Map<String, Object> changes = loan.loanApplicationICReview(currentUser, command);
+            if (!changes.isEmpty()) {
+                LocalDate recalculateFrom = null;
+                ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
+                loan.regenerateRepaymentSchedule(scheduleGeneratorDTO);
+            }
+        }
+
         LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelFourFrom(command, currentUser, loanDecision,
                 Boolean.FALSE, icReviewOn, recommendedAmount, termFrequency, termPeriodFrequencyEnum);
         LoanDecision savedObj = loanDecisionRepository.saveAndFlush(loanDecisionObj);
@@ -675,6 +717,16 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         loanDecisionStateUtilService.validateLoanAccountToComplyToApprovalMatrixStage(loan, approvalMatrix, isLoanFirstCycle,
                 isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_FIVE);
+
+        final Integer nextDecisionStage = loanDecision.getNextLoanIcReviewDecisionState();
+        if (nextDecisionStage.equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())) {
+            final Map<String, Object> changes = loan.loanApplicationICReview(currentUser, command);
+            if (!changes.isEmpty()) {
+                LocalDate recalculateFrom = null;
+                ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
+                loan.regenerateRepaymentSchedule(scheduleGeneratorDTO);
+            }
+        }
 
         LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelFiveFrom(command, currentUser, loanDecision,
                 Boolean.FALSE, icReviewOn, recommendedAmount, termFrequency, termPeriodFrequencyEnum);
