@@ -57,6 +57,9 @@ public final class LoanFinancialRatioData {
     private BigDecimal leverage;
     private BigDecimal capitalization;
     private BigDecimal dscr;
+    private BigDecimal totalIncome;
+    private BigDecimal totalExpense;
+    private BigDecimal netCashFlow;
 
     public LoanFinancialRatioData(Long id, Long loanId, BigDecimal cash, BigDecimal inventoryStock, BigDecimal receivables,
             BigDecimal chamaTontines, BigDecimal otherCurrentAssets, BigDecimal totalCurrentAssets, BigDecimal goodsBoughtOnCredit,
