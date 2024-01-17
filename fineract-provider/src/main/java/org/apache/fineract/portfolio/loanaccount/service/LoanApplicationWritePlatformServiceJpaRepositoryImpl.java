@@ -2292,7 +2292,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     "error.msg.loan.cashflow.projection.data.is.already.available.so.cashflow.cannot.be.regenerated",
                     "Loan CashFlow Projection data is already Generated so CashFlow cannot be regenerated");
         }
-        LOG.info("projectionRate: " + projectionRate);
 
         BigDecimal previousSales = BigDecimal.ZERO;
         BigDecimal previousPurchases = BigDecimal.ZERO;
