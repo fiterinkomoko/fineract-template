@@ -18,12 +18,11 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
-import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.apache.fineract.organisation.monetary.data.CurrencyData;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**
  * Immutable data object representing a loan transaction.
@@ -65,7 +64,8 @@ public class LoanApprovalData {
         this.netDisbursalAmount = netDisbursalAmount;
     }
 
-    public LoanApprovalData(BigDecimal approvalAmount, LocalDate approvalDate, BigDecimal netDisbursalAmount, Collection<EnumOptionData> termFrequencyTypeOptions, CurrencyData currency, LoanDecisionData loanDecisionData) {
+    public LoanApprovalData(BigDecimal approvalAmount, LocalDate approvalDate, BigDecimal netDisbursalAmount,
+            Collection<EnumOptionData> termFrequencyTypeOptions, CurrencyData currency, LoanDecisionData loanDecisionData) {
         this.approvalDate = approvalDate;
         this.approvalAmount = approvalAmount;
         this.netDisbursalAmount = netDisbursalAmount;

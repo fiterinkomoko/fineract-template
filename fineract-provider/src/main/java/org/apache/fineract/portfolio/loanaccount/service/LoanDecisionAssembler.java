@@ -54,9 +54,11 @@ public class LoanDecisionAssembler {
     public LoanDecision assembleDueDiligenceFrom(final JsonCommand command, AppUser currentUser, LoanDecision savedLoanDecision) {
 
         LocalDate dueDiligenceOn = command.localDateValueOfParameterNamed(LoanApiConstants.dueDiligenceOnDateParameterName);
-        final BigDecimal recommendedAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.dueDiligenceRecommendedAmountParameterName);
+        final BigDecimal recommendedAmount = command
+                .bigDecimalValueOfParameterNamed(LoanApiConstants.dueDiligenceRecommendedAmountParameterName);
         final Integer termFrequency = command.integerValueOfParameterNamed(LoanApiConstants.recommendedLoanTermFrequencyParameterName);
-        final Integer termPeriodFrequencyType = command.integerValueOfParameterNamed(LoanApiConstants.recommendedLoanTermFrequencyTypeParameterName);
+        final Integer termPeriodFrequencyType = command
+                .integerValueOfParameterNamed(LoanApiConstants.recommendedLoanTermFrequencyTypeParameterName);
 
         final String noteText = command.stringValueOfParameterNamed("note");
 
@@ -306,13 +308,13 @@ public class LoanDecisionAssembler {
         loanDecision.setIcReviewDecisionLevelOneNote(noteText);
         loanDecision.setIcReviewDecisionLevelOneBy(currentUser);
         loanDecision.setIcReviewDecisionLevelOneOn(icReviewOn);
-        if(recommendedAmount != null) {
+        if (recommendedAmount != null) {
             loanDecision.setIcReviewDecisionLevelOneRecommendedAmount(recommendedAmount);
         }
-        if(termFrequency != null) {
+        if (termFrequency != null) {
             loanDecision.setIcReviewDecisionLevelOneTermFrequency(termFrequency);
         }
-        if(termPeriodFrequencyEnum != null) {
+        if (termPeriodFrequencyEnum != null) {
             loanDecision.setIcReviewDecisionLevelOneTermPeriodFrequencyEnum(termPeriodFrequencyEnum);
         }
 
@@ -337,13 +339,13 @@ public class LoanDecisionAssembler {
         loanDecision.setIcReviewDecisionLevelTwoNote(noteText);
         loanDecision.setIcReviewDecisionLevelTwoBy(currentUser);
         loanDecision.setIcReviewDecisionLevelTwoOn(icReviewOn);
-        if(recommendedAmount != null) {
+        if (recommendedAmount != null) {
             loanDecision.setIcReviewDecisionLevelTwoRecommendedAmount(recommendedAmount);
         }
-        if(termFrequency != null) {
+        if (termFrequency != null) {
             loanDecision.setIcReviewDecisionLevelTwoTermFrequency(termFrequency);
         }
-        if(termPeriodFrequencyEnum != null) {
+        if (termPeriodFrequencyEnum != null) {
             loanDecision.setIcReviewDecisionLevelTwoTermPeriodFrequencyEnum(termPeriodFrequencyEnum);
         }
 
@@ -358,8 +360,9 @@ public class LoanDecisionAssembler {
         return loanDecision;
     }
 
-    public LoanDecision assembleIcReviewDecisionLevelThreeFrom(final JsonCommand command, AppUser currentUser, LoanDecision savedLoanDecision,
-            Boolean isReject, LocalDate icReviewOn, BigDecimal recommendedAmount, Integer termFrequency, Integer termPeriodFrequencyEnum) {
+    public LoanDecision assembleIcReviewDecisionLevelThreeFrom(final JsonCommand command, AppUser currentUser,
+            LoanDecision savedLoanDecision, Boolean isReject, LocalDate icReviewOn, BigDecimal recommendedAmount, Integer termFrequency,
+            Integer termPeriodFrequencyEnum) {
 
         final String noteText = command.stringValueOfParameterNamed("note");
         LoanDecision loanDecision = savedLoanDecision;
@@ -368,13 +371,13 @@ public class LoanDecisionAssembler {
         loanDecision.setIcReviewDecisionLevelThreeNote(noteText);
         loanDecision.setIcReviewDecisionLevelThreeBy(currentUser);
         loanDecision.setIcReviewDecisionLevelThreeOn(icReviewOn);
-        if(recommendedAmount != null) {
+        if (recommendedAmount != null) {
             loanDecision.setIcReviewDecisionLevelThreeRecommendedAmount(recommendedAmount);
         }
-        if(termFrequency != null) {
+        if (termFrequency != null) {
             loanDecision.setIcReviewDecisionLevelThreeTermFrequency(termFrequency);
         }
-        if(termPeriodFrequencyEnum != null) {
+        if (termPeriodFrequencyEnum != null) {
             loanDecision.setIcReviewDecisionLevelThreeTermPeriodFrequencyEnum(termPeriodFrequencyEnum);
         }
 
@@ -389,8 +392,9 @@ public class LoanDecisionAssembler {
         return loanDecision;
     }
 
-    public LoanDecision assembleIcReviewDecisionLevelFourFrom(final JsonCommand command, AppUser currentUser, LoanDecision savedLoanDecision,
-            Boolean isReject, LocalDate icReviewOn, BigDecimal recommendedAmount, Integer termFrequency, Integer termPeriodFrequencyEnum) {
+    public LoanDecision assembleIcReviewDecisionLevelFourFrom(final JsonCommand command, AppUser currentUser,
+            LoanDecision savedLoanDecision, Boolean isReject, LocalDate icReviewOn, BigDecimal recommendedAmount, Integer termFrequency,
+            Integer termPeriodFrequencyEnum) {
 
         final String noteText = command.stringValueOfParameterNamed("note");
 
@@ -400,13 +404,13 @@ public class LoanDecisionAssembler {
         loanDecision.setIcReviewDecisionLevelFourNote(noteText);
         loanDecision.setIcReviewDecisionLevelFourBy(currentUser);
         loanDecision.setIcReviewDecisionLevelFourOn(icReviewOn);
-        if(recommendedAmount != null) {
+        if (recommendedAmount != null) {
             loanDecision.setIcReviewDecisionLevelFourRecommendedAmount(recommendedAmount);
         }
-        if(termFrequency != null) {
+        if (termFrequency != null) {
             loanDecision.setIcReviewDecisionLevelFourTermFrequency(termFrequency);
         }
-        if(termPeriodFrequencyEnum != null) {
+        if (termPeriodFrequencyEnum != null) {
             loanDecision.setIcReviewDecisionLevelFourTermPeriodFrequencyEnum(termPeriodFrequencyEnum);
         }
 
@@ -421,8 +425,9 @@ public class LoanDecisionAssembler {
         return loanDecision;
     }
 
-    public LoanDecision assembleIcReviewDecisionLevelFiveFrom(final JsonCommand command, AppUser currentUser, LoanDecision savedLoanDecision,
-            Boolean isReject, LocalDate icReviewOn, BigDecimal recommendedAmount, Integer termFrequency, Integer termPeriodFrequencyEnum) {
+    public LoanDecision assembleIcReviewDecisionLevelFiveFrom(final JsonCommand command, AppUser currentUser,
+            LoanDecision savedLoanDecision, Boolean isReject, LocalDate icReviewOn, BigDecimal recommendedAmount, Integer termFrequency,
+            Integer termPeriodFrequencyEnum) {
 
         final String noteText = command.stringValueOfParameterNamed("note");
         LoanDecision loanDecision = savedLoanDecision;
@@ -432,13 +437,13 @@ public class LoanDecisionAssembler {
         loanDecision.setIcReviewDecisionLevelFiveNote(noteText);
         loanDecision.setIcReviewDecisionLevelFiveBy(currentUser);
         loanDecision.setIcReviewDecisionLevelFiveOn(icReviewOn);
-        if(recommendedAmount != null) {
+        if (recommendedAmount != null) {
             loanDecision.setIcReviewDecisionLevelFiveRecommendedAmount(recommendedAmount);
         }
-        if(termFrequency != null) {
+        if (termFrequency != null) {
             loanDecision.setIcReviewDecisionLevelFiveTermFrequency(termFrequency);
         }
-        if(termPeriodFrequencyEnum != null) {
+        if (termPeriodFrequencyEnum != null) {
             loanDecision.setIcReviewDecisionLevelFiveTermPeriodFrequencyEnum(termPeriodFrequencyEnum);
         }
 

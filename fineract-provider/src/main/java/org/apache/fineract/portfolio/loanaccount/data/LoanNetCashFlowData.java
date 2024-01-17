@@ -16,18 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.domain;
+package org.apache.fineract.portfolio.loanaccount.data;
 
-import java.util.List;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import java.math.BigDecimal;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public interface TransunionCrbHeaderRepository
-        extends JpaRepository<TransunionCrbHeader, Long>, JpaSpecificationExecutor<TransunionCrbHeader> {
+@Data
+@NoArgsConstructor
+public final class LoanNetCashFlowData {
 
-    @Query("from TransunionCrbHeader m where m.loanId.id=:loanId ")
-    List<TransunionCrbHeader> findByLoanId(@Param("loanId") Long loanId);
+    private BigDecimal previousMonth2;
+    private BigDecimal previousMonth1;
+    private BigDecimal month0;
 
 }

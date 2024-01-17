@@ -264,6 +264,8 @@ public final class LoanAccountData {
     private String description;
     private String kivaId;
     private String kivaUUId;
+    private BigDecimal approvedICReview;
+    private Double allowableDscr;
 
     public static LoanAccountData importInstanceIndividual(EnumOptionData loanTypeEnumOption, Long clientId, Long productId,
             Long loanOfficerId, LocalDate submittedOnDate, Long fundId, BigDecimal principal, Integer numberOfRepayments,
@@ -831,6 +833,7 @@ public final class LoanAccountData {
         loanAccountData.setDescription(acc.description);
         loanAccountData.setKivaId(acc.kivaId);
         loanAccountData.setKivaUUId(acc.kivaUUId);
+        loanAccountData.setAllowableDscr(acc.allowableDscr);
         return loanAccountData;
     }
 
@@ -1412,6 +1415,8 @@ public final class LoanAccountData {
         loanAccountData.setDescription(acc.description);
         loanAccountData.setKivaId(acc.kivaId);
         loanAccountData.setKivaUUId(acc.kivaUUId);
+        loanAccountData.setApprovedICReview(acc.approvedICReview);
+        loanAccountData.setAllowableDscr(acc.allowableDscr);
         return loanAccountData;
     }
 
@@ -1442,6 +1447,7 @@ public final class LoanAccountData {
         loanAccountData.setDescription(acc.description);
         loanAccountData.setKivaId(acc.kivaId);
         loanAccountData.setKivaUUId(acc.kivaUUId);
+        loanAccountData.setAllowableDscr(acc.allowableDscr);
         return loanAccountData;
     }
 
@@ -1489,6 +1495,7 @@ public final class LoanAccountData {
         loanAccountData.setDescription(acc.description);
         loanAccountData.setKivaId(acc.kivaId);
         loanAccountData.setKivaUUId(acc.kivaUUId);
+        loanAccountData.setAllowableDscr(acc.allowableDscr);
         return loanAccountData;
     }
 
@@ -1607,6 +1614,7 @@ public final class LoanAccountData {
         loanAccountData.setDescription(acc.description);
         loanAccountData.setKivaId(acc.kivaId);
         loanAccountData.setKivaUUId(acc.kivaUUId);
+        loanAccountData.setAllowableDscr(acc.allowableDscr);
         return loanAccountData;
     }
 
@@ -1651,6 +1659,7 @@ public final class LoanAccountData {
         loanAccountData.setDescription(acc.description);
         loanAccountData.setKivaId(acc.kivaId);
         loanAccountData.setKivaUUId(acc.kivaUUId);
+        loanAccountData.setAllowableDscr(acc.allowableDscr);
         return loanAccountData;
     }
 
@@ -2209,5 +2218,17 @@ public final class LoanAccountData {
 
     public void setTermFrequencyTypeOptions(Collection<EnumOptionData> termFrequencyTypeOptions) {
         this.termFrequencyTypeOptions = termFrequencyTypeOptions;
+    }
+
+    public void setApprovedICReview(BigDecimal approvedICReview) {
+        this.approvedICReview = approvedICReview;
+    }
+
+    public Double getAllowableDscr() {
+        return allowableDscr;
+    }
+
+    public void setAllowableDscr(Double allowableDscr) {
+        this.allowableDscr = allowableDscr;
     }
 }

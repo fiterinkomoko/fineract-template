@@ -334,7 +334,8 @@ public class LoanProductData implements Serializable {
                 maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
                 syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled,
                 fixedPrincipalPercentagePerInstallment, maxNumberOfLoanExtensionsAllowed, loanTermIncludesToppedUpLoanTerm,
-                isAccountLevelArrearsToleranceEnable, productCategoryId, productTypeId, maintainInterestOnLoanTermExtension, isIslamic, allowableDSCR);
+                isAccountLevelArrearsToleranceEnable, productCategoryId, productTypeId, maintainInterestOnLoanTermExtension, isIslamic,
+                allowableDSCR);
 
     }
 
@@ -446,7 +447,8 @@ public class LoanProductData implements Serializable {
                 maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
                 syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled,
                 fixedPrincipalPercentagePerInstallment, maxNumberOfLoanExtensionsAllowed, loanTermIncludesToppedUpLoanTerm,
-                isAccountLevelArrearsToleranceEnable, productCategoryId, productTypeId, maintainInterestOnLoanTermExtension, isIslamic, allowableDSCR);
+                isAccountLevelArrearsToleranceEnable, productCategoryId, productTypeId, maintainInterestOnLoanTermExtension, isIslamic,
+                allowableDSCR);
 
     }
 
@@ -565,7 +567,8 @@ public class LoanProductData implements Serializable {
                 maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
                 syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled,
                 fixedPrincipalPercentagePerInstallment, maxNumberOfLoanExtensionsAllowed, loanTermIncludesToppedUpLoanTerm,
-                isAccountLevelArrearsToleranceEnable, productCategoryId, productTypeId, maintainInterestOnLoanTermExtension, isIslamic, allowableDSCR);
+                isAccountLevelArrearsToleranceEnable, productCategoryId, productTypeId, maintainInterestOnLoanTermExtension, isIslamic,
+                allowableDSCR);
 
     }
 
@@ -678,7 +681,8 @@ public class LoanProductData implements Serializable {
                 maxDifferentialLendingRate, isFloatingInterestRateCalculationAllowed, isVariableInstallmentsAllowed, minimumGap, maximumGap,
                 syncExpectedWithDisbursementDate, canUseForTopup, isEqualAmortization, rateOptions, rates, isRatesEnabled,
                 fixedPrincipalPercentagePerInstallment, maxNumberOfLoanExtensionsAllowed, loanTermIncludesToppedUpLoanTerm,
-                isAccountLevelArrearsToleranceEnable, productCategoryId, productTypeId, maintainInterestOnLoanTermExtension, isIslamic, allowableDSCR);
+                isAccountLevelArrearsToleranceEnable, productCategoryId, productTypeId, maintainInterestOnLoanTermExtension, isIslamic,
+                allowableDSCR);
 
     }
 
