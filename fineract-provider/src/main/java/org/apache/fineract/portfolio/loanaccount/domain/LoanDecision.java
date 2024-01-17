@@ -71,7 +71,6 @@ public class LoanDecision extends AbstractAuditableCustom {
     @Column(name = "due_diligence_term_period_frequency_type")
     private Integer dueDiligenceTermFrequencyType;
 
-
     // collateral review
     @Column(name = "collateral_review_note")
     private String collateralReviewNote;

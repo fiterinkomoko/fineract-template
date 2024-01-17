@@ -2219,6 +2219,7 @@ public final class LoanAccountData {
     public void setTermFrequencyTypeOptions(Collection<EnumOptionData> termFrequencyTypeOptions) {
         this.termFrequencyTypeOptions = termFrequencyTypeOptions;
     }
+
     public void setApprovedICReview(BigDecimal approvedICReview) {
         this.approvedICReview = approvedICReview;
     }

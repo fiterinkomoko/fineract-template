@@ -54,9 +54,11 @@ public class LoanDecisionAssembler {
     public LoanDecision assembleDueDiligenceFrom(final JsonCommand command, AppUser currentUser, LoanDecision savedLoanDecision) {
 
         LocalDate dueDiligenceOn = command.localDateValueOfParameterNamed(LoanApiConstants.dueDiligenceOnDateParameterName);
-        final BigDecimal recommendedAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.dueDiligenceRecommendedAmountParameterName);
+        final BigDecimal recommendedAmount = command
+                .bigDecimalValueOfParameterNamed(LoanApiConstants.dueDiligenceRecommendedAmountParameterName);
         final Integer termFrequency = command.integerValueOfParameterNamed(LoanApiConstants.recommendedLoanTermFrequencyParameterName);
-        final Integer termPeriodFrequencyType = command.integerValueOfParameterNamed(LoanApiConstants.recommendedLoanTermFrequencyTypeParameterName);
+        final Integer termPeriodFrequencyType = command
+                .integerValueOfParameterNamed(LoanApiConstants.recommendedLoanTermFrequencyTypeParameterName);
 
         final String noteText = command.stringValueOfParameterNamed("note");
 

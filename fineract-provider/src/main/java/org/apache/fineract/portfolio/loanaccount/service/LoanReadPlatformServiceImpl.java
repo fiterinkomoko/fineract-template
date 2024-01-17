@@ -37,7 +37,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
@@ -84,6 +83,7 @@ import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
+import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
 import org.apache.fineract.portfolio.floatingrates.data.InterestRatePeriodData;
 import org.apache.fineract.portfolio.floatingrates.service.FloatingRatesReadPlatformService;
 import org.apache.fineract.portfolio.fund.data.FundData;
@@ -193,6 +193,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private final SearchReadPlatformService searchReadPlatformService;
     private final ConfigurationReadPlatformService configurationReadPlatformService;
     private final LoanDueDiligenceInfoRepository loanDueDiligenceInfoRepository;
+    private final DropdownReadPlatformService dropdownReadPlatformService;
 
     @Autowired
     public LoanReadPlatformServiceImpl(final PlatformSecurityContext context,
@@ -210,7 +211,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final AccountDetailsReadPlatformService accountDetailsReadPlatformService, final LoanRepositoryWrapper loanRepositoryWrapper,
             final ColumnValidator columnValidator, DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper,
             SearchReadPlatformService searchReadPlatformService, final LoanDueDiligenceInfoRepository loanDueDiligenceInfoRepository,
-            final ConfigurationReadPlatformService configurationReadPlatformService) {
+            final ConfigurationReadPlatformService configurationReadPlatformService,
+            final DropdownReadPlatformService dropdownReadPlatformService) {
         this.context = context;
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
@@ -239,6 +241,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         this.searchReadPlatformService = searchReadPlatformService;
         this.loanDueDiligenceInfoRepository = loanDueDiligenceInfoRepository;
         this.configurationReadPlatformService = configurationReadPlatformService;
+        this.dropdownReadPlatformService = dropdownReadPlatformService;
     }
 
     @Override
@@ -593,7 +596,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
         final LoanDecisionData loanDecisionData = this.retrieveLoanDecisionByLoanId(loan.getId());
         BigDecimal approvedAmount;
-        if(loanDecisionData != null && loanDecisionData.getLoanDecisionState().equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())) {
+        if (loanDecisionData != null
+                && loanDecisionData.getLoanDecisionState().equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())) {
             approvedAmount = loan.getApprovedICReview();
         } else {
             approvedAmount = loan.getProposedPrincipal();
@@ -3209,15 +3213,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             return "                            cf.id                                           as id,          "
                     + "                           cf.loan_id                                      as loanId,  "
                     + "                           cashFlowT.code_value                            as cashFlowType,"
-                    + "                           particularT.code_value                          as particularType,"
-                    + " cf." + sqlGenerator.escape("Name") + " as name,"
-                    + " cf." + sqlGenerator.escape("PreviousMonth2") + " as previousMonth2,"
-                    + " cf." + sqlGenerator.escape("PreviousMonth1") + " as previousMonth1,"
-                    + " cf." + sqlGenerator.escape("Month0") + " as month0 "
-                    + "  FROM loan_cashflow_information cf"
-                    + "  INNER JOIN m_code_value cashFlowT ON cf." + sqlGenerator.escape("CashFlowType_cd_CashFlowType") + "   = cashFlowT.id"
-                    + "  INNER JOIN m_code_value particularT ON cf." + sqlGenerator.escape("ParticularType_cd_ParticularType") + "   = particularT.id"
-                    + "  WHERE loan_id = ? ";
+                    + "                           particularT.code_value                          as particularType," + " cf."
+                    + sqlGenerator.escape("Name") + " as name," + " cf." + sqlGenerator.escape("PreviousMonth2") + " as previousMonth2,"
+                    + " cf." + sqlGenerator.escape("PreviousMonth1") + " as previousMonth1," + " cf." + sqlGenerator.escape("Month0")
+                    + " as month0 " + "  FROM loan_cashflow_information cf" + "  INNER JOIN m_code_value cashFlowT ON cf."
+                    + sqlGenerator.escape("CashFlowType_cd_CashFlowType") + "   = cashFlowT.id"
+                    + "  INNER JOIN m_code_value particularT ON cf." + sqlGenerator.escape("ParticularType_cd_ParticularType")
+                    + "   = particularT.id" + "  WHERE loan_id = ? ";
         }
 
         @Override
@@ -3241,7 +3243,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final LoanDecisionDataMapper mapper = new LoanDecisionDataMapper(sqlGenerator);
         String sql = "select " + mapper.schema();
         List<LoanDecisionData> result = this.jdbcTemplate.query(sql, mapper, loanId);
-        if(!result.isEmpty()) {
+        if (!result.isEmpty()) {
             return result.get(0);
         }
         return null;
@@ -3280,10 +3282,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final BigDecimal icReviewDecisionLevelFourRecommendedAmount = rs.getBigDecimal("icReviewDecisionLevelFourRecommendedAmount");
             final BigDecimal icReviewDecisionLevelFiveRecommendedAmount = rs.getBigDecimal("icReviewDecisionLevelFiveRecommendedAmount");
 
-
-            return new LoanDecisionData(loanId, loanDecisionState, loanNextDecisionState, icReviewDecisionLevelOneRecommendedAmount, icReviewDecisionLevelTwoRecommendedAmount,
-                    icReviewDecisionLevelThreeRecommendedAmount, icReviewDecisionLevelFourRecommendedAmount,
-                    icReviewDecisionLevelFiveRecommendedAmount);
+            return new LoanDecisionData(loanId, loanDecisionState, loanNextDecisionState, icReviewDecisionLevelOneRecommendedAmount,
+                    icReviewDecisionLevelTwoRecommendedAmount, icReviewDecisionLevelThreeRecommendedAmount,
+                    icReviewDecisionLevelFourRecommendedAmount, icReviewDecisionLevelFiveRecommendedAmount);
         }
 
     }
