@@ -2643,16 +2643,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         final LoanAccountData loanAccountData = retrieveOne(loanId);
 
-        final Collection<CodeValueData> surveyLocationOptions = this.codeValueReadPlatformService
-                .retrieveCodeValuesByCode("SurveyLocation");
-        final Collection<CodeValueData> programOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("Program");
-        final Collection<CodeValueData> countryOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("COUNTRY");
-        final Collection<CodeValueData> cohortOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("Cohort");
+        final Collection<EnumOptionData> termFrequencyTypeOptions = this.dropdownReadPlatformService.retrievePeriodFrequencyTypeOptions();
 
-        loanAccountData.setSurveyLocationOptions(surveyLocationOptions);
-        loanAccountData.setCohortOptions(cohortOptions);
-        loanAccountData.setCountryOptions(countryOptions);
-        loanAccountData.setProgramOptions(programOptions);
+        loanAccountData.setTermFrequencyTypeOptions(termFrequencyTypeOptions);
         return loanAccountData;
     }
 
@@ -3184,10 +3177,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
 
         public String loanCashFlow() {
-            return "   cf.id as id, "
-                    + " cf.loan_id as loanId,  "
-                    + " cashFlowT.code_value as cashFlowType,"
-                    + " particularT.code_value as particularType,"
+            return "                            cf.id                                           as id,          "
+                    + "                           cf.loan_id                                      as loanId,  "
+                    + "                           cashFlowT.code_value                            as cashFlowType,"
+                    + "                           particularT.code_value                          as particularType,"
                     + " cf." + sqlGenerator.escape("Name") + " as name,"
                     + " cf." + sqlGenerator.escape("PreviousMonth2") + " as previousMonth2,"
                     + " cf." + sqlGenerator.escape("PreviousMonth1") + " as previousMonth1,"
@@ -3277,7 +3270,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         return financialRatioData;
     }
 
-    private void generateFinancialRatioData(Loan loan, List<LoanCashFlowData> cashFlowData, LoanFinancialRatioData financialRatioData) {
+    @Override
+    public void generateFinancialRatioData(Loan loan, List<LoanCashFlowData> cashFlowData, LoanFinancialRatioData financialRatioData) {
         final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
         final MathContext mc = new MathContext(8, roundingMode);
         List<String> incomeParticularTypes = Arrays.asList("Sales Income", "Other Income");
@@ -3320,6 +3314,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         financialRatioData.setLeverage(leverage);
         financialRatioData.setCapitalization(capitalization);
         financialRatioData.setDscr(dscr);
+        financialRatioData.setTotalIncome(totalIncome);
+        financialRatioData.setTotalExpense(totalExpense);
+        financialRatioData.setNetCashFlow(netCashFlow);
     }
     @Override
     public LoanFinancialRatioData findLoanFinancialRatioDataByLoanId(Long loanId) {
