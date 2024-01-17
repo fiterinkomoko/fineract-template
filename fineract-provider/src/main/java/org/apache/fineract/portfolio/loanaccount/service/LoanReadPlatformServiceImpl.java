@@ -3166,7 +3166,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
     @Override
     public Integer retrieveProjectionRate(Long loanId) {
-        final String sql = "SELECT rate.\"DefaultRate\" as rate FROM \"ProjectionRate\" rate WHERE rate.loan_id = ? ORDER BY rate.id DESC LIMIT 1";
+        final String sql = "SELECT rate." + sqlGenerator.escape("DefaultRate") + " as rate FROM " + sqlGenerator.escape("ProjectionRate") + " rate WHERE rate.loan_id = ? ORDER BY rate.id DESC LIMIT 1";
         return this.jdbcTemplate.queryForObject(sql, new Object[] { loanId }, Integer.class);
     }
 
@@ -3203,17 +3203,17 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
 
         public String loanCashFlow() {
-            return "                            cf.id                                           as id,          "
-                    + "                           cf.loan_id                                      as loanId,  "
-                    + "                           cashFlowT.code_value                            as cashFlowType,"
-                    + "                           particularT.code_value                          as particularType,"
-                    + "                           cf.\"Name\"                                     as name,"
-                    + "                           cf.\"PreviousMonth2\"                           as previousMonth2,"
-                    + "                           cf.\"PreviousMonth1\"                           as previousMonth1,"
-                    + "                           cf.\"Month0\"                                   as month0"
+            return "   cf.id as id, "
+                    + " cf.loan_id as loanId,  "
+                    + " cashFlowT.code_value as cashFlowType,"
+                    + " particularT.code_value as particularType,"
+                    + " cf." + sqlGenerator.escape("Name") + " as name,"
+                    + " cf." + sqlGenerator.escape("PreviousMonth2") + " as previousMonth2,"
+                    + " cf." + sqlGenerator.escape("PreviousMonth1") + " as previousMonth1,"
+                    + " cf." + sqlGenerator.escape("Month0") + " as month0 "
                     + "  FROM loan_cashflow_information cf"
-                    + "  INNER JOIN m_code_value cashFlowT ON cf.\"CashFlowType_cd_CashFlowType\"   = cashFlowT.id"
-                    + "  INNER JOIN m_code_value particularT ON cf.\"ParticularType_cd_ParticularType\"   = particularT.id\n"
+                    + "  INNER JOIN m_code_value cashFlowT ON cf." + sqlGenerator.escape("CashFlowType_cd_CashFlowType") + "   = cashFlowT.id"
+                    + "  INNER JOIN m_code_value particularT ON cf." + sqlGenerator.escape("ParticularType_cd_ParticularType") + "   = particularT.id"
                     + "  WHERE loan_id = ? ";
         }
 
@@ -3411,10 +3411,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + "       proj.amount           AS amount, " + "       proj.schedule_id      AS scheduleInstallmentId, "
                     + "       proj.projection_rate      AS projectionRate, " + "       info.loan_id          AS loanId, "
                     + "        cashFlowT.code_value   as cashFlowType, " + "       particularT.code_value as particularType, "
-                    + "       info.\"Name\"              as name " + " FROM m_loan_cashflow_projection proj "
+                    + "       info." + sqlGenerator.escape("Name") + "              as name " + " FROM m_loan_cashflow_projection proj "
                     + "         INNER JOIN loan_cashflow_information info ON proj.cashflow_info_id = info.id "
-                    + "         INNER JOIN m_code_value cashFlowT ON info.\"CashFlowType_cd_CashFlowType\" = cashFlowT.id "
-                    + "         INNER JOIN m_code_value particularT ON info.\"ParticularType_cd_ParticularType\" = particularT.id "
+                    + "         INNER JOIN m_code_value cashFlowT ON info." + sqlGenerator.escape("CashFlowType_cd_CashFlowType") + " = cashFlowT.id "
+                    + "         INNER JOIN m_code_value particularT ON info." + sqlGenerator.escape("ParticularType_cd_ParticularType") + " = particularT.id "
                     + " WHERE info.loan_id = ? " + " ORDER BY proj.id ASC ";
         }
 

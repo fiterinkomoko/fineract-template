@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import javax.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
@@ -2287,12 +2288,17 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         }
         List<LoanCashFlowProjectionData> cashFlowProjectionList = this.loanReadPlatformService.retrieveCashFlowProjection(loanId);
 
-        if (!CollectionUtils.isEmpty(cashFlowProjectionList)) {
+        final Integer cashFlowType = command.integerValueOfParameterNamed("cashFlowType");
+        if (cashFlowType == null && !CollectionUtils.isEmpty(cashFlowProjectionList)) {
             throw new GeneralPlatformDomainRuleException(
                     "error.msg.loan.cashflow.projection.data.is.already.available.so.cashflow.cannot.be.regenerated",
                     "Loan CashFlow Projection data is already Generated so CashFlow cannot be regenerated");
         }
         LOG.info("projectionRate: " + projectionRate);
+
+        if (cashFlowType != null) {
+            this.fromApiJsonDeserializer.validateCashFlowProjectionUpdate(command.json());
+        }
 
         BigDecimal previousSales = BigDecimal.ZERO;
         BigDecimal previousPurchases = BigDecimal.ZERO;
@@ -2300,6 +2306,12 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         BigDecimal salesComputed;
         BigDecimal purchaseComputed;
 
+        final Integer month = command.integerValueOfParameterNamed("month");
+        final Integer updatedProjectionRate = command.integerValueOfParameterNamed("projectionRate");
+        Integer incomeProjectionRate = projectionRate;
+        Integer expenseProjectionRate = projectionRate;
+
+        this.loanCashFlowProjectionRepository.deleteByLoanId(loanId);
         for (LoanRepaymentScheduleInstallment installment : loan.getRepaymentScheduleInstallments()) {
             LOG.info("installment id: " + installment.getId() + " Month " + installment.getInstallmentNumber());
             for (LoanCashFlowData cashFlow : loanCashFlowDataList) {
@@ -2307,14 +2319,17 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 if (cashFlow.getCashFlowType().equals("INCOME") && cashFlow.getParticularType().equals("Sales Income")) {
                     LOG.info("INCOME -- cashflow Data :- " + cashFlow.getName() + " " + cashFlow.getMonth0() + "    * *"
                             + cashFlow.getCashFlowType());
+                    if (cashFlowType != null && cashFlowType == 1 && month != null && Objects.equals(month, installment.getInstallmentNumber())) {
+                        incomeProjectionRate = updatedProjectionRate;
+                    }
                     if (installment.getInstallmentNumber() == 1) {
-                        salesComputed = computeProjection(projectionRate, cashFlow.getMonth0());
+                        salesComputed = computeProjection(incomeProjectionRate, cashFlow.getMonth0());
                         previousSales = salesComputed;
                     } else {
-                        salesComputed = computeProjection(projectionRate, previousSales);
+                        salesComputed = computeProjection(incomeProjectionRate, previousSales);
                         previousSales = salesComputed;
                     }
-                    saveCashFlowProjection(projectionRate, salesComputed, installment, cashFlow);
+                    saveCashFlowProjection(incomeProjectionRate, salesComputed, installment, cashFlow);
 
                     LOG.info("INCOME -- Computed :- " + salesComputed + "Previous sales" + previousSales);
                 }
@@ -2322,15 +2337,18 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 if (cashFlow.getCashFlowType().equals("EXPENSE") && cashFlow.getParticularType().equals("Purchases")) {
                     LOG.info("EXPENSE -- cashflow Data :- " + cashFlow.getName() + " " + cashFlow.getMonth0() + "    * *"
                             + cashFlow.getCashFlowType());
+                    if (cashFlowType != null && cashFlowType == 2 && month != null && Objects.equals(month, installment.getInstallmentNumber())) {
+                        expenseProjectionRate = updatedProjectionRate;
+                    }
 
                     if (installment.getInstallmentNumber() == 1) {
-                        purchaseComputed = computeProjection(projectionRate, cashFlow.getMonth0());
+                        purchaseComputed = computeProjection(expenseProjectionRate, cashFlow.getMonth0());
                         previousPurchases = purchaseComputed;
                     } else {
-                        purchaseComputed = computeProjection(projectionRate, previousPurchases);
+                        purchaseComputed = computeProjection(expenseProjectionRate, previousPurchases);
                         previousPurchases = purchaseComputed;
                     }
-                    saveCashFlowProjection(projectionRate, purchaseComputed, installment, cashFlow);
+                    saveCashFlowProjection(expenseProjectionRate, purchaseComputed, installment, cashFlow);
 
                     LOG.info("EXPENSE -- Computed :- " + purchaseComputed + "Previous purchase" + previousPurchases);
 
