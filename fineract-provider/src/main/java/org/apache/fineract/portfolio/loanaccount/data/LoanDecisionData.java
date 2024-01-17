@@ -35,9 +35,10 @@ public final class LoanDecisionData {
     private BigDecimal icReviewDecisionLevelFourRecommendedAmount;
     private BigDecimal icReviewDecisionLevelFiveRecommendedAmount;
 
-    public LoanDecisionData(Long loanId, Integer loanDecisionState, Integer loanNextDecisionState, BigDecimal icReviewDecisionLevelOneRecommendedAmount, BigDecimal icReviewDecisionLevelTwoRecommendedAmount,
-                            BigDecimal icReviewDecisionLevelThreeRecommendedAmount, BigDecimal icReviewDecisionLevelFourRecommendedAmount,
-                            BigDecimal icReviewDecisionLevelFiveRecommendedAmount) {
+    public LoanDecisionData(Long loanId, Integer loanDecisionState, Integer loanNextDecisionState,
+            BigDecimal icReviewDecisionLevelOneRecommendedAmount, BigDecimal icReviewDecisionLevelTwoRecommendedAmount,
+            BigDecimal icReviewDecisionLevelThreeRecommendedAmount, BigDecimal icReviewDecisionLevelFourRecommendedAmount,
+            BigDecimal icReviewDecisionLevelFiveRecommendedAmount) {
         this.loanId = loanId;
         this.loanDecisionState = loanDecisionState;
         this.loanNextDecisionState = loanNextDecisionState;

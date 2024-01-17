@@ -163,14 +163,15 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
             isIdeaClient = Boolean.FALSE;
         }
 
-        //Check CRB Verification has been executed
+        // Check CRB Verification has been executed
         if (loan.getCurrencyCode().equalsIgnoreCase("KES")) {
-            List<MetropolCrbIdentityReport> metropolCrbIdentityReportList = metropolCrbIdentityVerificationRepository.findByLoanId(loan.getId());
+            List<MetropolCrbIdentityReport> metropolCrbIdentityReportList = metropolCrbIdentityVerificationRepository
+                    .findByLoanId(loan.getId());
             if (metropolCrbIdentityReportList.isEmpty()) {
                 throw new LoanDueDiligenceException("error.msg.required.crb.verification", "CRB Verification required.");
             }
         } else if (loan.getCurrencyCode().equalsIgnoreCase("RWF")) {
-            //transunion
+            // transunion
             List<TransunionCrbHeader> transunionCrbHeaderList = transunionCrbHeaderRepository.findByLoanId(loan.getId());
             if (transunionCrbHeaderList.isEmpty()) {
                 throw new LoanDueDiligenceException("error.msg.required.crb.verification", "CRB Verification required.");
@@ -178,14 +179,13 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         }
 
         if (!isIdeaClient) {
-            //check for cashflow and financial ratio. Idea Client does not have a cashflow/ balancesheet
+            // check for cashflow and financial ratio. Idea Client does not have a cashflow/ balancesheet
             final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
             final MathContext mc = new MathContext(8, roundingMode);
 
             List<LoanCashFlowData> cashFlowData = this.loanReadPlatformService.retrieveCashFlow(loanId);
             if (CollectionUtils.isEmpty(cashFlowData)) {
-                throw new LoanDueDiligenceException("error.msg.loan.required.cashflow.data",
-                        "CashFlow data not available.");
+                throw new LoanDueDiligenceException("error.msg.loan.required.cashflow.data", "CashFlow data not available.");
             }
             LoanFinancialRatioData financialRatioData = this.loanReadPlatformService.findLoanFinancialRatioDataByLoanId(loanId);
             if (financialRatioData == null) {
@@ -195,7 +195,8 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
             BigDecimal maxEMI = financialRatioData.getNetCashFlow().divide(loan.getLoanProduct().getAllowableDSCR(), mc);
             BigDecimal calculatedAmount = maxEMI.multiply(BigDecimal.valueOf(loan.getNumberOfRepayments()), mc);
-            final BigDecimal recommendedAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.dueDiligenceRecommendedAmountParameterName);
+            final BigDecimal recommendedAmount = command
+                    .bigDecimalValueOfParameterNamed(LoanApiConstants.dueDiligenceRecommendedAmountParameterName);
             if (recommendedAmount.compareTo(calculatedAmount) > 0) {
                 throw new PlatformDataIntegrityException("error.msg.loan.recommended.amount.cannot.be.greater.than.calculated.amount",
                         "Recommended amount cannot be greater than the calculated amount", calculatedAmount);
@@ -378,7 +379,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         /* TODO Get max loan amount from cash flow calculation */
         final BigDecimal maxLoanAmount = BigDecimal.valueOf(100000);
         final int comparisonResult = maxLoanAmount.compareTo(recommendedAmount);
-        if(comparisonResult < 0) {
+        if (comparisonResult < 0) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.ic.review.recommended.amount.must.be.lower.than.max.loan.amount",
                     String.format("IC Review recommended value must be lower than Loan maximum amount from cash flow calculation"));
         }
@@ -417,9 +418,9 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         if (StringUtils.isNotBlank(loanDecisionObj.getIcReviewDecisionLevelOneNote())) {
             final Note note = Note.loanNote(loanObj,
-                    "Approve IC Review-Decision Level One : " + loanDecisionObj.getIcReviewDecisionLevelOneNote() +
-                    " Recommended Amount : " + recommendedAmount + " " + loan.getCurrencyCode() +
-                    " Loan Term : " + termFrequency + " " + PeriodFrequencyType.fromInt(termPeriodFrequencyEnum));
+                    "Approve IC Review-Decision Level One : " + loanDecisionObj.getIcReviewDecisionLevelOneNote() + " Recommended Amount : "
+                            + recommendedAmount + " " + loan.getCurrencyCode() + " Loan Term : " + termFrequency + " "
+                            + PeriodFrequencyType.fromInt(termPeriodFrequencyEnum));
             this.noteRepository.save(note);
         }
 
@@ -459,7 +460,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         /* TODO Get max loan amount from cash flow calculation */
         final BigDecimal maxLoanAmount = BigDecimal.valueOf(100000);
         final int comparisonResult = maxLoanAmount.compareTo(recommendedAmount);
-        if(comparisonResult < 0) {
+        if (comparisonResult < 0) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.ic.review.recommended.amount.must.be.lower.than.max.loan.amount",
                     String.format("IC Review recommended value must be lower than Loan maximum amount from cash flow calculation"));
         }
@@ -498,9 +499,9 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         if (StringUtils.isNotBlank(loanDecisionObj.getIcReviewDecisionLevelTwoNote())) {
             final Note note = Note.loanNote(loanObj,
-                    "Approve IC Review-Decision Level Two : " + loanDecisionObj.getIcReviewDecisionLevelTwoNote() +
-                            " Recommended Amount : " + recommendedAmount + " " + loan.getCurrencyCode() +
-                            " Loan Term : " + termFrequency + " " + PeriodFrequencyType.fromInt(termPeriodFrequencyEnum));
+                    "Approve IC Review-Decision Level Two : " + loanDecisionObj.getIcReviewDecisionLevelTwoNote() + " Recommended Amount : "
+                            + recommendedAmount + " " + loan.getCurrencyCode() + " Loan Term : " + termFrequency + " "
+                            + PeriodFrequencyType.fromInt(termPeriodFrequencyEnum));
             this.noteRepository.save(note);
         }
 
@@ -540,7 +541,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         /* TODO Get max loan amount from cash flow calculation */
         final BigDecimal maxLoanAmount = BigDecimal.valueOf(100000);
         final int comparisonResult = maxLoanAmount.compareTo(recommendedAmount);
-        if(comparisonResult < 0) {
+        if (comparisonResult < 0) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.ic.review.recommended.amount.must.be.lower.than.max.loan.amount",
                     String.format("IC Review recommended value must be lower than Loan maximum amount from cash flow calculation"));
         }
@@ -579,9 +580,9 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         if (StringUtils.isNotBlank(loanDecisionObj.getIcReviewDecisionLevelThreeNote())) {
             final Note note = Note.loanNote(loanObj,
-                    "Approve IC Review-Decision Level Three : " + loanDecisionObj.getIcReviewDecisionLevelThreeNote() +
-                            " Recommended Amount : " + recommendedAmount + " " + loan.getCurrencyCode() +
-                            " Loan Term : " + termFrequency + " " + PeriodFrequencyType.fromInt(termPeriodFrequencyEnum));
+                    "Approve IC Review-Decision Level Three : " + loanDecisionObj.getIcReviewDecisionLevelThreeNote()
+                            + " Recommended Amount : " + recommendedAmount + " " + loan.getCurrencyCode() + " Loan Term : " + termFrequency
+                            + " " + PeriodFrequencyType.fromInt(termPeriodFrequencyEnum));
             this.noteRepository.save(note);
         }
 
@@ -621,7 +622,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         /* TODO Get max loan amount from cash flow calculation */
         final BigDecimal maxLoanAmount = BigDecimal.valueOf(100000);
         final int comparisonResult = maxLoanAmount.compareTo(recommendedAmount);
-        if(comparisonResult < 0) {
+        if (comparisonResult < 0) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.ic.review.recommended.amount.must.be.lower.than.max.loan.amount",
                     String.format("IC Review recommended value must be lower than Loan maximum amount from cash flow calculation"));
         }
@@ -660,9 +661,9 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         if (StringUtils.isNotBlank(loanDecisionObj.getIcReviewDecisionLevelFourNote())) {
             final Note note = Note.loanNote(loanObj,
-                    "Approve IC Review-Decision Level Four : " + loanDecisionObj.getIcReviewDecisionLevelFourNote() +
-                            " Recommended Amount : " + recommendedAmount + " " + loan.getCurrencyCode() +
-                            " Loan Term : " + termFrequency + " " + PeriodFrequencyType.fromInt(termPeriodFrequencyEnum));
+                    "Approve IC Review-Decision Level Four : " + loanDecisionObj.getIcReviewDecisionLevelFourNote()
+                            + " Recommended Amount : " + recommendedAmount + " " + loan.getCurrencyCode() + " Loan Term : " + termFrequency
+                            + " " + PeriodFrequencyType.fromInt(termPeriodFrequencyEnum));
             this.noteRepository.save(note);
         }
 
@@ -702,7 +703,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         /* TODO Get max loan amount from cash flow calculation */
         final BigDecimal maxLoanAmount = BigDecimal.valueOf(100000);
         final int comparisonResult = maxLoanAmount.compareTo(recommendedAmount);
-        if(comparisonResult < 0) {
+        if (comparisonResult < 0) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.ic.review.recommended.amount.must.be.lower.than.max.loan.amount",
                     String.format("IC Review recommended value must be lower than Loan maximum amount from cash flow calculation"));
         }
@@ -738,9 +739,9 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         if (StringUtils.isNotBlank(loanDecisionObj.getIcReviewDecisionLevelFiveNote())) {
             final Note note = Note.loanNote(loanObj,
-                    "Approve IC Review-Decision Level Five : " + loanDecisionObj.getIcReviewDecisionLevelFiveNote() +
-                            " Recommended Amount : " + recommendedAmount + " " + loan.getCurrencyCode() +
-                            " Loan Term : " + termFrequency + " " + PeriodFrequencyType.fromInt(termPeriodFrequencyEnum));
+                    "Approve IC Review-Decision Level Five : " + loanDecisionObj.getIcReviewDecisionLevelFiveNote()
+                            + " Recommended Amount : " + recommendedAmount + " " + loan.getCurrencyCode() + " Loan Term : " + termFrequency
+                            + " " + PeriodFrequencyType.fromInt(termPeriodFrequencyEnum));
             this.noteRepository.save(note);
         }
 
@@ -758,7 +759,8 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
     public CommandProcessingResult acceptPrepareAndSignContract(Long loanId, JsonCommand command) {
         final AppUser currentUser = getAppUserIfPresent();
 
-        final Collection<DocumentData> documentData = this.documentReadPlatformService.retrieveLoanDocumentsFilterByDocumentType(LoanApiConstants.loanEntityType, loanId, LoanApiConstants.loanDocumentTypeContract);
+        final Collection<DocumentData> documentData = this.documentReadPlatformService.retrieveLoanDocumentsFilterByDocumentType(
+                LoanApiConstants.loanEntityType, loanId, LoanApiConstants.loanDocumentTypeContract);
         if (documentData.size() < 1) {
             throw new GeneralPlatformDomainRuleException("error.msg.loan.document.with.type.contract.not.found",
                     "Loan contract document not found. Please upload loan document with type Contract");

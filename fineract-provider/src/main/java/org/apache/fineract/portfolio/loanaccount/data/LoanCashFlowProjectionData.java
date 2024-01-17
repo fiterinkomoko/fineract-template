@@ -19,33 +19,33 @@
 package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
-import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public final class LoanCashFlowData {
+public final class LoanCashFlowProjectionData {
 
     private Long id;
+    private Long cashflowInfoId;
+    private Long scheduleInstallmentId;
+    private Long projectionRate;
     private Long loanId;
     private String cashFlowType;
     private String particularType;
     private String name;
-    private BigDecimal previousMonth2;
-    private BigDecimal previousMonth1;
-    private BigDecimal month0;
-    List<LoanCashFlowProjectionData> cashFlowProjectionDataList;
+    private BigDecimal amount;
 
-    public LoanCashFlowData(Long id, Long loanId, String cashFlowType, String particularType, String name, BigDecimal previousMonth2,
-            BigDecimal previousMonth1, BigDecimal month0) {
+    public LoanCashFlowProjectionData(Long id, Long cashflowInfoId, Long scheduleInstallmentId, Long projectionRate, Long loanId,
+            String cashFlowType, String particularType, String name, BigDecimal amount) {
         this.id = id;
+        this.cashflowInfoId = cashflowInfoId;
+        this.scheduleInstallmentId = scheduleInstallmentId;
+        this.projectionRate = projectionRate;
         this.loanId = loanId;
         this.cashFlowType = cashFlowType;
         this.particularType = particularType;
         this.name = name;
-        this.previousMonth2 = previousMonth2;
-        this.previousMonth1 = previousMonth1;
-        this.month0 = month0;
+        this.amount = amount;
     }
 }

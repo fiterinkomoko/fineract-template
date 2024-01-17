@@ -18,16 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
-import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
-public interface TransunionCrbHeaderRepository
-        extends JpaRepository<TransunionCrbHeader, Long>, JpaSpecificationExecutor<TransunionCrbHeader> {
-
-    @Query("from TransunionCrbHeader m where m.loanId.id=:loanId ")
-    List<TransunionCrbHeader> findByLoanId(@Param("loanId") Long loanId);
-
-}
+public interface LoanCashFlowProjectionRepository
+        extends JpaRepository<LoanCashFlowProjection, Long>, JpaSpecificationExecutor<LoanCashFlowProjection> {}

@@ -38,7 +38,8 @@ public class DocumentData {
     private final String documentType;
 
     public DocumentData(final Long id, final String parentEntityType, final Long parentEntityId, final String name, final String fileName,
-            final Long size, final String type, final String description, final String location, final Integer storageType, final String documentType) {
+            final Long size, final String type, final String description, final String location, final Integer storageType,
+            final String documentType) {
         this.id = id;
         this.parentEntityType = parentEntityType;
         this.parentEntityId = parentEntityId;

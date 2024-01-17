@@ -37,7 +37,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
@@ -61,7 +60,6 @@ import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
-import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
@@ -99,11 +97,14 @@ import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApplicationTimelineData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanFinancialRatioData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowProjectionData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowReport;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDecisionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDueDiligenceData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanFinancialRatioData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInterestRecalculationData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanNetCashFlowData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentScheduleInstallmentData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanStatusEnumData;
@@ -193,7 +194,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private final ConfigurationReadPlatformService configurationReadPlatformService;
     private final LoanDueDiligenceInfoRepository loanDueDiligenceInfoRepository;
     private final DropdownReadPlatformService dropdownReadPlatformService;
-    private final CurrencyReadPlatformService currencyReadPlatformService;
 
     @Autowired
     public LoanReadPlatformServiceImpl(final PlatformSecurityContext context,
@@ -211,7 +211,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final AccountDetailsReadPlatformService accountDetailsReadPlatformService, final LoanRepositoryWrapper loanRepositoryWrapper,
             final ColumnValidator columnValidator, DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper,
             SearchReadPlatformService searchReadPlatformService, final LoanDueDiligenceInfoRepository loanDueDiligenceInfoRepository,
-            final ConfigurationReadPlatformService configurationReadPlatformService, final DropdownReadPlatformService dropdownReadPlatformService, final CurrencyReadPlatformService currencyReadPlatformService) {
+            final ConfigurationReadPlatformService configurationReadPlatformService,
+            final DropdownReadPlatformService dropdownReadPlatformService) {
         this.context = context;
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
@@ -241,7 +242,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         this.loanDueDiligenceInfoRepository = loanDueDiligenceInfoRepository;
         this.configurationReadPlatformService = configurationReadPlatformService;
         this.dropdownReadPlatformService = dropdownReadPlatformService;
-        this.currencyReadPlatformService = currencyReadPlatformService;
     }
 
     @Override
@@ -596,23 +596,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
         final LoanDecisionData loanDecisionData = this.retrieveLoanDecisionByLoanId(loan.getId());
         BigDecimal approvedAmount;
-        if(loanDecisionData != null && loanDecisionData.getLoanDecisionState().equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())) {
+        if (loanDecisionData != null
+                && loanDecisionData.getLoanDecisionState().equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())) {
             approvedAmount = loan.getApprovedICReview();
         } else {
             approvedAmount = loan.getProposedPrincipal();
         }
         return new LoanApprovalData(approvedAmount, DateUtils.getBusinessLocalDate(), loan.getNetDisbursalAmount());
-    }
-
-    @Override
-    public LoanApprovalData retrieveICReviewTemplate(final Long loanId) {
-        final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
-        final String currencyCode = loan.getCurrencyCode();
-        final CurrencyData currency = currencyReadPlatformService.retrieveCurrency(currencyCode);
-        final Collection<EnumOptionData> termFrequencyTypeOptions = this.dropdownReadPlatformService.retrievePeriodFrequencyTypeOptions();
-        final LoanDecisionData loanDecisionData = this.retrieveLoanDecisionByLoanId(loan.getId());
-        return new LoanApprovalData(loan.getProposedPrincipal(), DateUtils.getBusinessLocalDate(), loan.getNetDisbursalAmount(),
-                termFrequencyTypeOptions, currency, loanDecisionData);
     }
 
     @Override
@@ -756,7 +746,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " l.total_recovered_derived as totalRecovered" + ", topuploan.account_no as closureLoanAccountNo, "
                     + " topup.topup_amount as topupAmount ,l.department_cv_id as departmentId,departmentV.code_value as departmentCode, "
                     + " ds.loan_decision_state as loanDecisionState , ds.next_loan_ic_review_decision_state as nextLoanIcReviewDecisionState, "
-                    + " l.description as description , l.kiva_id as kivaId , l.kiva_uuid as kivaUUId  " + " from m_loan l" //
+                    + " l.description as description , l.kiva_id as kivaId , l.kiva_uuid as kivaUUId , lp.allowable_dscr as allowableDscr "
+                    + " from m_loan l" //
                     + " join m_product_loan lp on lp.id = l.product_id" //
                     + " left join m_loan_recalculation_details lir on lir.loan_id = l.id " + " join m_currency rc on rc."
                     + sqlGenerator.escape("code") + " = l.currency_code" //
@@ -799,6 +790,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String description = rs.getString("description");
             final String kivaId = rs.getString("kivaId");
             final String kivaUUId = rs.getString("kivaUUId");
+            final Double allowableDscr = rs.getDouble("allowableDscr");
 
             final Long clientId = JdbcSupport.getLong(rs, "clientId");
             final String clientAccountNo = rs.getString("clientAccountNo");
@@ -1131,6 +1123,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             loanAccountData.setKivaId(kivaId);
             loanAccountData.setKivaUUId(kivaUUId);
             loanAccountData.setApprovedICReview(approvedICReview);
+            loanAccountData.setAllowableDscr(allowableDscr);
             return loanAccountData;
         }
     }
@@ -3178,6 +3171,36 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         return this.jdbcTemplate.query(sql, rm, loanId); // NOSONAR
     }
 
+    @Override
+    public Integer retrieveProjectionRate(Long loanId) {
+        final String sql = "SELECT rate.\"DefaultRate\" as rate FROM \"ProjectionRate\" rate WHERE rate.loan_id = ? ORDER BY rate.id DESC LIMIT 1";
+        return this.jdbcTemplate.queryForObject(sql, new Object[] { loanId }, Integer.class);
+    }
+
+    @Override
+    public List<LoanCashFlowProjectionData> retrieveCashFlowProjection(Long loanId) {
+        this.context.authenticatedUser();
+        final LoanCashFlowProjectionMapper rm = new LoanCashFlowProjectionMapper(sqlGenerator);
+
+        final String sql = "select " + rm.loanCashFlowProjection();
+
+        return this.jdbcTemplate.query(sql, rm, loanId); // NOSONAR
+    }
+
+    @Override
+    public LoanCashFlowReport retrieveCashFlowReport(Long loanId) {
+        LoanCashFlowReport loanCashFlowReport = new LoanCashFlowReport();
+        LoanNetCashFlowData netCashFlowData = new LoanNetCashFlowData();
+
+        List<LoanCashFlowData> cashFlowData = this.retrieveCashFlow(loanId);
+        List<LoanCashFlowProjectionData> cashFlowProjectionDataList = this.retrieveCashFlowProjection(loanId);
+
+        loanCashFlowReport.setCashFlowDataList(cashFlowData);
+        loanCashFlowReport.setCashFlowProjectionDataList(cashFlowProjectionDataList);
+        loanCashFlowReport.setNetCashFlowData(generateNetCashFlow(cashFlowData, netCashFlowData));
+        return loanCashFlowReport;
+    }
+
     private static final class LoanCashFlowMapper implements RowMapper<LoanCashFlowData> {
 
         private final DatabaseSpecificSQLGenerator sqlGenerator;
@@ -3190,15 +3213,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             return "                            cf.id                                           as id,          "
                     + "                           cf.loan_id                                      as loanId,  "
                     + "                           cashFlowT.code_value                            as cashFlowType,"
-                    + "                           particularT.code_value                          as particularType,"
-                    + " cf." + sqlGenerator.escape("Name") + " as name,"
-                    + " cf." + sqlGenerator.escape("PreviousMonth2") + " as previousMonth2,"
-                    + " cf." + sqlGenerator.escape("PreviousMonth1") + " as previousMonth1,"
-                    + " cf." + sqlGenerator.escape("Month0") + " as month0 "
-                    + "  FROM loan_cashflow_information cf"
-                    + "  INNER JOIN m_code_value cashFlowT ON cf." + sqlGenerator.escape("CashFlowType_cd_CashFlowType") + "   = cashFlowT.id"
-                    + "  INNER JOIN m_code_value particularT ON cf." + sqlGenerator.escape("ParticularType_cd_ParticularType") + "   = particularT.id"
-                    + "  WHERE loan_id = ? ";
+                    + "                           particularT.code_value                          as particularType," + " cf."
+                    + sqlGenerator.escape("Name") + " as name," + " cf." + sqlGenerator.escape("PreviousMonth2") + " as previousMonth2,"
+                    + " cf." + sqlGenerator.escape("PreviousMonth1") + " as previousMonth1," + " cf." + sqlGenerator.escape("Month0")
+                    + " as month0 " + "  FROM loan_cashflow_information cf" + "  INNER JOIN m_code_value cashFlowT ON cf."
+                    + sqlGenerator.escape("CashFlowType_cd_CashFlowType") + "   = cashFlowT.id"
+                    + "  INNER JOIN m_code_value particularT ON cf." + sqlGenerator.escape("ParticularType_cd_ParticularType")
+                    + "   = particularT.id" + "  WHERE loan_id = ? ";
         }
 
         @Override
@@ -3222,13 +3243,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final LoanDecisionDataMapper mapper = new LoanDecisionDataMapper(sqlGenerator);
         String sql = "select " + mapper.schema();
         List<LoanDecisionData> result = this.jdbcTemplate.query(sql, mapper, loanId);
-        if(!result.isEmpty()) {
+        if (!result.isEmpty()) {
             return result.get(0);
         }
         return null;
     }
 
     public static final class LoanDecisionDataMapper implements RowMapper<LoanDecisionData> {
+
         private final DatabaseSpecificSQLGenerator sqlGenerator;
 
         LoanDecisionDataMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
@@ -3260,7 +3282,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final BigDecimal icReviewDecisionLevelFourRecommendedAmount = rs.getBigDecimal("icReviewDecisionLevelFourRecommendedAmount");
             final BigDecimal icReviewDecisionLevelFiveRecommendedAmount = rs.getBigDecimal("icReviewDecisionLevelFiveRecommendedAmount");
 
-
             return new LoanDecisionData(loanId, loanDecisionState, loanNextDecisionState, icReviewDecisionLevelOneRecommendedAmount,
                     icReviewDecisionLevelTwoRecommendedAmount, icReviewDecisionLevelThreeRecommendedAmount,
                     icReviewDecisionLevelFourRecommendedAmount, icReviewDecisionLevelFiveRecommendedAmount);
@@ -3268,7 +3289,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
     }
 
-   @Override
+    @Override
     public LoanFinancialRatioData retrieveLoanFinancialRatioData(Long loanId) {
         List<LoanCashFlowData> cashFlowData = retrieveCashFlow(loanId);
         if (CollectionUtils.isEmpty(cashFlowData)) {
@@ -3277,7 +3298,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
         LoanFinancialRatioData financialRatioData = findLoanFinancialRatioDataByLoanId(loanId);
         if (financialRatioData == null) {
-            throw new GeneralPlatformDomainRuleException("error.msg.loan.balancesheet.data.is.not.available.financialratio.cannot.be.generated",
+            throw new GeneralPlatformDomainRuleException(
+                    "error.msg.loan.balancesheet.data.is.not.available.financialratio.cannot.be.generated",
                     "Financial Ratio report cannot be created. Balance Sheet data not available.");
         }
 
@@ -3292,25 +3314,19 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
         final MathContext mc = new MathContext(8, roundingMode);
         List<String> incomeParticularTypes = Arrays.asList("Sales Income", "Other Income");
-        List<String> expenseParticularTypes = Arrays.asList("Purchases", "Business Expenses","Household Expenses");
-        BigDecimal totalIncome = cashFlowData.stream()
-                .filter(cashFlow ->
-                        cashFlow.getCashFlowType().equals("INCOME") && incomeParticularTypes.contains(cashFlow.getParticularType()))
-                .map(LoanCashFlowData::getMonth0)
-                .reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+        List<String> expenseParticularTypes = Arrays.asList("Purchases", "Business Expenses", "Household Expenses");
+        BigDecimal totalIncome = cashFlowData.stream().filter(
+                cashFlow -> cashFlow.getCashFlowType().equals("INCOME") && incomeParticularTypes.contains(cashFlow.getParticularType()))
+                .map(LoanCashFlowData::getMonth0).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
 
-        BigDecimal totalExpense = cashFlowData.stream()
-                .filter(cashFlow ->
-                        cashFlow.getCashFlowType().equals("EXPENSE") && expenseParticularTypes.contains(cashFlow.getParticularType()))
-                .map(LoanCashFlowData::getMonth0)
-                .reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+        BigDecimal totalExpense = cashFlowData.stream().filter(
+                cashFlow -> cashFlow.getCashFlowType().equals("EXPENSE") && expenseParticularTypes.contains(cashFlow.getParticularType()))
+                .map(LoanCashFlowData::getMonth0).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
 
         BigDecimal netCashFlow = totalIncome.subtract(totalExpense);
         BigDecimal purchases = cashFlowData.stream()
-                .filter(cashFlow ->
-                        cashFlow.getCashFlowType().equals("EXPENSE") && cashFlow.getParticularType().equals("Purchases"))
-                .map(LoanCashFlowData::getMonth0)
-                .reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+                .filter(cashFlow -> cashFlow.getCashFlowType().equals("EXPENSE") && cashFlow.getParticularType().equals("Purchases"))
+                .map(LoanCashFlowData::getMonth0).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
 
         BigDecimal netMargin = netCashFlow.divide(purchases, mc);
 
@@ -3322,7 +3338,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         if (loan.getLoanDecisionState().equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())) {
             LoanRepaymentScheduleInstallment installment = loan.getRepaymentScheduleInstallments().get(0);
             BigDecimal emi = installment.getTotalPrincipalAndInterest(loan.getCurrency()).getAmount();
-             dscr = emi.divide(netCashFlow, mc);
+            dscr = emi.divide(netCashFlow, mc);
         }
 
         financialRatioData.setNetMargin(netMargin);
@@ -3335,22 +3351,21 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         financialRatioData.setTotalExpense(totalExpense);
         financialRatioData.setNetCashFlow(netCashFlow);
     }
+
     @Override
     public LoanFinancialRatioData findLoanFinancialRatioDataByLoanId(Long loanId) {
         this.context.authenticatedUser();
         final LoanFinancialRatioMapper rm = new LoanFinancialRatioMapper();
 
-        final String sql = "select id, loan_id, cash as cash, inventory_stock as inventory_stock, receivables as receivables, chama_tontines as chama_tontines, " +
-                "  other_current_assets as other_current_assets, total_current_assets as total_current_assets,  " +
-                "  goods_bought_on_credit as goods_bought_on_credit, any_other_pending_payables as any_other_pending_payables, total_short_term as total_short_term, " +
-                "  equipment_tools as equipment_tools, furniture as furniture, business_premises as business_premises,  " +
-                "  other_fixed_assets as other_fixed_assets, total_fixed_assets as total_fixed_assets, total_assets as total_assets, equity as equity, " +
-                "  unsecured_loans as unsecured_loans, asset_financing as asset_financing, total_long_term as total_long_term,  " +
-                "  total_liabilities as total_liabilities, bss_deposits as bss_deposits, bss_withdrawals as bss_withdrawals, " +
-                "  bss_monthly_turn_over as bss_monthly_turn_over  " +
-                " FROM loan_balancesheet  " +
-                " WHERE loan_id= ? " +
-                " order by id desc limit 1 ";
+        final String sql = "select id, loan_id, cash as cash, inventory_stock as inventory_stock, receivables as receivables, chama_tontines as chama_tontines, "
+                + "  other_current_assets as other_current_assets, total_current_assets as total_current_assets,  "
+                + "  goods_bought_on_credit as goods_bought_on_credit, any_other_pending_payables as any_other_pending_payables, total_short_term as total_short_term, "
+                + "  equipment_tools as equipment_tools, furniture as furniture, business_premises as business_premises,  "
+                + "  other_fixed_assets as other_fixed_assets, total_fixed_assets as total_fixed_assets, total_assets as total_assets, equity as equity, "
+                + "  unsecured_loans as unsecured_loans, asset_financing as asset_financing, total_long_term as total_long_term,  "
+                + "  total_liabilities as total_liabilities, bss_deposits as bss_deposits, bss_withdrawals as bss_withdrawals, "
+                + "  bss_monthly_turn_over as bss_monthly_turn_over  " + " FROM loan_balancesheet  " + " WHERE loan_id= ? "
+                + " order by id desc limit 1 ";
 
         List<LoanFinancialRatioData> data = this.jdbcTemplate.query(sql, rm, loanId);
         if (!data.isEmpty()) {
@@ -3391,9 +3406,85 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final BigDecimal bss_withdrawals = rs.getBigDecimal("bss_withdrawals");
             final BigDecimal bss_monthly_turn_over = rs.getBigDecimal("bss_monthly_turn_over");
 
-            return new LoanFinancialRatioData(id, loanId, cash, inventory_stock, receivables, chama_tontines, other_current_assets, total_current_assets,
-                    goods_bought_on_credit, any_other_pending_payables, total_short_term, equipment_tools, furniture, business_premises, other_fixed_assets, total_fixed_assets,
-                    total_assets, equity, unsecured_loans, asset_financing,  total_long_term, total_liabilities, bss_deposits, bss_withdrawals, bss_monthly_turn_over);
+            return new LoanFinancialRatioData(id, loanId, cash, inventory_stock, receivables, chama_tontines, other_current_assets,
+                    total_current_assets, goods_bought_on_credit, any_other_pending_payables, total_short_term, equipment_tools, furniture,
+                    business_premises, other_fixed_assets, total_fixed_assets, total_assets, equity, unsecured_loans, asset_financing,
+                    total_long_term, total_liabilities, bss_deposits, bss_withdrawals, bss_monthly_turn_over);
         }
     }
+
+    private static final class LoanCashFlowProjectionMapper implements RowMapper<LoanCashFlowProjectionData> {
+
+        private final DatabaseSpecificSQLGenerator sqlGenerator;
+
+        LoanCashFlowProjectionMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
+            this.sqlGenerator = sqlGenerator;
+        }
+
+        public String loanCashFlowProjection() {
+            return "        proj.id AS id," + "       proj.cashflow_info_id AS cashflowInfoId, "
+                    + "       proj.amount           AS amount, " + "       proj.schedule_id      AS scheduleInstallmentId, "
+                    + "       proj.projection_rate      AS projectionRate, " + "       info.loan_id          AS loanId, "
+                    + "        cashFlowT.code_value   as cashFlowType, " + "       particularT.code_value as particularType, "
+                    + "       info.\"Name\"              as name " + " FROM m_loan_cashflow_projection proj "
+                    + "         INNER JOIN loan_cashflow_information info ON proj.cashflow_info_id = info.id "
+                    + "         INNER JOIN m_code_value cashFlowT ON info.\"CashFlowType_cd_CashFlowType\" = cashFlowT.id "
+                    + "         INNER JOIN m_code_value particularT ON info.\"ParticularType_cd_ParticularType\" = particularT.id "
+                    + " WHERE info.loan_id = ? " + " ORDER BY proj.id ASC ";
+        }
+
+        @Override
+        public LoanCashFlowProjectionData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+            final Long id = rs.getLong("id");
+            final Long cashflowInfoId = rs.getLong("cashflowInfoId");
+            final Long scheduleInstallmentId = rs.getLong("scheduleInstallmentId");
+            final Long projectionRate = rs.getLong("projectionRate");
+            final Long loanId = rs.getLong("loanId");
+            final String cashFlowType = rs.getString("cashFlowType");
+            final String particularType = rs.getString("particularType");
+            final String name = rs.getString("name");
+
+            final BigDecimal amount = rs.getBigDecimal("amount");
+
+            return new LoanCashFlowProjectionData(id, cashflowInfoId, scheduleInstallmentId, projectionRate, loanId, cashFlowType,
+                    particularType, name, amount);
+        }
+    }
+
+    private LoanNetCashFlowData generateNetCashFlow(List<LoanCashFlowData> cashFlowData, LoanNetCashFlowData netCashFlowData) {
+
+        List<String> incomeParticularTypes = Arrays.asList("Sales Income", "Other Income");
+        List<String> expenseParticularTypes = Arrays.asList("Purchases", "Business Expenses", "Household Expenses");
+
+        BigDecimal totalIncomeMonth0 = cashFlowData.stream().filter(
+                cashFlow -> cashFlow.getCashFlowType().equals("INCOME") && incomeParticularTypes.contains(cashFlow.getParticularType()))
+                .map(LoanCashFlowData::getMonth0).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+
+        BigDecimal totalExpenseMonth0 = cashFlowData.stream().filter(
+                cashFlow -> cashFlow.getCashFlowType().equals("EXPENSE") && expenseParticularTypes.contains(cashFlow.getParticularType()))
+                .map(LoanCashFlowData::getMonth0).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+
+        BigDecimal totalIncomePreviousMonth1 = cashFlowData.stream().filter(
+                cashFlow -> cashFlow.getCashFlowType().equals("INCOME") && incomeParticularTypes.contains(cashFlow.getParticularType()))
+                .map(LoanCashFlowData::getPreviousMonth1).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+
+        BigDecimal totalExpensePreviousMonth1 = cashFlowData.stream().filter(
+                cashFlow -> cashFlow.getCashFlowType().equals("EXPENSE") && expenseParticularTypes.contains(cashFlow.getParticularType()))
+                .map(LoanCashFlowData::getPreviousMonth1).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+
+        BigDecimal totalIncomePreviousMonth2 = cashFlowData.stream().filter(
+                cashFlow -> cashFlow.getCashFlowType().equals("INCOME") && incomeParticularTypes.contains(cashFlow.getParticularType()))
+                .map(LoanCashFlowData::getPreviousMonth2).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+
+        BigDecimal totalExpensePreviousMonth2 = cashFlowData.stream().filter(
+                cashFlow -> cashFlow.getCashFlowType().equals("EXPENSE") && expenseParticularTypes.contains(cashFlow.getParticularType()))
+                .map(LoanCashFlowData::getPreviousMonth2).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+
+        netCashFlowData.setMonth0(totalIncomeMonth0.subtract(totalExpenseMonth0));
+        netCashFlowData.setPreviousMonth1(totalIncomePreviousMonth1.subtract(totalExpensePreviousMonth1));
+        netCashFlowData.setPreviousMonth2(totalIncomePreviousMonth2.subtract(totalExpensePreviousMonth2));
+
+        return netCashFlowData;
+    }
+
 }

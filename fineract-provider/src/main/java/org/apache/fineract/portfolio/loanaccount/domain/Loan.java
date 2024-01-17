@@ -7129,8 +7129,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             compareApprovedToProposedPrincipal(icReviewRecommendedAmount);
 
             /*
-             * All the calculations are done based on the principal amount, so it is necessary to set principal
-             * amount to approved amount
+             * All the calculations are done based on the principal amount, so it is necessary to set principal amount
+             * to approved amount
              */
             this.approvedPrincipal = icReviewRecommendedAmount;
             this.approvedICReview = icReviewRecommendedAmount;

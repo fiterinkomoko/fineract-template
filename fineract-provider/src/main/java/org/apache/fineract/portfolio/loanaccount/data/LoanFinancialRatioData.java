@@ -18,10 +18,9 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
+import java.math.BigDecimal;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
@@ -62,13 +61,12 @@ public final class LoanFinancialRatioData {
     private BigDecimal totalExpense;
     private BigDecimal netCashFlow;
 
-
-    public LoanFinancialRatioData(Long id, Long loanId, BigDecimal cash, BigDecimal inventoryStock, BigDecimal receivables, BigDecimal chamaTontines,
-                                  BigDecimal otherCurrentAssets, BigDecimal totalCurrentAssets, BigDecimal goodsBoughtOnCredit, BigDecimal anyOtherPendingPayables,
-                                  BigDecimal totalShortTerm, BigDecimal equipmentTools, BigDecimal furniture, BigDecimal businessPremises, BigDecimal otherFixedAssets,
-                                  BigDecimal totalFixedAssets, BigDecimal totalAssets, BigDecimal equity, BigDecimal unsecuredLoans, BigDecimal assetFinancing,
-                                  BigDecimal totalLongTerm, BigDecimal totalLiabilities, BigDecimal bssDeposits, BigDecimal bssWithdrawals,
-                                  BigDecimal bssMonthlyTurnOver) {
+    public LoanFinancialRatioData(Long id, Long loanId, BigDecimal cash, BigDecimal inventoryStock, BigDecimal receivables,
+            BigDecimal chamaTontines, BigDecimal otherCurrentAssets, BigDecimal totalCurrentAssets, BigDecimal goodsBoughtOnCredit,
+            BigDecimal anyOtherPendingPayables, BigDecimal totalShortTerm, BigDecimal equipmentTools, BigDecimal furniture,
+            BigDecimal businessPremises, BigDecimal otherFixedAssets, BigDecimal totalFixedAssets, BigDecimal totalAssets,
+            BigDecimal equity, BigDecimal unsecuredLoans, BigDecimal assetFinancing, BigDecimal totalLongTerm, BigDecimal totalLiabilities,
+            BigDecimal bssDeposits, BigDecimal bssWithdrawals, BigDecimal bssMonthlyTurnOver) {
         this.id = id;
         this.loanId = loanId;
         this.cash = cash;

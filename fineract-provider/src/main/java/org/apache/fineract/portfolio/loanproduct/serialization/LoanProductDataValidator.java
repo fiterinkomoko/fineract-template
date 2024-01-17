@@ -330,7 +330,8 @@ public final class LoanProductDataValidator {
         }
 
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.allowableDSCR, element)) {
-            BigDecimal allowableDSCR = this.fromApiJsonHelper.extractBigDecimalNamed(LoanProductConstants.allowableDSCR, element, Locale.US);
+            BigDecimal allowableDSCR = this.fromApiJsonHelper.extractBigDecimalNamed(LoanProductConstants.allowableDSCR, element,
+                    Locale.US);
             baseDataValidator.reset().parameter(LoanProductConstants.allowableDSCR).value(allowableDSCR).notNull();
         }
 
@@ -1217,7 +1218,8 @@ public final class LoanProductDataValidator {
         }
 
         if (this.fromApiJsonHelper.parameterExists(LoanProductConstants.allowableDSCR, element)) {
-            BigDecimal allowableDSCR = this.fromApiJsonHelper.extractBigDecimalNamed(LoanProductConstants.allowableDSCR, element, Locale.US);
+            BigDecimal allowableDSCR = this.fromApiJsonHelper.extractBigDecimalNamed(LoanProductConstants.allowableDSCR, element,
+                    Locale.US);
             baseDataValidator.reset().parameter(LoanProductConstants.allowableDSCR).value(allowableDSCR).notNull();
         }
 
