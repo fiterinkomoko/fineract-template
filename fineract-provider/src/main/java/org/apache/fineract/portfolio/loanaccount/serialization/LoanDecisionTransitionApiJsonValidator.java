@@ -95,10 +95,9 @@ public final class LoanDecisionTransitionApiJsonValidator {
 
         final Set<String> disbursementParameters = new HashSet<>(Arrays.asList(LoanApiConstants.loanId,
                 LoanApiConstants.loanReviewOnDateParameterName, LoanApiConstants.noteParameterName, LoanApiConstants.localeParameterName,
-                LoanApiConstants.dateFormatParameterName, LoanApiConstants.dueDiligenceOnDateParameterName,
-                LoanApiConstants.surveyNameParameterName, LoanApiConstants.startDateParameterName, LoanApiConstants.endDateParameterName,
-                LoanApiConstants.surveyLocationParameterName, LoanApiConstants.programParameterName, LoanApiConstants.countryParameterName,
-                LoanApiConstants.cohortParameterName));
+                LoanApiConstants.dateFormatParameterName, LoanApiConstants.dueDiligenceOnDateParameterName,LoanApiConstants.dueDiligenceRecommendedAmountParameterName,
+                LoanApiConstants.recommendedLoanTermFrequencyParameterName, LoanApiConstants.recommendedLoanTermFrequencyTypeParameterName,
+                LoanApiConstants.isIdeaClientParamName));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
@@ -115,27 +114,24 @@ public final class LoanDecisionTransitionApiJsonValidator {
         final String note = this.fromApiJsonHelper.extractStringNamed(LoanApiConstants.noteParameterName, element);
         baseDataValidator.reset().parameter(LoanApiConstants.noteParameterName).value(note).notExceedingLengthOf(1000).notNull();
 
-        final String surveyName = this.fromApiJsonHelper.extractStringNamed(LoanApiConstants.surveyNameParameterName, element);
-        baseDataValidator.reset().parameter(LoanApiConstants.surveyNameParameterName).value(surveyName).notExceedingLengthOf(200).notNull();
-
-        final LocalDate startDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.startDateParameterName, element);
-        baseDataValidator.reset().parameter(LoanApiConstants.startDateParameterName).value(startDate).notNull();
-
-        final LocalDate endDate = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.endDateParameterName, element);
-        baseDataValidator.reset().parameter(LoanApiConstants.endDateParameterName).value(endDate).notNull();
-
-        final Long surveyLocation = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.surveyLocationParameterName, element);
-        baseDataValidator.reset().parameter(LoanApiConstants.surveyLocationParameterName).value(surveyLocation).notNull()
+        final BigDecimal recommendedAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.dueDiligenceRecommendedAmountParameterName, element);
+        baseDataValidator.reset().parameter(LoanApiConstants.dueDiligenceRecommendedAmountParameterName).value(recommendedAmount).notNull()
                 .integerGreaterThanZero();
 
-        final Long cohort = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.cohortParameterName, element);
-        baseDataValidator.reset().parameter(LoanApiConstants.cohortParameterName).value(cohort).notNull().integerGreaterThanZero();
+        final Long recommendedLoanTermFrequency = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.recommendedLoanTermFrequencyParameterName, element);
+        baseDataValidator.reset().parameter(LoanApiConstants.recommendedLoanTermFrequencyParameterName).value(recommendedLoanTermFrequency).notNull()
+                .integerGreaterThanZero();
 
-        final Long program = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.programParameterName, element);
-        baseDataValidator.reset().parameter(LoanApiConstants.programParameterName).value(program).notNull().integerGreaterThanZero();
+        final Long recommendedLoanTermFrequencyType = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.recommendedLoanTermFrequencyTypeParameterName, element);
+        baseDataValidator.reset().parameter(LoanApiConstants.recommendedLoanTermFrequencyTypeParameterName).value(recommendedLoanTermFrequencyType).notNull()
+                .integerGreaterThanZero();
 
-        final Long country = this.fromApiJsonHelper.extractLongNamed(LoanApiConstants.countryParameterName, element);
-        baseDataValidator.reset().parameter(LoanApiConstants.countryParameterName).value(country).notNull().integerGreaterThanZero();
+        Boolean isIdeaClient = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.isIdeaClientParamName, element);
+        if (isIdeaClient == null)
+            isIdeaClient = Boolean.FALSE;
+        baseDataValidator.reset().parameter(LoanApiConstants.isIdeaClientParamName).value(isIdeaClient).notNull()
+                .validateForBooleanValue();
+
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -1286,6 +1282,32 @@ public final class LoanDecisionTransitionApiJsonValidator {
                 .extractIntegerNamed(LoanApiConstants.icReviewTermPeriodFrequencyEnum, element, Locale.US);
         baseDataValidator.reset().parameter(LoanApiConstants.icReviewTermPeriodFrequencyEnum).value(icReviewTermPeriodFrequencyEnum)
                 .notNull();
+        final String note = this.fromApiJsonHelper.extractStringNamed(LoanApiConstants.noteParameterName, element);
+        baseDataValidator.reset().parameter(LoanApiConstants.noteParameterName).value(note).notExceedingLengthOf(1000).notNull();
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validatePrepareAndSignContractStage(final String json) {
+
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+
+        final Set<String> reviewParameters = new HashSet<>(
+                Arrays.asList(LoanApiConstants.loanId, LoanApiConstants.icReviewOnDateParameterName, LoanApiConstants.noteParameterName,
+                        LoanApiConstants.localeParameterName, LoanApiConstants.dateFormatParameterName));
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, reviewParameters);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loanDecisionEngine");
+
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        final LocalDate icReviewOn = this.fromApiJsonHelper.extractLocalDateNamed(LoanApiConstants.icReviewOnDateParameterName, element);
+        baseDataValidator.reset().parameter(LoanApiConstants.icReviewOnDateParameterName).value(icReviewOn).notNull();
         final String note = this.fromApiJsonHelper.extractStringNamed(LoanApiConstants.noteParameterName, element);
         baseDataValidator.reset().parameter(LoanApiConstants.noteParameterName).value(note).notExceedingLengthOf(1000).notNull();
 

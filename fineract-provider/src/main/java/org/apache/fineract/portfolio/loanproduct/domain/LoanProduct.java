@@ -1781,4 +1781,8 @@ public class LoanProduct extends AbstractPersistableCustom {
     public Boolean isIslamic() {
         return isIslamic;
     }
+
+    public BigDecimal getAllowableDSCR() {
+        return this.allowableDSCR;
+    }
 }

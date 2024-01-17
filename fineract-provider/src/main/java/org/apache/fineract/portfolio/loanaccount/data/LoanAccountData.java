@@ -149,7 +149,7 @@ public final class LoanAccountData {
     private final Collection<StaffData> loanOfficerOptions;
     private final Collection<CodeValueData> loanPurposeOptions;
     private final Collection<FundData> fundOptions;
-    private final Collection<EnumOptionData> termFrequencyTypeOptions;
+    private Collection<EnumOptionData> termFrequencyTypeOptions;
     private final Collection<EnumOptionData> repaymentFrequencyTypeOptions;
     private final Collection<EnumOptionData> repaymentFrequencyNthDayTypeOptions;
     private final Collection<EnumOptionData> repaymentFrequencyDaysOfWeekTypeOptions;
@@ -264,6 +264,7 @@ public final class LoanAccountData {
     private String description;
     private String kivaId;
     private String kivaUUId;
+    private BigDecimal approvedICReview;
     private Double allowableDscr;
 
     public static LoanAccountData importInstanceIndividual(EnumOptionData loanTypeEnumOption, Long clientId, Long productId,
@@ -1414,6 +1415,7 @@ public final class LoanAccountData {
         loanAccountData.setDescription(acc.description);
         loanAccountData.setKivaId(acc.kivaId);
         loanAccountData.setKivaUUId(acc.kivaUUId);
+        loanAccountData.setApprovedICReview(acc.approvedICReview);
         loanAccountData.setAllowableDscr(acc.allowableDscr);
         return loanAccountData;
     }
@@ -2212,6 +2214,13 @@ public final class LoanAccountData {
 
     public Long getId() {
         return id;
+    }
+
+    public void setTermFrequencyTypeOptions(Collection<EnumOptionData> termFrequencyTypeOptions) {
+        this.termFrequencyTypeOptions = termFrequencyTypeOptions;
+    }
+    public void setApprovedICReview(BigDecimal approvedICReview) {
+        this.approvedICReview = approvedICReview;
     }
 
     public Double getAllowableDscr() {

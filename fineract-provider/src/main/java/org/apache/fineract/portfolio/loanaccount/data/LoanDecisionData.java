@@ -26,20 +26,33 @@ public final class LoanDecisionData {
     private Long clientId;
     private Long loanStatus;
     private Long loanSubStatus;
+
+    private Integer loanDecisionState;
+    private Integer loanNextDecisionState;
     private BigDecimal icReviewDecisionLevelOneRecommendedAmount;
     private BigDecimal icReviewDecisionLevelTwoRecommendedAmount;
     private BigDecimal icReviewDecisionLevelThreeRecommendedAmount;
     private BigDecimal icReviewDecisionLevelFourRecommendedAmount;
     private BigDecimal icReviewDecisionLevelFiveRecommendedAmount;
 
-    public LoanDecisionData(Long loanId, BigDecimal icReviewDecisionLevelOneRecommendedAmount,
+    public LoanDecisionData(Long loanId, Integer loanDecisionState, Integer loanNextDecisionState, BigDecimal icReviewDecisionLevelOneRecommendedAmount,
             BigDecimal icReviewDecisionLevelTwoRecommendedAmount, BigDecimal icReviewDecisionLevelThreeRecommendedAmount,
             BigDecimal icReviewDecisionLevelFourRecommendedAmount, BigDecimal icReviewDecisionLevelFiveRecommendedAmount) {
         this.loanId = loanId;
+        this.loanDecisionState = loanDecisionState;
+        this.loanNextDecisionState = loanNextDecisionState;
         this.icReviewDecisionLevelOneRecommendedAmount = icReviewDecisionLevelOneRecommendedAmount;
         this.icReviewDecisionLevelTwoRecommendedAmount = icReviewDecisionLevelTwoRecommendedAmount;
         this.icReviewDecisionLevelThreeRecommendedAmount = icReviewDecisionLevelThreeRecommendedAmount;
         this.icReviewDecisionLevelFourRecommendedAmount = icReviewDecisionLevelFourRecommendedAmount;
         this.icReviewDecisionLevelFiveRecommendedAmount = icReviewDecisionLevelFiveRecommendedAmount;
+    }
+
+    public Integer getLoanDecisionState() {
+        return loanDecisionState;
+    }
+
+    public Integer getLoanNextDecisionState() {
+        return loanNextDecisionState;
     }
 }
