@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
@@ -593,7 +594,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     @Override
     public LoanApprovalData retrieveApprovalTemplate(final Long loanId) {
         final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
-        return new LoanApprovalData(loan.getProposedPrincipal(), DateUtils.getBusinessLocalDate(), loan.getNetDisbursalAmount());
+        final LoanDecisionData loanDecisionData = this.retrieveLoanDecisionByLoanId(loan.getId());
+        BigDecimal approvedAmount;
+        if(loanDecisionData != null && loanDecisionData.getLoanDecisionState().equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())) {
+            approvedAmount = loan.getApprovedICReview();
+        } else {
+            approvedAmount = loan.getProposedPrincipal();
+        }
+        return new LoanApprovalData(approvedAmount, DateUtils.getBusinessLocalDate(), loan.getNetDisbursalAmount());
     }
 
     @Override
@@ -684,7 +692,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " l.expected_disbursedon_date as expectedDisbursementDate, l.disbursedon_date as actualDisbursementDate, dbu.username as disbursedByUsername, dbu.firstname as disbursedByFirstname, dbu.lastname as disbursedByLastname,"
                     + " l.closedon_date as closedOnDate, cbu.username as closedByUsername, cbu.firstname as closedByFirstname, cbu.lastname as closedByLastname, l.writtenoffon_date as writtenOffOnDate, "
                     + " l.expected_firstrepaymenton_date as expectedFirstRepaymentOnDate, l.interest_calculated_from_date as interestChargedFromDate, l.expected_maturedon_date as expectedMaturityDate, "
-                    + " l.principal_amount_proposed as proposedPrincipal, l.principal_amount as principal, l.approved_principal as approvedPrincipal, l.net_disbursal_amount as netDisbursalAmount, l.arrearstolerance_amount as inArrearsTolerance, l.number_of_repayments as numberOfRepayments, l.repay_every as repaymentEvery,"
+                    + " l.principal_amount_proposed as proposedPrincipal, l.principal_amount as principal, l.approved_icreview as approvedICReview, l.approved_principal as approvedPrincipal, l.net_disbursal_amount as netDisbursalAmount, l.arrearstolerance_amount as inArrearsTolerance, l.number_of_repayments as numberOfRepayments, l.repay_every as repaymentEvery,"
                     + " l.grace_on_principal_periods as graceOnPrincipalPayment, l.recurring_moratorium_principal_periods as recurringMoratoriumOnPrincipalPeriods, l.grace_on_interest_periods as graceOnInterestPayment, l.grace_interest_free_periods as graceOnInterestCharged,l.grace_on_arrears_ageing as graceOnArrearsAgeing,"
                     + " l.nominal_interest_rate_per_period as interestRatePerPeriod, l.annual_nominal_interest_rate as annualInterestRate, "
                     + " l.repayment_period_frequency_enum as repaymentFrequencyType, l.interest_period_frequency_enum as interestRateFrequencyType, "
@@ -882,6 +890,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final BigDecimal principal = rs.getBigDecimal("principal");
             final BigDecimal approvedPrincipal = rs.getBigDecimal("approvedPrincipal");
             final BigDecimal proposedPrincipal = rs.getBigDecimal("proposedPrincipal");
+            final BigDecimal approvedICReview = rs.getBigDecimal("approvedICReview");
             final BigDecimal netDisbursalAmount = rs.getBigDecimal("netDisbursalAmount");
             final BigDecimal totalOverpaid = rs.getBigDecimal("totalOverpaid");
             final BigDecimal inArrearsTolerance = rs.getBigDecimal("inArrearsTolerance");
@@ -1121,6 +1130,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             loanAccountData.setDescription(description);
             loanAccountData.setKivaId(kivaId);
             loanAccountData.setKivaUUId(kivaUUId);
+            loanAccountData.setApprovedICReview(approvedICReview);
             return loanAccountData;
         }
     }
@@ -3211,8 +3221,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     public LoanDecisionData retrieveLoanDecisionByLoanId(Long loanId) {
         final LoanDecisionDataMapper mapper = new LoanDecisionDataMapper(sqlGenerator);
         String sql = "select " + mapper.schema();
-        LoanDecisionData loanDecisionData = this.jdbcTemplate.queryForObject(sql, mapper, loanId);
-        return loanDecisionData;
+        List<LoanDecisionData> result = this.jdbcTemplate.query(sql, mapper, loanId);
+        if(!result.isEmpty()) {
+            return result.get(0);
+        }
+        return null;
     }
 
     public static final class LoanDecisionDataMapper implements RowMapper<LoanDecisionData> {
@@ -3225,6 +3238,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         public String schema() {
             StringBuilder sb = new StringBuilder();
             sb.append(" ld.loan_id as loanId, "
+                    + "ld.loan_decision_state as loanDecisionState, ld.next_loan_ic_review_decision_state as loanNextDecisionState, "
                     + "ld.ic_review_decision_level_one_recommended_amount as icReviewDecisionLevelOneRecommendedAmount, "
                     + "ld.ic_review_decision_level_two_recommended_amount as icReviewDecisionLevelTwoRecommendedAmount, "
                     + "ld.ic_review_decision_level_three_recommended_amount as icReviewDecisionLevelThreeRecommendedAmount, "
@@ -3238,13 +3252,16 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         @Override
         public LoanDecisionData mapRow(ResultSet rs, int rowNum) throws SQLException {
             final Long loanId = rs.getLong("loanId");
+            final Integer loanDecisionState = rs.getInt("loanDecisionState");
+            final Integer loanNextDecisionState = rs.getInt("loanNextDecisionState");
             final BigDecimal icReviewDecisionLevelOneRecommendedAmount = rs.getBigDecimal("icReviewDecisionLevelOneRecommendedAmount");
             final BigDecimal icReviewDecisionLevelTwoRecommendedAmount = rs.getBigDecimal("icReviewDecisionLevelTwoRecommendedAmount");
             final BigDecimal icReviewDecisionLevelThreeRecommendedAmount = rs.getBigDecimal("icReviewDecisionLevelThreeRecommendedAmount");
             final BigDecimal icReviewDecisionLevelFourRecommendedAmount = rs.getBigDecimal("icReviewDecisionLevelFourRecommendedAmount");
             final BigDecimal icReviewDecisionLevelFiveRecommendedAmount = rs.getBigDecimal("icReviewDecisionLevelFiveRecommendedAmount");
 
-            return new LoanDecisionData(loanId, icReviewDecisionLevelOneRecommendedAmount,
+
+            return new LoanDecisionData(loanId, loanDecisionState, loanNextDecisionState, icReviewDecisionLevelOneRecommendedAmount,
                     icReviewDecisionLevelTwoRecommendedAmount, icReviewDecisionLevelThreeRecommendedAmount,
                     icReviewDecisionLevelFourRecommendedAmount, icReviewDecisionLevelFiveRecommendedAmount);
         }
