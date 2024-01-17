@@ -3222,7 +3222,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + "  INNER JOIN m_code_value cashFlowT ON cf." + sqlGenerator.escape("CashFlowType_cd_CashFlowType") + "   = cashFlowT.id"
                     + "  INNER JOIN m_code_value particularT ON cf." + sqlGenerator.escape("ParticularType_cd_ParticularType") + "   = particularT.id"
                     + "  WHERE loan_id = ? ";
-=        }
+       }
 
         @Override
         public LoanCashFlowData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
