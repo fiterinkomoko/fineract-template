@@ -1512,4 +1512,32 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         }
     }
 
+    public void validateCashFlowProjectionUpdate(final String json) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+            if (this.fromApiJsonHelper.parameterExists("cashFlowType", element)) {
+                final Integer cashFlowType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("cashFlowType", element);
+                baseDataValidator.reset().parameter("cashFlowType")
+                        .value(cashFlowType).notNull().isOneOfTheseValues(1, 2);
+
+                final Integer month = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("month", element);
+                baseDataValidator.reset().parameter("month")
+                        .value(month).notNull();
+
+
+                final Integer projectionRate = this.fromApiJsonHelper
+                        .extractIntegerWithLocaleNamed("projectionRate", element);
+                baseDataValidator.reset().parameter("projectionRate")
+                        .value(projectionRate).notNull();
+
+                if (!dataValidationErrors.isEmpty()) {
+                    throw new PlatformApiDataValidationException(dataValidationErrors);
+                }
+
+            }
+
+
+    }
+
 }

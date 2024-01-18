@@ -20,6 +20,13 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 
 public interface LoanCashFlowProjectionRepository
-        extends JpaRepository<LoanCashFlowProjection, Long>, JpaSpecificationExecutor<LoanCashFlowProjection> {}
+        extends JpaRepository<LoanCashFlowProjection, Long>, JpaSpecificationExecutor<LoanCashFlowProjection> {
+
+    @Modifying
+    @Query(value = "delete from m_loan_cashflow_projection where cashflow_info_id in (select id from loan_cashflow_information where loan_id = ?1)", nativeQuery = true)
+    void deleteByLoanId(Long loanId);
+}
