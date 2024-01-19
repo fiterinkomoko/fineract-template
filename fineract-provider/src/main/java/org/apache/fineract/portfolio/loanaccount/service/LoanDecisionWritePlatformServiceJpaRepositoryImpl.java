@@ -376,13 +376,12 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                             loan.getCurrencyCode()));
         }
 
-        /* TODO Get max loan amount from cash flow calculation */
-        final BigDecimal maxLoanAmount = BigDecimal.valueOf(100000);
-        final int comparisonResult = maxLoanAmount.compareTo(recommendedAmount);
-        if (comparisonResult < 0) {
-            throw new GeneralPlatformDomainRuleException("error.msg.loan.ic.review.recommended.amount.must.be.lower.than.max.loan.amount",
-                    String.format("IC Review recommended value must be lower than Loan maximum amount from cash flow calculation"));
+        final BigDecimal maxLoanAmountFromCashFlow = loanDecisionStateUtilService.getMaxLoanAmountFromCashFlow(loan);
+        if (recommendedAmount.compareTo(maxLoanAmountFromCashFlow) > 0) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.ic.review.recommended.amount.can.not.greater.than.auto.computed.amount",
+                    "Recommended amount can not be greater than auto-computed recommended amount", maxLoanAmountFromCashFlow);
         }
+
         // Get Loan Matrix
         // Determine which cycle of this Loan Account
         // Determine the Next Level or stage to review
@@ -457,13 +456,12 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                             loan.getCurrencyCode()));
         }
 
-        /* TODO Get max loan amount from cash flow calculation */
-        final BigDecimal maxLoanAmount = BigDecimal.valueOf(100000);
-        final int comparisonResult = maxLoanAmount.compareTo(recommendedAmount);
-        if (comparisonResult < 0) {
-            throw new GeneralPlatformDomainRuleException("error.msg.loan.ic.review.recommended.amount.must.be.lower.than.max.loan.amount",
-                    String.format("IC Review recommended value must be lower than Loan maximum amount from cash flow calculation"));
+        final BigDecimal maxLoanAmountFromCashFlow = loanDecisionStateUtilService.getMaxLoanAmountFromCashFlow(loan);
+        if (recommendedAmount.compareTo(maxLoanAmountFromCashFlow) > 0) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.ic.review.recommended.amount.can.not.greater.than.auto.computed.amount",
+                    "Recommended amount can not be greater than auto-computed recommended amount", maxLoanAmountFromCashFlow);
         }
+
         // Get Loan Matrix
         // Determine which cycle of this Loan Account
         // Determine the Next Level or stage to review
@@ -538,13 +536,12 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                             loan.getCurrencyCode()));
         }
 
-        /* TODO Get max loan amount from cash flow calculation */
-        final BigDecimal maxLoanAmount = BigDecimal.valueOf(100000);
-        final int comparisonResult = maxLoanAmount.compareTo(recommendedAmount);
-        if (comparisonResult < 0) {
-            throw new GeneralPlatformDomainRuleException("error.msg.loan.ic.review.recommended.amount.must.be.lower.than.max.loan.amount",
-                    String.format("IC Review recommended value must be lower than Loan maximum amount from cash flow calculation"));
+        final BigDecimal maxLoanAmountFromCashFlow = loanDecisionStateUtilService.getMaxLoanAmountFromCashFlow(loan);
+        if (recommendedAmount.compareTo(maxLoanAmountFromCashFlow) > 0) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.ic.review.recommended.amount.can.not.greater.than.auto.computed.amount",
+                    "Recommended amount can not be greater than auto-computed recommended amount", maxLoanAmountFromCashFlow);
         }
+
         // Get Loan Matrix
         // Determine which cycle of this Loan Account
         // Determine the Next Level or stage to review
@@ -619,13 +616,12 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                             loan.getCurrencyCode()));
         }
 
-        /* TODO Get max loan amount from cash flow calculation */
-        final BigDecimal maxLoanAmount = BigDecimal.valueOf(100000);
-        final int comparisonResult = maxLoanAmount.compareTo(recommendedAmount);
-        if (comparisonResult < 0) {
-            throw new GeneralPlatformDomainRuleException("error.msg.loan.ic.review.recommended.amount.must.be.lower.than.max.loan.amount",
-                    String.format("IC Review recommended value must be lower than Loan maximum amount from cash flow calculation"));
+        final BigDecimal maxLoanAmountFromCashFlow = loanDecisionStateUtilService.getMaxLoanAmountFromCashFlow(loan);
+        if (recommendedAmount.compareTo(maxLoanAmountFromCashFlow) > 0) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.ic.review.recommended.amount.can.not.greater.than.auto.computed.amount",
+                    "Recommended amount can not be greater than auto-computed recommended amount", maxLoanAmountFromCashFlow);
         }
+
         // Get Loan Matrix
         // Determine which cycle of this Loan Account
         // Determine the Next Level or stage to review
@@ -700,13 +696,12 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                             loan.getCurrencyCode()));
         }
 
-        /* TODO Get max loan amount from cash flow calculation */
-        final BigDecimal maxLoanAmount = BigDecimal.valueOf(100000);
-        final int comparisonResult = maxLoanAmount.compareTo(recommendedAmount);
-        if (comparisonResult < 0) {
-            throw new GeneralPlatformDomainRuleException("error.msg.loan.ic.review.recommended.amount.must.be.lower.than.max.loan.amount",
-                    String.format("IC Review recommended value must be lower than Loan maximum amount from cash flow calculation"));
+        final BigDecimal maxLoanAmountFromCashFlow = loanDecisionStateUtilService.getMaxLoanAmountFromCashFlow(loan);
+        if (recommendedAmount.compareTo(maxLoanAmountFromCashFlow) > 0) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.ic.review.recommended.amount.can.not.greater.than.auto.computed.amount",
+                    "Recommended amount can not be greater than auto-computed recommended amount", maxLoanAmountFromCashFlow);
         }
+
         // Get Loan Matrix
         // Determine which cycle of this Loan Account
         // Determine the Next Level or stage to review

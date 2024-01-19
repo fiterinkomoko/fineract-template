@@ -61,6 +61,7 @@ import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepos
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.staff.service.StaffReadPlatformService;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
@@ -194,6 +195,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private final ConfigurationReadPlatformService configurationReadPlatformService;
     private final LoanDueDiligenceInfoRepository loanDueDiligenceInfoRepository;
     private final DropdownReadPlatformService dropdownReadPlatformService;
+    private final CurrencyReadPlatformService currencyReadPlatformService;
 
     @Autowired
     public LoanReadPlatformServiceImpl(final PlatformSecurityContext context,
@@ -212,7 +214,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final ColumnValidator columnValidator, DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper,
             SearchReadPlatformService searchReadPlatformService, final LoanDueDiligenceInfoRepository loanDueDiligenceInfoRepository,
             final ConfigurationReadPlatformService configurationReadPlatformService,
-            final DropdownReadPlatformService dropdownReadPlatformService) {
+            final DropdownReadPlatformService dropdownReadPlatformService, final CurrencyReadPlatformService currencyReadPlatformService) {
         this.context = context;
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
@@ -242,6 +244,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         this.loanDueDiligenceInfoRepository = loanDueDiligenceInfoRepository;
         this.configurationReadPlatformService = configurationReadPlatformService;
         this.dropdownReadPlatformService = dropdownReadPlatformService;
+        this.currencyReadPlatformService = currencyReadPlatformService;
     }
 
     @Override
@@ -603,6 +606,17 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             approvedAmount = loan.getProposedPrincipal();
         }
         return new LoanApprovalData(approvedAmount, DateUtils.getBusinessLocalDate(), loan.getNetDisbursalAmount());
+    }
+
+    @Override
+    public LoanApprovalData retrieveICReviewTemplate(final Long loanId) {
+        final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
+        final String currencyCode = loan.getCurrencyCode();
+        final CurrencyData currency = currencyReadPlatformService.retrieveCurrency(currencyCode);
+        final Collection<EnumOptionData> termFrequencyTypeOptions = this.dropdownReadPlatformService.retrievePeriodFrequencyTypeOptions();
+        final LoanDecisionData loanDecisionData = this.retrieveLoanDecisionByLoanId(loan.getId());
+        return new LoanApprovalData(loan.getProposedPrincipal(), DateUtils.getBusinessLocalDate(), loan.getNetDisbursalAmount(),
+                termFrequencyTypeOptions, currency, loanDecisionData);
     }
 
     @Override
