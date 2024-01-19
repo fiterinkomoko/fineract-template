@@ -38,6 +38,9 @@ import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.exception.GroupNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApprovalMatrixConstants;
+import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowProjectionData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowReport;
+import org.apache.fineract.portfolio.loanaccount.data.LoanNetCashFlowData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanApprovalMatrix;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCollateralManagement;
@@ -47,6 +50,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanDecisionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDecisionState;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleAssembler;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
@@ -1289,5 +1293,17 @@ public class LoanDecisionStateUtilService {
                     String.format("This Loan Type [ %s ] , is not supported for IC Review Operations .", loan.getLoanType()));
         }
         return loanIndividualCounter;
+    }
+
+    public BigDecimal getMaxLoanAmountFromCashFlow(Loan loan) {
+        final LoanCashFlowReport loanCashFlowReport = this.loanReadPlatformService.retrieveCashFlowReport(loan.getId());
+        final LoanNetCashFlowData loanNetCashFlowData = loanCashFlowReport.getNetCashFlowData();
+        final List<LoanCashFlowProjectionData> loanCashFlowProjectionData = loanCashFlowReport.getCashFlowProjectionDataList();
+        final Integer projectionSize = loanCashFlowProjectionData.size();
+        final BigDecimal month0 = loanNetCashFlowData.getMonth0();
+        final LoanProduct loanProduct = loan.getLoanProduct();
+        final BigDecimal allowableDSCR = loanProduct.getAllowableDSCR();
+        final BigDecimal maxLoanAmount = allowableDSCR.multiply(month0).multiply(BigDecimal.valueOf(projectionSize / 2));
+        return maxLoanAmount;
     }
 }
