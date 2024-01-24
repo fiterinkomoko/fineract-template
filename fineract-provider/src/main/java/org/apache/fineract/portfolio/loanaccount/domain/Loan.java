@@ -7125,6 +7125,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
 
         BigDecimal icReviewRecommendedAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.icReviewRecommendedAmount);
+        Integer icReviewTermFrequency = command.integerValueOfParameterNamed(LoanApiConstants.icReviewTermFrequency);
+        Integer icReviewTermPeriodFrequencyType = command.integerValueOfParameterNamed(LoanApiConstants.icReviewTermPeriodFrequencyEnum);
+
         if (icReviewRecommendedAmount != null) {
             compareApprovedToProposedPrincipal(icReviewRecommendedAmount);
 
@@ -7135,10 +7138,22 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             this.approvedPrincipal = icReviewRecommendedAmount;
             this.approvedICReview = icReviewRecommendedAmount;
             this.netDisbursalAmount = icReviewRecommendedAmount;
-
             this.loanRepaymentScheduleDetail.setPrincipal(icReviewRecommendedAmount);
             actualChanges.put(LoanApiConstants.icReviewRecommendedAmount, icReviewRecommendedAmount);
         }
+
+        if (icReviewTermFrequency != null) {
+            this.termFrequency = icReviewTermFrequency;
+            this.loanRepaymentScheduleDetail.updateNumberOfRepayments(icReviewTermFrequency);
+            actualChanges.put(LoanApiConstants.icReviewTermFrequency, icReviewTermFrequency);
+        }
+
+        if (icReviewTermPeriodFrequencyType != null) {
+            this.termPeriodFrequencyType = icReviewTermPeriodFrequencyType;
+            this.loanRepaymentScheduleDetail.setRepaymentPeriodFrequencyType(PeriodFrequencyType.fromInt(icReviewTermPeriodFrequencyType));
+            actualChanges.put(LoanApiConstants.icReviewTermPeriodFrequencyEnum, icReviewTermPeriodFrequencyType);
+        }
+
         return actualChanges;
     }
 }

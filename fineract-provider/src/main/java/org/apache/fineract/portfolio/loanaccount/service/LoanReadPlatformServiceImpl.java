@@ -84,7 +84,6 @@ import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
-import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
 import org.apache.fineract.portfolio.floatingrates.data.InterestRatePeriodData;
 import org.apache.fineract.portfolio.floatingrates.service.FloatingRatesReadPlatformService;
 import org.apache.fineract.portfolio.fund.data.FundData;
@@ -190,11 +189,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private final ColumnValidator columnValidator;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService;
-
     private final SearchReadPlatformService searchReadPlatformService;
     private final ConfigurationReadPlatformService configurationReadPlatformService;
     private final LoanDueDiligenceInfoRepository loanDueDiligenceInfoRepository;
-    private final DropdownReadPlatformService dropdownReadPlatformService;
     private final CurrencyReadPlatformService currencyReadPlatformService;
 
     @Autowired
@@ -213,8 +210,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final AccountDetailsReadPlatformService accountDetailsReadPlatformService, final LoanRepositoryWrapper loanRepositoryWrapper,
             final ColumnValidator columnValidator, DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper,
             SearchReadPlatformService searchReadPlatformService, final LoanDueDiligenceInfoRepository loanDueDiligenceInfoRepository,
-            final ConfigurationReadPlatformService configurationReadPlatformService,
-            final DropdownReadPlatformService dropdownReadPlatformService, final CurrencyReadPlatformService currencyReadPlatformService) {
+            final ConfigurationReadPlatformService configurationReadPlatformService, final CurrencyReadPlatformService currencyReadPlatformService) {
         this.context = context;
         this.loanRepositoryWrapper = loanRepositoryWrapper;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
@@ -243,7 +239,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         this.searchReadPlatformService = searchReadPlatformService;
         this.loanDueDiligenceInfoRepository = loanDueDiligenceInfoRepository;
         this.configurationReadPlatformService = configurationReadPlatformService;
-        this.dropdownReadPlatformService = dropdownReadPlatformService;
         this.currencyReadPlatformService = currencyReadPlatformService;
     }
 
@@ -613,7 +608,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId, true);
         final String currencyCode = loan.getCurrencyCode();
         final CurrencyData currency = currencyReadPlatformService.retrieveCurrency(currencyCode);
-        final Collection<EnumOptionData> termFrequencyTypeOptions = this.dropdownReadPlatformService.retrievePeriodFrequencyTypeOptions();
+        final Collection<EnumOptionData> termFrequencyTypeOptions = this.loanDropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
         final LoanDecisionData loanDecisionData = this.retrieveLoanDecisionByLoanId(loan.getId());
         return new LoanApprovalData(loan.getProposedPrincipal(), DateUtils.getBusinessLocalDate(), loan.getNetDisbursalAmount(),
                 termFrequencyTypeOptions, currency, loanDecisionData);
@@ -2660,7 +2655,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         final LoanAccountData loanAccountData = retrieveOne(loanId);
 
-        final Collection<EnumOptionData> termFrequencyTypeOptions = this.dropdownReadPlatformService.retrievePeriodFrequencyTypeOptions();
+        final Collection<EnumOptionData> termFrequencyTypeOptions = this.loanDropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
 
         loanAccountData.setTermFrequencyTypeOptions(termFrequencyTypeOptions);
         return loanAccountData;

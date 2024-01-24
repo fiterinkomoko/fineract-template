@@ -726,14 +726,11 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         loanDecisionStateUtilService.validateLoanAccountToComplyToApprovalMatrixStage(loan, approvalMatrix, isLoanFirstCycle,
                 isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_FIVE);
 
-        final Integer nextDecisionStage = loanDecision.getNextLoanIcReviewDecisionState();
-        if (nextDecisionStage.equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())) {
-            final Map<String, Object> changes = loan.loanApplicationICReview(currentUser, command);
-            if (!changes.isEmpty()) {
-                LocalDate recalculateFrom = null;
-                ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
-                loan.regenerateRepaymentSchedule(scheduleGeneratorDTO);
-            }
+        final Map<String, Object> changes = loan.loanApplicationICReview(currentUser, command);
+        if (!changes.isEmpty()) {
+            LocalDate recalculateFrom = null;
+            ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
+            loan.regenerateRepaymentSchedule(scheduleGeneratorDTO);
         }
 
         LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelFiveFrom(command, currentUser, loanDecision,
