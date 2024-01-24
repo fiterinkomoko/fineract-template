@@ -180,6 +180,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
         if (!isIdeaClient) {
+            loanDecision.setIdeaClient(false);
             // check for cashflow and financial ratio. Idea Client does not have a cashflow/ balancesheet
             final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
             final MathContext mc = new MathContext(8, roundingMode);
