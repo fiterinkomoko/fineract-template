@@ -1539,7 +1539,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         }
 
         final Map<String, Object> changes = loan.loanApplicationApproval(currentUser, command, disbursementDataArray,
-                defaultLoanLifecycleStateMachine(), isBnplEquityContributionLoan, amountToDisburseForBnplEquityContributionLoan);
+                defaultLoanLifecycleStateMachine(), isBnplEquityContributionLoan, amountToDisburseForBnplEquityContributionLoan, isExtendLoanLifeCycleConfig);
 
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(loanId, EntityTables.LOAN.getName(),
                 StatusEnum.APPROVE.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
