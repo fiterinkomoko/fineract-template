@@ -2331,7 +2331,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public Map<String, Object> loanApplicationApproval(final AppUser currentUser, final JsonCommand command,
             final JsonArray disbursementDataArray, final LoanLifecycleStateMachine loanLifecycleStateMachine,
-            Boolean isBnplEquityContributionLoan, BigDecimal amountToDisburseForBnplEquityContributionLoan) {
+            Boolean isBnplEquityContributionLoan, BigDecimal amountToDisburseForBnplEquityContributionLoan, Boolean isExtendLoanLifeCycleConfig) {
 
         validateAccountStatus(LoanEvent.LOAN_APPROVED);
 
@@ -2367,6 +2367,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             BigDecimal approvedLoanAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.approvedLoanAmountParameterName);
             if (approvedLoanAmount != null) {
                 compareApprovedToProposedPrincipal(approvedLoanAmount);
+
+                if (isExtendLoanLifeCycleConfig) {
+                    compareApprovedToICReviewAmount(approvedLoanAmount);
+                }
 
                 /*
                  * All the calculations are done based on the principal amount, so it is necessary to set principal
@@ -2483,6 +2487,14 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                 throw new InvalidLoanStateTransitionException("approval", "amount.can't.be.greater.than.loan.amount.demanded", errorMessage,
                         this.proposedPrincipal, approvedLoanAmount);
             }
+        }
+    }
+
+    private void compareApprovedToICReviewAmount(BigDecimal approvedLoanAmount) {
+        if (approvedLoanAmount.compareTo(this.approvedICReview) > 0) {
+            final String errorMessage = "Loan approved amount can't be greater than the last IC recommended amount.";
+            throw new InvalidLoanStateTransitionException("approval", "amount.can't.be.greater.than.ic.review.recommended.amount", errorMessage,
+                    this.approvedICReview, approvedLoanAmount);
         }
     }
 
@@ -7125,6 +7137,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         final Map<String, Object> actualChanges = new LinkedHashMap<>();
 
         BigDecimal icReviewRecommendedAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.icReviewRecommendedAmount);
+        Integer icReviewTermFrequency = command.integerValueOfParameterNamed(LoanApiConstants.icReviewTermFrequency);
+        Integer icReviewTermPeriodFrequencyType = command.integerValueOfParameterNamed(LoanApiConstants.icReviewTermPeriodFrequencyEnum);
+
         if (icReviewRecommendedAmount != null) {
             compareApprovedToProposedPrincipal(icReviewRecommendedAmount);
 
@@ -7135,10 +7150,22 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             this.approvedPrincipal = icReviewRecommendedAmount;
             this.approvedICReview = icReviewRecommendedAmount;
             this.netDisbursalAmount = icReviewRecommendedAmount;
-
             this.loanRepaymentScheduleDetail.setPrincipal(icReviewRecommendedAmount);
             actualChanges.put(LoanApiConstants.icReviewRecommendedAmount, icReviewRecommendedAmount);
         }
+
+        if (icReviewTermFrequency != null) {
+            this.termFrequency = icReviewTermFrequency;
+            this.loanRepaymentScheduleDetail.updateNumberOfRepayments(icReviewTermFrequency);
+            actualChanges.put(LoanApiConstants.icReviewTermFrequency, icReviewTermFrequency);
+        }
+
+        if (icReviewTermPeriodFrequencyType != null) {
+            this.termPeriodFrequencyType = icReviewTermPeriodFrequencyType;
+            this.loanRepaymentScheduleDetail.setRepaymentPeriodFrequencyType(PeriodFrequencyType.fromInt(icReviewTermPeriodFrequencyType));
+            actualChanges.put(LoanApiConstants.icReviewTermPeriodFrequencyEnum, icReviewTermPeriodFrequencyType);
+        }
+
         return actualChanges;
     }
 }
