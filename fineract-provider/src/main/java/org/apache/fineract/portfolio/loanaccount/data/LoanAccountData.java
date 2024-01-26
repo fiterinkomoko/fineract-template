@@ -266,6 +266,7 @@ public final class LoanAccountData {
     private String kivaUUId;
     private BigDecimal approvedICReview;
     private Double allowableDscr;
+    private BigDecimal loanWithAnotherInstitutionAmount;
 
     public static LoanAccountData importInstanceIndividual(EnumOptionData loanTypeEnumOption, Long clientId, Long productId,
             Long loanOfficerId, LocalDate submittedOnDate, Long fundId, BigDecimal principal, Integer numberOfRepayments,
@@ -1417,6 +1418,7 @@ public final class LoanAccountData {
         loanAccountData.setKivaUUId(acc.kivaUUId);
         loanAccountData.setApprovedICReview(acc.approvedICReview);
         loanAccountData.setAllowableDscr(acc.allowableDscr);
+        loanAccountData.setLoanWithAnotherInstitutionAmount(acc.loanWithAnotherInstitutionAmount);
         return loanAccountData;
     }
 
@@ -2230,5 +2232,13 @@ public final class LoanAccountData {
 
     public void setAllowableDscr(Double allowableDscr) {
         this.allowableDscr = allowableDscr;
+    }
+
+    public BigDecimal getLoanWithAnotherInstitutionAmount() {
+        return loanWithAnotherInstitutionAmount;
+    }
+
+    public void setLoanWithAnotherInstitutionAmount(BigDecimal loanWithAnotherInstitutionAmount) {
+        this.loanWithAnotherInstitutionAmount = loanWithAnotherInstitutionAmount;
     }
 }

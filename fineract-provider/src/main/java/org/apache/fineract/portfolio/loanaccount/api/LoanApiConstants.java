@@ -181,4 +181,6 @@ public interface LoanApiConstants {
     String icReviewRecommendedAmount = "icReviewRecommendedAmount";
     String icReviewTermFrequency = "icReviewTermFrequency";
     String icReviewTermPeriodFrequencyEnum = "icReviewTermPeriodFrequencyEnum";
+    String loanWithAnotherInstitution = "loanWithAnotherInstitution";
+    String loanWithAnotherInstitutionAmount = "loanWithAnotherInstitutionAmount";
 }

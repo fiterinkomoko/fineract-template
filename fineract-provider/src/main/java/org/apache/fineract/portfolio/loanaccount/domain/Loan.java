@@ -445,6 +445,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     private Boolean stopConsumerCreditUploadToTransUnion;
     @Column(name = "stop_consumer_credit_upload_to_trans_union_on")
     private LocalDate stopConsumerCreditUploadToTransUnionOn;
+    @Column(name = "loan_with_another_institution_amount")
+    private BigDecimal loanWithAnotherInstitutionAmount;
 
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
@@ -1759,6 +1761,19 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
             final Long newValue = command.longValueOfParameterNamed(LoanApiConstants.DEPARTMENT_PARAM);
             actualChanges.put(LoanApiConstants.DEPARTMENT_PARAM, newValue);
         }
+
+        final Boolean loanWithAnotherInstitution = command.booleanObjectValueOfParameterNamed(LoanApiConstants.loanWithAnotherInstitution);
+        if (loanWithAnotherInstitution) {
+            if (command.isChangeInBigDecimalParameterNamed(LoanApiConstants.loanWithAnotherInstitutionAmount, this.loanWithAnotherInstitutionAmount)) {
+                final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(LoanApiConstants.loanWithAnotherInstitutionAmount);
+                this.loanWithAnotherInstitutionAmount = newValue;
+                actualChanges.put(LoanApiConstants.loanWithAnotherInstitutionAmount, newValue);
+            }
+        } else {
+            this.loanWithAnotherInstitutionAmount = null;
+            actualChanges.put(LoanApiConstants.loanWithAnotherInstitutionAmount, null);
+        }
+
 
         return actualChanges;
     }
@@ -7167,5 +7182,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         }
 
         return actualChanges;
+    }
+
+    public void setLoanWithAnotherInstitutionAmount(BigDecimal loanWithAnotherInstitutionAmont) {
+        this.loanWithAnotherInstitutionAmount = loanWithAnotherInstitutionAmont;
     }
 }
