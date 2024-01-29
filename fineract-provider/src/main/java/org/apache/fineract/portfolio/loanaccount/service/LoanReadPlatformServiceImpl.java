@@ -755,7 +755,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " l.total_recovered_derived as totalRecovered" + ", topuploan.account_no as closureLoanAccountNo, "
                     + " topup.topup_amount as topupAmount ,l.department_cv_id as departmentId,departmentV.code_value as departmentCode, "
                     + " ds.loan_decision_state as loanDecisionState , ds.next_loan_ic_review_decision_state as nextLoanIcReviewDecisionState, "
-                    + " l.description as description , l.kiva_id as kivaId , l.kiva_uuid as kivaUUId , lp.allowable_dscr as allowableDscr "
+                    + " l.description as description , l.kiva_id as kivaId , l.kiva_uuid as kivaUUId , lp.allowable_dscr as allowableDscr, "
+                    + " l.loan_with_another_institution_amount as loanWithAnotherInstitutionAmount "
                     + " from m_loan l" //
                     + " join m_product_loan lp on lp.id = l.product_id" //
                     + " left join m_loan_recalculation_details lir on lir.loan_id = l.id " + " join m_currency rc on rc."
@@ -800,6 +801,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String kivaId = rs.getString("kivaId");
             final String kivaUUId = rs.getString("kivaUUId");
             final Double allowableDscr = rs.getDouble("allowableDscr");
+            final BigDecimal loanWithAnotherInstitutionAmount = rs.getBigDecimal("loanWithAnotherInstitutionAmount");
 
             final Long clientId = JdbcSupport.getLong(rs, "clientId");
             final String clientAccountNo = rs.getString("clientAccountNo");
@@ -1133,6 +1135,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             loanAccountData.setKivaUUId(kivaUUId);
             loanAccountData.setApprovedICReview(approvedICReview);
             loanAccountData.setAllowableDscr(allowableDscr);
+            loanAccountData.setLoanWithAnotherInstitutionAmount(loanWithAnotherInstitutionAmount);
             return loanAccountData;
         }
     }
