@@ -98,7 +98,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             LoanApiConstants.LOAN_TERM_INCLUDES_TOPPED_UP_LOAN_TERM, LoanApiConstants.NUMBER_OF_REPAYMENT_TO_CARRY_FORWARD,
             LoanApiConstants.linkVendorAccountIdParamName, LoanApiConstants.LOAN_TERM_TO_TOP_UP, LoanApiConstants.isBnplLoanParamName,
             LoanApiConstants.requiresEquityContributionParamName, LoanApiConstants.equityContributionLoanPercentageParamName,
-            LoanApiConstants.DEPARTMENT_PARAM, LoanApiConstants.DESCRIPTION_PARAM, LoanApiConstants.KIVA_ID_PARAM));
+            LoanApiConstants.DEPARTMENT_PARAM, LoanApiConstants.DESCRIPTION_PARAM, LoanApiConstants.KIVA_ID_PARAM,
+            LoanApiConstants.loanWithAnotherInstitution, LoanApiConstants.loanWithAnotherInstitutionAmount));
 
     private final FromJsonHelper fromApiJsonHelper;
     private final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper;
@@ -208,6 +209,14 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         if (this.fromApiJsonHelper.parameterExists(kivaIdParameterName, element)) {
             final String kivaId = this.fromApiJsonHelper.extractStringNamed(kivaIdParameterName, element);
             baseDataValidator.reset().parameter(kivaIdParameterName).value(kivaId).ignoreIfNull().notExceedingLengthOf(100);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.loanWithAnotherInstitution, element)) {
+            final Boolean loanWithAnotherInstitution = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.loanWithAnotherInstitution, element);
+            final BigDecimal loanWithAnotherInstitutionAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.loanWithAnotherInstitutionAmount, element);
+            if (loanWithAnotherInstitution) {
+                baseDataValidator.reset().parameter(LoanApiConstants.loanWithAnotherInstitutionAmount).value(loanWithAnotherInstitutionAmount).notNull().positiveAmount();
+            }
         }
 
         final String fundIdParameterName = "fundId";
@@ -684,6 +693,14 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             atLeastOneParameterPassedForUpdate = true;
             final String kivaId = this.fromApiJsonHelper.extractStringNamed(kivaIdParameterName, element);
             baseDataValidator.reset().parameter(kivaIdParameterName).value(kivaId).ignoreIfNull().notExceedingLengthOf(100);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.loanWithAnotherInstitution, element)) {
+            final Boolean loanWithAnotherInstitution = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.loanWithAnotherInstitution, element);
+            final BigDecimal loanWithAnotherInstitutionAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.loanWithAnotherInstitutionAmount, element);
+            if (loanWithAnotherInstitution) {
+                baseDataValidator.reset().parameter(LoanApiConstants.loanWithAnotherInstitutionAmount).value(loanWithAnotherInstitutionAmount).notNull().positiveAmount();
+            }
         }
 
         final String fundIdParameterName = "fundId";
