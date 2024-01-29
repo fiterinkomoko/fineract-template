@@ -195,6 +195,7 @@ import org.apache.fineract.portfolio.loanaccount.exception.GLIMLoanCannotBeDisbu
 import org.apache.fineract.portfolio.loanaccount.exception.InstallmentNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanTransactionTypeException;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidPaidInAdvanceAmountException;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanDisbursalException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanForeclosureException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanMultiDisbursementException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
@@ -3537,6 +3538,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Transactional
     public CommandProcessingResult disburseRequestLoan(Long loanId, JsonCommand command) {
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.principalDisbursedParameterName);
+        if (transactionAmount.compareTo(loan.getApprovedPrincipal()) > 0) {
+            final String errorMsg = "Loan can't be disbursed, disburse amount is exceeding approved amount ";
+            throw new LoanDisbursalException(errorMsg, "disburse.amount.must.be.less.than.approved.amount", transactionAmount,
+                    loan.getApprovedPrincipal());
+        }
         this.disbursementRequestService.disburseRequestLoan(loan, command);
         loan.handleDisbursementRequest();
         this.saveLoanWithDataIntegrityViolationChecks(loan);
