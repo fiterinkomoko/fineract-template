@@ -191,6 +191,11 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         }
 
         final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
+        final BigDecimal recommendedAmount = command
+                .bigDecimalValueOfParameterNamed(LoanApiConstants.dueDiligenceRecommendedAmountParameterName);
+        final Integer termFrequency = command.integerValueOfParameterNamed(LoanApiConstants.recommendedLoanTermFrequencyParameterName);
+        final Integer termPeriodFrequencyEnum = command.integerValueOfParameterNamed(LoanApiConstants.recommendedLoanTermFrequencyTypeParameterName);
+
         if (!isIdeaClient) {
             loanDecision.setIdeaClient(false);
             // check for cashflow and financial ratio. Idea Client does not have a cashflow/ balancesheet
@@ -208,8 +213,6 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
             //Get calculated amount from CashFlow Projection Report
             BigDecimal calculatedAmount = this.loanDecisionStateUtilService.getMaxLoanAmountFromCashFlow(loan);
-            final BigDecimal recommendedAmount = command
-                    .bigDecimalValueOfParameterNamed(LoanApiConstants.dueDiligenceRecommendedAmountParameterName);
             if (recommendedAmount.compareTo(calculatedAmount) > 0) {
                 throw new PlatformDataIntegrityException("error.msg.loan.recommended.amount.cannot.be.greater.than.calculated.amount",
                         "Recommended amount cannot be greater than the calculated amount", calculatedAmount);
@@ -230,7 +233,9 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         this.loanRepositoryWrapper.saveAndFlush(loanObj);
 
         if (StringUtils.isNotBlank(loanDecisionObj.getDueDiligenceNote())) {
-            final Note note = Note.loanNote(loanObj, "Due Diligence : " + loanDecisionObj.getDueDiligenceNote());
+            final Note note = Note.loanNote(loanObj, "Due Diligence : " + loanDecisionObj.getDueDiligenceNote()
+                + " Recommended Amount : " + recommendedAmount + " " + loan.getCurrencyCode()
+                + " Loan Term : " + termFrequency + " " + PeriodFrequencyType.fromInt(termPeriodFrequencyEnum));
             this.noteRepository.save(note);
         }
 
