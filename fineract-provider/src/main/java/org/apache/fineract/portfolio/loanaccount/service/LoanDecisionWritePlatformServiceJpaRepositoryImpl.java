@@ -412,12 +412,13 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         Boolean isLoanFirstCycle = loanDecisionStateUtilService.isLoanFirstCycle(loanIndividualCounter);
         Boolean isLoanUnsecure = loanDecisionStateUtilService.isLoanUnSecure(loan);
+        final BigDecimal dueDiligenceRecommendedAmount = loanDecision.getDueDiligenceRecommendedAmount();
 
         loanDecisionStateUtilService.validateLoanAccountToComplyToApprovalMatrixStage(loan, approvalMatrix, isLoanFirstCycle,
-                isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_ONE);
+                isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_ONE, dueDiligenceRecommendedAmount);
         // generate the next stage based on loan approval matrix via amounts to be disbursed
         loanDecisionStateUtilService.determineTheNextDecisionStage(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
-                LoanDecisionState.IC_REVIEW_LEVEL_ONE);
+                LoanDecisionState.IC_REVIEW_LEVEL_ONE, dueDiligenceRecommendedAmount);
 
         final Integer nextDecisionStage = loanDecision.getNextLoanIcReviewDecisionState();
         if (nextDecisionStage.equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())) {
@@ -494,12 +495,13 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         Boolean isLoanFirstCycle = loanDecisionStateUtilService.isLoanFirstCycle(loanIndividualCounter);
         Boolean isLoanUnsecure = loanDecisionStateUtilService.isLoanUnSecure(loan);
+        final BigDecimal dueDiligenceRecommendedAmount = loanDecision.getDueDiligenceRecommendedAmount();
 
         loanDecisionStateUtilService.validateLoanAccountToComplyToApprovalMatrixStage(loan, approvalMatrix, isLoanFirstCycle,
-                isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_TWO);
+                isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_TWO, dueDiligenceRecommendedAmount);
         // generate the next stage based on loan approval matrix via amounts to be disbursed
         loanDecisionStateUtilService.determineTheNextDecisionStage(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
-                LoanDecisionState.IC_REVIEW_LEVEL_TWO);
+                LoanDecisionState.IC_REVIEW_LEVEL_TWO, dueDiligenceRecommendedAmount);
 
         final Integer nextDecisionStage = loanDecision.getNextLoanIcReviewDecisionState();
         if (nextDecisionStage.equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())) {
@@ -576,12 +578,13 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         Boolean isLoanFirstCycle = loanDecisionStateUtilService.isLoanFirstCycle(loanIndividualCounter);
         Boolean isLoanUnsecure = loanDecisionStateUtilService.isLoanUnSecure(loan);
+        final BigDecimal dueDiligenceRecommendedAmount = loanDecision.getDueDiligenceRecommendedAmount();
 
         loanDecisionStateUtilService.validateLoanAccountToComplyToApprovalMatrixStage(loan, approvalMatrix, isLoanFirstCycle,
-                isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_THREE);
+                isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_THREE, dueDiligenceRecommendedAmount);
         // generate the next stage based on loan approval matrix via amounts to be disbursed
         loanDecisionStateUtilService.determineTheNextDecisionStage(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
-                LoanDecisionState.IC_REVIEW_LEVEL_THREE);
+                LoanDecisionState.IC_REVIEW_LEVEL_THREE, dueDiligenceRecommendedAmount);
 
         final Integer nextDecisionStage = loanDecision.getNextLoanIcReviewDecisionState();
         if (nextDecisionStage.equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())) {
@@ -658,12 +661,13 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         Boolean isLoanFirstCycle = loanDecisionStateUtilService.isLoanFirstCycle(loanIndividualCounter);
         Boolean isLoanUnsecure = loanDecisionStateUtilService.isLoanUnSecure(loan);
+        final BigDecimal dueDiligenceRecommendedAmount = loanDecision.getDueDiligenceRecommendedAmount();
 
         loanDecisionStateUtilService.validateLoanAccountToComplyToApprovalMatrixStage(loan, approvalMatrix, isLoanFirstCycle,
-                isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_FOUR);
+                isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_FOUR, dueDiligenceRecommendedAmount);
         // generate the next stage based on loan approval matrix via amounts to be disbursed
         loanDecisionStateUtilService.determineTheNextDecisionStage(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
-                LoanDecisionState.IC_REVIEW_LEVEL_FOUR);
+                LoanDecisionState.IC_REVIEW_LEVEL_FOUR, dueDiligenceRecommendedAmount);
 
         final Integer nextDecisionStage = loanDecision.getNextLoanIcReviewDecisionState();
         if (nextDecisionStage.equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())) {
@@ -740,9 +744,10 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
 
         Boolean isLoanFirstCycle = loanDecisionStateUtilService.isLoanFirstCycle(loanIndividualCounter);
         Boolean isLoanUnsecure = loanDecisionStateUtilService.isLoanUnSecure(loan);
+        final BigDecimal dueDiligenceRecommendedAmount = loanDecision.getDueDiligenceRecommendedAmount();
 
         loanDecisionStateUtilService.validateLoanAccountToComplyToApprovalMatrixStage(loan, approvalMatrix, isLoanFirstCycle,
-                isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_FIVE);
+                isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_FIVE, dueDiligenceRecommendedAmount);
 
         final Map<String, Object> changes = loan.loanApplicationICReview(currentUser, command);
         if (!changes.isEmpty()) {
