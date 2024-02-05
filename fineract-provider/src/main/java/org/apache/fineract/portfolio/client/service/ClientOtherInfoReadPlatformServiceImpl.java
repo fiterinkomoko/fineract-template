@@ -105,7 +105,7 @@ public class ClientOtherInfoReadPlatformServiceImpl implements ClientOtherInfoRe
         final ClientOtherInfoMapper rm = new ClientOtherInfoMapper();
         final String sql = "select " + rm.schema() + " where co.client_id=?";
         try {
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[]{clientId}); // NOSONAR
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { clientId }); // NOSONAR
         } catch (Exception e) {
             return null;
         }

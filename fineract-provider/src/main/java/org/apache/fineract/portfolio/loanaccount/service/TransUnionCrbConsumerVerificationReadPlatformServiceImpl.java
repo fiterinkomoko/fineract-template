@@ -26,6 +26,7 @@ import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaConsumerVerificationData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCorporateVerificationData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCrbReportData;
+import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCrbSummaryReportData;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -52,9 +53,16 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
 
     @Override
     public TransUnionRwandaCrbReportData fetchCrbReportForTransUnion(Integer loanId) {
-        final clientCrbReportMapper mapper = new clientCrbReportMapper();
+        final ClientCrbReportMapper mapper = new ClientCrbReportMapper();
         final String sql = "SELECT " + mapper.schema() + " order by h.id DESC LIMIT 1 ";
         return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { loanId });
+    }
+
+    @Override
+    public TransUnionRwandaCrbSummaryReportData fetchCrbReportSummaryTransUnion(Integer headerId) {
+        final SummaryCrbReportMapper mapper = new SummaryCrbReportMapper();
+        final String sql = "SELECT " + mapper.schema() + " order by summary.id DESC LIMIT 1 ";
+        return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { headerId });
     }
 
     private static final class ConsumerCreditMapper implements RowMapper<TransUnionRwandaConsumerVerificationData> {
@@ -111,7 +119,7 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
         }
     }
 
-    private static final class clientCrbReportMapper implements RowMapper<TransUnionRwandaCrbReportData> {
+    private static final class ClientCrbReportMapper implements RowMapper<TransUnionRwandaCrbReportData> {
 
         public String schema() {
             final StringBuilder sql = new StringBuilder();
@@ -176,6 +184,156 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
                     createdOnDate, personalCrn, dateOfBirth, fullName, gender, healthInsuranceNo, maritalStatus, nationalId, otherNames,
                     salutation, surname, corporateCrn, companyRegNo, companyName, grade, positiveScore, possibility, reasonCodeAarc1,
                     reasonCodeAarc2, reasonCodeAarc3, reasonCodeAarc4, clientType);
+
+        }
+    }
+
+    private static final class SummaryCrbReportMapper implements RowMapper<TransUnionRwandaCrbSummaryReportData> {
+
+        public String schema() {
+            final StringBuilder sql = new StringBuilder();
+
+            sql.append("    h.id                      AS id, " + "       summary.bc_all_sectors AS bcAllSectors, "
+                    + "       summary.bc_my_sector AS bcMySector, " + "       summary.bc_other_sectors AS bcOtherSectors, "
+                    + "       summary.bc_180_all_sectors AS bc180AllSectors, " + "       summary.bc_180_my_sector AS bc180MySector, "
+                    + "       summary.bc_180_other_sectors AS bc180OtherSectors, " + "       summary.bc_90_all_sectors AS bc90AllSectors, "
+                    + "       summary.bc_90_my_sector AS bc90MySector, " + "       summary.bc_90_other_sectors AS bc90OtherSectors, "
+                    + "       summary.bc_365_all_sectors AS bc365AllSectors, " + "       summary.bc_365_my_sector AS bc365MySector, "
+                    + "       summary.bc_365_other_sectors AS bc365OtherSectors, " + "       summary.fc_all_sectors AS fcAllSectors, "
+                    + "       summary.fc_my_sector AS fcMySector, " + "       summary.fc_other_sectors AS fcOtherSectors, "
+                    + "       summary.last_bounced_cheque_date AS lastBouncedChequeDate, "
+                    + "       summary.last_credit_application_date AS lastCreditApplicationDate, "
+                    + "       summary.last_fraud_date AS lastFraudDate, " + "       summary.last_npa_listing_date AS lastNPAListingDate, "
+                    + "       summary.last_pa_listing_date AS lastPAListingDate, "
+                    + "       summary.last_insurance_policy_date AS lastInsurancePolicyDate, "
+                    + "       summary.npa_accounts_all_sectors AS npaAccountsAllSectors, "
+                    + "       summary.npa_accounts_my_sector AS npaAccountsMySector, "
+                    + "       summary.npa_accounts_other_sectors AS npaAccountsOtherSectors, "
+                    + "       summary.open_accounts_all_sectors AS openAccountsAllSectors, "
+                    + "       summary.open_accounts_my_sector AS openAccountsMySector, "
+                    + "       summary.open_accounts_other_sectors AS openAccountsOtherSectors, "
+                    + "       summary.pa_accounts_all_sectors AS paAccountsAllSectors, "
+                    + "       summary.pa_accounts_my_sector AS paAccountsMySector, "
+                    + "       summary.pa_accounts_other_sectors AS paAccountsOtherSectors, "
+                    + "       summary.pa_accounts_with_dh_all_sectors AS paAccountsWithDhAllSectors, "
+                    + "       summary.pa_accounts_with_dh_my_sector AS paAccountsWithDhMySector, "
+                    + "       summary.pa_accounts_with_dh_other_sectors AS paAccountsWithDhOtherSectors, "
+                    + "       summary.closed_accounts_all_sectors AS closedAccountsAllSectors, "
+                    + "       summary.closed_accounts_my_sector AS closedAccountsMySector, "
+                    + "       summary.closed_accounts_other_sectors AS closedAccountsOtherSectors, "
+                    + "       summary.ca_all_sectors AS caAllSectors, " + "       summary.ca_my_sector AS caMySector, "
+                    + "       summary.ca_other_sectors AS caOtherSectors, " + "       summary.ch_all_sectors AS chAllSectors, "
+                    + "       summary.ch_my_sector AS chMySector, " + "       summary.ch_other_sectors AS chOtherSectors, "
+                    + "       summary.enq_31_to_60_days_all_sectors AS enq31to60DaysAllSectors, "
+                    + "       summary.enq_31_to_60_days_my_sector AS enq31to60DaysMySector, "
+                    + "       summary.enq_31_to_60_days_other_sectors AS enq31to60DaysOtherSectors, "
+                    + "       summary.enq_61_to_90_days_all_sectors AS enq61to90DaysAllSectors, "
+                    + "       summary.enq_61_to_90_days_my_sector AS enq61to90DaysMySector, "
+                    + "       summary.enq_61_to_90_days_other_sectors AS enq61to90DaysOtherSectors, "
+                    + "       summary.enq_91_to_180_days_all_sectors AS enq91to180DaysAllSectors, "
+                    + "       summary.enq_91_to_180_days_my_sector AS enq91to180DaysMySector, "
+                    + "       summary.enq_91_to_180_days_other_sectors AS enq91to180DaysOtherSectors, "
+                    + "       summary.enq_last_30_days_all_sectors AS enqLast30DaysAllSectors, "
+                    + "       summary.enq_last_30_days_my_sector AS enqLast30DaysMySector, "
+                    + "       summary.enq_last_30_days_other_sectors AS enqLast30DaysOtherSectors, "
+                    + "       summary.pa_closed_accounts_all_sectors AS paClosedAccountsAllSectors, "
+                    + "       summary.pa_closed_accounts_my_sector AS paClosedAccountsMySector, "
+                    + "       summary.pa_closed_accounts_other_sectors AS paClosedAccountsOtherSectors, "
+                    + "       summary.pa_closed_accounts_with_dh_all_sectors AS paClosedAccountsWithDhAllSectors, "
+                    + "       summary.pa_closed_accounts_with_dh_my_sector AS paClosedAccountsWithDhMySector, "
+                    + "       summary.pa_closed_accounts_with_dh_other_sectors AS paClosedAccountsWithDhOtherSectors, "
+                    + "       summary.insurance_policies_my_sector AS insurancePoliciesMySector, "
+                    + "       summary.insurance_policies_all_sectors AS insurancePoliciesAllSectors, "
+                    + "       summary.insurance_policies_my_sector AS insurancePoliciesOtherSectors "
+                    + "  FROM m_transunion_crb_summary  summary " + "  INNER JOIN m_transunion_crb_header h on summary.header_id = h.id "
+                    + " WHERE h.id =  ? ");
+            return sql.toString();
+        }
+
+        @Override
+        public TransUnionRwandaCrbSummaryReportData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
+                throws SQLException {
+            final Integer id = rs.getInt("id");
+            final Integer bcAllSectors = rs.getInt("bcAllSectors");
+            final Integer bcMySector = rs.getInt("bcMySector");
+            final Integer bcOtherSectors = rs.getInt("bcOtherSectors");
+            final Integer bc180AllSectors = rs.getInt("bc180AllSectors");
+            final Integer bc180MySector = rs.getInt("bc180MySector");
+            final Integer bc180OtherSectors = rs.getInt("bc180OtherSectors");
+            final Integer bc90AllSectors = rs.getInt("bc90AllSectors");
+            final Integer bc90MySector = rs.getInt("bc90MySector");
+            final Integer bc90OtherSectors = rs.getInt("bc90OtherSectors");
+            final Integer bc365AllSectors = rs.getInt("bc365AllSectors");
+            final Integer bc365MySector = rs.getInt("bc365MySector");
+            final Integer bc365OtherSectors = rs.getInt("bc365OtherSectors");
+            final Integer fcAllSectors = rs.getInt("fcAllSectors");
+            final Integer fcMySector = rs.getInt("fcMySector");
+            final Integer fcOtherSectors = rs.getInt("fcOtherSectors");
+
+            final String lastBouncedChequeDate = rs.getString("lastBouncedChequeDate");
+            final String lastCreditApplicationDate = rs.getString("lastCreditApplicationDate");
+            final String lastFraudDate = rs.getString("lastFraudDate");
+            final String lastNPAListingDate = rs.getString("lastNPAListingDate");
+            final String lastPAListingDate = rs.getString("lastPAListingDate");
+            final String lastInsurancePolicyDate = rs.getString("lastInsurancePolicyDate");
+
+            final Integer npaAccountsAllSectors = rs.getInt("npaAccountsAllSectors");
+            final Integer npaAccountsMySector = rs.getInt("npaAccountsMySector");
+            final Integer npaAccountsOtherSectors = rs.getInt("npaAccountsOtherSectors");
+            final Integer openAccountsAllSectors = rs.getInt("openAccountsAllSectors");
+            final Integer openAccountsMySector = rs.getInt("openAccountsMySector");
+            final Integer openAccountsOtherSectors = rs.getInt("openAccountsOtherSectors");
+            final Integer paAccountsAllSectors = rs.getInt("paAccountsAllSectors");
+            final Integer paAccountsMySector = rs.getInt("paAccountsMySector");
+            final Integer paAccountsOtherSectors = rs.getInt("paAccountsOtherSectors");
+            final Integer paAccountsWithDhAllSectors = rs.getInt("paAccountsWithDhAllSectors");
+            final Integer paAccountsWithDhMySector = rs.getInt("paAccountsWithDhMySector");
+            final Integer paAccountsWithDhOtherSectors = rs.getInt("paAccountsWithDhOtherSectors");
+            final Integer closedAccountsAllSectors = rs.getInt("closedAccountsAllSectors");
+            final Integer closedAccountsMySector = rs.getInt("closedAccountsMySector");
+            final Integer closedAccountsOtherSectors = rs.getInt("closedAccountsOtherSectors");
+            final Integer caAllSectors = rs.getInt("caAllSectors");
+            final Integer caMySector = rs.getInt("caMySector");
+            final Integer caOtherSectors = rs.getInt("caOtherSectors");
+            final Integer chAllSectors = rs.getInt("chAllSectors");
+            final Integer chMySector = rs.getInt("chMySector");
+            final Integer chOtherSectors = rs.getInt("chOtherSectors");
+            final Integer enq31to60DaysAllSectors = rs.getInt("enq31to60DaysAllSectors");
+            final Integer enq31to60DaysMySector = rs.getInt("enq31to60DaysMySector");
+            final Integer enq31to60DaysOtherSectors = rs.getInt("enq31to60DaysOtherSectors");
+            final Integer enq61to90DaysAllSectors = rs.getInt("enq61to90DaysAllSectors");
+            final Integer enq61to90DaysMySector = rs.getInt("enq61to90DaysMySector");
+            final Integer enq61to90DaysOtherSectors = rs.getInt("enq61to90DaysOtherSectors");
+            final Integer enq91to180DaysAllSectors = rs.getInt("enq91to180DaysAllSectors");
+            final Integer enq91to180DaysMySector = rs.getInt("enq91to180DaysMySector");
+            final Integer enq91to180DaysOtherSectors = rs.getInt("enq91to180DaysOtherSectors");
+            final Integer enqLast30DaysAllSectors = rs.getInt("enqLast30DaysAllSectors");
+            final Integer enqLast30DaysMySector = rs.getInt("enqLast30DaysMySector");
+            final Integer enqLast30DaysOtherSectors = rs.getInt("enqLast30DaysOtherSectors");
+            final Integer paClosedAccountsAllSectors = rs.getInt("paClosedAccountsAllSectors");
+            final Integer paClosedAccountsMySector = rs.getInt("paClosedAccountsMySector");
+            final Integer paClosedAccountsOtherSectors = rs.getInt("paClosedAccountsOtherSectors");
+            final Integer paClosedAccountsWithDhAllSectors = rs.getInt("paClosedAccountsWithDhAllSectors");
+            final Integer paClosedAccountsWithDhMySector = rs.getInt("paClosedAccountsWithDhMySector");
+            final Integer paClosedAccountsWithDhOtherSectors = rs.getInt("paClosedAccountsWithDhOtherSectors");
+            final Integer insurancePoliciesAllSectors = rs.getInt("insurancePoliciesAllSectors");
+            final Integer insurancePoliciesMySector = rs.getInt("insurancePoliciesMySector");
+            final Integer insurancePoliciesOtherSectors = rs.getInt("insurancePoliciesOtherSectors");
+
+            return new TransUnionRwandaCrbSummaryReportData(id, bcAllSectors, bcMySector, bcOtherSectors, bc180AllSectors, bc180MySector,
+                    bc180OtherSectors, bc90AllSectors, bc90MySector, bc90OtherSectors, bc365AllSectors, bc365MySector, bc365OtherSectors,
+                    fcAllSectors, fcMySector, fcOtherSectors, lastBouncedChequeDate, lastCreditApplicationDate, lastFraudDate,
+                    lastNPAListingDate, lastPAListingDate, lastInsurancePolicyDate, npaAccountsAllSectors, npaAccountsMySector,
+                    npaAccountsOtherSectors, openAccountsAllSectors, openAccountsMySector, openAccountsOtherSectors, paAccountsAllSectors,
+                    paAccountsMySector, paAccountsOtherSectors, paAccountsWithDhAllSectors, paAccountsWithDhMySector,
+                    paAccountsWithDhOtherSectors, closedAccountsAllSectors, closedAccountsMySector, closedAccountsOtherSectors,
+                    caAllSectors, caMySector, caOtherSectors, chAllSectors, chMySector, chOtherSectors, enq31to60DaysAllSectors,
+                    enq31to60DaysMySector, enq31to60DaysOtherSectors, enq61to90DaysAllSectors, enq61to90DaysMySector,
+                    enq61to90DaysOtherSectors, enq91to180DaysAllSectors, enq91to180DaysMySector, enq91to180DaysOtherSectors,
+                    enqLast30DaysAllSectors, enqLast30DaysMySector, enqLast30DaysOtherSectors, paClosedAccountsAllSectors,
+                    paClosedAccountsMySector, paClosedAccountsOtherSectors, paClosedAccountsWithDhAllSectors,
+                    paClosedAccountsWithDhMySector, paClosedAccountsWithDhOtherSectors, insurancePoliciesAllSectors,
+                    insurancePoliciesMySector, insurancePoliciesOtherSectors);
 
         }
     }
