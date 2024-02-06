@@ -18,8 +18,10 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import java.util.List;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaConsumerVerificationData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCorporateVerificationData;
+import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCrbAccountReportData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCrbReportData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCrbSummaryReportData;
 
@@ -32,4 +34,6 @@ public interface TransUnionCrbConsumerVerificationReadPlatformService {
     TransUnionRwandaCrbReportData fetchCrbReportForTransUnion(Integer loanId);
 
     TransUnionRwandaCrbSummaryReportData fetchCrbReportSummaryTransUnion(Integer headerId);
+
+    List<TransUnionRwandaCrbAccountReportData> fetchCrbReportAccountTransUnion(Integer headerId);
 }

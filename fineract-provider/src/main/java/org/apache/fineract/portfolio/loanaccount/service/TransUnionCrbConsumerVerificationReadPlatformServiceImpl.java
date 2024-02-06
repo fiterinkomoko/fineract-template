@@ -18,13 +18,16 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaConsumerVerificationData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCorporateVerificationData;
+import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCrbAccountReportData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCrbReportData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCrbSummaryReportData;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -63,6 +66,13 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
         final SummaryCrbReportMapper mapper = new SummaryCrbReportMapper();
         final String sql = "SELECT " + mapper.schema() + " order by summary.id DESC LIMIT 1 ";
         return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { headerId });
+    }
+
+    @Override
+    public List<TransUnionRwandaCrbAccountReportData> fetchCrbReportAccountTransUnion(Integer headerId) {
+        final AccountCrbReportMapper mapper = new AccountCrbReportMapper();
+        final String sql = "SELECT " + mapper.schema() + " order by ac.id DESC ";
+        return this.jdbcTemplate.query(sql, mapper, headerId);
     }
 
     private static final class ConsumerCreditMapper implements RowMapper<TransUnionRwandaConsumerVerificationData> {
@@ -334,6 +344,59 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
                     paClosedAccountsMySector, paClosedAccountsOtherSectors, paClosedAccountsWithDhAllSectors,
                     paClosedAccountsWithDhMySector, paClosedAccountsWithDhOtherSectors, insurancePoliciesAllSectors,
                     insurancePoliciesMySector, insurancePoliciesOtherSectors);
+
+        }
+    }
+
+    private static final class AccountCrbReportMapper implements RowMapper<TransUnionRwandaCrbAccountReportData> {
+
+        public String schema() {
+            final StringBuilder sql = new StringBuilder();
+
+            sql.append(" h.id                        AS id,  " + "       ac.account_no               AS accountNo,  "
+                    + "       ac.account_opening_date     AS accountOpeningDate,  "
+                    + "       ac.account_owner            AS accountOwner,  " + "       ac.account_status           AS accountStatus,  "
+                    + "       ac.account_type             AS accountType,  " + "       ac.arrear_amount            AS arrearAmount,  "
+                    + "       ac.arrear_days              AS arrearDays,  " + "       ac.balance_amount           AS balanceAmount,  "
+                    + "       ac.currency                 AS currency,  " + "       ac.disputed                 AS disputed,  "
+                    + "       ac.is_my_account            AS isMyAccount,  " + "       ac.last_payment_date        AS lastPaymentDate,  "
+                    + "       ac.listing_date             AS listingDate,  " + "       ac.principal_amount         AS principalAmount,  "
+                    + "       ac.repayment_duration       AS repaymentDuration,  "
+                    + "       ac.repayment_term           AS repaymentTerm,  "
+                    + "       ac.scheduled_payment_amount AS scheduledPaymentAmount,  "
+                    + "       ac.trade_sector             AS tradeSector,  " + "       ac.worst_arrear             AS worstArrear  "
+                    + " FROM m_transunion_crb_account ac  " + " INNER JOIN m_transunion_crb_header h on ac.header_id = h.id  "
+                    + " WHERE h.id =   ? ");
+            return sql.toString();
+        }
+
+        @Override
+        public TransUnionRwandaCrbAccountReportData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
+                throws SQLException {
+            final Integer id = rs.getInt("id");
+            final String accountNo = rs.getString("accountNo");
+            final String accountOpeningDate = rs.getString("accountOpeningDate");
+            final String accountOwner = rs.getString("accountOwner");
+            final String accountStatus = rs.getString("accountStatus");
+            final String accountType = rs.getString("accountType");
+            final BigDecimal arrearAmount = rs.getBigDecimal("arrearAmount");
+            final Integer arrearDays = rs.getInt("arrearDays");
+            final BigDecimal balanceAmount = rs.getBigDecimal("balanceAmount");
+            final String currency = rs.getString("currency");
+            final Boolean disputed = rs.getBoolean("disputed");
+            final Boolean isMyAccount = rs.getBoolean("isMyAccount");
+            final String lastPaymentDate = rs.getString("lastPaymentDate");
+            final String listingDate = rs.getString("listingDate");
+            final BigDecimal principalAmount = rs.getBigDecimal("principalAmount");
+            final Integer repaymentDuration = rs.getInt("repaymentDuration");
+            final String repaymentTerm = rs.getString("repaymentTerm");
+            final BigDecimal scheduledPaymentAmount = rs.getBigDecimal("scheduledPaymentAmount");
+            final String tradeSector = rs.getString("tradeSector");
+            final Integer worstArrear = rs.getInt("worstArrear");
+
+            return new TransUnionRwandaCrbAccountReportData(id, accountNo, accountOpeningDate, accountOwner, accountStatus, accountType,
+                    arrearAmount, arrearDays, balanceAmount, currency, disputed, isMyAccount, lastPaymentDate, listingDate, principalAmount,
+                    repaymentDuration, repaymentTerm, scheduledPaymentAmount, tradeSector, worstArrear);
 
         }
     }

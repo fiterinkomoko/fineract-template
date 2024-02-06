@@ -55,6 +55,7 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.portfolio.loanaccount.data.CrbKenyaMetropolRequestData;
 import org.apache.fineract.portfolio.loanaccount.data.MetropolAccountInfoData;
 import org.apache.fineract.portfolio.loanaccount.data.MetropolCrbCreditInfoEnchancedData;
+import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCrbAccountReportData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCrbReportData;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCrbSummaryReportData;
 import org.apache.fineract.portfolio.loanaccount.service.MetropolCrbReadPlatformService;
@@ -319,6 +320,10 @@ public class CreditBureauConfigurationAPI {
             TransUnionRwandaCrbSummaryReportData summary = this.transUnionCrbClientVerificationReadPlatformService
                     .fetchCrbReportSummaryTransUnion(crbReportData.getId());
             crbReportData.setTransUnionRwandaCrbSummaryReportData(summary);
+
+            List<TransUnionRwandaCrbAccountReportData> accountList = this.transUnionCrbClientVerificationReadPlatformService
+                    .fetchCrbReportAccountTransUnion(crbReportData.getId());
+            crbReportData.setAccountReportDataList(accountList);
         }
 
         return this.toApiJsonSerializerCreditBureauLoanProduct.serialize(crbReportData);
