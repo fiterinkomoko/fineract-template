@@ -82,12 +82,14 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
 
             if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.numberOfChildren, element) != null) {
                 final Long numberOfChildren = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.numberOfChildren, element);
-                baseDataValidator.reset().parameter(ClientApiConstants.numberOfChildren).value(numberOfChildren).notNull().longZeroOrGreater();
+                baseDataValidator.reset().parameter(ClientApiConstants.numberOfChildren).value(numberOfChildren).notNull()
+                        .longZeroOrGreater();
             }
 
             if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.numberOfDependents, element) != null) {
                 final Long numberOfDependents = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.numberOfDependents, element);
-                baseDataValidator.reset().parameter(ClientApiConstants.numberOfChildren).value(numberOfDependents).notNull().longZeroOrGreater();
+                baseDataValidator.reset().parameter(ClientApiConstants.numberOfChildren).value(numberOfDependents).notNull()
+                        .longZeroOrGreater();
             }
             final Integer yearArrivedInHostCountryId = this.fromApiJsonHelper
                     .extractIntegerSansLocaleNamed(ClientApiConstants.yearArrivedInHostCountry, element);
@@ -128,14 +130,12 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
 
             if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.coSignors, element) != null) {
                 final String coSignors = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.coSignors, element);
-                baseDataValidator.reset().parameter(ClientApiConstants.coSignors).value(coSignors).notBlank()
-                        .notExceedingLengthOf(100);
+                baseDataValidator.reset().parameter(ClientApiConstants.coSignors).value(coSignors).notBlank().notExceedingLengthOf(100);
             }
 
             if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.guarantor, element) != null) {
                 final String guarantor = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.guarantor, element);
-                baseDataValidator.reset().parameter(ClientApiConstants.guarantor).value(guarantor).notBlank()
-                        .notExceedingLengthOf(100);
+                baseDataValidator.reset().parameter(ClientApiConstants.guarantor).value(guarantor).notBlank().notExceedingLengthOf(100);
             }
 
             if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.incomeGeneratingActivityParamName, element) != null) {
@@ -151,8 +151,7 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
                 baseDataValidator.reset().parameter(ClientApiConstants.incomeGeneratingActivityMonthlyAmountParamName)
                         .value(incomeGeneratingActivityMonthlyAmount).notNull().zeroOrPositiveAmount();
             }
-            if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.telephoneNoParamName,
-                    element) != null) {
+            if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.telephoneNoParamName, element) != null) {
                 final String telephoneNo = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.telephoneNoParamName, element);
                 baseDataValidator.reset().parameter(ClientApiConstants.telephoneNoParamName).value(telephoneNo).notBlank()
                         .notExceedingLengthOf(20);
@@ -244,22 +243,20 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
                 atLeastOneParameterPassedForUpdate = true;
                 final String businessLocation = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.businessLocationParamName,
                         element);
-                baseDataValidator.reset().parameter(ClientApiConstants.businessLocationParamName).value(businessLocation)
-                        .notBlank().notExceedingLengthOf(100);
+                baseDataValidator.reset().parameter(ClientApiConstants.businessLocationParamName).value(businessLocation).notBlank()
+                        .notExceedingLengthOf(100);
             }
 
             if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.coSignors, element)) {
                 atLeastOneParameterPassedForUpdate = true;
                 final String coSignors = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.coSignors, element);
-                baseDataValidator.reset().parameter(ClientApiConstants.coSignors).value(coSignors).notBlank()
-                        .notExceedingLengthOf(100);
+                baseDataValidator.reset().parameter(ClientApiConstants.coSignors).value(coSignors).notBlank().notExceedingLengthOf(100);
             }
 
             if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.guarantor, element)) {
                 atLeastOneParameterPassedForUpdate = true;
                 final String guarantor = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.guarantor, element);
-                baseDataValidator.reset().parameter(ClientApiConstants.guarantor).value(guarantor).notBlank()
-                        .notExceedingLengthOf(100);
+                baseDataValidator.reset().parameter(ClientApiConstants.guarantor).value(guarantor).notBlank().notExceedingLengthOf(100);
             }
             if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.incomeGeneratingActivityParamName, element)) {
                 atLeastOneParameterPassedForUpdate = true;
