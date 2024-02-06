@@ -216,6 +216,8 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
             HeaderData headerData = corporateVerificationResponseData.getHeader();
             CorporateProfileData corporateProfileData = corporateVerificationResponseData.getCorporateProfile();
             ScoreOutputData scoreOutputData = corporateVerificationResponseData.getScoreOutput();
+            SummaryData summaryData = corporateVerificationResponseData.getSummaryData();
+            List<AccountListData> accountListData = corporateVerificationResponseData.getAccountListData();
             if (headerData != null) {
                 transunionCrbHeader = new TransunionCrbHeader(clientObj, loan, headerData);
                 transunionCrbHeaderRepository.saveAndFlush(transunionCrbHeader);
@@ -227,6 +229,17 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
                 if (scoreOutputData != null) {
                     TransunionCrbScoreOutput scoreOutput = new TransunionCrbScoreOutput(transunionCrbHeader, scoreOutputData);
                     transunionCrbScoreOutputRepository.saveAndFlush(scoreOutput);
+                }
+
+                if (summaryData != null) {
+                    TransunionCrbSummary scoreOutput = new TransunionCrbSummary(transunionCrbHeader, summaryData);
+                    transunionCrbSummaryRepository.saveAndFlush(scoreOutput);
+                }
+                if (!CollectionUtils.isEmpty(accountListData)) {
+                    for (AccountListData account : accountListData) {
+                        TransunionCrbAccount transunionCrbAccount = new TransunionCrbAccount(transunionCrbHeader, account);
+                        transunionCrbAccountRepository.saveAndFlush(transunionCrbAccount);
+                    }
                 }
             }
 
@@ -405,6 +418,7 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
                     product168Response.setHeader(extractHeader(getProduct168ResponseElement));
                     product168Response.setCorporateProfile(extractCorporateProfile(getProduct168ResponseElement));
                     product168Response.setSummaryData(extractSummaryData(getProduct168ResponseElement));
+                    product168Response.setAccountListData(extractAccountList(getProduct168ResponseElement));
                     LOG.info("Response from TransUnion Rwanda  product168Response:: >> " + product168Response.toString());
                     return product168Response;
                 } else {
