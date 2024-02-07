@@ -1016,6 +1016,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public CommandProcessingResult makeLoanRepayment(final LoanTransactionType repaymentTransactionType, final Long loanId,
             final JsonCommand command, final boolean isRecoveryRepayment, final boolean isPayOff) {
         final AppUser currentUser = getAppUserIfPresent();
+        if (command.integerValueOfParameterNamed("paymentTypeId") == 100) {
+            // Route to Waive Interest.
+            // Note This is for Data Migration Only.
+            return waiveInterestOnLoan(command.getLoanId(), command);
+        }
+
         this.loanUtilService.validateRepaymentTransactionType(repaymentTransactionType, isPayOff);
         this.loanEventApiJsonValidator.validateNewRepaymentTransaction(command.json());
 
