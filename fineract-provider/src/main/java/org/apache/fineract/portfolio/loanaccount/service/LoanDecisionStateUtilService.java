@@ -261,12 +261,12 @@ public class LoanDecisionStateUtilService {
     }
 
     private void validateLoanAccountToComplyToApprovalMatrixLevelTwo(Loan loan, LoanApprovalMatrix approvalMatrix, Boolean isLoanFirstCycle,
-            Boolean isLoanUnsecure) {
+            Boolean isLoanUnsecure, BigDecimal dueDiligenceRecommendedAmount) {
         if (isLoanFirstCycle && isLoanUnsecure) {
             // Loan is FirstCycle and Unsecure
             String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.Two.unsecured.first.cycle";
             String state = "Level Two Unsecured first cycle ";
-            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(loan.getProposedPrincipal(),
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(dueDiligenceRecommendedAmount,
                     approvalMatrix.getLevelTwoUnsecuredFirstCycleMaxAmount(), loan.getNumberOfRepayments(),
                     approvalMatrix.getLevelTwoUnsecuredFirstCycleMinTerm(), approvalMatrix.getLevelTwoUnsecuredFirstCycleMaxTerm(),
                     errormsg, state, approvalMatrix.getLevelOneUnsecuredFirstCycleMaxAmount());
@@ -275,7 +275,7 @@ public class LoanDecisionStateUtilService {
             // Loan is (Second cycle or plus) and Unsecure
             String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.Two.unsecured.second.cycle plus";
             String state = "Level Two Unsecured second cycle plus ";
-            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(loan.getProposedPrincipal(),
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(dueDiligenceRecommendedAmount,
                     approvalMatrix.getLevelTwoUnsecuredSecondCycleMaxAmount(), loan.getNumberOfRepayments(),
                     approvalMatrix.getLevelTwoUnsecuredSecondCycleMinTerm(), approvalMatrix.getLevelTwoUnsecuredSecondCycleMaxTerm(),
                     errormsg, state, approvalMatrix.getLevelOneUnsecuredSecondCycleMaxAmount());
@@ -284,7 +284,7 @@ public class LoanDecisionStateUtilService {
             // First Cycle and secured Loan
             String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.Two.secured.first.cycle";
             String state = "Level Two secured first cycle ";
-            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(loan.getProposedPrincipal(),
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(dueDiligenceRecommendedAmount,
                     approvalMatrix.getLevelTwoSecuredFirstCycleMaxAmount(), loan.getNumberOfRepayments(),
                     approvalMatrix.getLevelTwoSecuredFirstCycleMinTerm(), approvalMatrix.getLevelTwoSecuredFirstCycleMaxTerm(), errormsg,
                     state, approvalMatrix.getLevelOneSecuredFirstCycleMaxAmount());
@@ -293,7 +293,7 @@ public class LoanDecisionStateUtilService {
             // Second Cycle or plus and secured
             String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.Two.secured.second.cycle plus";
             String state = "Level Two Secured second cycle plus ";
-            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(loan.getProposedPrincipal(),
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(dueDiligenceRecommendedAmount,
                     approvalMatrix.getLevelTwoSecuredSecondCycleMaxAmount(), loan.getNumberOfRepayments(),
                     approvalMatrix.getLevelTwoSecuredSecondCycleMinTerm(), approvalMatrix.getLevelTwoSecuredSecondCycleMaxTerm(), errormsg,
                     state, approvalMatrix.getLevelOneSecuredSecondCycleMaxAmount());
@@ -306,12 +306,12 @@ public class LoanDecisionStateUtilService {
     }
 
     private void validateLoanAccountToComplyToApprovalMatrixLevelThree(Loan loan, LoanApprovalMatrix approvalMatrix,
-            Boolean isLoanFirstCycle, Boolean isLoanUnsecure) {
+            Boolean isLoanFirstCycle, Boolean isLoanUnsecure, BigDecimal dueDiligenceRecommendedAmount) {
         if (isLoanFirstCycle && isLoanUnsecure) {
             // Loan is FirstCycle and Unsecure
             String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.Three.unsecured.first.cycle";
             String state = "Level Three Unsecured first cycle ";
-            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(loan.getProposedPrincipal(),
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(dueDiligenceRecommendedAmount,
                     approvalMatrix.getLevelThreeUnsecuredFirstCycleMaxAmount(), loan.getNumberOfRepayments(),
                     approvalMatrix.getLevelThreeUnsecuredFirstCycleMinTerm(), approvalMatrix.getLevelThreeUnsecuredFirstCycleMaxTerm(),
                     errormsg, state, approvalMatrix.getLevelTwoUnsecuredFirstCycleMaxAmount());
@@ -320,7 +320,7 @@ public class LoanDecisionStateUtilService {
             // Loan is (Second cycle or plus) and Unsecure
             String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.Three.unsecured.second.cycle plus";
             String state = "Level Three Unsecured second cycle plus ";
-            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(loan.getProposedPrincipal(),
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(dueDiligenceRecommendedAmount,
                     approvalMatrix.getLevelThreeUnsecuredSecondCycleMaxAmount(), loan.getNumberOfRepayments(),
                     approvalMatrix.getLevelThreeUnsecuredSecondCycleMinTerm(), approvalMatrix.getLevelThreeUnsecuredSecondCycleMaxTerm(),
                     errormsg, state, approvalMatrix.getLevelTwoUnsecuredSecondCycleMaxAmount());
@@ -329,7 +329,7 @@ public class LoanDecisionStateUtilService {
             // First Cycle and secured Loan
             String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.Three.secured.first.cycle";
             String state = "Level Three secured first cycle ";
-            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(loan.getProposedPrincipal(),
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(dueDiligenceRecommendedAmount,
                     approvalMatrix.getLevelThreeSecuredFirstCycleMaxAmount(), loan.getNumberOfRepayments(),
                     approvalMatrix.getLevelThreeSecuredFirstCycleMinTerm(), approvalMatrix.getLevelThreeSecuredFirstCycleMaxTerm(),
                     errormsg, state, approvalMatrix.getLevelTwoSecuredFirstCycleMaxAmount());
@@ -338,7 +338,7 @@ public class LoanDecisionStateUtilService {
             // Second Cycle or plus and secured
             String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.Three.secured.second.cycle plus";
             String state = "Level Three Secured second cycle plus ";
-            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(loan.getProposedPrincipal(),
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(dueDiligenceRecommendedAmount,
                     approvalMatrix.getLevelThreeSecuredSecondCycleMaxAmount(), loan.getNumberOfRepayments(),
                     approvalMatrix.getLevelThreeSecuredSecondCycleMinTerm(), approvalMatrix.getLevelThreeSecuredSecondCycleMaxTerm(),
                     errormsg, state, approvalMatrix.getLevelTwoSecuredSecondCycleMaxAmount());
@@ -351,12 +351,12 @@ public class LoanDecisionStateUtilService {
     }
 
     private void validateLoanAccountToComplyToApprovalMatrixLevelFour(Loan loan, LoanApprovalMatrix approvalMatrix,
-            Boolean isLoanFirstCycle, Boolean isLoanUnsecure) {
+            Boolean isLoanFirstCycle, Boolean isLoanUnsecure, BigDecimal dueDiligenceRecommendedAmount) {
         if (isLoanFirstCycle && isLoanUnsecure) {
             // Loan is FirstCycle and Unsecure
             String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.Four.unsecured.first.cycle";
             String state = "Level Four Unsecured first cycle ";
-            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(loan.getProposedPrincipal(),
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(dueDiligenceRecommendedAmount,
                     approvalMatrix.getLevelFourUnsecuredFirstCycleMaxAmount(), loan.getNumberOfRepayments(),
                     approvalMatrix.getLevelFourUnsecuredFirstCycleMinTerm(), approvalMatrix.getLevelFourUnsecuredFirstCycleMaxTerm(),
                     errormsg, state, approvalMatrix.getLevelThreeUnsecuredFirstCycleMaxAmount());
@@ -365,7 +365,7 @@ public class LoanDecisionStateUtilService {
             // Loan is (Second cycle or plus) and Unsecure
             String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.Four.unsecured.second.cycle plus";
             String state = "Level Four Unsecured second cycle plus ";
-            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(loan.getProposedPrincipal(),
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(dueDiligenceRecommendedAmount,
                     approvalMatrix.getLevelFourUnsecuredSecondCycleMaxAmount(), loan.getNumberOfRepayments(),
                     approvalMatrix.getLevelFourUnsecuredSecondCycleMinTerm(), approvalMatrix.getLevelFourUnsecuredSecondCycleMaxTerm(),
                     errormsg, state, approvalMatrix.getLevelThreeUnsecuredSecondCycleMaxAmount());
@@ -374,7 +374,7 @@ public class LoanDecisionStateUtilService {
             // First Cycle and secured Loan
             String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.Four.secured.first.cycle";
             String state = "Level Four secured first cycle ";
-            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(loan.getProposedPrincipal(),
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(dueDiligenceRecommendedAmount,
                     approvalMatrix.getLevelFourSecuredFirstCycleMaxAmount(), loan.getNumberOfRepayments(),
                     approvalMatrix.getLevelFourSecuredFirstCycleMinTerm(), approvalMatrix.getLevelFourSecuredFirstCycleMaxTerm(), errormsg,
                     state, approvalMatrix.getLevelThreeSecuredFirstCycleMaxAmount());
@@ -383,7 +383,7 @@ public class LoanDecisionStateUtilService {
             // Second Cycle or plus and secured
             String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.Four.secured.second.cycle plus";
             String state = "Level Four Secured second cycle plus ";
-            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(loan.getProposedPrincipal(),
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(dueDiligenceRecommendedAmount,
                     approvalMatrix.getLevelFourSecuredSecondCycleMaxAmount(), loan.getNumberOfRepayments(),
                     approvalMatrix.getLevelFourSecuredSecondCycleMinTerm(), approvalMatrix.getLevelFourSecuredSecondCycleMaxTerm(),
                     errormsg, state, approvalMatrix.getLevelThreeSecuredSecondCycleMaxAmount());
@@ -396,12 +396,12 @@ public class LoanDecisionStateUtilService {
     }
 
     private void validateLoanAccountToComplyToApprovalMatrixLevelFive(Loan loan, LoanApprovalMatrix approvalMatrix,
-            Boolean isLoanFirstCycle, Boolean isLoanUnsecure) {
+            Boolean isLoanFirstCycle, Boolean isLoanUnsecure, BigDecimal dueDiligenceRecommendedAmount) {
         if (isLoanFirstCycle && isLoanUnsecure) {
             // Loan is FirstCycle and Unsecure
             String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.Five.unsecured.first.cycle";
             String state = "Level Five Unsecured first cycle ";
-            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelFive(loan.getProposedPrincipal(),
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelFive(dueDiligenceRecommendedAmount,
                     approvalMatrix.getLevelFiveUnsecuredFirstCycleMaxAmount(), loan.getNumberOfRepayments(),
                     approvalMatrix.getLevelFiveUnsecuredFirstCycleMinTerm(), approvalMatrix.getLevelFiveUnsecuredFirstCycleMaxTerm(),
                     errormsg, state, approvalMatrix.getLevelFourUnsecuredFirstCycleMaxAmount());
@@ -410,7 +410,7 @@ public class LoanDecisionStateUtilService {
             // Loan is (Second cycle or plus) and Unsecure
             String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.Five.unsecured.second.cycle plus";
             String state = "Level Five Unsecured second cycle plus ";
-            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelFive(loan.getProposedPrincipal(),
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelFive(dueDiligenceRecommendedAmount,
                     approvalMatrix.getLevelFiveUnsecuredSecondCycleMaxAmount(), loan.getNumberOfRepayments(),
                     approvalMatrix.getLevelFiveUnsecuredSecondCycleMinTerm(), approvalMatrix.getLevelFiveUnsecuredSecondCycleMaxTerm(),
                     errormsg, state, approvalMatrix.getLevelFourUnsecuredSecondCycleMaxAmount());
@@ -419,7 +419,7 @@ public class LoanDecisionStateUtilService {
             // First Cycle and secured Loan
             String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.Five.secured.first.cycle";
             String state = "Level Five secured first cycle ";
-            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelFive(loan.getProposedPrincipal(),
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelFive(dueDiligenceRecommendedAmount,
                     approvalMatrix.getLevelFiveSecuredFirstCycleMaxAmount(), loan.getNumberOfRepayments(),
                     approvalMatrix.getLevelFiveSecuredFirstCycleMinTerm(), approvalMatrix.getLevelFiveSecuredFirstCycleMaxTerm(), errormsg,
                     state, approvalMatrix.getLevelFourSecuredFirstCycleMaxAmount());
@@ -428,7 +428,7 @@ public class LoanDecisionStateUtilService {
             // Second Cycle or plus and secured
             String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.Five.secured.second.cycle plus";
             String state = "Level Five Secured second cycle plus ";
-            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelFive(loan.getProposedPrincipal(),
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelFive(dueDiligenceRecommendedAmount,
                     approvalMatrix.getLevelFiveSecuredSecondCycleMaxAmount(), loan.getNumberOfRepayments(),
                     approvalMatrix.getLevelFiveSecuredSecondCycleMinTerm(), approvalMatrix.getLevelFiveSecuredSecondCycleMaxTerm(),
                     errormsg, state, approvalMatrix.getLevelFourSecuredSecondCycleMaxAmount());
@@ -441,12 +441,12 @@ public class LoanDecisionStateUtilService {
     }
 
     private void validateLoanAccountToComplyToApprovalMatrixLevelOne(Loan loan, LoanApprovalMatrix approvalMatrix, Boolean isLoanFirstCycle,
-            Boolean isLoanUnsecure) {
+            Boolean isLoanUnsecure, BigDecimal dueDiligenceRecommendedAmount) {
         if (isLoanFirstCycle && isLoanUnsecure) {
             // Loan is FirstCycle and Unsecure
             String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.one.unsecured.first.cycle";
             String state = "Level One Unsecured first cycle ";
-            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelOne(loan.getProposedPrincipal(),
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelOne(dueDiligenceRecommendedAmount,
                     approvalMatrix.getLevelOneUnsecuredFirstCycleMaxAmount(), loan.getNumberOfRepayments(),
                     approvalMatrix.getLevelOneUnsecuredFirstCycleMinTerm(), approvalMatrix.getLevelOneUnsecuredFirstCycleMaxTerm(),
                     errormsg, state);
@@ -455,7 +455,7 @@ public class LoanDecisionStateUtilService {
             // Loan is (Second cycle or plus) and Unsecure
             String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.one.unsecured.second.cycle plus";
             String state = "Level One Unsecured second cycle plus ";
-            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelOne(loan.getProposedPrincipal(),
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelOne(dueDiligenceRecommendedAmount,
                     approvalMatrix.getLevelOneUnsecuredSecondCycleMaxAmount(), loan.getNumberOfRepayments(),
                     approvalMatrix.getLevelOneUnsecuredSecondCycleMinTerm(), approvalMatrix.getLevelOneUnsecuredSecondCycleMaxTerm(),
                     errormsg, state);
@@ -464,7 +464,7 @@ public class LoanDecisionStateUtilService {
             // First Cycle and secured Loan
             String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.one.secured.first.cycle";
             String state = "Level One secured first cycle ";
-            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelOne(loan.getProposedPrincipal(),
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelOne(dueDiligenceRecommendedAmount,
                     approvalMatrix.getLevelOneSecuredFirstCycleMaxAmount(), loan.getNumberOfRepayments(),
                     approvalMatrix.getLevelOneSecuredFirstCycleMinTerm(), approvalMatrix.getLevelOneSecuredFirstCycleMaxTerm(), errormsg,
                     state);
@@ -473,7 +473,7 @@ public class LoanDecisionStateUtilService {
             // Second Cycle or plus and secured
             String errormsg = "error.msg.invalid.loan.principal.does.not.qualify.for.IC-review.level.one.secured.second.cycle plus";
             String state = "Level One Secured second cycle plus ";
-            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelOne(loan.getProposedPrincipal(),
+            validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelOne(dueDiligenceRecommendedAmount,
                     approvalMatrix.getLevelOneSecuredSecondCycleMaxAmount(), loan.getNumberOfRepayments(),
                     approvalMatrix.getLevelOneSecuredSecondCycleMinTerm(), approvalMatrix.getLevelOneSecuredSecondCycleMaxTerm(), errormsg,
                     state);
@@ -485,60 +485,66 @@ public class LoanDecisionStateUtilService {
         }
     }
 
-    private void validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelOne(BigDecimal loanPrincipal,
+    private void validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelOne(BigDecimal dueDiligenceRecommendedAmount,
             BigDecimal currentStageMatrixMaxAmount, Integer numberOfRepayment, Integer currentStageMatrixMinTerm,
             Integer currentStageMatrixMaxTerm, String errorMsg, String stateMsg) {
         if ((numberOfRepayment < currentStageMatrixMinTerm || numberOfRepayment > currentStageMatrixMaxTerm)) {
             throw new GeneralPlatformDomainRuleException(errorMsg, String.format(
                     "This Loan Account Principal [ %s ] vs Approval Matrix Max Amount [%s] , does not qualify for IC-Review  [%s] with Terms Min [%s] Max [%s] Vs Loan Term [%s]",
-                    loanPrincipal, currentStageMatrixMaxAmount, stateMsg, currentStageMatrixMinTerm, currentStageMatrixMaxTerm,
-                    numberOfRepayment));
+                    dueDiligenceRecommendedAmount, currentStageMatrixMaxAmount, stateMsg, currentStageMatrixMinTerm,
+                    currentStageMatrixMaxTerm, numberOfRepayment));
         }
     }
 
-    private void validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(BigDecimal loanPrincipal,
+    private void validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelTwoAndAbove(BigDecimal dueDiligenceRecommendedAmount,
             BigDecimal currentStageMatrixMaxAmount, Integer numberOfRepayment, Integer currentStageMatrixMinTerm,
             Integer currentStageMatrixMaxTerm, String errorMsg, String stateMsg, BigDecimal previousStageMatrixMaxAmount) {
         BigDecimal minAmount = previousStageMatrixMaxAmount.add(BigDecimal.ONE);
-        if ((loanPrincipal.compareTo(minAmount) < 0)
+        if ((dueDiligenceRecommendedAmount.compareTo(minAmount) < 0)
                 && (numberOfRepayment < currentStageMatrixMinTerm || numberOfRepayment > currentStageMatrixMaxTerm)) {
             throw new GeneralPlatformDomainRuleException(errorMsg, String.format(
                     "This Loan Account Principal [ %s ] vs Approval Matrix Min [%s] and Max Amount [%s] , does not qualify for IC-Review  [%s] with Terms Min [%s] Max [%s] Vs Loan Term [%s]",
-                    loanPrincipal, minAmount, currentStageMatrixMaxAmount, stateMsg, currentStageMatrixMinTerm, currentStageMatrixMaxTerm,
-                    numberOfRepayment));
+                    dueDiligenceRecommendedAmount, minAmount, currentStageMatrixMaxAmount, stateMsg, currentStageMatrixMinTerm,
+                    currentStageMatrixMaxTerm, numberOfRepayment));
         }
     }
 
-    private void validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelFive(BigDecimal loanPrincipal,
+    private void validateLoanAccountCompliancePolicyBasedOnApprovalMatrixLevelFive(BigDecimal dueDiligenceRecommendedAmount,
             BigDecimal currentStageMatrixMaxAmount, Integer numberOfRepayment, Integer currentStageMatrixMinTerm,
             Integer currentStageMatrixMaxTerm, String errorMsg, String stateMsg, BigDecimal previousStageMatrixMaxAmount) {
         BigDecimal minAmount = previousStageMatrixMaxAmount.add(BigDecimal.ONE);
-        if ((loanPrincipal.compareTo(minAmount) < 0 || loanPrincipal.compareTo(currentStageMatrixMaxAmount) <= 0)
+        if ((dueDiligenceRecommendedAmount.compareTo(minAmount) < 0
+                || dueDiligenceRecommendedAmount.compareTo(currentStageMatrixMaxAmount) <= 0)
                 && (numberOfRepayment < currentStageMatrixMinTerm || numberOfRepayment > currentStageMatrixMaxTerm)) {
             throw new GeneralPlatformDomainRuleException(errorMsg, String.format(
                     "This Loan Account Principal [ %s ] vs Approval Matrix Min [%s] and Max Amount [%s] , does not qualify for IC-Review  [%s] with Terms Min [%s] Max [%s] Vs Loan Term [%s]",
-                    loanPrincipal, minAmount, currentStageMatrixMaxAmount, stateMsg, currentStageMatrixMinTerm, currentStageMatrixMaxTerm,
-                    numberOfRepayment));
+                    dueDiligenceRecommendedAmount, minAmount, currentStageMatrixMaxAmount, stateMsg, currentStageMatrixMinTerm,
+                    currentStageMatrixMaxTerm, numberOfRepayment));
         }
     }
 
     public void validateLoanAccountToComplyToApprovalMatrixStage(Loan loan, LoanApprovalMatrix approvalMatrix, Boolean isLoanFirstCycle,
-            Boolean isLoanUnsecure, LoanDecisionState currentStage) {
+            Boolean isLoanUnsecure, LoanDecisionState currentStage, BigDecimal dueDiligenceRecommendedAmount) {
         switch (currentStage) {
             case IC_REVIEW_LEVEL_ONE:
-                validateLoanAccountToComplyToApprovalMatrixLevelOne(loan, approvalMatrix, isLoanFirstCycle, isLoanUnsecure);
+                validateLoanAccountToComplyToApprovalMatrixLevelOne(loan, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
+                        dueDiligenceRecommendedAmount);
             break;
             case IC_REVIEW_LEVEL_TWO:
-                validateLoanAccountToComplyToApprovalMatrixLevelTwo(loan, approvalMatrix, isLoanFirstCycle, isLoanUnsecure);
+                validateLoanAccountToComplyToApprovalMatrixLevelTwo(loan, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
+                        dueDiligenceRecommendedAmount);
             break;
             case IC_REVIEW_LEVEL_THREE:
-                validateLoanAccountToComplyToApprovalMatrixLevelThree(loan, approvalMatrix, isLoanFirstCycle, isLoanUnsecure);
+                validateLoanAccountToComplyToApprovalMatrixLevelThree(loan, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
+                        dueDiligenceRecommendedAmount);
             break;
             case IC_REVIEW_LEVEL_FOUR:
-                validateLoanAccountToComplyToApprovalMatrixLevelFour(loan, approvalMatrix, isLoanFirstCycle, isLoanUnsecure);
+                validateLoanAccountToComplyToApprovalMatrixLevelFour(loan, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
+                        dueDiligenceRecommendedAmount);
             break;
             case IC_REVIEW_LEVEL_FIVE:
-                validateLoanAccountToComplyToApprovalMatrixLevelFive(loan, approvalMatrix, isLoanFirstCycle, isLoanUnsecure);
+                validateLoanAccountToComplyToApprovalMatrixLevelFive(loan, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
+                        dueDiligenceRecommendedAmount);
             break;
             default:
                 throw new GeneralPlatformDomainRuleException("error.msg.invalid.loan.decision.stage",
@@ -1007,11 +1013,11 @@ public class LoanDecisionStateUtilService {
         }
     }
 
-    private void generateTheNextIcReviewStageFive(BigDecimal loanPrincipal, BigDecimal nextStageMatrixMaxAmount, Integer numberOfRepayment,
-            Integer nextStageMatrixMinTerm, Integer nextStageMatrixMaxTerm, LoanDecision loanDecision,
+    private void generateTheNextIcReviewStageFive(BigDecimal dueDiligenceRecommendedAmount, BigDecimal nextStageMatrixMaxAmount,
+            Integer numberOfRepayment, Integer nextStageMatrixMinTerm, Integer nextStageMatrixMaxTerm, LoanDecision loanDecision,
             LoanDecisionState nextStageIcReview) {
 
-        if ((loanPrincipal.compareTo(nextStageMatrixMaxAmount) > 0)
+        if ((dueDiligenceRecommendedAmount.compareTo(nextStageMatrixMaxAmount) > 0)
                 && (numberOfRepayment > nextStageMatrixMinTerm && numberOfRepayment <= nextStageMatrixMaxTerm)) {
             loanDecision.setNextLoanIcReviewDecisionState(nextStageIcReview.getValue());
         } else {
@@ -1019,12 +1025,13 @@ public class LoanDecisionStateUtilService {
         }
     }
 
-    private void generateTheNextIcReviewStage(BigDecimal loanPrincipal, BigDecimal nextStageMatrixMaxAmount, Integer numberOfRepayment,
-            Integer nextStageMatrixMinTerm, Integer nextStageMatrixMaxTerm, LoanDecision loanDecision, LoanDecisionState nextStageIcReview,
-            BigDecimal currentStageMaximumLoanAmount) {
+    private void generateTheNextIcReviewStage(BigDecimal dueDiligenceRecommendedAmount, BigDecimal nextStageMatrixMaxAmount,
+            Integer numberOfRepayment, Integer nextStageMatrixMinTerm, Integer nextStageMatrixMaxTerm, LoanDecision loanDecision,
+            LoanDecisionState nextStageIcReview, BigDecimal currentStageMaximumLoanAmount) {
 
-        if ((loanPrincipal.compareTo(currentStageMaximumLoanAmount.add(BigDecimal.ONE)) >= 0
-                && (loanPrincipal.compareTo(nextStageMatrixMaxAmount) <= 0 || loanPrincipal.compareTo(nextStageMatrixMaxAmount) > 0))
+        if ((dueDiligenceRecommendedAmount.compareTo(currentStageMaximumLoanAmount.add(BigDecimal.ONE)) >= 0
+                && (dueDiligenceRecommendedAmount.compareTo(nextStageMatrixMaxAmount) <= 0
+                        || dueDiligenceRecommendedAmount.compareTo(nextStageMatrixMaxAmount) > 0))
                 && (numberOfRepayment > nextStageMatrixMinTerm && numberOfRepayment <= nextStageMatrixMaxTerm)) {
             loanDecision.setNextLoanIcReviewDecisionState(nextStageIcReview.getValue());
         } else {
@@ -1033,19 +1040,23 @@ public class LoanDecisionStateUtilService {
     }
 
     public void determineTheNextDecisionStage(Loan loan, LoanDecision loanDecision, LoanApprovalMatrix approvalMatrix,
-            Boolean isLoanFirstCycle, Boolean isLoanUnsecure, LoanDecisionState currentStage) {
+            Boolean isLoanFirstCycle, Boolean isLoanUnsecure, LoanDecisionState currentStage, BigDecimal dueDiligenceRecommendedAmount) {
         switch (currentStage) {
             case IC_REVIEW_LEVEL_ONE:
-                determineTheNextDecisionStateAfterLevelOne(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure);
+                determineTheNextDecisionStateAfterLevelOne(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
+                        dueDiligenceRecommendedAmount);
             break;
             case IC_REVIEW_LEVEL_TWO:
-                determineTheNextDecisionStateAfterLevelTwo(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure);
+                determineTheNextDecisionStateAfterLevelTwo(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
+                        dueDiligenceRecommendedAmount);
             break;
             case IC_REVIEW_LEVEL_THREE:
-                determineTheNextDecisionStateAfterLevelThree(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure);
+                determineTheNextDecisionStateAfterLevelThree(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
+                        dueDiligenceRecommendedAmount);
             break;
             case IC_REVIEW_LEVEL_FOUR:
-                determineTheNextDecisionStateAfterLevelFour(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure);
+                determineTheNextDecisionStateAfterLevelFour(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
+                        dueDiligenceRecommendedAmount);
             break;
             default:
                 throw new GeneralPlatformDomainRuleException("error.msg.invalid.loan.decision.stage",
@@ -1055,32 +1066,32 @@ public class LoanDecisionStateUtilService {
     }
 
     private void determineTheNextDecisionStateAfterLevelOne(Loan loan, LoanDecision loanDecision, LoanApprovalMatrix approvalMatrix,
-            Boolean isLoanFirstCycle, Boolean isLoanUnsecure) {
+            Boolean isLoanFirstCycle, Boolean isLoanUnsecure, BigDecimal dueDiligenceRecommendedAmount) {
         LoanDecisionState expectedNextIcReviewStage = LoanDecisionState.IC_REVIEW_LEVEL_TWO;
         if (isLoanFirstCycle && isLoanUnsecure) {
             // Loan is FirstCycle and Unsecure
-            generateTheNextIcReviewStage(loan.getProposedPrincipal(), approvalMatrix.getLevelTwoUnsecuredFirstCycleMaxAmount(),
+            generateTheNextIcReviewStage(dueDiligenceRecommendedAmount, approvalMatrix.getLevelTwoUnsecuredFirstCycleMaxAmount(),
                     loan.getNumberOfRepayments(), approvalMatrix.getLevelTwoUnsecuredFirstCycleMinTerm(),
                     approvalMatrix.getLevelTwoUnsecuredFirstCycleMaxTerm(), loanDecision, expectedNextIcReviewStage,
                     approvalMatrix.getLevelOneUnsecuredFirstCycleMaxAmount());
 
         } else if (!isLoanFirstCycle && isLoanUnsecure) {
             // Loan is (Second cycle or plus) and Unsecure
-            generateTheNextIcReviewStage(loan.getProposedPrincipal(), approvalMatrix.getLevelTwoUnsecuredSecondCycleMaxAmount(),
+            generateTheNextIcReviewStage(dueDiligenceRecommendedAmount, approvalMatrix.getLevelTwoUnsecuredSecondCycleMaxAmount(),
                     loan.getNumberOfRepayments(), approvalMatrix.getLevelTwoUnsecuredSecondCycleMinTerm(),
                     approvalMatrix.getLevelTwoUnsecuredSecondCycleMaxTerm(), loanDecision, expectedNextIcReviewStage,
                     approvalMatrix.getLevelOneUnsecuredSecondCycleMaxAmount());
 
         } else if (isLoanFirstCycle && !isLoanUnsecure) {
             // First Cycle and secured Loan
-            generateTheNextIcReviewStage(loan.getProposedPrincipal(), approvalMatrix.getLevelTwoSecuredFirstCycleMaxAmount(),
+            generateTheNextIcReviewStage(dueDiligenceRecommendedAmount, approvalMatrix.getLevelTwoSecuredFirstCycleMaxAmount(),
                     loan.getNumberOfRepayments(), approvalMatrix.getLevelTwoSecuredFirstCycleMinTerm(),
                     approvalMatrix.getLevelTwoSecuredFirstCycleMaxTerm(), loanDecision, expectedNextIcReviewStage,
                     approvalMatrix.getLevelOneSecuredFirstCycleMaxAmount());
 
         } else if (!isLoanFirstCycle && !isLoanUnsecure) {
             // Second Cycle or plus and secured
-            generateTheNextIcReviewStage(loan.getProposedPrincipal(), approvalMatrix.getLevelTwoSecuredSecondCycleMaxAmount(),
+            generateTheNextIcReviewStage(dueDiligenceRecommendedAmount, approvalMatrix.getLevelTwoSecuredSecondCycleMaxAmount(),
                     loan.getNumberOfRepayments(), approvalMatrix.getLevelTwoSecuredSecondCycleMinTerm(),
                     approvalMatrix.getLevelTwoSecuredSecondCycleMaxTerm(), loanDecision, expectedNextIcReviewStage,
                     approvalMatrix.getLevelOneSecuredSecondCycleMaxAmount());
@@ -1092,32 +1103,32 @@ public class LoanDecisionStateUtilService {
     }
 
     private void determineTheNextDecisionStateAfterLevelTwo(Loan loan, LoanDecision loanDecision, LoanApprovalMatrix approvalMatrix,
-            Boolean isLoanFirstCycle, Boolean isLoanUnsecure) {
+            Boolean isLoanFirstCycle, Boolean isLoanUnsecure, BigDecimal dueDiligenceRecommendedAmount) {
         LoanDecisionState expectedNextIcReviewStage = LoanDecisionState.IC_REVIEW_LEVEL_THREE;
         if (isLoanFirstCycle && isLoanUnsecure) {
             // Loan is FirstCycle and Unsecure
-            generateTheNextIcReviewStage(loan.getProposedPrincipal(), approvalMatrix.getLevelThreeUnsecuredFirstCycleMaxAmount(),
+            generateTheNextIcReviewStage(dueDiligenceRecommendedAmount, approvalMatrix.getLevelThreeUnsecuredFirstCycleMaxAmount(),
                     loan.getNumberOfRepayments(), approvalMatrix.getLevelThreeUnsecuredFirstCycleMinTerm(),
                     approvalMatrix.getLevelThreeUnsecuredFirstCycleMaxTerm(), loanDecision, expectedNextIcReviewStage,
                     approvalMatrix.getLevelTwoUnsecuredFirstCycleMaxAmount());
 
         } else if (!isLoanFirstCycle && isLoanUnsecure) {
             // Loan is (Second cycle or plus) and Unsecure
-            generateTheNextIcReviewStage(loan.getProposedPrincipal(), approvalMatrix.getLevelThreeUnsecuredSecondCycleMaxAmount(),
+            generateTheNextIcReviewStage(dueDiligenceRecommendedAmount, approvalMatrix.getLevelThreeUnsecuredSecondCycleMaxAmount(),
                     loan.getNumberOfRepayments(), approvalMatrix.getLevelThreeUnsecuredSecondCycleMinTerm(),
                     approvalMatrix.getLevelThreeUnsecuredSecondCycleMaxTerm(), loanDecision, expectedNextIcReviewStage,
                     approvalMatrix.getLevelTwoUnsecuredSecondCycleMaxAmount());
 
         } else if (isLoanFirstCycle && !isLoanUnsecure) {
             // First Cycle and secured Loan
-            generateTheNextIcReviewStage(loan.getProposedPrincipal(), approvalMatrix.getLevelThreeSecuredFirstCycleMaxAmount(),
+            generateTheNextIcReviewStage(dueDiligenceRecommendedAmount, approvalMatrix.getLevelThreeSecuredFirstCycleMaxAmount(),
                     loan.getNumberOfRepayments(), approvalMatrix.getLevelThreeSecuredFirstCycleMinTerm(),
                     approvalMatrix.getLevelThreeSecuredFirstCycleMaxTerm(), loanDecision, expectedNextIcReviewStage,
                     approvalMatrix.getLevelTwoSecuredFirstCycleMaxAmount());
 
         } else if (!isLoanFirstCycle && !isLoanUnsecure) {
             // Second Cycle or plus and secured
-            generateTheNextIcReviewStage(loan.getProposedPrincipal(), approvalMatrix.getLevelThreeSecuredSecondCycleMaxAmount(),
+            generateTheNextIcReviewStage(dueDiligenceRecommendedAmount, approvalMatrix.getLevelThreeSecuredSecondCycleMaxAmount(),
                     loan.getNumberOfRepayments(), approvalMatrix.getLevelThreeSecuredSecondCycleMinTerm(),
                     approvalMatrix.getLevelThreeSecuredSecondCycleMaxTerm(), loanDecision, expectedNextIcReviewStage,
                     approvalMatrix.getLevelTwoSecuredSecondCycleMaxAmount());
@@ -1129,32 +1140,32 @@ public class LoanDecisionStateUtilService {
     }
 
     private void determineTheNextDecisionStateAfterLevelThree(Loan loan, LoanDecision loanDecision, LoanApprovalMatrix approvalMatrix,
-            Boolean isLoanFirstCycle, Boolean isLoanUnsecure) {
+            Boolean isLoanFirstCycle, Boolean isLoanUnsecure, BigDecimal dueDiligenceRecommendedAmount) {
         LoanDecisionState expectedNextIcReviewStage = LoanDecisionState.IC_REVIEW_LEVEL_FOUR;
         if (isLoanFirstCycle && isLoanUnsecure) {
             // Loan is FirstCycle and Unsecure
-            generateTheNextIcReviewStage(loan.getProposedPrincipal(), approvalMatrix.getLevelFourUnsecuredFirstCycleMaxAmount(),
+            generateTheNextIcReviewStage(dueDiligenceRecommendedAmount, approvalMatrix.getLevelFourUnsecuredFirstCycleMaxAmount(),
                     loan.getNumberOfRepayments(), approvalMatrix.getLevelFourUnsecuredFirstCycleMinTerm(),
                     approvalMatrix.getLevelFourUnsecuredFirstCycleMaxTerm(), loanDecision, expectedNextIcReviewStage,
                     approvalMatrix.getLevelThreeUnsecuredFirstCycleMaxAmount());
 
         } else if (!isLoanFirstCycle && isLoanUnsecure) {
             // Loan is (Second cycle or plus) and Unsecure
-            generateTheNextIcReviewStage(loan.getProposedPrincipal(), approvalMatrix.getLevelFourUnsecuredSecondCycleMaxAmount(),
+            generateTheNextIcReviewStage(dueDiligenceRecommendedAmount, approvalMatrix.getLevelFourUnsecuredSecondCycleMaxAmount(),
                     loan.getNumberOfRepayments(), approvalMatrix.getLevelFourUnsecuredSecondCycleMinTerm(),
                     approvalMatrix.getLevelFourUnsecuredSecondCycleMaxTerm(), loanDecision, expectedNextIcReviewStage,
                     approvalMatrix.getLevelThreeUnsecuredSecondCycleMaxAmount());
 
         } else if (isLoanFirstCycle && !isLoanUnsecure) {
             // First Cycle and secured Loan
-            generateTheNextIcReviewStage(loan.getProposedPrincipal(), approvalMatrix.getLevelFourSecuredFirstCycleMaxAmount(),
+            generateTheNextIcReviewStage(dueDiligenceRecommendedAmount, approvalMatrix.getLevelFourSecuredFirstCycleMaxAmount(),
                     loan.getNumberOfRepayments(), approvalMatrix.getLevelFourSecuredFirstCycleMinTerm(),
                     approvalMatrix.getLevelFourSecuredFirstCycleMaxTerm(), loanDecision, expectedNextIcReviewStage,
                     approvalMatrix.getLevelThreeSecuredFirstCycleMaxAmount());
 
         } else if (!isLoanFirstCycle && !isLoanUnsecure) {
             // Second Cycle or plus and secured
-            generateTheNextIcReviewStage(loan.getProposedPrincipal(), approvalMatrix.getLevelFourSecuredSecondCycleMaxAmount(),
+            generateTheNextIcReviewStage(dueDiligenceRecommendedAmount, approvalMatrix.getLevelFourSecuredSecondCycleMaxAmount(),
                     loan.getNumberOfRepayments(), approvalMatrix.getLevelFourSecuredSecondCycleMinTerm(),
                     approvalMatrix.getLevelFourSecuredSecondCycleMaxTerm(), loanDecision, expectedNextIcReviewStage,
                     approvalMatrix.getLevelThreeSecuredSecondCycleMaxAmount());
@@ -1166,29 +1177,29 @@ public class LoanDecisionStateUtilService {
     }
 
     private void determineTheNextDecisionStateAfterLevelFour(Loan loan, LoanDecision loanDecision, LoanApprovalMatrix approvalMatrix,
-            Boolean isLoanFirstCycle, Boolean isLoanUnsecure) {
+            Boolean isLoanFirstCycle, Boolean isLoanUnsecure, BigDecimal dueDiligenceRecommendedAmount) {
         LoanDecisionState expectedNextIcReviewStage = LoanDecisionState.IC_REVIEW_LEVEL_FIVE;
         if (isLoanFirstCycle && isLoanUnsecure) {
             // Loan is FirstCycle and Unsecure
-            generateTheNextIcReviewStageFive(loan.getProposedPrincipal(), approvalMatrix.getLevelFiveUnsecuredFirstCycleMaxAmount(),
+            generateTheNextIcReviewStageFive(dueDiligenceRecommendedAmount, approvalMatrix.getLevelFiveUnsecuredFirstCycleMaxAmount(),
                     loan.getNumberOfRepayments(), approvalMatrix.getLevelFiveUnsecuredFirstCycleMinTerm(),
                     approvalMatrix.getLevelFiveUnsecuredFirstCycleMaxTerm(), loanDecision, expectedNextIcReviewStage);
 
         } else if (!isLoanFirstCycle && isLoanUnsecure) {
             // Loan is (Second cycle or plus) and Unsecure
-            generateTheNextIcReviewStageFive(loan.getProposedPrincipal(), approvalMatrix.getLevelFiveUnsecuredSecondCycleMaxAmount(),
+            generateTheNextIcReviewStageFive(dueDiligenceRecommendedAmount, approvalMatrix.getLevelFiveUnsecuredSecondCycleMaxAmount(),
                     loan.getNumberOfRepayments(), approvalMatrix.getLevelFiveUnsecuredSecondCycleMinTerm(),
                     approvalMatrix.getLevelFiveUnsecuredSecondCycleMaxTerm(), loanDecision, expectedNextIcReviewStage);
 
         } else if (isLoanFirstCycle && !isLoanUnsecure) {
             // First Cycle and secured Loan
-            generateTheNextIcReviewStageFive(loan.getProposedPrincipal(), approvalMatrix.getLevelFiveSecuredFirstCycleMaxAmount(),
+            generateTheNextIcReviewStageFive(dueDiligenceRecommendedAmount, approvalMatrix.getLevelFiveSecuredFirstCycleMaxAmount(),
                     loan.getNumberOfRepayments(), approvalMatrix.getLevelFiveSecuredFirstCycleMinTerm(),
                     approvalMatrix.getLevelFiveSecuredFirstCycleMaxTerm(), loanDecision, expectedNextIcReviewStage);
 
         } else if (!isLoanFirstCycle && !isLoanUnsecure) {
             // Second Cycle or plus and secured
-            generateTheNextIcReviewStageFive(loan.getProposedPrincipal(), approvalMatrix.getLevelFiveSecuredSecondCycleMaxAmount(),
+            generateTheNextIcReviewStageFive(dueDiligenceRecommendedAmount, approvalMatrix.getLevelFiveSecuredSecondCycleMaxAmount(),
                     loan.getNumberOfRepayments(), approvalMatrix.getLevelFiveSecuredSecondCycleMinTerm(),
                     approvalMatrix.getLevelFiveSecuredSecondCycleMaxTerm(), loanDecision, expectedNextIcReviewStage);
 

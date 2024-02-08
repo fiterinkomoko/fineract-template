@@ -1021,7 +1021,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
                 if (!StringUtils.isBlank(loanTypeStr) && loanType.isIndividualAccount()) {
                     final String collateralParamName = "collateral";
-                    if (changes.containsKey(collateralParamName)) {
+                    if (changes.containsKey(collateralParamName) || possiblyModifedLoanCollateralItems.isEmpty()) {
                         existingLoanApplication.updateLoanCollateral(possiblyModifedLoanCollateralItems);
                     }
                 }
@@ -1539,7 +1539,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         }
 
         final Map<String, Object> changes = loan.loanApplicationApproval(currentUser, command, disbursementDataArray,
-                defaultLoanLifecycleStateMachine(), isBnplEquityContributionLoan, amountToDisburseForBnplEquityContributionLoan, isExtendLoanLifeCycleConfig);
+                defaultLoanLifecycleStateMachine(), isBnplEquityContributionLoan, amountToDisburseForBnplEquityContributionLoan,
+                isExtendLoanLifeCycleConfig);
 
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(loanId, EntityTables.LOAN.getName(),
                 StatusEnum.APPROVE.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
@@ -1810,9 +1811,10 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         Boolean isLoanFirstCycle = loanDecisionStateUtilService.isLoanFirstCycle(loanIndividualCounter);
         Boolean isLoanUnsecure = loanDecisionStateUtilService.isLoanUnSecure(loan);
+        final BigDecimal dueDiligenceRecommendedAmount = loanDecision.getDueDiligenceRecommendedAmount();
 
         loanDecisionStateUtilService.validateLoanAccountToComplyToApprovalMatrixStage(loan, approvalMatrix, isLoanFirstCycle,
-                isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_FIVE);
+                isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_FIVE, dueDiligenceRecommendedAmount);
 
         LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelFiveFrom(command, currentUser, loanDecision,
                 Boolean.TRUE, rejectedOnDate, null, null, null);
@@ -1853,12 +1855,13 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         Boolean isLoanFirstCycle = loanDecisionStateUtilService.isLoanFirstCycle(loanIndividualCounter);
         Boolean isLoanUnsecure = loanDecisionStateUtilService.isLoanUnSecure(loan);
+        final BigDecimal dueDiligenceRecommendedAmount = loanDecision.getDueDiligenceRecommendedAmount();
 
         loanDecisionStateUtilService.validateLoanAccountToComplyToApprovalMatrixStage(loan, approvalMatrix, isLoanFirstCycle,
-                isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_FOUR);
+                isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_FOUR, dueDiligenceRecommendedAmount);
         // generate the next stage based on loan approval matrix via amounts to be disbursed
         loanDecisionStateUtilService.determineTheNextDecisionStage(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
-                LoanDecisionState.IC_REVIEW_LEVEL_FOUR);
+                LoanDecisionState.IC_REVIEW_LEVEL_FOUR, dueDiligenceRecommendedAmount);
 
         LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelFourFrom(command, currentUser, loanDecision,
                 Boolean.TRUE, rejectedOnDate, null, null, null);
@@ -1901,12 +1904,13 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         Boolean isLoanFirstCycle = loanDecisionStateUtilService.isLoanFirstCycle(loanIndividualCounter);
         Boolean isLoanUnsecure = loanDecisionStateUtilService.isLoanUnSecure(loan);
+        final BigDecimal dueDiligenceRecommendedAmount = loanDecision.getDueDiligenceRecommendedAmount();
 
         loanDecisionStateUtilService.validateLoanAccountToComplyToApprovalMatrixStage(loan, approvalMatrix, isLoanFirstCycle,
-                isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_THREE);
+                isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_THREE, dueDiligenceRecommendedAmount);
         // generate the next stage based on loan approval matrix via amounts to be disbursed
         loanDecisionStateUtilService.determineTheNextDecisionStage(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
-                LoanDecisionState.IC_REVIEW_LEVEL_THREE);
+                LoanDecisionState.IC_REVIEW_LEVEL_THREE, dueDiligenceRecommendedAmount);
 
         LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelThreeFrom(command, currentUser, loanDecision,
                 Boolean.TRUE, rejectedOnDate, null, null, null);
@@ -1950,12 +1954,13 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         Boolean isLoanFirstCycle = loanDecisionStateUtilService.isLoanFirstCycle(loanIndividualCounter);
         Boolean isLoanUnsecure = loanDecisionStateUtilService.isLoanUnSecure(loan);
+        final BigDecimal dueDiligenceRecommendedAmount = loanDecision.getDueDiligenceRecommendedAmount();
 
         loanDecisionStateUtilService.validateLoanAccountToComplyToApprovalMatrixStage(loan, approvalMatrix, isLoanFirstCycle,
-                isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_TWO);
+                isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_TWO, dueDiligenceRecommendedAmount);
         // generate the next stage based on loan approval matrix via amounts to be disbursed
         loanDecisionStateUtilService.determineTheNextDecisionStage(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
-                LoanDecisionState.IC_REVIEW_LEVEL_TWO);
+                LoanDecisionState.IC_REVIEW_LEVEL_TWO, dueDiligenceRecommendedAmount);
 
         LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelTwoFrom(command, currentUser, loanDecision,
                 Boolean.TRUE, rejectedOnDate, null, null, null);
@@ -1996,12 +2001,13 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         Boolean isLoanFirstCycle = loanDecisionStateUtilService.isLoanFirstCycle(loanIndividualCounter);
         Boolean isLoanUnsecure = loanDecisionStateUtilService.isLoanUnSecure(loan);
+        final BigDecimal dueDiligenceRecommendedAmount = loanDecision.getDueDiligenceRecommendedAmount();
 
         loanDecisionStateUtilService.validateLoanAccountToComplyToApprovalMatrixStage(loan, approvalMatrix, isLoanFirstCycle,
-                isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_ONE);
+                isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_ONE, dueDiligenceRecommendedAmount);
         // generate the next stage based on loan approval matrix via amounts to be disbursed
         loanDecisionStateUtilService.determineTheNextDecisionStage(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
-                LoanDecisionState.IC_REVIEW_LEVEL_ONE);
+                LoanDecisionState.IC_REVIEW_LEVEL_ONE, dueDiligenceRecommendedAmount);
 
         LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelOneFrom(command, currentUser, loanDecision,
                 Boolean.TRUE, rejectedOnDate, null, null, null);
@@ -2318,7 +2324,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 if (cashFlow.getCashFlowType().equals("INCOME") && cashFlow.getParticularType().equals("Sales Income")) {
                     LOG.info("INCOME -- cashflow Data :- " + cashFlow.getName() + " " + cashFlow.getMonth0() + "    * *"
                             + cashFlow.getCashFlowType());
-                    if (cashFlowType != null && cashFlowType == 1 && month != null && Objects.equals(month, installment.getInstallmentNumber())) {
+                    if (cashFlowType != null && cashFlowType == 1 && month != null
+                            && Objects.equals(month, installment.getInstallmentNumber())) {
                         incomeProjectionRate = updatedProjectionRate;
                     }
                     if (installment.getInstallmentNumber() == 1) {
@@ -2336,7 +2343,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 if (cashFlow.getCashFlowType().equals("EXPENSE") && cashFlow.getParticularType().equals("Purchases")) {
                     LOG.info("EXPENSE -- cashflow Data :- " + cashFlow.getName() + " " + cashFlow.getMonth0() + "    * *"
                             + cashFlow.getCashFlowType());
-                    if (cashFlowType != null && cashFlowType == 2 && month != null && Objects.equals(month, installment.getInstallmentNumber())) {
+                    if (cashFlowType != null && cashFlowType == 2 && month != null
+                            && Objects.equals(month, installment.getInstallmentNumber())) {
                         expenseProjectionRate = updatedProjectionRate;
                     }
 
@@ -2385,7 +2393,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
     private void saveCashFlowProjection(Integer projectionRate, BigDecimal amount, LoanRepaymentScheduleInstallment installment,
             LoanCashFlowData cashFlow) {
-        LoanCashFlowProjection projection = new LoanCashFlowProjection(installment, cashFlow.getId(), projectionRate, amount);
+        LoanCashFlowProjection projection = new LoanCashFlowProjection(installment.getInstallmentNumber(), cashFlow.getId(), projectionRate,
+                amount);
         this.loanCashFlowProjectionRepository.saveAndFlush(projection);
     }
 

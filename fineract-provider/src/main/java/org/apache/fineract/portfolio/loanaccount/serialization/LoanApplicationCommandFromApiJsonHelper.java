@@ -212,10 +212,13 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         }
 
         if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.loanWithAnotherInstitution, element)) {
-            final Boolean loanWithAnotherInstitution = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.loanWithAnotherInstitution, element);
-            final BigDecimal loanWithAnotherInstitutionAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.loanWithAnotherInstitutionAmount, element);
+            final Boolean loanWithAnotherInstitution = this.fromApiJsonHelper
+                    .extractBooleanNamed(LoanApiConstants.loanWithAnotherInstitution, element);
+            final BigDecimal loanWithAnotherInstitutionAmount = this.fromApiJsonHelper
+                    .extractBigDecimalWithLocaleNamed(LoanApiConstants.loanWithAnotherInstitutionAmount, element);
             if (loanWithAnotherInstitution) {
-                baseDataValidator.reset().parameter(LoanApiConstants.loanWithAnotherInstitutionAmount).value(loanWithAnotherInstitutionAmount).notNull().positiveAmount();
+                baseDataValidator.reset().parameter(LoanApiConstants.loanWithAnotherInstitutionAmount)
+                        .value(loanWithAnotherInstitutionAmount).notNull().positiveAmount();
             }
         }
 
@@ -455,8 +458,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                             .integerGreaterThanZero();
 
                     final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed("amount", loanChargeElement, locale);
-                    baseDataValidator.reset().parameter("charges").parameterAtIndexArray("amount", i).value(amount).notNull()
-                            .positiveAmount();
+                    baseDataValidator.reset().parameter("charges").parameterAtIndexArray("amount", i).value(amount);
 
                     this.fromApiJsonHelper.extractLocalDateNamed("dueDate", loanChargeElement, dateFormat, locale);
                 }
@@ -696,10 +698,13 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         }
 
         if (this.fromApiJsonHelper.parameterExists(LoanApiConstants.loanWithAnotherInstitution, element)) {
-            final Boolean loanWithAnotherInstitution = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.loanWithAnotherInstitution, element);
-            final BigDecimal loanWithAnotherInstitutionAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(LoanApiConstants.loanWithAnotherInstitutionAmount, element);
+            final Boolean loanWithAnotherInstitution = this.fromApiJsonHelper
+                    .extractBooleanNamed(LoanApiConstants.loanWithAnotherInstitution, element);
+            final BigDecimal loanWithAnotherInstitutionAmount = this.fromApiJsonHelper
+                    .extractBigDecimalWithLocaleNamed(LoanApiConstants.loanWithAnotherInstitutionAmount, element);
             if (loanWithAnotherInstitution) {
-                baseDataValidator.reset().parameter(LoanApiConstants.loanWithAnotherInstitutionAmount).value(loanWithAnotherInstitutionAmount).notNull().positiveAmount();
+                baseDataValidator.reset().parameter(LoanApiConstants.loanWithAnotherInstitutionAmount)
+                        .value(loanWithAnotherInstitutionAmount).notNull().positiveAmount();
             }
         }
 
@@ -1177,7 +1182,6 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         final Long loanPurposeId = this.fromApiJsonHelper.extractLongNamed(loanPurposeIdParameterName, element);
         baseDataValidator.reset().parameter(loanPurposeIdParameterName).value(loanPurposeId).notNull().integerGreaterThanZero();
 
-
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
                     dataValidationErrors);
@@ -1538,27 +1542,21 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
         final JsonElement element = this.fromApiJsonHelper.parse(json);
-            if (this.fromApiJsonHelper.parameterExists("cashFlowType", element)) {
-                final Integer cashFlowType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("cashFlowType", element);
-                baseDataValidator.reset().parameter("cashFlowType")
-                        .value(cashFlowType).notNull().isOneOfTheseValues(1, 2);
+        if (this.fromApiJsonHelper.parameterExists("cashFlowType", element)) {
+            final Integer cashFlowType = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("cashFlowType", element);
+            baseDataValidator.reset().parameter("cashFlowType").value(cashFlowType).notNull().isOneOfTheseValues(1, 2);
 
-                final Integer month = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("month", element);
-                baseDataValidator.reset().parameter("month")
-                        .value(month).notNull();
+            final Integer month = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("month", element);
+            baseDataValidator.reset().parameter("month").value(month).notNull();
 
+            final Integer projectionRate = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("projectionRate", element);
+            baseDataValidator.reset().parameter("projectionRate").value(projectionRate).notNull();
 
-                final Integer projectionRate = this.fromApiJsonHelper
-                        .extractIntegerWithLocaleNamed("projectionRate", element);
-                baseDataValidator.reset().parameter("projectionRate")
-                        .value(projectionRate).notNull();
-
-                if (!dataValidationErrors.isEmpty()) {
-                    throw new PlatformApiDataValidationException(dataValidationErrors);
-                }
-
+            if (!dataValidationErrors.isEmpty()) {
+                throw new PlatformApiDataValidationException(dataValidationErrors);
             }
 
+        }
 
     }
 
