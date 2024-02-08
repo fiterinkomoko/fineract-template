@@ -428,19 +428,19 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
             clientFamilyMember.setRelationship(relationship);
         }
 
-        if (command.longValueOfParameterNamed("maritalStatusId") != 0) {
+        if (command.longValueOfParameterNamed("maritalStatusId") != null) {
             maritalStatusId = command.longValueOfParameterNamed("maritalStatusId");
             maritalStatus = this.codeValueRepository.getReferenceById(maritalStatusId);
             clientFamilyMember.setMaritalStatus(maritalStatus);
         }
 
-        if (command.longValueOfParameterNamed("genderId") != 0) {
+        if (command.longValueOfParameterNamed("genderId") != null) {
             genderId = command.longValueOfParameterNamed("genderId");
             gender = this.codeValueRepository.getReferenceById(genderId);
             clientFamilyMember.setGender(gender);
         }
 
-        if (command.longValueOfParameterNamed("professionId") != 0) {
+        if (command.longValueOfParameterNamed("professionId") != null) {
             professionId = command.longValueOfParameterNamed("professionId");
             profession = this.codeValueRepository.getReferenceById(professionId);
             clientFamilyMember.setProfession(profession);
@@ -476,12 +476,9 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
         }
 
         if (command.longValueOfParameterNamed("addressTypeId") != null) {
-            if (command.longValueOfParameterNamed("addressTypeId") != 0) {
-                addressTypeId = command.longValueOfParameterNamed("addressTypeId");
-                addressTypeIdObj = this.codeValueRepository.getById(addressTypeId);
-                clientFamilyMember.setAddressType(addressTypeIdObj);
-            }
-
+            addressTypeId = command.longValueOfParameterNamed("addressTypeId");
+            addressTypeIdObj = this.codeValueRepository.getById(addressTypeId);
+            clientFamilyMember.setAddressType(addressTypeIdObj);
         }
 
         if (command.longValueOfParameterNamed("cityId") != null) {
@@ -494,21 +491,15 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
         }
 
         if (command.longValueOfParameterNamed("stateProvinceId") != null) {
-            if (command.longValueOfParameterNamed("stateProvinceId") != 0) {
-                stateId = command.longValueOfParameterNamed("stateProvinceId");
-                stateIdObj = this.codeValueRepository.getById(stateId);
-                clientFamilyMember.setStateProvince(stateIdObj);
+            stateId = command.longValueOfParameterNamed("stateProvinceId");
+            stateIdObj = this.codeValueRepository.getById(stateId);
+            clientFamilyMember.setStateProvince(stateIdObj);
             }
-
-        }
 
         if (command.longValueOfParameterNamed("countryId") != null) {
-            if (command.longValueOfParameterNamed("countryId") != 0) {
-                countryId = command.longValueOfParameterNamed("countryId");
-                countryIdObj = this.codeValueRepository.getById(countryId);
-                clientFamilyMember.setCountry(countryIdObj);
-            }
-
+            countryId = command.longValueOfParameterNamed("countryId");
+            countryIdObj = this.codeValueRepository.getById(countryId);
+            clientFamilyMember.setCountry(countryIdObj);
         }
 
         // ClientFamilyMembers
