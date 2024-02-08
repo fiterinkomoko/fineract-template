@@ -16,18 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.portfolio.loanaccount.domain;
 
-import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface KivaLoanService {
+public interface KivaThemeRepository
+        extends JpaRepository<KivaTheme, Long>, JpaSpecificationExecutor<KivaTheme> {
 
-    void postLoanAccountsToKiva() throws JobExecutionException;
+    @Modifying
+    @Transactional
+    @Query(value = "TRUNCATE TABLE m_kiva_themes", nativeQuery = true)
+    void truncateTable();
 
-    void postLoanRepaymentsToKiva() throws JobExecutionException;
-
-    boolean validateLoanKivaDetails(Loan loan);
-
-    void updateKivaDependenciesMetaData();
 }

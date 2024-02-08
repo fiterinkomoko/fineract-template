@@ -42,6 +42,7 @@ import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.client.data.ClientOtherInfoData;
 import org.apache.fineract.portfolio.client.service.ClientOtherInfoReadPlatformService;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
+import org.apache.fineract.portfolio.fund.domain.Fund;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApprovalMatrixConstants;
 import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowReport;
@@ -91,6 +92,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
     private final TransunionCrbHeaderRepository transunionCrbHeaderRepository;
     private final LoanUtilService loanUtilService;
     private final ClientOtherInfoReadPlatformService clientOtherInfoReadPlatformService;
+    private final KivaLoanService kivaLoanService;
 
     @Override
     public CommandProcessingResult acceptLoanApplicationReview(final Long loanId, final JsonCommand command) {
@@ -166,6 +168,12 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
             isIdeaClient = Boolean.FALSE;
         }
 
+        // Do validation for kiva loans
+        Fund fund = loan.getFund();
+        if (fund != null && fund.getName().equalsIgnoreCase("kiva")) {
+            kivaLoanService.validateLoanKivaDetails(loan);
+        }
+        ////
         // Check CRB Verification has been executed
         boolean crbVerification = true;
         ClientOtherInfoData clientOtherInfoData = this.clientOtherInfoReadPlatformService.retrieveByClientId(loan.getClientId());
