@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet author="faheem@fiter.io" id="INKO-288-add_job_fetch_kiva_metadata">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sqlCheck expectedResult="1">
+                    SELECT COUNT(1) FROM job WHERE name = 'Download Kiva Metadata'
+                </sqlCheck>
+            </not>
+        </preConditions>
+        <insert tableName="job">
+            <column name="name" value="Download Kiva Metadata" />
+            <column name="display_name" value="Download Kiva Metadata" />
+            <column name="cron_expression" value="0 0 0 ? * * *" />
+            <column name="create_time" value="now()" />
+            <column name="task_priority" value="5" />
+            <column name="group_name" value="null" />
+            <column name="previous_run_start_time" value="null" />
+            <column name="next_run_time" value="null" />
+            <column name="job_key" value="Download Kiva Metadata _ DEFAULT" />
+            <column name="initializing_errorlog" value="null" />
+            <column name="is_active" valueBoolean="true" />
+            <column name="currently_running" valueBoolean="false" />
+            <column name="updates_allowed" valueBoolean="true" />
+            <column name="scheduler_group" value="0" />
+            <column name="is_misfired" valueBoolean="false" />
+            <column name="node_id" value="1" />
+            <column name="is_mismatched_job" valueBoolean="false" />
+        </insert>
+    </changeSet>
+    <changeSet author="faheem@fiter.io" id="INKO-288_create_kiva__supported_currencies">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_kiva_currencies"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_kiva_currencies">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="language" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="faheem@fiter.io" id="INKO-288_create_kiva__supported_locations">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_kiva_locations"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_kiva_locations">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="country" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="location" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+		<column name="full_name" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="faheem@fiter.io" id="INKO-288_create_kiva__supported_themes">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_kiva_themes"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_kiva_themes">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="theme_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="theme_name" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="faheem@fiter.io" id="INKO-288-insert_default_values_for_kiva_metadata" >
+	<comment>default values for kiva metadata</comment>
+    	<sql splitStatements="true" stripComments="true">         
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Nyabiheke','Nyabiheke: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Ruhango','Ruhango: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Bugarama','Bugarama: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Kirehe','Kirehe: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Hagadera, Dadaab','Hagadera, Dadaab: Kenya');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Mahama','Mahama: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','KARONGI','KARONGI: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Mombasa, Island','Mombasa, Island: Kenya');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Byumba','Byumba: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Rulindo','Rulindo: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Musanze','Musanze: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Garissa County','Garissa County: Kenya');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Gatsibo','Gatsibo: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Kakuma 2','Kakuma 2: Kenya');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Huye','Huye: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Mtwapa','Mtwapa: Kenya');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Nyamata','Nyamata: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Tanzania','Moshi','Moshi: Tanzania');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Ngoma','Ngoma: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Mombasa, South Coast','Mombasa, South Coast: Kenya');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Kigali','Kigali: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Rubavu','Rubavu: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Kayonza','Kayonza: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Nyamasheke','Nyamasheke: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Tanzania','Arusha','Arusha: Tanzania');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Gikongoro','Gikongoro: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Kakuma 3','Kakuma 3: Kenya');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Gisagara','Gisagara: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Dagahaley, Dadaab','Dagahaley, Dadaab: Kenya');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Masaka','Masaka: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Gicumbi','Gicumbi: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Ifo, Dadaab','Ifo, Dadaab: Kenya');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Butaro','Butaro: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Kamonyi','Kamonyi: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Mombasa, Mainland','Mombasa, Mainland: Kenya');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Nyagatare','Nyagatare: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','RWAMAGANA','RWAMAGANA: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Mombasa, North Coast','Mombasa, North Coast: Kenya');
+		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Diani','Diani: Kenya');
+		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Kakuma Town','Kakuma Town: Kenya');
+		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Kakuma 1','Kakuma 1: Kenya');
+		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Kalobeyei','Kalobeyei: Kenya');
+		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Kakuma 4','Kakuma 4: Kenya');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Nyamagabe','Nyamagabe: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','KABARORE','KABARORE: Rwanda');
+		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Kakuma','Kakuma: Kenya');
+		insert into m_kiva_themes (theme_id,theme_name) values ('98','SME');
+		insert into m_kiva_themes (theme_id,theme_name) values ('29','Vulnerable Populations');
+		insert into m_kiva_themes (theme_id,theme_name) values ('228','Micro-enterprise');
+		insert into m_kiva_themes (theme_id,theme_name) values ('246','Vulnerable Populations (Refugees Kenya)');
+		insert into m_kiva_currencies (name,language) values ('KES','EN');
+		insert into m_kiva_currencies (name,language) values ('RWF','EN');    
+	    </sql>    
+    </changeSet>
+</databaseChangeLog>

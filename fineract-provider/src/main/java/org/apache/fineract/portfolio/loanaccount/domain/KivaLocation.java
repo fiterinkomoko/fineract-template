@@ -16,18 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.service;
+package org.apache.fineract.portfolio.loanaccount.domain;
 
-import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import lombok.Data;
+import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
-public interface KivaLoanService {
+@Data
+@Entity
+@Table(name = "m_kiva_locations")
+public class KivaLocation extends AbstractPersistableCustom {
 
-    void postLoanAccountsToKiva() throws JobExecutionException;
+    @Column(name = "country")
+    private String country;
+    @Column(name = "location")
+    private String location;
 
-    void postLoanRepaymentsToKiva() throws JobExecutionException;
-
-    boolean validateLoanKivaDetails(Loan loan);
-
-    void updateKivaDependenciesMetaData();
+    @Column(name = "full_name")
+    private String fullName;
 }
