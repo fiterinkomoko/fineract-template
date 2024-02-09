@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -58,18 +59,32 @@ import org.apache.fineract.portfolio.loanaccount.data.KivaLoanAwaitingApprovalDa
 import org.apache.fineract.portfolio.loanaccount.data.KivaLoanAwaitingRepaymentData;
 import org.apache.fineract.portfolio.loanaccount.data.KivaLoanData;
 import org.apache.fineract.portfolio.loanaccount.data.KivaLoanRepaymentData;
+import org.apache.fineract.portfolio.loanaccount.data.KivaLocaleData;
+import org.apache.fineract.portfolio.loanaccount.data.KivaLocationData;
+import org.apache.fineract.portfolio.loanaccount.data.KivaSupportedCurrencyData;
+import org.apache.fineract.portfolio.loanaccount.data.KivaSupportedLocationData;
+import org.apache.fineract.portfolio.loanaccount.data.KivaSupportedThemeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDetailToKivaData;
+import org.apache.fineract.portfolio.loanaccount.data.ThemeData;
+import org.apache.fineract.portfolio.loanaccount.domain.KivaCurrency;
+import org.apache.fineract.portfolio.loanaccount.domain.KivaCurrencyRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.KivaLoanAwaitingApproval;
 import org.apache.fineract.portfolio.loanaccount.domain.KivaLoanAwaitingApprovalRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.KivaLocation;
+import org.apache.fineract.portfolio.loanaccount.domain.KivaLocationRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.KivaTheme;
+import org.apache.fineract.portfolio.loanaccount.domain.KivaThemeRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanDueDiligenceException;
 import org.apache.fineract.portfolio.loanaccount.serialization.KivaDateSerializerApi;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 
@@ -91,6 +106,9 @@ public class KivaLoanServiceImpl implements KivaLoanService {
     private final ClientRecruitmentSurveyRepository clientRecruitmentSurveyRepository;
     private final KivaLoanAwaitingApprovalRepository kivaLoanAwaitingApprovalRepository;
     private final KivaLoanAwaitingApprovalReadPlatformService kivaLoanAwaitingApprovalReadPlatformService;
+    private final KivaThemeRepository kivaThemeRepository;
+    private final KivaLocationRepository kivaLocationRepository;
+    private final KivaCurrencyRepository kivaCurrencyRepository;
     @Autowired
     private Environment env;
 
@@ -497,6 +515,239 @@ public class KivaLoanServiceImpl implements KivaLoanService {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    @Override
+    public boolean validateLoanKivaDetails(Loan loan) {
+        if (loan.getLoanPurpose() == null) {
+            throw new LoanDueDiligenceException("validation.msg.loan.loanPurposeId.cannot.be.blank", "Loan purpose required.");
+        }
+        if (loan.getDescription() == null) {
+            throw new LoanDueDiligenceException("validation.msg.loan.description.cannot.be.blank", "Loan description required.");
+        }
+
+        ClientRecruitmentSurvey clientRecruitmentSurvey = clientRecruitmentSurveyRepository.getByClientId(loan.getClientId());
+        if (clientRecruitmentSurvey == null) {
+            throw new LoanDueDiligenceException("validation.msg.client.recruitment.survey.required","Client recruitment survey required");
+        }
+        String clientLocation = clientRecruitmentSurvey.getSurveyLocation().label();
+        String clientCountry = clientRecruitmentSurvey.getCountry().label();
+
+        if (clientCountry == null) {
+            throw new LoanDueDiligenceException("validation.msg.client.recruitment.survey.country.required","Client recruitment survey country required");
+        }
+        if (clientLocation == null) {
+            throw new LoanDueDiligenceException("validation.msg.client.recruitment.survey.location.required","Client recruitment survey location required");
+        }
+
+        List<KivaLocation> locations = this.kivaLocationRepository.findAll();
+        KivaLocation kivaLocation = locations.stream()
+                .filter(location -> clientLocation.equalsIgnoreCase(location.getLocation())
+                        && clientCountry.equalsIgnoreCase(location.getCountry()))
+                .findAny()
+                .orElse(null);
+        if (kivaLocation == null) {
+            throw new LoanDueDiligenceException("validation.msg.client.survey.location.not.supported.by.kiva","Client Survey location/country not supported by kiva");
+        }
+
+        List<KivaCurrency> currencies = this.kivaCurrencyRepository.findAll();
+        KivaCurrency kivaCurrency = currencies.stream()
+                .filter(currency -> loan.getCurrency().getCode().equalsIgnoreCase(currency.getName()))
+                .findAny()
+                .orElse(null);
+        if (kivaCurrency == null) {
+            throw new LoanDueDiligenceException("validation.msg.loan.currency.not.supported.by.kiva","Loan Currency not supported by kiva");
+        }
+
+        List<KivaTheme> themes = this.kivaThemeRepository.findAll();
+        KivaTheme kivaTheme = themes.stream()
+                .filter(theme -> loan.getDepartment().label().equalsIgnoreCase(theme.getName()))
+                .findAny()
+                .orElse(null);
+        if (kivaTheme == null) {
+            throw new LoanDueDiligenceException("validation.msg.loan.department.not.supported.by.kiva","Loan Department not supported by kiva");
+        }
+        try {
+            final DocumentData documentData = this.documentReadPlatformService.retrieveKivaLoanProfileImage("loans", loan.getId());
+        } catch (EmptyResultDataAccessException e) {
+            throw new LoanDueDiligenceException("validation.msg.loan.profile.image.not.uploaded", "Loan profile image not uploaded");
+        }
+
+
+        return true;
+    }
+
+    @Override
+    @CronTarget(jobName = JobName.DOWNLOAD_KIVA_DEPENDENCIES_META_DATA)
+    public void updateKivaDependenciesMetaData() {
+        LOG.info("starting download kiva metadata job");
+        String accessToken = authenticateToKiva();
+        updateKivaSupportedCurrencies(accessToken);
+        updateKivaSupportedThemes(accessToken);
+        updateKivaSupportedLocations(accessToken);
+        LOG.info("end download kiva metadata job");
+
+    }
+
+    private void updateKivaSupportedCurrencies(String accessToken) {
+
+        HttpUrl.Builder builder = new HttpUrl.Builder().scheme(getConfigProperty("fineract.integrations.kiva.httpType"))
+                .host(getConfigProperty("fineract.integrations.kiva.baseUrl"))
+                .addPathSegment(getConfigProperty("fineract.integrations.kiva.apiVersion"))
+                .addPathSegment(getConfigProperty("fineract.integrations.kiva.partnerCode"))
+                .addPathSegment(getConfigProperty("fineract.integrations.kiva.partnerId")).addPathSegment("config")
+                .addPathSegment("locales");
+
+
+        String url = builder.build().toString();
+
+        OkHttpClient client = new OkHttpClient();
+        Response response = null;
+        List<Throwable> exceptions = new ArrayList<>();
+        Request request = new Request.Builder().url(url).header("Authorization", "Bearer " + accessToken).get().build();
+
+        try {
+            response = client.newCall(request).execute();
+            String resObject = response.body().string();
+            if (response.isSuccessful()) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                KivaSupportedCurrencyData data = objectMapper.readValue(resObject, KivaSupportedCurrencyData.class);
+                List<KivaCurrency> currencies = new ArrayList<KivaCurrency>();
+                for (KivaLocaleData locale : data.getLocales()) {
+                    KivaCurrency currency = new KivaCurrency();
+                    currency.setName(locale.getCurrency());
+                    currency.setLanguage(locale.getLanguageCode());
+                    currencies.add(currency);
+                }
+
+                this.kivaCurrencyRepository.truncateTable();
+                this.kivaCurrencyRepository.saveAllAndFlush(currencies);
+            } else {
+                log.error("Get supported currencies from KIVA failed with Message:" + resObject);
+
+                handleAPIIntegrityIssues(resObject);
+
+            }
+        } catch (Exception e) {
+            log.error("Get supported currencies from KIVA failed" + e);
+            exceptions.add(e);
+        }
+        if (!CollectionUtils.isEmpty(exceptions)) {
+            try {
+                throw new JobExecutionException(exceptions);
+            } catch (JobExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void updateKivaSupportedThemes(String accessToken) {
+
+        HttpUrl.Builder builder = new HttpUrl.Builder().scheme(getConfigProperty("fineract.integrations.kiva.httpType"))
+                .host(getConfigProperty("fineract.integrations.kiva.baseUrl"))
+                .addPathSegment(getConfigProperty("fineract.integrations.kiva.apiVersion"))
+                .addPathSegment(getConfigProperty("fineract.integrations.kiva.partnerCode"))
+                .addPathSegment(getConfigProperty("fineract.integrations.kiva.partnerId")).addPathSegment("config")
+                .addPathSegment("themes");
+
+
+        String url = builder.build().toString();
+
+        OkHttpClient client = new OkHttpClient();
+        Response response = null;
+
+        List<Throwable> exceptions = new ArrayList<>();
+        Request request = new Request.Builder().url(url).header("Authorization", "Bearer " + accessToken).get().build();
+
+        try {
+            response = client.newCall(request).execute();
+            String resObject = response.body().string();
+            if (response.isSuccessful()) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                KivaSupportedThemeData data = objectMapper.readValue(resObject, KivaSupportedThemeData.class);
+                List<KivaTheme> themes = new ArrayList<KivaTheme>();
+                for (ThemeData theme : data.getThemes()) {
+                    KivaTheme kivaTheme = new KivaTheme();
+                    kivaTheme.setThemeId(theme.getThemeTypeId());
+                    kivaTheme.setName(theme.getThemeType());
+                    themes.add(kivaTheme);
+                }
+
+                this.kivaThemeRepository.truncateTable();
+                this.kivaThemeRepository.saveAllAndFlush(themes);
+            } else {
+                log.error("Get supported themese from KIVA failed with Message:" + resObject);
+
+                handleAPIIntegrityIssues(resObject);
+
+            }
+        } catch (Exception e) {
+            log.error("Get supported themes from KIVA failed" + e);
+            exceptions.add(e);
+        }
+        if (!CollectionUtils.isEmpty(exceptions)) {
+            try {
+                throw new JobExecutionException(exceptions);
+            } catch (JobExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+    }
+
+    private void updateKivaSupportedLocations(String accessToken) {
+
+        HttpUrl.Builder builder = new HttpUrl.Builder().scheme(getConfigProperty("fineract.integrations.kiva.httpType"))
+                .host(getConfigProperty("fineract.integrations.kiva.baseUrl"))
+                .addPathSegment(getConfigProperty("fineract.integrations.kiva.apiVersion"))
+                .addPathSegment(getConfigProperty("fineract.integrations.kiva.partnerCode"))
+                .addPathSegment(getConfigProperty("fineract.integrations.kiva.partnerId")).addPathSegment("config")
+                .addPathSegment("locations");
+
+
+        String url = builder.build().toString();
+
+        OkHttpClient client = new OkHttpClient();
+        Response response = null;
+
+        List<Throwable> exceptions = new ArrayList<>();
+        Request request = new Request.Builder().url(url).header("Authorization", "Bearer " + accessToken).get().build();
+
+        try {
+            response = client.newCall(request).execute();
+            String resObject = response.body().string();
+            if (response.isSuccessful()) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                KivaSupportedLocationData data = objectMapper.readValue(resObject, KivaSupportedLocationData.class);
+                List<KivaLocation> locations = new ArrayList<KivaLocation>();
+                for (KivaLocationData location : data.getLocations()) {
+                    KivaLocation kivaLocation = new KivaLocation();
+                    kivaLocation.setCountry(location.getCountry());
+                    kivaLocation.setLocation(location.getLocation());
+                    kivaLocation.setFullName(location.getFullName());
+                    locations.add(kivaLocation);
+                }
+
+                this.kivaLocationRepository.truncateTable();
+                this.kivaLocationRepository.saveAllAndFlush(locations);
+            } else {
+                log.error("Get supported locations from KIVA failed with Message:" + resObject);
+
+                handleAPIIntegrityIssues(resObject);
+
+            }
+        } catch (Exception e) {
+            log.error("Get supported locations from KIVA failed" + e);
+            exceptions.add(e);
+        }
+        if (!CollectionUtils.isEmpty(exceptions)) {
+            try {
+                throw new JobExecutionException(exceptions);
+            } catch (JobExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
     }
 
 }
