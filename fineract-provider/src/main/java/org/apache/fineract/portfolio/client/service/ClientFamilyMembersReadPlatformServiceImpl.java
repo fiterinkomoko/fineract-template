@@ -70,28 +70,28 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
         @Override
         public ClientFamilyMembersData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             final long id = rs.getLong("id");
-            final long clientId = rs.getLong("clientId");
+            final Long clientId = rs.getLong("clientId");
             final String firstName = rs.getString("firstName");
             final String middleName = rs.getString("middleName");
             final String lastName = rs.getString("lastName");
             final String qualification = rs.getString("qualification");
             final String mobileNumber = rs.getString("mobileNumber");
-            final long age = rs.getLong("age");
+            final Long age = rs.getLong("age");
             final boolean isDependent = rs.getBoolean("isDependent");
             final String relationship = rs.getString("relationship");
-            final long relationshipId = rs.getLong("relationshipId");
+            final Long relationshipId = JdbcSupport.getLongDefaultToNullIfZero(rs, "relationshipId");
             final String maritalStatus = rs.getString("maritalStatus");
-            final long maritalStatusId = rs.getLong("maritalStatusId");
+            final Long maritalStatusId = JdbcSupport.getLongDefaultToNullIfZero(rs, "maritalStatusId");
             final String gender = rs.getString("gender");
-            final long genderId = rs.getLong("genderId");
+            final Long genderId = JdbcSupport.getLongDefaultToNullIfZero(rs, "genderId");
             final LocalDate dateOfBirth = JdbcSupport.getLocalDate(rs, "dateOfBirth");
             final String profession = rs.getString("profession");
-            final long professionId = rs.getLong("professionId");
-            final long stateProvinceId = rs.getLong("state_province_id");
+            final Long professionId = JdbcSupport.getLongDefaultToNullIfZero(rs, "professionId");
+            final Long stateProvinceId = JdbcSupport.getLongDefaultToNullIfZero(rs, "state_province_id");
             final String stateName = rs.getString("state_name");
-            final long countryId = rs.getLong("country_id");
+            final Long countryId = JdbcSupport.getLongDefaultToNullIfZero(rs, "country_id");
             final String countryName = rs.getString("country_name");
-            final long cityId = rs.getLong("city_id");
+            final Long cityId = JdbcSupport.getLongDefaultToNullIfZero(rs, "city_id");
             final String cityName = rs.getString("city_name");
             final String address1 = rs.getString("address1");
             final String address2 = rs.getString("address2");
@@ -99,7 +99,7 @@ public class ClientFamilyMembersReadPlatformServiceImpl implements ClientFamilyM
             final String postalCode = rs.getString("postalCode");
             final String email = rs.getString("email");
             final String addressType = rs.getString("addressType");
-            final long addressTypeId = rs.getLong("addressTypeId");
+            final Long addressTypeId = JdbcSupport.getLongDefaultToNullIfZero(rs, "addressTypeId");
 
             return ClientFamilyMembersData.instance(id, clientId, firstName, middleName, lastName, qualification, mobileNumber, age,
                     isDependent, relationship, relationshipId, maritalStatus, maritalStatusId, gender, genderId, dateOfBirth, profession,
