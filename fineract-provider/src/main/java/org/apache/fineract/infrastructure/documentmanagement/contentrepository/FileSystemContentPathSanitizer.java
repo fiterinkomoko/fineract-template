@@ -83,7 +83,7 @@ public class FileSystemContentPathSanitizer implements ContentPathSanitizer {
                 boolean matches = regexWhitelist.stream().anyMatch(p -> p.matcher(fileName).matches());
 
                 if (!matches) {
-                    throw new RuntimeException(String.format("File name not allowed: %s", fileName));
+                    throw new RuntimeException(String.format("File type not allowed: %s", fileName));
                 }
             }
 
