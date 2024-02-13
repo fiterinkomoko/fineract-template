@@ -73,6 +73,9 @@ public class LoanDecision extends AbstractAuditableCustom {
     @Column(name = "is_idea_client")
     private Boolean ideaClient;
 
+    @Column(name = "is_crb_verification_required")
+    private Boolean crbVerificationRequired;
+
     // collateral review
     @Column(name = "collateral_review_note")
     private String collateralReviewNote;

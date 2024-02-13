@@ -58,6 +58,7 @@ public interface LoanApiConstants {
     String recommendedLoanTermFrequencyTypeParameterName = "recommendedLoanTermFrequencyType";
     String dueDiligenceRecommendedAmountParameterName = "recommendedAmount";
     String isIdeaClientParamName = "isIdeaClient";
+    String isCrbVerificationRequiredParamName = "isCrbVerificationRequired";
     String localeParameterName = "locale";
     String dateFormatParameterName = "dateFormat";
     String rejectedOnDateParameterName = "rejectedOnDate";
