@@ -32,7 +32,7 @@ import org.apache.fineract.infrastructure.documentmanagement.domain.StorageType;
 public interface ContentRepository {
 
     // TODO:Vishwas Need to move these settings to the Database
-    Integer MAX_FILE_UPLOAD_SIZE_IN_MB = 5;
+    Integer MAX_FILE_UPLOAD_SIZE_IN_MB = 1;
 
     // TODO:Vishwas Need to move these settings to the Database
     Integer MAX_IMAGE_UPLOAD_SIZE_IN_MB = 1;
