@@ -110,7 +110,7 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
 
     public ClientOtherInfo(Client client, CodeValue strata, final String businessLocation, final Long taxIdentificationNumber,
             final Long incomeGeneratingActivity, final BigDecimal incomeGeneratingActivityMonthlyAmount, final String telephoneNo,
-            final String coSignors, final String guarantor) {
+            final String coSignors, final String guarantor, final String bankAccountNumber, final String bankName) {
         this.client = client;
         this.strata = strata;
         this.businessLocation = businessLocation;
@@ -120,6 +120,8 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
         this.telephoneNo = telephoneNo;
         this.coSignors = coSignors;
         this.guarantor = guarantor;
+        this.bankAccountNumber = bankAccountNumber;
+        this.bankName = bankName;
 
     }
 
@@ -146,10 +148,12 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
         final Long incomeGeneratingActivity = command.longValueOfParameterNamed(ClientApiConstants.incomeGeneratingActivityParamName);
         final BigDecimal incomeGeneratingActivityMonthlyAmount = command
                 .bigDecimalValueOfParameterNamed(ClientApiConstants.incomeGeneratingActivityMonthlyAmountParamName);
+        final String bankAccountNumber = command.stringValueOfParameterNamed(ClientApiConstants.BANK_ACCOUNT_NUMBER);
+        final String bankName = command.stringValueOfParameterNamed(ClientApiConstants.BANK_NAME);
         final String telephoneNo = command.stringValueOfParameterNamedAllowingNull(ClientApiConstants.telephoneNoParamName);
 
         return new ClientOtherInfo(client, strata, businessLocation, taxIdentificationNumber, incomeGeneratingActivity,
-                incomeGeneratingActivityMonthlyAmount, telephoneNo, coSignors, guarantor);
+                incomeGeneratingActivityMonthlyAmount, telephoneNo, coSignors, guarantor, bankAccountNumber, bankName);
     }
 
     public Map<String, Object> update(final JsonCommand command, final Integer legalFormId) {
@@ -247,6 +251,16 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
                 final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.guarantor);
                 actualChanges.put(ClientApiConstants.guarantor, newValue);
                 this.guarantor = newValue;
+            }
+            if (command.isChangeInStringParameterNamed(ClientApiConstants.BANK_ACCOUNT_NUMBER, this.bankAccountNumber)) {
+                final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.BANK_ACCOUNT_NUMBER);
+                actualChanges.put(ClientApiConstants.BANK_ACCOUNT_NUMBER, newValue);
+                this.bankAccountNumber = newValue;
+            }
+            if (command.isChangeInStringParameterNamed(ClientApiConstants.BANK_NAME, this.bankName)) {
+                final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.BANK_NAME);
+                actualChanges.put(ClientApiConstants.BANK_NAME, newValue);
+                this.bankName = newValue;
             }
         }
         return actualChanges;

@@ -79,6 +79,12 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
         final Integer strataId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.strataIdParamName, element);
         baseDataValidator.reset().parameter(ClientApiConstants.strataIdParamName).value(strataId).notNull().integerGreaterThanZero();
 
+        final String bankAccountNumber = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.BANK_ACCOUNT_NUMBER, element);
+        baseDataValidator.reset().parameter(ClientApiConstants.BANK_ACCOUNT_NUMBER).value(bankAccountNumber).notNull().notBlank();
+
+        final String bankName = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.BANK_NAME, element);
+        baseDataValidator.reset().parameter(ClientApiConstants.BANK_NAME).value(bankName).notNull().notBlank();
+
         if (LegalForm.fromInt(legalFormId).isPerson()) {
             final Integer nationalityId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.nationalityIdParamName,
                     element);
@@ -117,12 +123,6 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
                 final String passportNumber = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.PASSPORT_NUMBER, element);
                 baseDataValidator.reset().parameter(ClientApiConstants.PASSPORT_NUMBER).value(passportNumber).notNull().notBlank();
             }
-
-            final String bankAccountNumber = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.BANK_ACCOUNT_NUMBER, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.BANK_ACCOUNT_NUMBER).value(bankAccountNumber).notNull().notBlank();
-
-            final String bankName = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.BANK_NAME, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.BANK_NAME).value(bankName).notNull().notBlank();
 
             final String telephoneNo = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.telephoneNoParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.telephoneNoParamName).value(telephoneNo).notNull().notBlank()
@@ -193,6 +193,12 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
             baseDataValidator.reset().parameter(ClientApiConstants.staffIdParamName).value(strataId).notNull().integerGreaterThanZero();
         }
 
+        final String bankAccountNumber = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.BANK_ACCOUNT_NUMBER, element);
+        baseDataValidator.reset().parameter(ClientApiConstants.BANK_ACCOUNT_NUMBER).value(bankAccountNumber).notNull().notBlank();
+
+        final String bankName = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.BANK_NAME, element);
+        baseDataValidator.reset().parameter(ClientApiConstants.BANK_NAME).value(bankName).notNull().notBlank();
+
         if (LegalForm.fromInt(legalFormId).isPerson()) {
             if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.nationalityIdParamName, element)) {
                 atLeastOneParameterPassedForUpdate = true;
@@ -240,12 +246,6 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
                 final String passportNumber = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.PASSPORT_NUMBER, element);
                 baseDataValidator.reset().parameter(ClientApiConstants.PASSPORT_NUMBER).value(passportNumber).notNull().notBlank();
             }
-
-            final String bankAccountNumber = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.BANK_ACCOUNT_NUMBER, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.BANK_ACCOUNT_NUMBER).value(bankAccountNumber).notNull().notBlank();
-
-            final String bankName = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.BANK_NAME, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.BANK_NAME).value(bankName).notNull().notBlank();
 
             final String telephoneNo = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.telephoneNoParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.telephoneNoParamName).value(telephoneNo).notNull().notBlank()
