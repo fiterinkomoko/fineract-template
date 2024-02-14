@@ -87,7 +87,7 @@ public final class ClientOtherInfoData implements Serializable {
 
     public ClientOtherInfoData(Long id, Long clientId, String coSignors, String guarantor, CodeValueData strata, String businessLocation,
             Long taxIdentificationNumber, Long incomeGeneratingActivity, BigDecimal incomeGeneratingActivityMonthlyAmount,
-            String telephoneNumber) {
+            String telephoneNumber, String bankAccountNumber, String bankName) {
         this.id = id;
         this.clientId = clientId;
         this.coSignors = coSignors;
@@ -98,6 +98,8 @@ public final class ClientOtherInfoData implements Serializable {
         this.incomeGeneratingActivity = incomeGeneratingActivity;
         this.incomeGeneratingActivityMonthlyAmount = incomeGeneratingActivityMonthlyAmount;
         this.telephoneNumber = telephoneNumber;
+        this.bankAccountNumber = bankAccountNumber;
+        this.bankName = bankName;
     }
 
     public static ClientOtherInfoData template(final Collection<CodeValueData> nationalityOptions,
@@ -124,9 +126,9 @@ public final class ClientOtherInfoData implements Serializable {
 
     public static ClientOtherInfoData instanceEntity(final Long id, final Long clientId, String coSignors, String guarantor,
             CodeValueData strata, String businessLocation, Long taxIdentificationNumber, Long incomeGeneratingActivity,
-            BigDecimal incomeGeneratingActivityMonthlyAmount, String telephoneNumber) {
+            BigDecimal incomeGeneratingActivityMonthlyAmount, String telephoneNumber, String bankAccountNumber, String bankName) {
         return new ClientOtherInfoData(id, clientId, coSignors, guarantor, strata, businessLocation, taxIdentificationNumber,
-                incomeGeneratingActivity, incomeGeneratingActivityMonthlyAmount, telephoneNumber);
+                incomeGeneratingActivity, incomeGeneratingActivityMonthlyAmount, telephoneNumber, bankAccountNumber, bankName);
     }
 
     public CodeValueData getStrata() {
