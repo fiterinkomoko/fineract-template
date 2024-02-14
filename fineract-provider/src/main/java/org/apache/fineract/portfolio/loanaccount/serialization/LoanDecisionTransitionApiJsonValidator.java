@@ -97,7 +97,8 @@ public final class LoanDecisionTransitionApiJsonValidator {
                 LoanApiConstants.loanReviewOnDateParameterName, LoanApiConstants.noteParameterName, LoanApiConstants.localeParameterName,
                 LoanApiConstants.dateFormatParameterName, LoanApiConstants.dueDiligenceOnDateParameterName,
                 LoanApiConstants.dueDiligenceRecommendedAmountParameterName, LoanApiConstants.recommendedLoanTermFrequencyParameterName,
-                LoanApiConstants.recommendedLoanTermFrequencyTypeParameterName, LoanApiConstants.isIdeaClientParamName));
+                LoanApiConstants.recommendedLoanTermFrequencyTypeParameterName, LoanApiConstants.isIdeaClientParamName,
+                LoanApiConstants.isCrbVerificationRequiredParamName));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
@@ -132,6 +133,10 @@ public final class LoanDecisionTransitionApiJsonValidator {
         Boolean isIdeaClient = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.isIdeaClientParamName, element);
         if (isIdeaClient == null) isIdeaClient = Boolean.FALSE;
         baseDataValidator.reset().parameter(LoanApiConstants.isIdeaClientParamName).value(isIdeaClient).notNull().validateForBooleanValue();
+
+        Boolean isCrbVerificationRequired = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.isCrbVerificationRequiredParamName, element);
+        if (isCrbVerificationRequired == null) isCrbVerificationRequired = Boolean.FALSE;
+        baseDataValidator.reset().parameter(LoanApiConstants.isCrbVerificationRequiredParamName).value(isCrbVerificationRequired).notNull().validateForBooleanValue();
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

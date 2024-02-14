@@ -39,7 +39,6 @@ import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
 import org.apache.fineract.infrastructure.documentmanagement.service.DocumentReadPlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
-import org.apache.fineract.portfolio.client.data.ClientOtherInfoData;
 import org.apache.fineract.portfolio.client.service.ClientOtherInfoReadPlatformService;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.fund.domain.Fund;
@@ -167,22 +166,21 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         if (isIdeaClient == null) {
             isIdeaClient = Boolean.FALSE;
         }
+        Boolean isCrbVerificationRequired = command.booleanObjectValueOfParameterNamed(LoanApiConstants.isCrbVerificationRequiredParamName);
+        if (isCrbVerificationRequired == null) {
+            isCrbVerificationRequired = Boolean.FALSE;
+        }
 
         // Do validation for kiva loans
         Fund fund = loan.getFund();
         if (fund != null && fund.getName().equalsIgnoreCase("kiva")) {
             kivaLoanService.validateLoanKivaDetails(loan);
         }
-        ////
-        // Check CRB Verification has been executed
-        boolean crbVerification = true;
-        ClientOtherInfoData clientOtherInfoData = this.clientOtherInfoReadPlatformService.retrieveByClientId(loan.getClientId());
-        if (clientOtherInfoData != null && clientOtherInfoData.getStrata() != null
-                && (clientOtherInfoData.getStrata().getName().equalsIgnoreCase("Refugees")
-                        || clientOtherInfoData.getStrata().getName().equalsIgnoreCase("Refugee"))) {
-            crbVerification = false;
-        }
-        if (crbVerification) {
+
+        final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
+        // Check CRB Verification if required
+        if (isCrbVerificationRequired) {
+            loanDecision.setCrbVerificationRequired(true);
             if (loan.getCurrencyCode().equalsIgnoreCase("KES")) {
                 List<MetropolCrbIdentityReport> metropolCrbIdentityReportList = metropolCrbIdentityVerificationRepository
                         .findByLoanId(loan.getId());
@@ -196,9 +194,10 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                     throw new LoanDueDiligenceException("error.msg.required.crb.verification", "CRB Verification required.");
                 }
             }
+        } else {
+            loanDecision.setCrbVerificationRequired(false);
         }
 
-        final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
         final BigDecimal recommendedAmount = command
                 .bigDecimalValueOfParameterNamed(LoanApiConstants.dueDiligenceRecommendedAmountParameterName);
         final Integer termFrequency = command.integerValueOfParameterNamed(LoanApiConstants.recommendedLoanTermFrequencyParameterName);
