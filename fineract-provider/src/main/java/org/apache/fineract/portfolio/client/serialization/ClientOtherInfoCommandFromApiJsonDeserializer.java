@@ -163,11 +163,9 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
                 baseDataValidator.reset().parameter(ClientApiConstants.incomeGeneratingActivityMonthlyAmountParamName)
                         .value(incomeGeneratingActivityMonthlyAmount).notNull().zeroOrPositiveAmount();
             }
-            if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.telephoneNoParamName, element) != null) {
-                final String telephoneNo = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.telephoneNoParamName, element);
-                baseDataValidator.reset().parameter(ClientApiConstants.telephoneNoParamName).value(telephoneNo).notBlank()
+            final String telephoneNo = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.telephoneNoParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.telephoneNoParamName).value(telephoneNo).notBlank()
                         .notExceedingLengthOf(20);
-            }
         }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
@@ -290,10 +288,10 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
             }
             if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.telephoneNoParamName, element)) {
                 atLeastOneParameterPassedForUpdate = true;
+            }
                 final String telephoneNo = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.telephoneNoParamName, element);
                 baseDataValidator.reset().parameter(ClientApiConstants.telephoneNoParamName).value(telephoneNo).notBlank()
                         .notExceedingLengthOf(20);
-            }
         }
 
         if (!atLeastOneParameterPassedForUpdate) {
