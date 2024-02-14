@@ -24,8 +24,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
-public interface KivaLocationRepository
-        extends JpaRepository<KivaLocation, Long>, JpaSpecificationExecutor<KivaLocation> {
+public interface KivaLocationRepository extends JpaRepository<KivaLocation, Long>, JpaSpecificationExecutor<KivaLocation> {
 
     @Modifying
     @Transactional

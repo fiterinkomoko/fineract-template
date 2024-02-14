@@ -134,9 +134,11 @@ public final class LoanDecisionTransitionApiJsonValidator {
         if (isIdeaClient == null) isIdeaClient = Boolean.FALSE;
         baseDataValidator.reset().parameter(LoanApiConstants.isIdeaClientParamName).value(isIdeaClient).notNull().validateForBooleanValue();
 
-        Boolean isCrbVerificationRequired = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.isCrbVerificationRequiredParamName, element);
+        Boolean isCrbVerificationRequired = this.fromApiJsonHelper.extractBooleanNamed(LoanApiConstants.isCrbVerificationRequiredParamName,
+                element);
         if (isCrbVerificationRequired == null) isCrbVerificationRequired = Boolean.FALSE;
-        baseDataValidator.reset().parameter(LoanApiConstants.isCrbVerificationRequiredParamName).value(isCrbVerificationRequired).notNull().validateForBooleanValue();
+        baseDataValidator.reset().parameter(LoanApiConstants.isCrbVerificationRequiredParamName).value(isCrbVerificationRequired).notNull()
+                .validateForBooleanValue();
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

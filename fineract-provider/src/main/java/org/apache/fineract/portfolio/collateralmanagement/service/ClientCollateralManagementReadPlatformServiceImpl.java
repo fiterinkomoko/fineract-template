@@ -83,10 +83,10 @@ public class ClientCollateralManagementReadPlatformServiceImpl implements Client
         for (ClientCollateralManagement clientCollateralManagement : clientCollateralManagements) {
             BigDecimal total = clientCollateralManagement.getTotal();
             BigDecimal totalCollateral = clientCollateralManagement.getTotalCollateral(total);
-            clientCollateralManagementDataList
-                    .add(ClientCollateralManagementData.instance(clientCollateralManagement.getCollaterals().getName(), clientCollateralManagement.getQuantity(),
-                            total, totalCollateral, clientId, null, clientCollateralManagement.getId(),
-                            clientCollateralManagement.getCollaterals().getPctToBase(), clientCollateralManagement.getCollaterals().getBasePrice()));
+            clientCollateralManagementDataList.add(ClientCollateralManagementData.instance(
+                    clientCollateralManagement.getCollaterals().getName(), clientCollateralManagement.getQuantity(), total, totalCollateral,
+                    clientId, null, clientCollateralManagement.getId(), clientCollateralManagement.getCollaterals().getPctToBase(),
+                    clientCollateralManagement.getCollaterals().getBasePrice()));
         }
 
         return clientCollateralManagementDataList;

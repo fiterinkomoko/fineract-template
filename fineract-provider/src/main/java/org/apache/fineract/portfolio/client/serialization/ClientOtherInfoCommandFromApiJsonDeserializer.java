@@ -54,7 +54,8 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
             "telephoneNo", "nationalIdentificationNumber", "passportNumber", "bankAccountNumber", "bankName"));
 
     @Autowired
-    public ClientOtherInfoCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper, final CodeValueReadPlatformService codeValueReadPlatformService) {
+    public ClientOtherInfoCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper,
+            final CodeValueReadPlatformService codeValueReadPlatformService) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
     }
@@ -107,11 +108,11 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
             final Integer yearArrivedInHostCountryId = this.fromApiJsonHelper
                     .extractIntegerSansLocaleNamed(ClientApiConstants.yearArrivedInHostCountry, element);
             if (codeValue.getName().equalsIgnoreCase("Host Community")) {
-                baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountry).value(yearArrivedInHostCountryId).ignoreIfNull()
-                        .integerGreaterThanZero();
-            } else {
                 baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountry).value(yearArrivedInHostCountryId)
-                        .notNull().integerGreaterThanZero();
+                        .ignoreIfNull().integerGreaterThanZero();
+            } else {
+                baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountry).value(yearArrivedInHostCountryId).notNull()
+                        .integerGreaterThanZero();
             }
 
             if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER, element) != null) {
@@ -165,7 +166,7 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
             }
             final String telephoneNo = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.telephoneNoParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.telephoneNoParamName).value(telephoneNo).notBlank()
-                        .notExceedingLengthOf(20);
+                    .notExceedingLengthOf(20);
         }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
@@ -230,11 +231,11 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
                 atLeastOneParameterPassedForUpdate = true;
             }
             if (codeValue.getName().equalsIgnoreCase("Host Community")) {
-                baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountry).value(yearArrivedInHostCountryId).ignoreIfNull()
-                        .integerGreaterThanZero();
-            } else {
                 baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountry).value(yearArrivedInHostCountryId)
-                        .notNull().integerGreaterThanZero();
+                        .ignoreIfNull().integerGreaterThanZero();
+            } else {
+                baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountry).value(yearArrivedInHostCountryId).notNull()
+                        .integerGreaterThanZero();
             }
 
             if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER, element) != null) {
@@ -289,9 +290,9 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
             if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.telephoneNoParamName, element)) {
                 atLeastOneParameterPassedForUpdate = true;
             }
-                final String telephoneNo = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.telephoneNoParamName, element);
-                baseDataValidator.reset().parameter(ClientApiConstants.telephoneNoParamName).value(telephoneNo).notBlank()
-                        .notExceedingLengthOf(20);
+            final String telephoneNo = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.telephoneNoParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.telephoneNoParamName).value(telephoneNo).notBlank()
+                    .notExceedingLengthOf(20);
         }
 
         if (!atLeastOneParameterPassedForUpdate) {
