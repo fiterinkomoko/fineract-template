@@ -528,51 +528,48 @@ public class KivaLoanServiceImpl implements KivaLoanService {
 
         ClientRecruitmentSurvey clientRecruitmentSurvey = clientRecruitmentSurveyRepository.getByClientId(loan.getClientId());
         if (clientRecruitmentSurvey == null) {
-            throw new LoanDueDiligenceException("validation.msg.client.recruitment.survey.required","Client recruitment survey required");
+            throw new LoanDueDiligenceException("validation.msg.client.recruitment.survey.required", "Client recruitment survey required");
         }
         String clientLocation = clientRecruitmentSurvey.getSurveyLocation().label();
         String clientCountry = clientRecruitmentSurvey.getCountry().label();
 
         if (clientCountry == null) {
-            throw new LoanDueDiligenceException("validation.msg.client.recruitment.survey.country.required","Client recruitment survey country required");
+            throw new LoanDueDiligenceException("validation.msg.client.recruitment.survey.country.required",
+                    "Client recruitment survey country required");
         }
         if (clientLocation == null) {
-            throw new LoanDueDiligenceException("validation.msg.client.recruitment.survey.location.required","Client recruitment survey location required");
+            throw new LoanDueDiligenceException("validation.msg.client.recruitment.survey.location.required",
+                    "Client recruitment survey location required");
         }
 
         List<KivaLocation> locations = this.kivaLocationRepository.findAll();
-        KivaLocation kivaLocation = locations.stream()
-                .filter(location -> clientLocation.equalsIgnoreCase(location.getLocation())
-                        && clientCountry.equalsIgnoreCase(location.getCountry()))
-                .findAny()
-                .orElse(null);
+        KivaLocation kivaLocation = locations.stream().filter(location -> clientLocation.equalsIgnoreCase(location.getLocation())
+                && clientCountry.equalsIgnoreCase(location.getCountry())).findAny().orElse(null);
         if (kivaLocation == null) {
-            throw new LoanDueDiligenceException("validation.msg.client.survey.location.not.supported.by.kiva","Client Survey location/country not supported by kiva");
+            throw new LoanDueDiligenceException("validation.msg.client.survey.location.not.supported.by.kiva",
+                    "Client Survey location/country not supported by kiva");
         }
 
         List<KivaCurrency> currencies = this.kivaCurrencyRepository.findAll();
         KivaCurrency kivaCurrency = currencies.stream()
-                .filter(currency -> loan.getCurrency().getCode().equalsIgnoreCase(currency.getName()))
-                .findAny()
-                .orElse(null);
+                .filter(currency -> loan.getCurrency().getCode().equalsIgnoreCase(currency.getName())).findAny().orElse(null);
         if (kivaCurrency == null) {
-            throw new LoanDueDiligenceException("validation.msg.loan.currency.not.supported.by.kiva","Loan Currency not supported by kiva");
+            throw new LoanDueDiligenceException("validation.msg.loan.currency.not.supported.by.kiva",
+                    "Loan Currency not supported by kiva");
         }
 
         List<KivaTheme> themes = this.kivaThemeRepository.findAll();
-        KivaTheme kivaTheme = themes.stream()
-                .filter(theme -> loan.getDepartment().label().equalsIgnoreCase(theme.getName()))
-                .findAny()
+        KivaTheme kivaTheme = themes.stream().filter(theme -> loan.getDepartment().label().equalsIgnoreCase(theme.getName())).findAny()
                 .orElse(null);
         if (kivaTheme == null) {
-            throw new LoanDueDiligenceException("validation.msg.loan.department.not.supported.by.kiva","Loan Department not supported by kiva");
+            throw new LoanDueDiligenceException("validation.msg.loan.department.not.supported.by.kiva",
+                    "Loan Department not supported by kiva");
         }
         try {
             final DocumentData documentData = this.documentReadPlatformService.retrieveKivaLoanProfileImage("loans", loan.getId());
         } catch (EmptyResultDataAccessException e) {
             throw new LoanDueDiligenceException("validation.msg.loan.profile.image.not.uploaded", "Loan profile image not uploaded");
         }
-
 
         return true;
     }
@@ -597,7 +594,6 @@ public class KivaLoanServiceImpl implements KivaLoanService {
                 .addPathSegment(getConfigProperty("fineract.integrations.kiva.partnerCode"))
                 .addPathSegment(getConfigProperty("fineract.integrations.kiva.partnerId")).addPathSegment("config")
                 .addPathSegment("locales");
-
 
         String url = builder.build().toString();
 
@@ -649,7 +645,6 @@ public class KivaLoanServiceImpl implements KivaLoanService {
                 .addPathSegment(getConfigProperty("fineract.integrations.kiva.partnerCode"))
                 .addPathSegment(getConfigProperty("fineract.integrations.kiva.partnerId")).addPathSegment("config")
                 .addPathSegment("themes");
-
 
         String url = builder.build().toString();
 
@@ -703,7 +698,6 @@ public class KivaLoanServiceImpl implements KivaLoanService {
                 .addPathSegment(getConfigProperty("fineract.integrations.kiva.partnerCode"))
                 .addPathSegment(getConfigProperty("fineract.integrations.kiva.partnerId")).addPathSegment("config")
                 .addPathSegment("locations");
-
 
         String url = builder.build().toString();
 

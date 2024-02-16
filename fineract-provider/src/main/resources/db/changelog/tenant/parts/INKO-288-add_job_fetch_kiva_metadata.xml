@@ -83,7 +83,7 @@
             <column name="location" type="varchar(100)">
                 <constraints nullable="false"/>
             </column>
-		<column name="full_name" type="varchar(100)">
+        <column name="full_name" type="varchar(100)">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -107,60 +107,60 @@
         </createTable>
     </changeSet>
     <changeSet author="faheem@fiter.io" id="INKO-288-insert_default_values_for_kiva_metadata" >
-	<comment>default values for kiva metadata</comment>
-    	<sql splitStatements="true" stripComments="true">         
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Nyabiheke','Nyabiheke: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Ruhango','Ruhango: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Bugarama','Bugarama: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Kirehe','Kirehe: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Hagadera, Dadaab','Hagadera, Dadaab: Kenya');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Mahama','Mahama: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','KARONGI','KARONGI: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Mombasa, Island','Mombasa, Island: Kenya');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Byumba','Byumba: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Rulindo','Rulindo: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Musanze','Musanze: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Garissa County','Garissa County: Kenya');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Gatsibo','Gatsibo: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Kakuma 2','Kakuma 2: Kenya');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Huye','Huye: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Mtwapa','Mtwapa: Kenya');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Nyamata','Nyamata: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Tanzania','Moshi','Moshi: Tanzania');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Ngoma','Ngoma: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Mombasa, South Coast','Mombasa, South Coast: Kenya');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Kigali','Kigali: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Rubavu','Rubavu: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Kayonza','Kayonza: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Nyamasheke','Nyamasheke: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Tanzania','Arusha','Arusha: Tanzania');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Gikongoro','Gikongoro: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Kakuma 3','Kakuma 3: Kenya');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Gisagara','Gisagara: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Dagahaley, Dadaab','Dagahaley, Dadaab: Kenya');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Masaka','Masaka: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Gicumbi','Gicumbi: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Ifo, Dadaab','Ifo, Dadaab: Kenya');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Butaro','Butaro: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Kamonyi','Kamonyi: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Mombasa, Mainland','Mombasa, Mainland: Kenya');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Nyagatare','Nyagatare: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','RWAMAGANA','RWAMAGANA: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Mombasa, North Coast','Mombasa, North Coast: Kenya');
-		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Diani','Diani: Kenya');
-		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Kakuma Town','Kakuma Town: Kenya');
-		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Kakuma 1','Kakuma 1: Kenya');
-		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Kalobeyei','Kalobeyei: Kenya');
-		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Kakuma 4','Kakuma 4: Kenya');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Nyamagabe','Nyamagabe: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Rwanda','KABARORE','KABARORE: Rwanda');
-		insert into m_kiva_locations (country,location,full_name) values ('Kenya','Kakuma','Kakuma: Kenya');
-		insert into m_kiva_themes (theme_id,theme_name) values ('98','SME');
-		insert into m_kiva_themes (theme_id,theme_name) values ('29','Vulnerable Populations');
-		insert into m_kiva_themes (theme_id,theme_name) values ('228','Micro-enterprise');
-		insert into m_kiva_themes (theme_id,theme_name) values ('246','Vulnerable Populations (Refugees Kenya)');
-		insert into m_kiva_currencies (name,language) values ('KES','EN');
-		insert into m_kiva_currencies (name,language) values ('RWF','EN');    
-	    </sql>    
+    <comment>default values for kiva metadata</comment>
+        <sql splitStatements="true" stripComments="true">
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Nyabiheke','Nyabiheke: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Ruhango','Ruhango: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Bugarama','Bugarama: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Kirehe','Kirehe: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Kenya','Hagadera, Dadaab','Hagadera, Dadaab: Kenya');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Mahama','Mahama: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','KARONGI','KARONGI: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Kenya','Mombasa, Island','Mombasa, Island: Kenya');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Byumba','Byumba: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Rulindo','Rulindo: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Musanze','Musanze: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Kenya','Garissa County','Garissa County: Kenya');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Gatsibo','Gatsibo: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Kenya','Kakuma 2','Kakuma 2: Kenya');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Huye','Huye: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Kenya','Mtwapa','Mtwapa: Kenya');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Nyamata','Nyamata: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Tanzania','Moshi','Moshi: Tanzania');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Ngoma','Ngoma: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Kenya','Mombasa, South Coast','Mombasa, South Coast: Kenya');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Kigali','Kigali: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Rubavu','Rubavu: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Kayonza','Kayonza: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Nyamasheke','Nyamasheke: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Tanzania','Arusha','Arusha: Tanzania');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Gikongoro','Gikongoro: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Kenya','Kakuma 3','Kakuma 3: Kenya');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Gisagara','Gisagara: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Kenya','Dagahaley, Dadaab','Dagahaley, Dadaab: Kenya');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Masaka','Masaka: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Gicumbi','Gicumbi: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Kenya','Ifo, Dadaab','Ifo, Dadaab: Kenya');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Butaro','Butaro: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Kamonyi','Kamonyi: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Kenya','Mombasa, Mainland','Mombasa, Mainland: Kenya');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Nyagatare','Nyagatare: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','RWAMAGANA','RWAMAGANA: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Kenya','Mombasa, North Coast','Mombasa, North Coast: Kenya');
+        insert into m_kiva_locations (country,location,full_name) values ('Kenya','Diani','Diani: Kenya');
+        insert into m_kiva_locations (country,location,full_name) values ('Kenya','Kakuma Town','Kakuma Town: Kenya');
+        insert into m_kiva_locations (country,location,full_name) values ('Kenya','Kakuma 1','Kakuma 1: Kenya');
+        insert into m_kiva_locations (country,location,full_name) values ('Kenya','Kalobeyei','Kalobeyei: Kenya');
+        insert into m_kiva_locations (country,location,full_name) values ('Kenya','Kakuma 4','Kakuma 4: Kenya');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','Nyamagabe','Nyamagabe: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Rwanda','KABARORE','KABARORE: Rwanda');
+        insert into m_kiva_locations (country,location,full_name) values ('Kenya','Kakuma','Kakuma: Kenya');
+        insert into m_kiva_themes (theme_id,theme_name) values ('98','SME');
+        insert into m_kiva_themes (theme_id,theme_name) values ('29','Vulnerable Populations');
+        insert into m_kiva_themes (theme_id,theme_name) values ('228','Micro-enterprise');
+        insert into m_kiva_themes (theme_id,theme_name) values ('246','Vulnerable Populations (Refugees Kenya)');
+        insert into m_kiva_currencies (name,language) values ('KES','EN');
+        insert into m_kiva_currencies (name,language) values ('RWF','EN');
+        </sql>
     </changeSet>
 </databaseChangeLog>

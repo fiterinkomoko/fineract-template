@@ -96,8 +96,7 @@ public class LoanCollateralAssembler {
                     }
 
                     clientCollateral.updateQuantity(updatedClientQuantity);
-                    collateralItems
-                            .add(loanCollateralManagement);
+                    collateralItems.add(loanCollateralManagement);
                 }
             }
         }
