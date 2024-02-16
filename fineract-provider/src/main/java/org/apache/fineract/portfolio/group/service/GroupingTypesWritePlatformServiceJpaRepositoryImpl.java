@@ -72,6 +72,7 @@ import org.apache.fineract.portfolio.group.domain.GroupLevel;
 import org.apache.fineract.portfolio.group.domain.GroupLevelRepository;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.group.domain.GroupTypes;
+import org.apache.fineract.portfolio.group.exception.DuplicateGroupMemberDetectedException;
 import org.apache.fineract.portfolio.group.exception.GroupAccountExistsException;
 import org.apache.fineract.portfolio.group.exception.GroupHasNoStaffException;
 import org.apache.fineract.portfolio.group.exception.GroupMemberCountNotInPermissibleRangeException;
@@ -721,6 +722,13 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     final String errorMessage = "Client with identifier " + clientId + " must have the same office as group.";
                     throw new InvalidOfficeException("client", "attach.to.group", errorMessage, clientId, groupOfficeId);
                 }
+
+                boolean alreadyExists = clientMembers.stream().anyMatch(existingClient -> existingClient.getId().equals(client.getId()));
+
+                if (alreadyExists) {
+                    throw new DuplicateGroupMemberDetectedException(client.getDisplayName(), client.getId());
+                }
+
                 clientMembers.add(client);
             }
         }

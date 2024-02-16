@@ -120,7 +120,7 @@ public class ClientCollateralManagementApiResource {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ClientCollateralManagementApiResourceSwagger.GetClientCollateralManagementsResponse.class)))) })
     public String getClientCollateralList(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
-                                      @Context final UriInfo uriInfo) {
+            @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser()
                 .validateHasReadPermission(CollateralManagementJsonInputParams.CLIENT_COLLATERAL_PRODUCT_READ_PERMISSION.getValue());

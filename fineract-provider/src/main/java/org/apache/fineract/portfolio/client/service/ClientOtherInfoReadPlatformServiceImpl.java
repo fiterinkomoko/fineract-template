@@ -142,8 +142,7 @@ public class ClientOtherInfoReadPlatformServiceImpl implements ClientOtherInfoRe
                     + " co.guarantor AS guarantor, co.tax_identification_number as taxIdentificationNumber, co.business_location as businessLocation,"
                     + " co.income_generating_activity AS incomeGeneratingActivity, co.income_generating_activity_monthly_amount as incomeGeneratingActivityMonthlyAmount,"
                     + " co.telephone_no as telephoneNo, co.bank_account_number as bankAccountNumber, co.bank_name as bankName "
-                    + " FROM m_client_other_info co"
-                    + " left join m_code_value cv on co.strata_cv_id=cv.id";
+                    + " FROM m_client_other_info co" + " left join m_code_value cv on co.strata_cv_id=cv.id";
         }
 
         @Override

@@ -18,24 +18,19 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import javax.annotation.Generated;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Generated;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-        "as_of_date_time",
-        "themes",
-        "code",
-        "message"
-})
+@JsonPropertyOrder({ "as_of_date_time", "themes", "code", "message" })
 @Generated("jsonschema2pojo")
 public class KivaSupportedThemeData {
 
