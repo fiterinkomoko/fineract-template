@@ -494,7 +494,7 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
             stateId = command.longValueOfParameterNamed("stateProvinceId");
             stateIdObj = this.codeValueRepository.getById(stateId);
             clientFamilyMember.setStateProvince(stateIdObj);
-            }
+        }
 
         if (command.longValueOfParameterNamed("countryId") != null) {
             countryId = command.longValueOfParameterNamed("countryId");

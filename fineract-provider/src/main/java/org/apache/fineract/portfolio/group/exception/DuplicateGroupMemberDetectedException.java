@@ -16,19 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.domain;
+package org.apache.fineract.portfolio.group.exception;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.transaction.annotation.Transactional;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-public interface KivaLocationRepository extends JpaRepository<KivaLocation, Long>, JpaSpecificationExecutor<KivaLocation> {
+public class DuplicateGroupMemberDetectedException extends AbstractPlatformDomainRuleException {
 
-    @Modifying
-    @Transactional
-    @Query(value = "TRUNCATE TABLE m_kiva_locations", nativeQuery = true)
-    void truncateTable();
-
+    public DuplicateGroupMemberDetectedException(final String name, Long id) {
+        super("error.msg.duplicate.group.member.detected",
+                "Duplicate Group Member [" + name + "] detected . Group Members should be unique", id);
+    }
 }

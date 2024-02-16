@@ -24,8 +24,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
-public interface KivaCurrencyRepository
-        extends JpaRepository<KivaCurrency, Long>, JpaSpecificationExecutor<KivaCurrency> {
+public interface KivaCurrencyRepository extends JpaRepository<KivaCurrency, Long>, JpaSpecificationExecutor<KivaCurrency> {
 
     @Modifying
     @Transactional
