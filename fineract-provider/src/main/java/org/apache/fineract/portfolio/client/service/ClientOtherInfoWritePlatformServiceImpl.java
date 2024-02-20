@@ -112,7 +112,7 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
 
                 otherInfo = ClientOtherInfo.createNew(command, client, strata, nationality, yearArrivedInHostCountry);
             } else if (LegalForm.fromInt(client.getLegalForm().intValue()).isEntity()) {
-                otherInfo = ClientOtherInfo.createNewForEntity(command, client, strata);
+                otherInfo = ClientOtherInfo.createNewForEntity(command, client, strata, yearArrivedInHostCountry);
             }
 
             ClientOtherInfo info = clientOtherInfoRepository.saveAndFlush(otherInfo);
@@ -209,6 +209,10 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
     }
 
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
+        if (realCause.getMessage().contains("co_signors_constraint")) {
+            String coSignorsName = command.stringValueOfParameterNamed(ClientApiConstants.coSignors);
+            throw new PlatformDataIntegrityException("error.msg.client.other.info.duplicate.coSignorsName", "Client with Co-Signors Name `" + coSignorsName + "` already exists", "coSignorsName", coSignorsName);
+        }
         LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
     }
