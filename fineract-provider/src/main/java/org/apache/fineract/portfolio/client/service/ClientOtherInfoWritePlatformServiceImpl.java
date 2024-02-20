@@ -30,6 +30,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -38,6 +39,7 @@ import org.apache.fineract.portfolio.client.domain.ClientOtherInfoRepository;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.apache.fineract.portfolio.client.exception.ClientOtherInfoAlreadyPresentException;
+import org.apache.fineract.portfolio.client.exception.ClientOtherInfoNationalIdentificationNumberAlreadyPresentException;
 import org.apache.fineract.portfolio.client.exception.ClientOtherInfoNotFoundException;
 import org.apache.fineract.portfolio.client.serialization.ClientOtherInfoCommandFromApiJsonDeserializer;
 import org.slf4j.Logger;
@@ -61,53 +63,66 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
 
     @Override
     public CommandProcessingResult create(final Long clientId, final JsonCommand command) {
-
-        final ClientOtherInfo clientOtherInfo = this.clientOtherInfoRepository.getByClientId(clientId);
-        if (clientOtherInfo != null) {
-            throw new ClientOtherInfoAlreadyPresentException(clientId);
-        }
-
-        final GlobalConfigurationPropertyData otherInfoConfig = this.configurationReadPlatformService
-                .retrieveGlobalConfiguration("Enable-other-client-info");
-        final Boolean isClientOtherInfoEnable = otherInfoConfig.isEnabled();
-
-        if (!isClientOtherInfoEnable) {
-            throw new GeneralPlatformDomainRuleException("error.msg.enable.client.other.info",
-                    "Enable Client Other Info for proceeding operation");
-        }
-        final Client client = clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
-        fromApiJsonDeserializer.validateForCreate(client.getLegalForm().intValue(), command.json());
-
-        ClientOtherInfo otherInfo = null;
-
-        CodeValue strata = null;
-        final Long strataId = command.longValueOfParameterNamed(ClientApiConstants.strataIdParamName);
-        if (strataId != null) {
-            strata = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.STRATA, strataId);
-        }
-
-        CodeValue yearArrivedInHostCountry = null;
-        final Long yearArrivedInHostCountryId = command.longValueOfParameterNamed(ClientApiConstants.yearArrivedInHostCountry);
-        if (yearArrivedInHostCountryId != null) {
-            yearArrivedInHostCountry = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
-                    ClientApiConstants.YEAR_ARRIVED_IN_HOST_COUNTRY, yearArrivedInHostCountryId);
-        }
-
-        if (LegalForm.fromInt(client.getLegalForm().intValue()).isPerson()) {
-            CodeValue nationality = null;
-            final Long nationalityId = command.longValueOfParameterNamed(ClientApiConstants.nationalityIdParamName);
-            if (nationalityId != null) {
-                nationality = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection("COUNTRY", nationalityId);
+        try {
+            final ClientOtherInfo clientOtherInfo = this.clientOtherInfoRepository.getByClientId(clientId);
+            if (clientOtherInfo != null) {
+                throw new ClientOtherInfoAlreadyPresentException(clientId);
             }
-            otherInfo = ClientOtherInfo.createNew(command, client, strata, nationality, yearArrivedInHostCountry);
-        } else if (LegalForm.fromInt(client.getLegalForm().intValue()).isEntity()) {
-            otherInfo = ClientOtherInfo.createNewForEntity(command, client, strata, yearArrivedInHostCountry);
+
+            final GlobalConfigurationPropertyData otherInfoConfig = this.configurationReadPlatformService
+                    .retrieveGlobalConfiguration("Enable-other-client-info");
+            final Boolean isClientOtherInfoEnable = otherInfoConfig.isEnabled();
+
+            if (!isClientOtherInfoEnable) {
+                throw new GeneralPlatformDomainRuleException("error.msg.enable.client.other.info",
+                        "Enable Client Other Info for proceeding operation");
+            }
+            final Client client = clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+            fromApiJsonDeserializer.validateForCreate(client.getLegalForm().intValue(), command.json());
+
+            ClientOtherInfo otherInfo = null;
+
+            CodeValue strata = null;
+            final Long strataId = command.longValueOfParameterNamed(ClientApiConstants.strataIdParamName);
+            if (strataId != null) {
+                strata = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.STRATA, strataId);
+            }
+
+            CodeValue yearArrivedInHostCountry = null;
+                final Long yearArrivedInHostCountryId = command.longValueOfParameterNamed(ClientApiConstants.yearArrivedInHostCountry);
+                if (yearArrivedInHostCountryId != null) {
+                    yearArrivedInHostCountry = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
+                            ClientApiConstants.YEAR_ARRIVED_IN_HOST_COUNTRY, yearArrivedInHostCountryId);
+                }
+
+            if (LegalForm.fromInt(client.getLegalForm().intValue()).isPerson()) {
+                final String nationalIdentificationNumber = command.stringValueOfParameterNamedAllowingNull(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER);
+                if (nationalIdentificationNumber != null) {
+                    final ClientOtherInfo clientOtherInfoWithNationalIdentificationNumber = this.clientOtherInfoRepository.getByNationalIdentificationNumber(nationalIdentificationNumber);
+                    if (clientOtherInfoWithNationalIdentificationNumber != null) {
+                        throw new ClientOtherInfoNationalIdentificationNumberAlreadyPresentException(nationalIdentificationNumber);
+                    }
+                }
+
+                CodeValue nationality = null;
+                final Long nationalityId = command.longValueOfParameterNamed(ClientApiConstants.nationalityIdParamName);
+                if (nationalityId != null) {
+                    nationality = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection("COUNTRY", nationalityId);
+                }
+
+                otherInfo = ClientOtherInfo.createNew(command, client, strata, nationality, yearArrivedInHostCountry);
+            } else if (LegalForm.fromInt(client.getLegalForm().intValue()).isEntity()) {
+                otherInfo = ClientOtherInfo.createNewForEntity(command, client, strata);
+            }
+
+            ClientOtherInfo info = clientOtherInfoRepository.saveAndFlush(otherInfo);
+
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withClientId(clientId).withEntityId(info.getId())
+                    .build();
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
+            return CommandProcessingResult.empty();
         }
-
-        ClientOtherInfo info = clientOtherInfoRepository.saveAndFlush(otherInfo);
-
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withClientId(clientId).withEntityId(info.getId())
-                .build();
     }
 
     @Override
@@ -126,6 +141,19 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
             final ClientOtherInfo clientOtherInfo = this.clientOtherInfoRepository.findById(otherInfoId)
                     .orElseThrow(() -> new ClientOtherInfoNotFoundException(otherInfoId));
             this.fromApiJsonDeserializer.validateForUpdate(command.json(), clientOtherInfo.getClient().getLegalForm().intValue());
+
+            if (LegalForm.fromInt(clientOtherInfo.getClient().getLegalForm().intValue()).isPerson()) {
+                if (command.isChangeInStringParameterNamed(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER, clientOtherInfo.getNationalIdentificationNumber())) {
+                    final String nationalIdentificationNumber = command.stringValueOfParameterNamedAllowingNull(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER);
+                    if (nationalIdentificationNumber != null) {
+                        final ClientOtherInfo clientOtherInfoWithNationalIdentificationNumber = this.clientOtherInfoRepository.getByNationalIdentificationNumber(nationalIdentificationNumber);
+                        if (clientOtherInfoWithNationalIdentificationNumber != null) {
+                            throw new ClientOtherInfoNationalIdentificationNumberAlreadyPresentException(nationalIdentificationNumber);
+                        }
+                    }
+                }
+            }
+
             final Map<String, Object> changes = clientOtherInfo.update(command, clientOtherInfo.getClient().getLegalForm().intValue());
 
             if (changes.containsKey(ClientApiConstants.strataIdParamName)) {
@@ -171,12 +199,18 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
                     .with(changes) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             return CommandProcessingResult.empty();
         }
 
+    }
+
+    private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
+        LOG.error("Error occured.", dve);
+        throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
     }
 
 }

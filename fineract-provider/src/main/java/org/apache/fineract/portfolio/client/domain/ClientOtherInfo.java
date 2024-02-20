@@ -131,7 +131,7 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
 
         final Integer numberOfChildren = command.integerValueOfParameterNamed(ClientApiConstants.numberOfChildren);
         final Integer numberOfDependents = command.integerValueOfParameterNamed(ClientApiConstants.numberOfDependents);
-        final String nationalIdentificationNumber = command.stringValueOfParameterNamed(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER);
+        final String nationalIdentificationNumber = command.stringValueOfParameterNamedAllowingNull(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER);
         final String passportNumber = command.stringValueOfParameterNamed(ClientApiConstants.PASSPORT_NUMBER);
         final String bankAccountNumber = command.stringValueOfParameterNamed(ClientApiConstants.BANK_ACCOUNT_NUMBER);
         final String bankName = command.stringValueOfParameterNamed(ClientApiConstants.BANK_NAME);
@@ -191,7 +191,7 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
 
             if (command.isChangeInStringParameterNamed(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER,
                     this.nationalIdentificationNumber)) {
-                final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER);
+                final String newValue = command.stringValueOfParameterNamedAllowingNull(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER);
                 actualChanges.put(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER, newValue);
                 this.nationalIdentificationNumber = newValue;
             }
@@ -322,5 +322,9 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
 
     public String getBankName() {
         return bankName;
+    }
+
+    public String getNationalIdentificationNumber() {
+        return nationalIdentificationNumber;
     }
 }
