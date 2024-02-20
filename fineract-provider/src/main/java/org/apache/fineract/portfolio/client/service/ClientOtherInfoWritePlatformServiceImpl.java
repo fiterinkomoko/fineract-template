@@ -86,22 +86,22 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
             strata = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.STRATA, strataId);
         }
 
+        CodeValue yearArrivedInHostCountry = null;
+        final Long yearArrivedInHostCountryId = command.longValueOfParameterNamed(ClientApiConstants.yearArrivedInHostCountry);
+        if (yearArrivedInHostCountryId != null) {
+            yearArrivedInHostCountry = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
+                    ClientApiConstants.YEAR_ARRIVED_IN_HOST_COUNTRY, yearArrivedInHostCountryId);
+        }
+
         if (LegalForm.fromInt(client.getLegalForm().intValue()).isPerson()) {
             CodeValue nationality = null;
             final Long nationalityId = command.longValueOfParameterNamed(ClientApiConstants.nationalityIdParamName);
             if (nationalityId != null) {
                 nationality = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection("COUNTRY", nationalityId);
             }
-
-            CodeValue yearArrivedInHostCountry = null;
-            final Long yearArrivedInHostCountryId = command.longValueOfParameterNamed(ClientApiConstants.yearArrivedInHostCountry);
-            if (yearArrivedInHostCountryId != null) {
-                yearArrivedInHostCountry = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
-                        ClientApiConstants.YEAR_ARRIVED_IN_HOST_COUNTRY, yearArrivedInHostCountryId);
-            }
             otherInfo = ClientOtherInfo.createNew(command, client, strata, nationality, yearArrivedInHostCountry);
         } else if (LegalForm.fromInt(client.getLegalForm().intValue()).isEntity()) {
-            otherInfo = ClientOtherInfo.createNewForEntity(command, client, strata);
+            otherInfo = ClientOtherInfo.createNewForEntity(command, client, strata, yearArrivedInHostCountry);
         }
 
         ClientOtherInfo info = clientOtherInfoRepository.saveAndFlush(otherInfo);
@@ -138,6 +138,16 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
                 }
                 clientOtherInfo.setStrata(strataCodeValue);
             }
+            if (changes.containsKey(ClientApiConstants.yearArrivedInHostCountry)) {
+                final Long yearArrivedInHostCountryId = command.longValueOfParameterNamed(ClientApiConstants.yearArrivedInHostCountry);
+                CodeValue yearArrivedInHostCountryCodeValue = null;
+                if (yearArrivedInHostCountryId != null) {
+
+                    yearArrivedInHostCountryCodeValue = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
+                            ClientApiConstants.YEAR_ARRIVED_IN_HOST_COUNTRY, yearArrivedInHostCountryId);
+                }
+                clientOtherInfo.setYearArrivedInHostCountry(yearArrivedInHostCountryCodeValue);
+            }
             if (LegalForm.fromInt(clientOtherInfo.getClient().getLegalForm().intValue()).isPerson()) {
                 if (changes.containsKey(ClientApiConstants.nationalityIdParamName)) {
                     final Long nationalityId = command.longValueOfParameterNamed(ClientApiConstants.nationalityIdParamName);
@@ -148,17 +158,6 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
                                 nationalityId);
                     }
                     clientOtherInfo.setNationality(nationalityCodeValue);
-                }
-
-                if (changes.containsKey(ClientApiConstants.yearArrivedInHostCountry)) {
-                    final Long yearArrivedInHostCountryId = command.longValueOfParameterNamed(ClientApiConstants.yearArrivedInHostCountry);
-                    CodeValue yearArrivedInHostCountryCodeValue = null;
-                    if (yearArrivedInHostCountryId != null) {
-
-                        yearArrivedInHostCountryCodeValue = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
-                                ClientApiConstants.YEAR_ARRIVED_IN_HOST_COUNTRY, yearArrivedInHostCountryId);
-                    }
-                    clientOtherInfo.setYearArrivedInHostCountry(yearArrivedInHostCountryCodeValue);
                 }
             }
             if (!changes.isEmpty()) {
