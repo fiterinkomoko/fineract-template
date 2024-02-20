@@ -16,14 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.client.domain;
+package org.apache.fineract.portfolio.client.exception;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
-public interface ClientOtherInfoRepository extends JpaRepository<ClientOtherInfo, Long>, JpaSpecificationExecutor<ClientOtherInfo> {
+/**
+ * A {@link RuntimeException} thrown when client other info resources are not found.
+ */
+public class ClientOtherInfoNationalIdentificationNumberAlreadyPresentException extends AbstractPlatformResourceNotFoundException {
 
-    ClientOtherInfo getByClientId(Long clientId);
-
-    ClientOtherInfo getByNationalIdentificationNumber(String nationalIdentificationNumber);
+    public ClientOtherInfoNationalIdentificationNumberAlreadyPresentException(final String nationalIdentificationNumber) {
+        super("error.msg.client.other.info.duplicate.national_identification_number", "Client with National Identification Number `" + nationalIdentificationNumber + "` already exists", nationalIdentificationNumber);
+    }
 }
