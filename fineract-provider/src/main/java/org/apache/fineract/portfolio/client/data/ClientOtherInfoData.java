@@ -87,7 +87,7 @@ public final class ClientOtherInfoData implements Serializable {
 
     public ClientOtherInfoData(Long id, Long clientId, String coSignors, String guarantor, CodeValueData strata, String businessLocation,
             Long taxIdentificationNumber, Long incomeGeneratingActivity, BigDecimal incomeGeneratingActivityMonthlyAmount,
-            String telephoneNumber, String bankAccountNumber, String bankName) {
+            String telephoneNumber, String bankAccountNumber, String bankName, CodeValueData yearArrivedInHostCountry) {
         this.id = id;
         this.clientId = clientId;
         this.coSignors = coSignors;
@@ -100,6 +100,7 @@ public final class ClientOtherInfoData implements Serializable {
         this.telephoneNumber = telephoneNumber;
         this.bankAccountNumber = bankAccountNumber;
         this.bankName = bankName;
+        this.yearArrivedInHostCountry = yearArrivedInHostCountry;
     }
 
     public static ClientOtherInfoData template(final Collection<CodeValueData> nationalityOptions,
@@ -126,9 +127,9 @@ public final class ClientOtherInfoData implements Serializable {
 
     public static ClientOtherInfoData instanceEntity(final Long id, final Long clientId, String coSignors, String guarantor,
             CodeValueData strata, String businessLocation, Long taxIdentificationNumber, Long incomeGeneratingActivity,
-            BigDecimal incomeGeneratingActivityMonthlyAmount, String telephoneNumber, String bankAccountNumber, String bankName) {
+            BigDecimal incomeGeneratingActivityMonthlyAmount, String telephoneNumber, String bankAccountNumber, String bankName, CodeValueData yearArrivedInHostCountry) {
         return new ClientOtherInfoData(id, clientId, coSignors, guarantor, strata, businessLocation, taxIdentificationNumber,
-                incomeGeneratingActivity, incomeGeneratingActivityMonthlyAmount, telephoneNumber, bankAccountNumber, bankName);
+                incomeGeneratingActivity, incomeGeneratingActivityMonthlyAmount, telephoneNumber, bankAccountNumber, bankName, yearArrivedInHostCountry);
     }
 
     public CodeValueData getStrata() {
