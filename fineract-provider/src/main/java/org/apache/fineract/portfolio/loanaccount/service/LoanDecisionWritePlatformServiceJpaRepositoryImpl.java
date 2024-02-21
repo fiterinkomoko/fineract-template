@@ -29,6 +29,8 @@ import javax.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.infrastructure.codes.data.CodeValueData;
+import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
@@ -39,6 +41,7 @@ import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
 import org.apache.fineract.infrastructure.documentmanagement.service.DocumentReadPlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.apache.fineract.portfolio.client.data.ClientOtherInfoData;
 import org.apache.fineract.portfolio.client.service.ClientOtherInfoReadPlatformService;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.fund.domain.Fund;
@@ -169,6 +172,19 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         Boolean isCrbVerificationRequired = command.booleanObjectValueOfParameterNamed(LoanApiConstants.isCrbVerificationRequiredParamName);
         if (isCrbVerificationRequired == null) {
             isCrbVerificationRequired = Boolean.FALSE;
+        }
+
+        // CRB Verification is required for Strata other than Refugee
+        final GlobalConfigurationPropertyData otherInfoConfig = this.configurationReadPlatformService
+                .retrieveGlobalConfiguration("Enable-other-client-info");
+        final Boolean isClientOtherInfoEnable = otherInfoConfig.isEnabled();
+        if (isClientOtherInfoEnable) {
+            final Long clientId = loan.getClientId();
+            final ClientOtherInfoData clientOtherInfoData = this.clientOtherInfoReadPlatformService.retrieveByClientId(clientId);
+            final CodeValueData strata = clientOtherInfoData.getStrata();
+            if (!strata.getName().equalsIgnoreCase("Refugee") && !isCrbVerificationRequired) {
+                throw new LoanDueDiligenceException("error.msg.required.crb.verification", "CRB Verification required");
+            }
         }
 
         // Do validation for kiva loans
