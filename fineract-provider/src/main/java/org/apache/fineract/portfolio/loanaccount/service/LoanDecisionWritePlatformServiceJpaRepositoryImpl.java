@@ -42,6 +42,7 @@ import org.apache.fineract.infrastructure.documentmanagement.service.DocumentRea
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.client.data.ClientOtherInfoData;
+import org.apache.fineract.portfolio.client.exception.ClientOtherInfoNotFoundException;
 import org.apache.fineract.portfolio.client.service.ClientOtherInfoReadPlatformService;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.fund.domain.Fund;
@@ -181,6 +182,9 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         if (isClientOtherInfoEnable) {
             final Long clientId = loan.getClientId();
             final ClientOtherInfoData clientOtherInfoData = this.clientOtherInfoReadPlatformService.retrieveByClientId(clientId);
+            if (clientOtherInfoData == null) {
+                throw new ClientOtherInfoNotFoundException(loan.getId(), clientId);
+            }
             final CodeValueData strata = clientOtherInfoData.getStrata();
             if (!strata.getName().equalsIgnoreCase("Refugee") && !isCrbVerificationRequired) {
                 throw new LoanDueDiligenceException("error.msg.required.crb.verification", "CRB Verification required");
