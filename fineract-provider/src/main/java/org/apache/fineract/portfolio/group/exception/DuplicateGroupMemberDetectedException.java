@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.client.domain;
+package org.apache.fineract.portfolio.group.exception;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-public interface ClientOtherInfoRepository extends JpaRepository<ClientOtherInfo, Long>, JpaSpecificationExecutor<ClientOtherInfo> {
+public class DuplicateGroupMemberDetectedException extends AbstractPlatformDomainRuleException {
 
-    ClientOtherInfo getByClientId(Long clientId);
-
-    ClientOtherInfo getByNationalIdentificationNumber(String nationalIdentificationNumber);
+    public DuplicateGroupMemberDetectedException(final String name, Long id) {
+        super("error.msg.duplicate.group.member.detected",
+                "Duplicate Group Member [" + name + "] detected . Group Members should be unique", id);
+    }
 }

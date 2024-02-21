@@ -262,25 +262,26 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
                         .notExceedingLengthOf(100);
             }
 
-            if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.coSignors, element)) {
+            if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.coSignors, element) != null) {
                 atLeastOneParameterPassedForUpdate = true;
                 final String coSignors = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.coSignors, element);
                 baseDataValidator.reset().parameter(ClientApiConstants.coSignors).value(coSignors).notBlank().notExceedingLengthOf(100);
             }
 
-            if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.guarantor, element)) {
+            if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.guarantor, element) != null) {
                 atLeastOneParameterPassedForUpdate = true;
                 final String guarantor = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.guarantor, element);
                 baseDataValidator.reset().parameter(ClientApiConstants.guarantor).value(guarantor).notBlank().notExceedingLengthOf(100);
             }
-            if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.incomeGeneratingActivityParamName, element)) {
+            if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.incomeGeneratingActivityParamName, element) != null) {
                 atLeastOneParameterPassedForUpdate = true;
                 final Long incomeGeneratingActivity = this.fromApiJsonHelper
                         .extractLongNamed(ClientApiConstants.incomeGeneratingActivityParamName, element);
                 baseDataValidator.reset().parameter(ClientApiConstants.incomeGeneratingActivityParamName).value(incomeGeneratingActivity)
                         .notNull().integerGreaterThanZero();
             }
-            if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.incomeGeneratingActivityMonthlyAmountParamName, element)) {
+            if (this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.incomeGeneratingActivityMonthlyAmountParamName,
+                    element) != null) {
                 atLeastOneParameterPassedForUpdate = true;
                 final BigDecimal incomeGeneratingActivityMonthlyAmount = this.fromApiJsonHelper
                         .extractBigDecimalWithLocaleNamed(ClientApiConstants.incomeGeneratingActivityMonthlyAmountParamName, element);
