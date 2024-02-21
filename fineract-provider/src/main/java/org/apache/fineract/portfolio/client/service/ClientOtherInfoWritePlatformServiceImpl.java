@@ -89,11 +89,11 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
             }
 
             CodeValue yearArrivedInHostCountry = null;
-                final Long yearArrivedInHostCountryId = command.longValueOfParameterNamed(ClientApiConstants.yearArrivedInHostCountry);
-                if (yearArrivedInHostCountryId != null) {
-                    yearArrivedInHostCountry = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
-                            ClientApiConstants.YEAR_ARRIVED_IN_HOST_COUNTRY, yearArrivedInHostCountryId);
-                }
+            final Long yearArrivedInHostCountryId = command.longValueOfParameterNamed(ClientApiConstants.yearArrivedInHostCountry);
+            if (yearArrivedInHostCountryId != null) {
+                yearArrivedInHostCountry = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
+                        ClientApiConstants.YEAR_ARRIVED_IN_HOST_COUNTRY, yearArrivedInHostCountryId);
+            }
 
             if (LegalForm.fromInt(client.getLegalForm().intValue()).isPerson()) {
                 final String nationalIdentificationNumber = command
@@ -216,7 +216,8 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
         if (realCause.getMessage().contains("co_signors_constraint")) {
             String coSignorsName = command.stringValueOfParameterNamed(ClientApiConstants.coSignors);
-            throw new PlatformDataIntegrityException("error.msg.client.other.info.duplicate.coSignorsName", "Client with Co-Signors Name `" + coSignorsName + "` already exists", "coSignorsName", coSignorsName);
+            throw new PlatformDataIntegrityException("error.msg.client.other.info.duplicate.coSignorsName",
+                    "Client with Co-Signors Name `" + coSignorsName + "` already exists", "coSignorsName", coSignorsName);
         }
         LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");

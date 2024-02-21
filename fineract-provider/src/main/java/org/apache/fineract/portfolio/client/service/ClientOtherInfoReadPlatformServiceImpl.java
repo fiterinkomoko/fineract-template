@@ -170,7 +170,8 @@ public class ClientOtherInfoReadPlatformServiceImpl implements ClientOtherInfoRe
             final String bankName = rs.getString("bankName");
 
             return ClientOtherInfoData.instanceEntity(id, clientId, coSignors, guarantor, strata, businessLocation, taxIdentificationNumber,
-                    incomeGeneratingActivity, incomeGeneratingActivityMonthlyAmount, telephoneNo, bankAccountNumber, bankName, yearArrivedInHostCountry);
+                    incomeGeneratingActivity, incomeGeneratingActivityMonthlyAmount, telephoneNo, bankAccountNumber, bankName,
+                    yearArrivedInHostCountry);
 
         }
     }
