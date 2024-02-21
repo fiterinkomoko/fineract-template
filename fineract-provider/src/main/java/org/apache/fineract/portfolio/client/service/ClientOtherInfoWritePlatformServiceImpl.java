@@ -89,9 +89,11 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
             }
 
             if (LegalForm.fromInt(client.getLegalForm().intValue()).isPerson()) {
-                final String nationalIdentificationNumber = command.stringValueOfParameterNamedAllowingNull(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER);
+                final String nationalIdentificationNumber = command
+                        .stringValueOfParameterNamedAllowingNull(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER);
                 if (nationalIdentificationNumber != null) {
-                    final ClientOtherInfo clientOtherInfoWithNationalIdentificationNumber = this.clientOtherInfoRepository.getByNationalIdentificationNumber(nationalIdentificationNumber);
+                    final ClientOtherInfo clientOtherInfoWithNationalIdentificationNumber = this.clientOtherInfoRepository
+                            .getByNationalIdentificationNumber(nationalIdentificationNumber);
                     if (clientOtherInfoWithNationalIdentificationNumber != null) {
                         throw new ClientOtherInfoNationalIdentificationNumberAlreadyPresentException(nationalIdentificationNumber);
                     }
@@ -142,10 +144,13 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
             this.fromApiJsonDeserializer.validateForUpdate(command.json(), clientOtherInfo.getClient().getLegalForm().intValue());
 
             if (LegalForm.fromInt(clientOtherInfo.getClient().getLegalForm().intValue()).isPerson()) {
-                if (command.isChangeInStringParameterNamed(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER, clientOtherInfo.getNationalIdentificationNumber())) {
-                    final String nationalIdentificationNumber = command.stringValueOfParameterNamedAllowingNull(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER);
+                if (command.isChangeInStringParameterNamed(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER,
+                        clientOtherInfo.getNationalIdentificationNumber())) {
+                    final String nationalIdentificationNumber = command
+                            .stringValueOfParameterNamedAllowingNull(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER);
                     if (nationalIdentificationNumber != null) {
-                        final ClientOtherInfo clientOtherInfoWithNationalIdentificationNumber = this.clientOtherInfoRepository.getByNationalIdentificationNumber(nationalIdentificationNumber);
+                        final ClientOtherInfo clientOtherInfoWithNationalIdentificationNumber = this.clientOtherInfoRepository
+                                .getByNationalIdentificationNumber(nationalIdentificationNumber);
                         if (clientOtherInfoWithNationalIdentificationNumber != null) {
                             throw new ClientOtherInfoNationalIdentificationNumberAlreadyPresentException(nationalIdentificationNumber);
                         }

@@ -130,7 +130,8 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
 
         final Integer numberOfChildren = command.integerValueOfParameterNamed(ClientApiConstants.numberOfChildren);
         final Integer numberOfDependents = command.integerValueOfParameterNamed(ClientApiConstants.numberOfDependents);
-        final String nationalIdentificationNumber = command.stringValueOfParameterNamedAllowingNull(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER);
+        final String nationalIdentificationNumber = command
+                .stringValueOfParameterNamedAllowingNull(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER);
         final String passportNumber = command.stringValueOfParameterNamed(ClientApiConstants.PASSPORT_NUMBER);
         final String bankAccountNumber = command.stringValueOfParameterNamed(ClientApiConstants.BANK_ACCOUNT_NUMBER);
         final String bankName = command.stringValueOfParameterNamed(ClientApiConstants.BANK_NAME);

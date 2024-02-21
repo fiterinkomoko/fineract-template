@@ -225,9 +225,18 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                 throw new PlatformDataIntegrityException("error.msg.loan.recommended.amount.cannot.be.greater.than.calculated.amount",
                         "Recommended amount cannot be greater than the calculated amount", calculatedAmount);
             }
+            if (recommendedAmount.compareTo(loan.getProposedPrincipal()) > 0) {
+                throw new PlatformDataIntegrityException("error.msg.loan.recommended.amount.cannot.be.greater.than.applied.amount",
+                        "Recommended amount cannot be greater than the Applied amount", loan.getProposedPrincipal());
+            }
 
         } else {
             loanDecision.setIdeaClient(true);
+
+            if (recommendedAmount.compareTo(loan.getProposedPrincipal()) > 0) {
+                throw new PlatformDataIntegrityException("error.msg.loan.recommended.amount.cannot.be.greater.than.applied.amount",
+                        "Recommended amount cannot be greater than the Applied amount", loan.getProposedPrincipal());
+            }
         }
 
         validateDueDiligenceBusinessRule(command, loan, loanDecision);
