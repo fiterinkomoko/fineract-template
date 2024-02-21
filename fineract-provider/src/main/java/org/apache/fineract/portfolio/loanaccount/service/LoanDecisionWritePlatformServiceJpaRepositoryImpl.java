@@ -19,8 +19,6 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
@@ -40,7 +38,6 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentData;
 import org.apache.fineract.infrastructure.documentmanagement.service.DocumentReadPlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.client.data.ClientOtherInfoData;
 import org.apache.fineract.portfolio.client.service.ClientOtherInfoReadPlatformService;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
@@ -183,7 +180,10 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
             final ClientOtherInfoData clientOtherInfoData = this.clientOtherInfoReadPlatformService.retrieveByClientId(clientId);
             final CodeValueData strata = clientOtherInfoData.getStrata();
             if (!strata.getName().equalsIgnoreCase("Refugee") && !isCrbVerificationRequired) {
-                throw new LoanDueDiligenceException("error.msg.required.crb.verification", "CRB Verification required");
+                throw new LoanDueDiligenceException("error.msg.required.crb.verification.if.strata.is.not.refugee",
+                        "CRB Verification required because client is not Refugee. " + " Please change client's Strata to Refugee. "
+                                + " If you want to ignore CRB Verification");
+
             }
         }
 
@@ -223,8 +223,6 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
         if (!isIdeaClient) {
             loanDecision.setIdeaClient(false);
             // check for cashflow and financial ratio. Idea Client does not have a cashflow/ balancesheet
-            final RoundingMode roundingMode = MoneyHelper.getRoundingMode();
-            final MathContext mc = new MathContext(8, roundingMode);
 
             LoanCashFlowReport cashFlowReport = this.loanReadPlatformService.retrieveCashFlowReport(loanId);
             if (CollectionUtils.isEmpty(cashFlowReport.getCashFlowProjectionDataList())) {
@@ -241,9 +239,10 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                 throw new PlatformDataIntegrityException("error.msg.loan.recommended.amount.cannot.be.greater.than.calculated.amount",
                         "Recommended amount cannot be greater than the calculated amount", calculatedAmount);
             }
-
+            validateRecommendedAmountShouldNotBeGreaterThanProposedAmount(loan.getProposedPrincipal(), recommendedAmount);
         } else {
             loanDecision.setIdeaClient(true);
+            validateRecommendedAmountShouldNotBeGreaterThanProposedAmount(loan.getProposedPrincipal(), recommendedAmount);
         }
 
         validateDueDiligenceBusinessRule(command, loan, loanDecision);
@@ -271,6 +270,14 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                 .withGroupId(loan.getGroupId()) //
                 .withLoanId(loanId) //
                 .withResourceIdAsString(savedObj.getId().toString()).build();
+    }
+
+    private static void validateRecommendedAmountShouldNotBeGreaterThanProposedAmount(BigDecimal proposedAmount,
+            BigDecimal recommendedAmount) {
+        if (recommendedAmount.compareTo(proposedAmount) > 0) {
+            throw new PlatformDataIntegrityException("error.msg.loan.recommended.amount.cannot.be.greater.than.applied.amount",
+                    "Recommended amount cannot be greater than the Applied amount", proposedAmount);
+        }
     }
 
     @Override
@@ -470,6 +477,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                             + PeriodFrequencyType.fromInt(termPeriodFrequencyEnum));
             this.noteRepository.save(note);
         }
+        validateRecommendedAmountShouldNotBeGreaterThanProposedAmount(loan.getProposedPrincipal(), recommendedAmount);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -554,6 +562,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                             + PeriodFrequencyType.fromInt(termPeriodFrequencyEnum));
             this.noteRepository.save(note);
         }
+        validateRecommendedAmountShouldNotBeGreaterThanProposedAmount(loan.getProposedPrincipal(), recommendedAmount);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -638,6 +647,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                             + " " + PeriodFrequencyType.fromInt(termPeriodFrequencyEnum));
             this.noteRepository.save(note);
         }
+        validateRecommendedAmountShouldNotBeGreaterThanProposedAmount(loan.getProposedPrincipal(), recommendedAmount);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -722,6 +732,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                             + " " + PeriodFrequencyType.fromInt(termPeriodFrequencyEnum));
             this.noteRepository.save(note);
         }
+        validateRecommendedAmountShouldNotBeGreaterThanProposedAmount(loan.getProposedPrincipal(), recommendedAmount);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -800,6 +811,7 @@ public class LoanDecisionWritePlatformServiceJpaRepositoryImpl implements LoanAp
                             + " " + PeriodFrequencyType.fromInt(termPeriodFrequencyEnum));
             this.noteRepository.save(note);
         }
+        validateRecommendedAmountShouldNotBeGreaterThanProposedAmount(loan.getProposedPrincipal(), recommendedAmount);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //

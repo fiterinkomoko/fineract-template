@@ -127,9 +127,11 @@ public final class ClientOtherInfoData implements Serializable {
 
     public static ClientOtherInfoData instanceEntity(final Long id, final Long clientId, String coSignors, String guarantor,
             CodeValueData strata, String businessLocation, Long taxIdentificationNumber, Long incomeGeneratingActivity,
-            BigDecimal incomeGeneratingActivityMonthlyAmount, String telephoneNumber, String bankAccountNumber, String bankName, CodeValueData yearArrivedInHostCountry) {
+            BigDecimal incomeGeneratingActivityMonthlyAmount, String telephoneNumber, String bankAccountNumber, String bankName,
+            CodeValueData yearArrivedInHostCountry) {
         return new ClientOtherInfoData(id, clientId, coSignors, guarantor, strata, businessLocation, taxIdentificationNumber,
-                incomeGeneratingActivity, incomeGeneratingActivityMonthlyAmount, telephoneNumber, bankAccountNumber, bankName, yearArrivedInHostCountry);
+                incomeGeneratingActivity, incomeGeneratingActivityMonthlyAmount, telephoneNumber, bankAccountNumber, bankName,
+                yearArrivedInHostCountry);
     }
 
     public CodeValueData getStrata() {
