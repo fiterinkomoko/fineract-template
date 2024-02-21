@@ -88,6 +88,13 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
                 strata = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(ClientApiConstants.STRATA, strataId);
             }
 
+            CodeValue yearArrivedInHostCountry = null;
+                final Long yearArrivedInHostCountryId = command.longValueOfParameterNamed(ClientApiConstants.yearArrivedInHostCountry);
+                if (yearArrivedInHostCountryId != null) {
+                    yearArrivedInHostCountry = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
+                            ClientApiConstants.YEAR_ARRIVED_IN_HOST_COUNTRY, yearArrivedInHostCountryId);
+                }
+
             if (LegalForm.fromInt(client.getLegalForm().intValue()).isPerson()) {
                 final String nationalIdentificationNumber = command.stringValueOfParameterNamedAllowingNull(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER);
                 if (nationalIdentificationNumber != null) {
@@ -103,15 +110,9 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
                     nationality = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection("COUNTRY", nationalityId);
                 }
 
-                CodeValue yearArrivedInHostCountry = null;
-                final Long yearArrivedInHostCountryId = command.longValueOfParameterNamed(ClientApiConstants.yearArrivedInHostCountry);
-                if (yearArrivedInHostCountryId != null) {
-                    yearArrivedInHostCountry = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
-                            ClientApiConstants.YEAR_ARRIVED_IN_HOST_COUNTRY, yearArrivedInHostCountryId);
-                }
                 otherInfo = ClientOtherInfo.createNew(command, client, strata, nationality, yearArrivedInHostCountry);
             } else if (LegalForm.fromInt(client.getLegalForm().intValue()).isEntity()) {
-                otherInfo = ClientOtherInfo.createNewForEntity(command, client, strata);
+                otherInfo = ClientOtherInfo.createNewForEntity(command, client, strata, yearArrivedInHostCountry);
             }
 
             ClientOtherInfo info = clientOtherInfoRepository.saveAndFlush(otherInfo);
@@ -165,6 +166,16 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
                 }
                 clientOtherInfo.setStrata(strataCodeValue);
             }
+            if (changes.containsKey(ClientApiConstants.yearArrivedInHostCountry)) {
+                final Long yearArrivedInHostCountryId = command.longValueOfParameterNamed(ClientApiConstants.yearArrivedInHostCountry);
+                CodeValue yearArrivedInHostCountryCodeValue = null;
+                if (yearArrivedInHostCountryId != null) {
+
+                    yearArrivedInHostCountryCodeValue = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
+                            ClientApiConstants.YEAR_ARRIVED_IN_HOST_COUNTRY, yearArrivedInHostCountryId);
+                }
+                clientOtherInfo.setYearArrivedInHostCountry(yearArrivedInHostCountryCodeValue);
+            }
             if (LegalForm.fromInt(clientOtherInfo.getClient().getLegalForm().intValue()).isPerson()) {
                 if (changes.containsKey(ClientApiConstants.nationalityIdParamName)) {
                     final Long nationalityId = command.longValueOfParameterNamed(ClientApiConstants.nationalityIdParamName);
@@ -175,17 +186,6 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
                                 nationalityId);
                     }
                     clientOtherInfo.setNationality(nationalityCodeValue);
-                }
-
-                if (changes.containsKey(ClientApiConstants.yearArrivedInHostCountry)) {
-                    final Long yearArrivedInHostCountryId = command.longValueOfParameterNamed(ClientApiConstants.yearArrivedInHostCountry);
-                    CodeValue yearArrivedInHostCountryCodeValue = null;
-                    if (yearArrivedInHostCountryId != null) {
-
-                        yearArrivedInHostCountryCodeValue = this.codeValueRepository.findOneByCodeNameAndIdWithNotFoundDetection(
-                                ClientApiConstants.YEAR_ARRIVED_IN_HOST_COUNTRY, yearArrivedInHostCountryId);
-                    }
-                    clientOtherInfo.setYearArrivedInHostCountry(yearArrivedInHostCountryCodeValue);
                 }
             }
             if (!changes.isEmpty()) {
@@ -209,6 +209,10 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
     }
 
     private void handleDataIntegrityIssues(final JsonCommand command, final Throwable realCause, final Exception dve) {
+        if (realCause.getMessage().contains("co_signors_constraint")) {
+            String coSignorsName = command.stringValueOfParameterNamed(ClientApiConstants.coSignors);
+            throw new PlatformDataIntegrityException("error.msg.client.other.info.duplicate.coSignorsName", "Client with Co-Signors Name `" + coSignorsName + "` already exists", "coSignorsName", coSignorsName);
+        }
         LOG.error("Error occured.", dve);
         throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
     }

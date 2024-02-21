@@ -349,6 +349,11 @@ public final class Group extends AbstractPersistableCustom {
             this.submittedOnDate = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.submittedOnDateParamName);
         }
 
+        if (command.isChangeInLongParameterNamed(GroupingTypesApiConstants.representativeIdParamName, representativeId())) {
+            final Long newValue = command.longValueOfParameterNamed(GroupingTypesApiConstants.representativeIdParamName);
+            actualChanges.put(GroupingTypesApiConstants.representativeIdParamName, newValue);
+        }
+
         return actualChanges;
     }
 
@@ -776,5 +781,13 @@ public final class Group extends AbstractPersistableCustom {
 
     public void setRepresentative(Client representative) {
         this.representative = representative;
+    }
+
+    private Long representativeId() {
+        Long representativeId = null;
+        if (this.representative != null) {
+            representativeId = this.representative.getId();
+        }
+        return representativeId;
     }
 }

@@ -141,8 +141,10 @@ public class ClientOtherInfoReadPlatformServiceImpl implements ClientOtherInfoRe
             return "co.id AS id, co.client_id AS clientId, co.strata_cv_id AS strataId, co.co_signors AS coSignorsName, cv.code_value as strataName, "
                     + " co.guarantor AS guarantor, co.tax_identification_number as taxIdentificationNumber, co.business_location as businessLocation,"
                     + " co.income_generating_activity AS incomeGeneratingActivity, co.income_generating_activity_monthly_amount as incomeGeneratingActivityMonthlyAmount,"
-                    + " co.telephone_no as telephoneNo, co.bank_account_number as bankAccountNumber, co.bank_name as bankName "
-                    + " FROM m_client_other_info co" + " left join m_code_value cv on co.strata_cv_id=cv.id";
+                    + " co.telephone_no as telephoneNo, co.bank_account_number as bankAccountNumber, co.bank_name as bankName, "
+                    + " co.year_arrived_in_country_cv_id AS yearArrivedInHostCountryId, cy.code_value AS yearArrivedInHostCountryName"
+                    + " FROM m_client_other_info co"
+                    + " left join m_code_value cv on co.strata_cv_id=cv.id left join m_code_value cy on co.year_arrived_in_country_cv_id=cy.id";
         }
 
         @Override
@@ -153,6 +155,9 @@ public class ClientOtherInfoReadPlatformServiceImpl implements ClientOtherInfoRe
             final long strataId = rs.getLong("strataId");
             final String strataName = rs.getString("strataName");
             final CodeValueData strata = CodeValueData.instance(strataId, strataName);
+            final long yearArrivedInHostCountryId = rs.getLong("yearArrivedInHostCountryId");
+            final String yearArrivedInHostCountryName = rs.getString("yearArrivedInHostCountryName");
+            final CodeValueData yearArrivedInHostCountry = CodeValueData.instance(yearArrivedInHostCountryId, yearArrivedInHostCountryName);
 
             final String coSignors = rs.getString("coSignorsName");
             final String guarantor = rs.getString("guarantor");
@@ -165,7 +170,7 @@ public class ClientOtherInfoReadPlatformServiceImpl implements ClientOtherInfoRe
             final String bankName = rs.getString("bankName");
 
             return ClientOtherInfoData.instanceEntity(id, clientId, coSignors, guarantor, strata, businessLocation, taxIdentificationNumber,
-                    incomeGeneratingActivity, incomeGeneratingActivityMonthlyAmount, telephoneNo, bankAccountNumber, bankName);
+                    incomeGeneratingActivity, incomeGeneratingActivityMonthlyAmount, telephoneNo, bankAccountNumber, bankName, yearArrivedInHostCountry);
 
         }
     }
