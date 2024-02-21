@@ -110,7 +110,7 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
 
     public ClientOtherInfo(Client client, CodeValue strata, final String businessLocation, final Long taxIdentificationNumber,
             final Long incomeGeneratingActivity, final BigDecimal incomeGeneratingActivityMonthlyAmount, final String telephoneNo,
-            final String coSignors, final String guarantor, final String bankAccountNumber, final String bankName) {
+            final String coSignors, final String guarantor, final String bankAccountNumber, final String bankName, final  CodeValue yearArrivedInHostCountry) {
         this.client = client;
         this.strata = strata;
         this.businessLocation = businessLocation;
@@ -122,6 +122,7 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
         this.guarantor = guarantor;
         this.bankAccountNumber = bankAccountNumber;
         this.bankName = bankName;
+        this.yearArrivedInHostCountry = yearArrivedInHostCountry;
 
     }
 
@@ -130,7 +131,7 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
 
         final Integer numberOfChildren = command.integerValueOfParameterNamed(ClientApiConstants.numberOfChildren);
         final Integer numberOfDependents = command.integerValueOfParameterNamed(ClientApiConstants.numberOfDependents);
-        final String nationalIdentificationNumber = command.stringValueOfParameterNamed(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER);
+        final String nationalIdentificationNumber = command.stringValueOfParameterNamedAllowingNull(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER);
         final String passportNumber = command.stringValueOfParameterNamed(ClientApiConstants.PASSPORT_NUMBER);
         final String bankAccountNumber = command.stringValueOfParameterNamed(ClientApiConstants.BANK_ACCOUNT_NUMBER);
         final String bankName = command.stringValueOfParameterNamed(ClientApiConstants.BANK_NAME);
@@ -139,7 +140,7 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
                 nationalIdentificationNumber, passportNumber, bankAccountNumber, bankName, telephoneNo);
     }
 
-    public static ClientOtherInfo createNewForEntity(JsonCommand command, Client client, final CodeValue strata) {
+    public static ClientOtherInfo createNewForEntity(JsonCommand command, Client client, final CodeValue strata, final CodeValue yearArrivedInHostCountry) {
 
         final String coSignors = command.stringValueOfParameterNamedAllowingNull(ClientApiConstants.coSignors);
         final String guarantor = command.stringValueOfParameterNamedAllowingNull(ClientApiConstants.guarantor);
@@ -153,7 +154,7 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
         final String telephoneNo = command.stringValueOfParameterNamedAllowingNull(ClientApiConstants.telephoneNoParamName);
 
         return new ClientOtherInfo(client, strata, businessLocation, taxIdentificationNumber, incomeGeneratingActivity,
-                incomeGeneratingActivityMonthlyAmount, telephoneNo, coSignors, guarantor, bankAccountNumber, bankName);
+                incomeGeneratingActivityMonthlyAmount, telephoneNo, coSignors, guarantor, bankAccountNumber, bankName, yearArrivedInHostCountry);
     }
 
     public Map<String, Object> update(final JsonCommand command, final Integer legalFormId) {
@@ -163,6 +164,11 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
         if (command.isChangeInLongParameterNamed(ClientApiConstants.strataIdParamName, strataId())) {
             final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.strataIdParamName);
             actualChanges.put(ClientApiConstants.strataIdParamName, newValue);
+        }
+
+        if (command.isChangeInLongParameterNamed(ClientApiConstants.yearArrivedInHostCountry, yearArrivedInHostCountryId())) {
+            final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.yearArrivedInHostCountry);
+            actualChanges.put(ClientApiConstants.yearArrivedInHostCountry, newValue);
         }
 
         if (LegalForm.fromInt(legalFormId).isPerson()) {
@@ -183,13 +189,9 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
                 this.numberOfDependents = newValue;
             }
 
-            if (command.isChangeInLongParameterNamed(ClientApiConstants.yearArrivedInHostCountry, yearArrivedInHostCountryId())) {
-                final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.yearArrivedInHostCountry);
-                actualChanges.put(ClientApiConstants.yearArrivedInHostCountry, newValue);
-            }
             if (command.isChangeInStringParameterNamed(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER,
                     this.nationalIdentificationNumber)) {
-                final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER);
+                final String newValue = command.stringValueOfParameterNamedAllowingNull(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER);
                 actualChanges.put(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER, newValue);
                 this.nationalIdentificationNumber = newValue;
             }
@@ -320,5 +322,9 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
 
     public String getBankName() {
         return bankName;
+    }
+
+    public String getNationalIdentificationNumber() {
+        return nationalIdentificationNumber;
     }
 }

@@ -173,8 +173,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             newGroup.setRepresentative(representative);
 
             boolean rollbackTransaction = false;
+            this.groupRepository.saveAndFlush(newGroup);
             if (newGroup.isActive()) {
-                this.groupRepository.saveAndFlush(newGroup);
                 // validate Group creation rules for Group
                 if (newGroup.isGroup()) {
                     validateGroupRulesBeforeActivation(newGroup);
@@ -406,6 +406,16 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     newStaff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(newValue, groupHierarchy);
                 }
                 groupForUpdate.updateStaff(newStaff);
+            }
+
+            if (actualChanges.containsKey(GroupingTypesApiConstants.representativeIdParamName)) {
+                final Long newValue = command.longValueOfParameterNamed(GroupingTypesApiConstants.representativeIdParamName);
+
+                Client newClient = null;
+                if (newValue != null) {
+                    newClient = this.clientRepositoryWrapper.findOneWithNotFoundDetection(newValue);
+                }
+                groupForUpdate.setRepresentative(newClient);
             }
 
             final GroupLevel groupLevel = this.groupLevelRepository.findById(groupForUpdate.getGroupLevel().getId()).orElse(null);
