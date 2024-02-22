@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.client.service;
 
+import java.util.List;
 import java.util.Map;
 import javax.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
@@ -99,9 +100,9 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
                 final String nationalIdentificationNumber = command
                         .stringValueOfParameterNamedAllowingNull(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER);
                 if (nationalIdentificationNumber != null) {
-                    final ClientOtherInfo clientOtherInfoWithNationalIdentificationNumber = this.clientOtherInfoRepository
-                            .getByNationalIdentificationNumber(nationalIdentificationNumber);
-                    if (clientOtherInfoWithNationalIdentificationNumber != null) {
+                    final List<ClientOtherInfo> clientOtherInfoWithNationalIdentificationNumber = this.clientOtherInfoRepository
+                            .findByNationalIdentificationNumber(nationalIdentificationNumber);
+                    if (clientOtherInfoWithNationalIdentificationNumber.size() > 0) {
                         throw new ClientOtherInfoNationalIdentificationNumberAlreadyPresentException(nationalIdentificationNumber);
                     }
                 }
@@ -150,9 +151,9 @@ public class ClientOtherInfoWritePlatformServiceImpl implements ClientOtherInfoW
                     final String nationalIdentificationNumber = command
                             .stringValueOfParameterNamedAllowingNull(ClientApiConstants.NATIONAL_IDENTIFICATION_NUMBER);
                     if (nationalIdentificationNumber != null) {
-                        final ClientOtherInfo clientOtherInfoWithNationalIdentificationNumber = this.clientOtherInfoRepository
-                                .getByNationalIdentificationNumber(nationalIdentificationNumber);
-                        if (clientOtherInfoWithNationalIdentificationNumber != null) {
+                        final List<ClientOtherInfo> clientOtherInfoWithNationalIdentificationNumber = this.clientOtherInfoRepository
+                                .findByNationalIdentificationNumber(nationalIdentificationNumber);
+                        if (clientOtherInfoWithNationalIdentificationNumber.size() > 0) {
                             throw new ClientOtherInfoNationalIdentificationNumberAlreadyPresentException(nationalIdentificationNumber);
                         }
                     }
