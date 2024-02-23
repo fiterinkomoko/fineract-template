@@ -20,10 +20,11 @@ package org.apache.fineract.portfolio.client.domain;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import java.util.List;
 
 public interface ClientOtherInfoRepository extends JpaRepository<ClientOtherInfo, Long>, JpaSpecificationExecutor<ClientOtherInfo> {
 
     ClientOtherInfo getByClientId(Long clientId);
 
-    ClientOtherInfo getByNationalIdentificationNumber(String nationalIdentificationNumber);
+    List<ClientOtherInfo> findByNationalIdentificationNumber(String nationalIdentificationNumber);
 }
