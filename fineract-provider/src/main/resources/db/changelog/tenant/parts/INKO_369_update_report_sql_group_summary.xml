@@ -27,13 +27,13 @@
             <where>report_name = 'GroupSummaryCounts'</where>
         </update>
     </changeSet>
-    <changeSet author="faheem@fiter.io" id="INKO_369_update_group_hierarchies" >
+    <changeSet author="faheem@fiter.io" id="INKO_369_update_group_hierarchies2" context="mysql">
     <comment>update group hierarchies</comment>
         <sql splitStatements="true" stripComments="true">
-        	update m_group set hierarchy = CONCAT('.',id,'.') where parent_id is null;
-		update m_group mg
-join m_group parent on parent.id = mg.parent_id 
-set mg.`hierarchy` = CONCAT(parent.`hierarchy` ,mg.id,'.') 
+            update m_group set hierarchy = CONCAT('.',id,'.') where parent_id is null;
+        update m_group mg
+join m_group parent on parent.id = mg.parent_id
+set mg.`hierarchy` = CONCAT(parent.`hierarchy` ,mg.id,'.')
 where mg.parent_id is not null;
         </sql>
     </changeSet>

@@ -26,7 +26,7 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourc
 public class ClientOtherInfoNationalIdentificationNumberAlreadyPresentException extends AbstractPlatformResourceNotFoundException {
 
     public ClientOtherInfoNationalIdentificationNumberAlreadyPresentException(final String nationalIdentificationNumber) {
-        super("error.msg.client.other.info.duplicate.national_identification_number",
+        super("error.msg.client.other.info.duplicate.nationalIdentificationNumber",
                 "Client with National Identification Number `" + nationalIdentificationNumber + "` already exists",
                 nationalIdentificationNumber);
     }
