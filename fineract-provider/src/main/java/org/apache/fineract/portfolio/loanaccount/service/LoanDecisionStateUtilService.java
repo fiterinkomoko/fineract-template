@@ -264,8 +264,8 @@ public class LoanDecisionStateUtilService {
     @NotNull
     public Boolean isLoanAccountInICReview(LoanDecisionState loanDecisionState) {
         switch (loanDecisionState) {
-            case COLLATERAL_REVIEW: // For the loan to have collateral review, it's next stage is IC Review Level One
-                                    // Making COLLATERAL_REVIEW necessary to this action
+            case DUE_DILIGENCE: // For the loan to have due diligence review, it's next stage is IC Review Level One
+                                    // Making DUE_DILIGENCE necessary to this action
             case IC_REVIEW_LEVEL_ONE:
             case IC_REVIEW_LEVEL_TWO:
             case IC_REVIEW_LEVEL_THREE:
