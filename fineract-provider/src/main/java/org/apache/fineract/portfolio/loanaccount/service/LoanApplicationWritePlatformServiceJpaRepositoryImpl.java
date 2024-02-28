@@ -1748,7 +1748,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             // intercept the reject module and transition the loan to other stages
             switch (LoanDecisionState.fromInt(loan.getLoanDecisionState())) {
-                case COLLATERAL_REVIEW:
+                case DUE_DILIGENCE:
                     changes = rejectLoanAccountForIcReviewLevelOne(command, currentUser, loan, changes);
                 break;
                 case IC_REVIEW_LEVEL_ONE:

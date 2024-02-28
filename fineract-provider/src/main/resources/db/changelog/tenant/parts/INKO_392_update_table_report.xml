@@ -1,0 +1,65 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.6.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet author="bosco@fiter.io" id="Update_Collateral_report_INKO-392_6" context="mysql">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="stretchy_report"/>
+            <sqlCheck expectedResult="1">
+                select count(1) from stretchy_report
+                where report_name = 'Collateral';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="&#10;select&#10;o.name as Office,&#10;c.external_id as UID,&#10;concat(c.firstname, ' ', c.lastname) as 'Customer Name',&#10;l.account_no as 'Loan Id Number',&#10;mpl.name as 'Product Name',&#10;l.principal_amount as 'Loan Amount',&#10;cvs.code_value as Strata,&#10;mcm.quality as 'Type of Collateral',&#10;mcm.unit_type as 'Collateral Coverage',&#10;'' as OMV,&#10;'' as FSV,&#10;cvp.code_value as Province,&#10;cvd.code_value as District,&#10;cvsec.code_value as Sector,&#10;cvcell.code_value as Cell,&#10;cvv.code_value as Village&#10;from&#10;m_office o&#10;join m_office ounder on ounder.hierarchy like concat(o.hierarchy, '%') and ounder.hierarchy like concat('${currentUserHierarchy}', '%')&#10;join m_client c on c.office_id = ounder.id    &#10;join m_loan l on l.client_id = c.id&#10;join m_product_loan mpl on l.product_id = mpl.id&#10;left join m_client_other_info coi on coi.client_id = c.id&#10;left join m_code_value cvs on cvs.id = coi.strata_cv_id&#10;left join m_loan_collateral_management lcm on lcm.loan_id = l.id&#10;left join m_client_collateral_management mccm on lcm.id = mccm.collateral_id&#10;left join m_collateral_management mcm on mccm.collateral_id = mcm.id&#10;left join m_client_collateral_management_additional_details ccma on ccma.client_collateral_id = lcm.client_collateral_id&#10;left join m_code_value cvp on cvp.id = ccma.province_cv_id&#10;left join m_code_value cvd on cvd.id = ccma.district_cv_id&#10;left join m_code_value cvsec on cvsec.id = ccma.sector_cv_id&#10;left join m_code_value cvcell on cvcell.id = ccma.cell_cv_id&#10;left join m_code_value cvv on cvv.id = ccma.village_cv_id&#10;where&#10;o.id = ${officeId}&#10;and (l.product_id = '${loanProductId}' or '-1' = '${loanProductId}')&#10;and (l.fund_id = '${fundId}' or '-1' = '${fundId}')&#10;and (l.loan_officer_id = '${loanOfficerId}' or '-1' = '${loanOfficerId}')&#10;and (ccma.province_cv_id = '${provinceId}' or '-1' = '${provinceId}')&#10;GROUP BY l.account_no&#10;"/>
+            <where>report_name = 'Collateral'</where>
+        </update>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="Update_Secured_and_Unsecured_loan_report_INKO-393_4" context="mysql">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="stretchy_report"/>
+            <sqlCheck expectedResult="1">
+                select count(1) from stretchy_report
+                where report_name = 'Secured and Unsecured loan';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="&#10;select o.name  as 'Office',&#10;cvl.code_value  as 'Location',&#10;concat(c.firstname, ' ', c.lastname) as 'Customer Name',&#10;c.external_id  as 'Client UID',&#10;l.account_no  as 'Loan ID Number',&#10;mpl.name  as 'Product Name',&#10;l.principal_disbursed_derived  as 'Loan Amount',&#10;l.principal_disbursed_derived  as 'Disbursed loan amount',&#10;if(lc.id is not null, 'Yes', 'No')   as 'Collateral',&#10;cdg.code_value  as 'Gender',&#10;cvc.code_value  as 'Cohort',&#10;l.loan_counter  as 'Cycle',&#10;cvn.code_value  as 'Nationality',&#10;l.total_outstanding_derived  as 'Outstanding Loan Amount',&#10;cvs.code_value   as 'Strata'&#10;from m_office o&#10;join m_office ounder on ounder.hierarchy like concat(o.hierarchy, '%') and&#10;ounder.hierarchy like concat('${currentUserHierarchy}', '%')&#10;join m_client c on c.office_id = ounder.id&#10;join m_loan l on l.client_id = c.id&#10;join m_product_loan mpl on l.product_id = mpl.id&#10;left join m_currency cur on cur.code = l.currency_code&#10;left join m_client_other_info coi on coi.client_id = c.id&#10;left join m_code_value cdg on cdg.id = c.gender_cv_id&#10;left join m_client_recruitment_survey crs on crs.client_id = c.id&#10;left join m_code_value cvc on cvc.id = crs.cohort_cv_id&#10;left join m_code_value cvn on cvn.id = coi.nationality_cv_id&#10;left join m_code_value cvl on cvl.id = crs.survey_location_cv_id&#10;left join m_code_value cvs on cvs.id = coi.strata_cv_id&#10;left join m_loan_collateral_management lc on lc.loan_id = l.id&#10;where o.id = ${officeId}&#10;and (l.product_id = '${loanProductId}' or '-1' = '${loanProductId}')&#10;and (l.loan_officer_id = '${loanOfficerId}' or '-1' = '${loanOfficerId}')&#10;and (l.currency_code = '${currencyId}' or '-1' = '${currencyId}')&#10;and date(l.disbursedon_date) between date('${startDate}') and date('${endDate}')&#10;"/>
+            <where>report_name = 'Secured and Unsecured loan'</where>
+        </update>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_loan_product_parameter_filter_on_Secured_and_Unsecured_loan_report" context="mysql">
+        <insert tableName="stretchy_report_parameter">
+            <column name="report_id" valueComputed="(select sr.id from stretchy_report sr where sr.report_name ='Secured and Unsecured loan')"/>
+            <column name="parameter_id" valueComputed="(select sp.id from stretchy_parameter sp where sp.parameter_name = 'loanProductIdSelectAllWithoutCurrency')"/>
+            <column name="report_parameter_name" value="loanProductId"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
