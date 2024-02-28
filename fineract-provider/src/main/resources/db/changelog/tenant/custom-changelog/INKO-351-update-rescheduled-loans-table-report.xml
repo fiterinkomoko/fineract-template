@@ -24,76 +24,76 @@
     <changeSet author="tabrez@fiter.io" id="INKO-351-update-rescheduled-loans-table-report">
         <update tableName="stretchy_report">
             <column name="report_sql" value="SELECT
-	concat(repeat('..', ((LENGTH(ounder.hierarchy) - LENGTH(REPLACE(ounder.hierarchy, '.', '')) - 1))), ounder.name) as &quot;Office/Branch&quot;,
-	coalesce (cur.display_symbol, ml.currency_code) as &quot;Currency&quot;,
-	c.account_no as &quot;Client Account No.&quot;,
-	c.display_name AS &quot;Client Name&quot;,
-	ml.account_no AS &quot;Loan Account No.&quot;,
-	mpl.name AS &quot;Product Name&quot;,
-	ml.disbursedon_date AS &quot;Disbursed Date&quot;,
-	lt.transaction_date AS &quot;Written Off date&quot;,
-	ml.principal_amount as &quot;Loan Amount&quot;,
-	coalesce (lt.principal_portion_derived, 0) AS &quot;Rescheduled Principal&quot;,
-	coalesce (lt.interest_portion_derived, 0) AS &quot;Rescheduled Interest&quot;,
-	coalesce (lt.fee_charges_portion_derived, 0) AS &quot;Rescheduled Fees&quot;,
-	coalesce (lt.penalty_charges_portion_derived, 0) AS &quot;Rescheduled Penalties&quot;,
-	n.note AS &quot;Reason For Rescheduling&quot;,
-	coalesce (ms.display_name, '-') AS &quot;Loan Officer Name&quot;,
-	extract(year from now()) - extract(year from c.date_of_birth) as &quot;Age&quot;,
-	c.external_id as &quot;Client UID&quot;,
-	cdg.code_value as &quot;Gender&quot;,
-	cvc.code_value as &quot;Cohort&quot;,
-	ml.loan_counter as &quot;Cycle&quot;,
-	cvn.code_value as &quot;Nationality&quot;,
-	cvl.code_value as &quot;Location&quot;,
-	cvs.code_value AS &quot;Strata&quot;,
-	ml.loan_status_id AS &quot;Loan Status&quot;
+    concat(repeat('..', ((LENGTH(ounder.hierarchy) - LENGTH(REPLACE(ounder.hierarchy, '.', '')) - 1))), ounder.name) as &quot;Office/Branch&quot;,
+    coalesce (cur.display_symbol, ml.currency_code) as &quot;Currency&quot;,
+    c.account_no as &quot;Client Account No.&quot;,
+    c.display_name AS &quot;Client Name&quot;,
+    ml.account_no AS &quot;Loan Account No.&quot;,
+    mpl.name AS &quot;Product Name&quot;,
+    ml.disbursedon_date AS &quot;Disbursed Date&quot;,
+    lt.transaction_date AS &quot;Written Off date&quot;,
+    ml.principal_amount as &quot;Loan Amount&quot;,
+    coalesce (lt.principal_portion_derived, 0) AS &quot;Rescheduled Principal&quot;,
+    coalesce (lt.interest_portion_derived, 0) AS &quot;Rescheduled Interest&quot;,
+    coalesce (lt.fee_charges_portion_derived, 0) AS &quot;Rescheduled Fees&quot;,
+    coalesce (lt.penalty_charges_portion_derived, 0) AS &quot;Rescheduled Penalties&quot;,
+    n.note AS &quot;Reason For Rescheduling&quot;,
+    coalesce (ms.display_name, '-') AS &quot;Loan Officer Name&quot;,
+    extract(year from now()) - extract(year from c.date_of_birth) as &quot;Age&quot;,
+    c.external_id as &quot;Client UID&quot;,
+    cdg.code_value as &quot;Gender&quot;,
+    cvc.code_value as &quot;Cohort&quot;,
+    ml.loan_counter as &quot;Cycle&quot;,
+    cvn.code_value as &quot;Nationality&quot;,
+    cvl.code_value as &quot;Location&quot;,
+    cvs.code_value AS &quot;Strata&quot;,
+    ml.loan_status_id AS &quot;Loan Status&quot;
 FROM
-	m_office o
+    m_office o
 JOIN m_office ounder ON
-	ounder.hierarchy like concat(o.hierarchy, '%')
-	AND ounder.hierarchy like CONCAT('${currentUserHierarchy}', '%')
+    ounder.hierarchy like concat(o.hierarchy, '%')
+    AND ounder.hierarchy like CONCAT('${currentUserHierarchy}', '%')
 JOIN m_client c ON
-	c.office_id = ounder.id
+    c.office_id = ounder.id
 JOIN m_loan ml ON
-	ml.client_id = c.id
+    ml.client_id = c.id
 JOIN m_product_loan mpl ON
-	mpl.id = ml.product_id
+    mpl.id = ml.product_id
 JOIN m_loan_transaction lt ON
-	lt.loan_id = ml.id
+    lt.loan_id = ml.id
 JOIN (SELECT MAX(mlrr.id) AS id, mlrr.loan_id FROM m_loan_reschedule_request mlrr WHERE mlrr.status_enum = 200 GROUP BY mlrr.loan_id) join_mlrr ON
-	join_mlrr.loan_id = ml.id
+    join_mlrr.loan_id = ml.id
 LEFT JOIN m_staff ms ON
-	ms.id = ml.loan_officer_id
+    ms.id = ml.loan_officer_id
 LEFT JOIN m_note n ON
-	n.loan_transaction_id = lt.id
+    n.loan_transaction_id = lt.id
 LEFT JOIN m_currency cur on
-	cur.code = ml.currency_code
+    cur.code = ml.currency_code
 left join m_client_other_info coi on
-	coi.client_id = c.id
+    coi.client_id = c.id
 left join m_code_value cdg on
-	cdg.id = c.gender_cv_id
+    cdg.id = c.gender_cv_id
 left join m_client_recruitment_survey crs on
-	crs.client_id = c.id
+    crs.client_id = c.id
 left join m_code_value cvc on
-	cvc.id = crs.cohort_cv_id
+    cvc.id = crs.cohort_cv_id
 left join m_code_value cvn on
-	cvn.id = coi.nationality_cv_id
+    cvn.id = coi.nationality_cv_id
 left join m_code_value cvl on
-	cvl.id = crs.survey_location_cv_id
+    cvl.id = crs.survey_location_cv_id
 left join m_code_value cvs on
-	cvs.id = coi.strata_cv_id
+    cvs.id = coi.strata_cv_id
 WHERE lt.is_reversed is false
-	AND o.id = ${officeId}
-	AND (mpl.id = ${loanProductId}
-		OR ${loanProductId} =-1)
-	AND lt.transaction_date BETWEEN '${startDate}' AND '${endDate}'
-	AND (ml.currency_code = '${currencyId}'
-		or '-1' = '${currencyId}')
+    AND o.id = ${officeId}
+    AND (mpl.id = ${loanProductId}
+        OR ${loanProductId} =-1)
+    AND lt.transaction_date BETWEEN '${startDate}' AND '${endDate}'
+    AND (ml.currency_code = '${currencyId}'
+        or '-1' = '${currencyId}')
 ORDER BY
-	ounder.hierarchy,
-	coalesce (cur.display_symbol, ml.currency_code),
-	ml.account_no" />
+    ounder.hierarchy,
+    coalesce (cur.display_symbol, ml.currency_code),
+    ml.account_no" />
             <where>report_name='Rescheduled Loans'</where>
         </update>
     </changeSet>

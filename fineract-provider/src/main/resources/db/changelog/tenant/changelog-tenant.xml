@@ -127,5 +127,6 @@
     <include file="parts/INKO-288-add_job_fetch_kiva_metadata.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO-356-crb-verification-flag.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO_369_update_report_sql_group_summary.xml" relativeToChangelogFile="true" />
+    <include file="parts/INKO_392_update_table_report.xml" relativeToChangelogFile="true" />
     <includeAll path="custom-changelog" relativeToChangelogFile="true"/>
 </databaseChangeLog>
