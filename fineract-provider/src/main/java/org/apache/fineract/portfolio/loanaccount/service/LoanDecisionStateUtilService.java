@@ -82,12 +82,11 @@ public class LoanDecisionStateUtilService {
             }
             if (!LoanDecisionState.fromInt(loan.getLoanDecisionState()).isPrepareAndSignContract()) {
                 if (loan.getLoanType().equals(AccountType.GLIM.getValue())) {
-                    throw new GeneralPlatformDomainRuleException(
-                            "error.msg.glim.loan.approval.state.invalid",
+                    throw new GeneralPlatformDomainRuleException("error.msg.glim.loan.approval.state.invalid",
                             "Loan Account cannot be approved because it's Decision state is invalid. Expected "
                                     + LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue() + " but found " + loan.getLoanDecisionState(),
                             loan.getAccountNumber());
-                } else{
+                } else {
                     throw new GeneralPlatformDomainRuleException(
                             "error.msg.loan.approval.is.terminated.expected.state.is.prepare.and.sign.contract.but.found.different",
                             "Loan Account can't be approved because it's Decision state is invalid. Expected "
@@ -265,7 +264,7 @@ public class LoanDecisionStateUtilService {
     public Boolean isLoanAccountInICReview(LoanDecisionState loanDecisionState) {
         switch (loanDecisionState) {
             case DUE_DILIGENCE: // For the loan to have due diligence review, it's next stage is IC Review Level One
-                                    // Making DUE_DILIGENCE necessary to this action
+                                // Making DUE_DILIGENCE necessary to this action
             case IC_REVIEW_LEVEL_ONE:
             case IC_REVIEW_LEVEL_TWO:
             case IC_REVIEW_LEVEL_THREE:
