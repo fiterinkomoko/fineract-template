@@ -35,6 +35,7 @@ import okhttp3.Response;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.portfolio.client.domain.ClientOtherInfo;
 import org.apache.fineract.portfolio.client.domain.ClientOtherInfoRepository;
+import org.apache.fineract.portfolio.client.exception.ClientOtherInfoNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementRequestData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanDisbursementRequestException;
@@ -86,11 +87,11 @@ public class DisbursementRequestServiceImpl implements DisbursementRequestServic
                 return accessToken;
             } else {
                 LOG.error("Login to inkomoko Integration has failed:" + resObject);
-                throw new LoanDisbursementRequestException("Login to inkomoko Integration has failed", "loan", resObject);
+                throw new LoanDisbursementRequestException("Login to inkomoko Integration has failed", "integration.disbursementRequest.loginFailed", resObject);
             }
         } catch (Exception e) {
             LOG.error("Login to inkomoko Integration has failed:" + e);
-            throw new LoanDisbursementRequestException("Login to inkomoko Integration has failed", "loan", e);
+            throw new LoanDisbursementRequestException("Login to inkomoko Integration has failed", "integration.disbursementRequest.loginFailed", e);
         }
     }
 
@@ -102,6 +103,9 @@ public class DisbursementRequestServiceImpl implements DisbursementRequestServic
     public void disburseRequestLoan(Loan loan, JsonCommand command) {
         String token = authenticateToIntegrationApi();
         final ClientOtherInfo clientOtherInfo = this.clientOtherInfoRepository.getByClientId(loan.client().getId());
+        if (clientOtherInfo == null) {
+            throw new ClientOtherInfoNotFoundException(null, loan.client().getId());
+        }
         Long paymentTypeId = command.longValueOfParameterNamed("paymentTypeId");
         final PaymentTypeData paymentTypes = this.paymentTypeReadPlatformService.retrieveOne(paymentTypeId);
         String uniqueId = UUID.randomUUID().toString() + "-" + System.currentTimeMillis();
@@ -120,12 +124,21 @@ public class DisbursementRequestServiceImpl implements DisbursementRequestServic
         final Note requestNote = Note.loanNote(loan, requestJson);
         this.noteRepository.saveAndFlush(requestNote);
         try (Response response = client.newCall(request).execute()) {
-            LOG.info("Received Response from Inkomoko for request   " + loan.getId() + " and  loanid  " + requestId);
-            final Note responseNote = Note.loanNote(loan, response.toString());
-            this.noteRepository.saveAndFlush(responseNote);
+            String responseBody = null;
+            if (response.body() != null) {
+                responseBody = response.body().string();
+            }
+            if (response.isSuccessful()) {
+                LOG.info("Received Response from Inkomoko for request   " + loan.getId() + " and  loanid  " + requestId);
+                final Note responseNote = Note.loanNote(loan, response.toString() + " " + responseBody);
+                this.noteRepository.saveAndFlush(responseNote);
+            } else {
+                Integer responseCode = response.code();
+                throw new LoanDisbursementRequestException("Unprocessable Entity", "integration.disbursementRequest.unprocessableEntity", requestId, responseCode, responseBody);
+            }
+
         } catch (IOException e) {
             throw new LoanDisbursementRequestException("Unexpected response received  from  inkomoko ", "loan", e);
         }
     }
-
 }
