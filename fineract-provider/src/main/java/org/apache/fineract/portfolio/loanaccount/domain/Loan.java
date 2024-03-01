@@ -447,6 +447,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     private LocalDate stopConsumerCreditUploadToTransUnionOn;
     @Column(name = "loan_with_another_institution_amount")
     private BigDecimal loanWithAnotherInstitutionAmount;
+    @Column(name = "generic_loan_counter", nullable = true)
+    private Integer genericLoanCounter;
 
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
@@ -7191,5 +7193,9 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     public void setLoanWithAnotherInstitutionAmount(BigDecimal loanWithAnotherInstitutionAmont) {
         this.loanWithAnotherInstitutionAmount = loanWithAnotherInstitutionAmont;
+    }
+
+    public void setGenericLoanCounter(Integer genericLoanCounter) {
+        this.genericLoanCounter = genericLoanCounter;
     }
 }
