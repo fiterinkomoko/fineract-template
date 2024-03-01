@@ -494,6 +494,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
                 disburseLoanToLoan(loan, command, loanOutstanding);
             }
+            if (loan.getClient() != null) {
+                // Update Generic Loan Cycle
+                Integer loanCounter = loanReadPlatformService.retriveGenericLoanCycle(loan.getClient().getId());
+                loan.setGenericLoanCounter(loanCounter + 1); // + 1 this loan which is not disbursed yet
+            }
 
             if (isAccountTransfer) {
                 disburseLoanToSavings(loan, command, amountToDisburse, paymentDetail);
@@ -920,6 +925,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final LocalDate recalculateFrom = null;
         loan.setActualDisbursementDate(null);
+        loan.setGenericLoanCounter(null); // Reset Generic Loan Counter on un-disbursal
         ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
 
         // Remove post dated checks if added.

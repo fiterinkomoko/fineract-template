@@ -87,11 +87,13 @@ public class DisbursementRequestServiceImpl implements DisbursementRequestServic
                 return accessToken;
             } else {
                 LOG.error("Login to inkomoko Integration has failed:" + resObject);
-                throw new LoanDisbursementRequestException("Login to inkomoko Integration has failed", "integration.disbursementRequest.loginFailed", resObject);
+                throw new LoanDisbursementRequestException("Login to inkomoko Integration has failed",
+                        "integration.disbursementRequest.loginFailed", resObject);
             }
         } catch (Exception e) {
             LOG.error("Login to inkomoko Integration has failed:" + e);
-            throw new LoanDisbursementRequestException("Login to inkomoko Integration has failed", "integration.disbursementRequest.loginFailed", e);
+            throw new LoanDisbursementRequestException("Login to inkomoko Integration has failed",
+                    "integration.disbursementRequest.loginFailed", e);
         }
     }
 
@@ -134,7 +136,8 @@ public class DisbursementRequestServiceImpl implements DisbursementRequestServic
                 this.noteRepository.saveAndFlush(responseNote);
             } else {
                 Integer responseCode = response.code();
-                throw new LoanDisbursementRequestException("Unprocessable Entity", "integration.disbursementRequest.unprocessableEntity", requestId, responseCode, responseBody);
+                throw new LoanDisbursementRequestException("Unprocessable Entity", "integration.disbursementRequest.unprocessableEntity",
+                        requestId, responseCode, responseBody);
             }
 
         } catch (IOException e) {
