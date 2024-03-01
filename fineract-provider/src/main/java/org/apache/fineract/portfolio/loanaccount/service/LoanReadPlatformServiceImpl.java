@@ -3503,4 +3503,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         return netCashFlowData;
     }
 
+    @Override
+    public Integer retriveGenericLoanCycle(final Long clientId) {
+        final String sql = "Select COUNT(l.id) from m_loan l where l.client_id = ?  and l.loan_status_id IN (300,600,601,700)";
+        return this.jdbcTemplate.queryForObject(sql, new Object[] { clientId }, Integer.class);
+    }
+
 }

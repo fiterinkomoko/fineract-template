@@ -214,4 +214,6 @@ public interface LoanReadPlatformService {
     List<LoanCashFlowProjectionData> retrieveCashFlowProjection(Long loanId);
 
     LoanCashFlowReport retrieveCashFlowReport(Long loanId);
+
+    Integer retriveGenericLoanCycle(final Long clientId);
 }
