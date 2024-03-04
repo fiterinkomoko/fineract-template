@@ -91,4 +91,19 @@
         </update>
     </changeSet>
 
+    <changeSet author="bosco@fiter.io" id="Update_Obligation-Met-Loans-Details-Table_loan_report_INKO-396" context="mysql">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="stretchy_report"/>
+            <sqlCheck expectedResult="1">
+                select count(1) from stretchy_report
+                where report_name = 'Obligation Met Loans Details';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="&#10;select concat(repeat('..',  ((LENGTH(ounder.hierarchy) - LENGTH(REPLACE(ounder.hierarchy, '.', '')) - 1))), ounder.name) as 'Office/Branch',&#10;ifnull(cur.display_symbol, l.currency_code) as 'Currency',&#10;c.account_no as 'Client Account No.',&#10;c.display_name as 'Client',&#10;l.account_no as 'Loan Account No.',&#10;pl.name as 'Product',&#10;f.name as 'Fund',&#10;l.principal_amount as 'Loan Amount',&#10;l.total_repayment_derived  as 'Total Repaid',&#10;l.annual_nominal_interest_rate as 'Annual Nominal Interest Rate',&#10;date(l.disbursedon_date) as 'Disbursed',&#10;date(l.closedon_date) as 'Closed',&#10;l.principal_repaid_derived as 'Principal Repaid',&#10;l.interest_repaid_derived as 'Interest Repaid',&#10;l.fee_charges_repaid_derived as 'Fees Repaid',&#10;l.penalty_charges_repaid_derived as 'Penalties Repaid',&#10;lo.display_name as 'Loan Officer',&#10;cvl.code_value     as 'Location',&#10;l.generic_loan_counter     as 'Cycle'&#10;from m_office o&#10;join m_office ounder on ounder.hierarchy like concat(o.hierarchy, '%')&#10;and ounder.hierarchy like concat('${currentUserHierarchy}', '%')&#10;join m_client c on c.office_id = ounder.id&#10;join m_loan l on l.client_id = c.id&#10;join m_product_loan pl on pl.id = l.product_id&#10;left join m_staff lo on lo.id = l.loan_officer_id&#10;left join m_currency cur on cur.code = l.currency_code&#10;left join m_fund f on f.id = l.fund_id&#10;left join m_client_recruitment_survey crs on crs.client_id = c.id&#10;left join m_code_value cvl on cvl.id = crs.survey_location_cv_id&#10;where o.id = ${officeId}&#10;and (l.currency_code = '${currencyId}' or '-1' = '${currencyId}')&#10;and (l.product_id = '${loanProductId}' or '-1' = '${loanProductId}')&#10;and (ifnull(l.loan_officer_id, -10) = '${loanOfficerId}' or '-1' = '${loanOfficerId}')&#10;and (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})&#10;and (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})&#10;and (case	when ${obligDateType} = 1 then    l.closedon_date between '${startDate}' and '${endDate}'	when ${obligDateType} = 2 then    l.disbursedon_date between '${startDate}' and '${endDate}'	else 1 = 1	end)&#10;and l.loan_status_id = 600&#10;group by l.id,ounder.hierarchy, l.currency_code, c.account_no, l.account_no,cvl.code_value&#10;order by ounder.hierarchy, l.currency_code, c.account_no, l.account_no&#10;"/>
+            <where>report_name = 'Obligation Met Loans Details'</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
