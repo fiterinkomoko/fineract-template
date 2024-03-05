@@ -500,6 +500,12 @@ public class Client extends AbstractAuditableWithUTCDateTimeCustom {
             this.externalId = StringUtils.defaultIfEmpty(newValue, null);
         }
 
+        if (command.isChangeInStringParameterNamed(ClientApiConstants.kivaIdParamName, this.kivaId)) {
+            final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.kivaIdParamName);
+            actualChanges.put(ClientApiConstants.kivaIdParamName, newValue);
+            this.kivaId = StringUtils.defaultIfEmpty(newValue, null);
+        }
+
         if (command.isChangeInStringParameterNamed(ClientApiConstants.mobileNoParamName, this.mobileNo)) {
             final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.mobileNoParamName);
             actualChanges.put(ClientApiConstants.mobileNoParamName, newValue);

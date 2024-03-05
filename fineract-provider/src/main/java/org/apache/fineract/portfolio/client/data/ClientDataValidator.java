@@ -165,6 +165,11 @@ public final class ClientDataValidator {
                     .notExceedingLengthOf(50);
         }
 
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.kivaIdParamName, element)) {
+            final String kivaId = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.kivaIdParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.kivaIdParamName).value(kivaId).ignoreIfNull().notExceedingLengthOf(50);
+        }
+
         final Boolean active = this.fromApiJsonHelper.extractBooleanNamed(ClientApiConstants.activeParamName, element);
         if (active != null) {
             if (active.booleanValue()) {
