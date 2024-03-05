@@ -106,4 +106,12 @@
         </update>
     </changeSet>
 
+    <changeSet author="bosco@fiter.io" id="Update_Portfolio-Management-Report-Table_loan_report_INKO-398" context="mysql">
+        <sqlFile
+                encoding="utf8"
+                path="db/changelog/tenant/commands/update_portfolio_management_table_reports.sql"
+                relativeToChangelogFile="false"
+                splitStatements="true"
+                stripComments="true"/>
+    </changeSet>
 </databaseChangeLog>
