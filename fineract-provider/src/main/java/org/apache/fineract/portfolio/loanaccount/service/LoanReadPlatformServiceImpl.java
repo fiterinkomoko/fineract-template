@@ -1470,7 +1470,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String loanExternalId = rs.getString("loanExternalId");
             final Long officeId = rs.getLong("officeId");
             final String officeName = rs.getString("officeName");
-            final int transactionTypeInt = JdbcSupport.getInteger(rs, "transactionType");
+            final Integer transactionTypeInt = JdbcSupport.getInteger(rs, "transactionType");
             final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(transactionTypeInt);
             final boolean manuallyReversed = rs.getBoolean("manuallyReversed");
 
