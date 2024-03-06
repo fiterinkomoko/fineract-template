@@ -1,0 +1,146 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.6.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet author="bosco@fiter.io" id="Update_Collateral_report_INKO-392_9" context="mysql">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="stretchy_report"/>
+            <sqlCheck expectedResult="1">
+                select count(1) from stretchy_report
+                where report_name = 'Collateral';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="&#10;select&#10;o.name as Office,&#10;c.external_id as UID,&#10;concat(c.firstname, ' ', c.lastname) as 'Customer Name',&#10;l.account_no as 'Loan Id Number',&#10;mpl.name as 'Product Name',&#10;l.principal_amount as 'Loan Amount',&#10;cvs.code_value as Strata,&#10;mcm.quality as 'Type of Collateral',&#10;ccma.worth_of_collateral as 'Collateral Coverage',&#10;'' as OMV,&#10;'' as FSV,&#10;cvp.code_value as Province,&#10;cvd.code_value as District,&#10;cvsec.code_value as Sector,&#10;cvcell.code_value as Cell,&#10;cvv.code_value as Village&#10;from&#10;m_office o&#10;join m_office ounder on ounder.hierarchy like concat(o.hierarchy, '%') and ounder.hierarchy like concat('${currentUserHierarchy}', '%')&#10;join m_client c on c.office_id = ounder.id    &#10;join m_loan l on l.client_id = c.id&#10;join m_product_loan mpl on l.product_id = mpl.id&#10;left join m_client_other_info coi on coi.client_id = c.id&#10;left join m_code_value cvs on cvs.id = coi.strata_cv_id&#10;left join m_loan_collateral_management lcm on lcm.loan_id = l.id&#10;left join m_client_collateral_management mccm on lcm.id = mccm.collateral_id&#10;left join m_collateral_management mcm on mccm.collateral_id = mcm.id&#10;left join m_client_collateral_management_additional_details ccma on ccma.client_collateral_id = lcm.client_collateral_id&#10;left join m_code_value cvp on cvp.id = ccma.province_cv_id&#10;left join m_code_value cvd on cvd.id = ccma.district_cv_id&#10;left join m_code_value cvsec on cvsec.id = ccma.sector_cv_id&#10;left join m_code_value cvcell on cvcell.id = ccma.cell_cv_id&#10;left join m_code_value cvv on cvv.id = ccma.village_cv_id&#10;where&#10;o.id = ${officeId}&#10;and (l.product_id = '${loanProductId}' or '-1' = '${loanProductId}')&#10;and (l.fund_id = '${fundId}' or '-1' = '${fundId}')&#10;and (l.loan_officer_id = '${loanOfficerId}' or '-1' = '${loanOfficerId}')&#10;and (ccma.province_cv_id = '${provinceId}' or '-1' = '${provinceId}')&#10;GROUP BY o.name, c.external_id, CONCAT(c.firstname, ' ', c.lastname), l.account_no, mpl.name, l.principal_amount, mcm.quality, mcm.unit_type, cvp.code_value, cvd.code_value, cvsec.code_value, cvcell.code_value, cvv.code_value,cvs.code_value,ccma.worth_of_collateral&#10;"/>
+            <where>report_name = 'Collateral'</where>
+        </update>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="Update_Secured_and_Unsecured_loan_report_INKO-393_4" context="mysql">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="stretchy_report"/>
+            <sqlCheck expectedResult="1">
+                select count(1) from stretchy_report
+                where report_name = 'Secured and Unsecured loan';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="&#10;select o.name  as 'Office',&#10;cvl.code_value  as 'Location',&#10;concat(c.firstname, ' ', c.lastname) as 'Customer Name',&#10;c.external_id  as 'Client UID',&#10;l.account_no  as 'Loan ID Number',&#10;mpl.name  as 'Product Name',&#10;l.principal_disbursed_derived  as 'Loan Amount',&#10;l.principal_disbursed_derived  as 'Disbursed loan amount',&#10;if(lc.id is not null, 'Yes', 'No')   as 'Collateral',&#10;cdg.code_value  as 'Gender',&#10;cvc.code_value  as 'Cohort',&#10;l.loan_counter  as 'Cycle',&#10;cvn.code_value  as 'Nationality',&#10;l.total_outstanding_derived  as 'Outstanding Loan Amount',&#10;cvs.code_value   as 'Strata'&#10;from m_office o&#10;join m_office ounder on ounder.hierarchy like concat(o.hierarchy, '%') and&#10;ounder.hierarchy like concat('${currentUserHierarchy}', '%')&#10;join m_client c on c.office_id = ounder.id&#10;join m_loan l on l.client_id = c.id&#10;join m_product_loan mpl on l.product_id = mpl.id&#10;left join m_currency cur on cur.code = l.currency_code&#10;left join m_client_other_info coi on coi.client_id = c.id&#10;left join m_code_value cdg on cdg.id = c.gender_cv_id&#10;left join m_client_recruitment_survey crs on crs.client_id = c.id&#10;left join m_code_value cvc on cvc.id = crs.cohort_cv_id&#10;left join m_code_value cvn on cvn.id = coi.nationality_cv_id&#10;left join m_code_value cvl on cvl.id = crs.survey_location_cv_id&#10;left join m_code_value cvs on cvs.id = coi.strata_cv_id&#10;left join m_loan_collateral_management lc on lc.loan_id = l.id&#10;where o.id = ${officeId}&#10;and (l.product_id = '${loanProductId}' or '-1' = '${loanProductId}')&#10;and (l.loan_officer_id = '${loanOfficerId}' or '-1' = '${loanOfficerId}')&#10;and (l.currency_code = '${currencyId}' or '-1' = '${currencyId}')&#10;and date(l.disbursedon_date) between date('${startDate}') and date('${endDate}')&#10;"/>
+            <where>report_name = 'Secured and Unsecured loan'</where>
+        </update>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_loan_product_parameter_filter_on_Secured_and_Unsecured_loan_report" context="mysql">
+        <insert tableName="stretchy_report_parameter">
+            <column name="report_id" valueComputed="(select sr.id from stretchy_report sr where sr.report_name ='Secured and Unsecured loan')"/>
+            <column name="parameter_id" valueComputed="(select sp.id from stretchy_parameter sp where sp.parameter_name = 'loanProductIdSelectAllWithoutCurrency')"/>
+            <column name="report_parameter_name" value="loanProductId"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_generic_loan_counter_in_loan">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_loan" columnName="generic_loan_counter"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_loan">
+            <column name="generic_loan_counter" type="int">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="Update_Loan-in-arrears-Table_loan_report_INKO-397" context="mysql">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="stretchy_report"/>
+            <sqlCheck expectedResult="1">
+                select count(1) from stretchy_report
+                where report_name = 'Loan in arrears Table';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="&#10;select mc.id   AS 'ID',&#10;mc.firstname   AS 'First Name',&#10;mc.middlename    AS 'Middle Name',&#10;mc.lastname    AS 'Last Name',&#10;mc.display_name   AS 'Full Name',&#10;mc.mobile_no    AS 'Mobile No',&#10;ml.principal_amount    AS 'Loan Amount',&#10;(IFNULL(ml.principal_outstanding_derived, 0) + IFNULL(ml.interest_outstanding_derived, 0) + IFNULL(ml.fee_charges_outstanding_derived, 0) + IFNULL(ml.penalty_charges_outstanding_derived, 0))    AS 'Loan Outstanding',&#10;ml.principal_disbursed_derived    AS 'Loan Disbursed',&#10;laa.overdue_since_date_derived     AS 'Payment Due Date',&#10;IFNULL(laa.total_overdue_derived, 0)    AS 'Total Due',&#10;ounder.id    AS 'Office Number',&#10;ml.account_no    AS 'Account Number',&#10;gua.lastname     AS 'Guarantor Last Name',&#10;COUNT(gua.id)   AS 'Number Of Guarantors',&#10;g.display_name   AS 'Group Name',&#10;year(now()) - YEAR(mc.date_of_birth)    as 'Age',&#10;mc.external_id  as 'Client UID',&#10;cdg.code_value   as 'Gender',&#10;cvc.code_value   as 'Cohort',&#10;ml.generic_loan_counter   as 'Cycle',&#10;cvn.code_value    as 'Nationality',&#10;cvl.code_value   as 'Location',&#10;cvs.code_value   as 'Strata'&#10;FROM m_office mo&#10;JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, '%')&#10;INNER JOIN m_client mc ON mc.office_id = ounder.id&#10;INNER JOIN m_loan ml ON ml.client_id = mc.id&#10;INNER JOIN r_enum_value rev ON rev.enum_id = ml.loan_status_id AND rev.enum_name = 'loan_status_id'&#10;INNER JOIN m_loan_arrears_aging laa ON laa.loan_id = ml.id&#10;LEFT JOIN m_currency cur ON cur.code = ml.currency_code&#10;LEFT JOIN m_group_client gc ON gc.client_id = mc.id&#10;LEFT JOIN m_group g ON g.id = gc.group_id&#10;LEFT JOIN m_staff lo ON lo.id = ml.loan_officer_id&#10;LEFT JOIN m_guarantor gua ON gua.loan_id = ml.id&#10;left join m_client_other_info coi on coi.client_id = mc.id&#10;left join m_code_value cdg on cdg.id = mc.gender_cv_id&#10;left join m_client_recruitment_survey crs on crs.client_id = mc.id&#10;left join m_code_value cvc on cvc.id = crs.cohort_cv_id&#10;left join m_code_value cvn on cvn.id = coi.nationality_cv_id&#10;left join m_code_value cvl on cvl.id = crs.survey_location_cv_id&#10;left join m_code_value cvs on cvs.id = coi.strata_cv_id&#10;WHERE ml.loan_status_id = 300&#10;AND mo.id = ${officeId}&#10;AND (IFNULL(ml.loan_officer_id, -10) = ${loanOfficerId} OR '-1' = '${loanOfficerId}')&#10;AND (DATEDIFF(CURDATE(), laa.overdue_since_date_derived) BETWEEN '${fromX}' AND '${toY}')&#10;GROUP BY ml.id, ounder.hierarchy, ml.currency_code, mc.account_no, ml.account_no, gua.lastname, g.display_name,&#10;cvc.code_value, cvn.code_value, cvl.code_value, cvs.code_value&#10;ORDER BY ounder.hierarchy, ml.currency_code, mc.account_no, ml.account_no&#10;"/>
+            <where>report_name = 'Loan in arrears Table'</where>
+        </update>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="Update_Obligation-Met-Loans-Details-Table_loan_report_INKO-396" context="mysql">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="stretchy_report"/>
+            <sqlCheck expectedResult="1">
+                select count(1) from stretchy_report
+                where report_name = 'Obligation Met Loans Details';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="&#10;select concat(repeat('..',  ((LENGTH(ounder.hierarchy) - LENGTH(REPLACE(ounder.hierarchy, '.', '')) - 1))), ounder.name) as 'Office/Branch',&#10;ifnull(cur.display_symbol, l.currency_code) as 'Currency',&#10;c.account_no as 'Client Account No.',&#10;c.display_name as 'Client',&#10;l.account_no as 'Loan Account No.',&#10;pl.name as 'Product',&#10;f.name as 'Fund',&#10;l.principal_amount as 'Loan Amount',&#10;l.total_repayment_derived  as 'Total Repaid',&#10;l.annual_nominal_interest_rate as 'Annual Nominal Interest Rate',&#10;date(l.disbursedon_date) as 'Disbursed',&#10;date(l.closedon_date) as 'Closed',&#10;l.principal_repaid_derived as 'Principal Repaid',&#10;l.interest_repaid_derived as 'Interest Repaid',&#10;l.fee_charges_repaid_derived as 'Fees Repaid',&#10;l.penalty_charges_repaid_derived as 'Penalties Repaid',&#10;lo.display_name as 'Loan Officer',&#10;cvl.code_value     as 'Location',&#10;l.generic_loan_counter     as 'Cycle'&#10;from m_office o&#10;join m_office ounder on ounder.hierarchy like concat(o.hierarchy, '%')&#10;and ounder.hierarchy like concat('${currentUserHierarchy}', '%')&#10;join m_client c on c.office_id = ounder.id&#10;join m_loan l on l.client_id = c.id&#10;join m_product_loan pl on pl.id = l.product_id&#10;left join m_staff lo on lo.id = l.loan_officer_id&#10;left join m_currency cur on cur.code = l.currency_code&#10;left join m_fund f on f.id = l.fund_id&#10;left join m_client_recruitment_survey crs on crs.client_id = c.id&#10;left join m_code_value cvl on cvl.id = crs.survey_location_cv_id&#10;where o.id = ${officeId}&#10;and (l.currency_code = '${currencyId}' or '-1' = '${currencyId}')&#10;and (l.product_id = '${loanProductId}' or '-1' = '${loanProductId}')&#10;and (ifnull(l.loan_officer_id, -10) = '${loanOfficerId}' or '-1' = '${loanOfficerId}')&#10;and (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})&#10;and (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})&#10;and (case	when ${obligDateType} = 1 then    l.closedon_date between '${startDate}' and '${endDate}'	when ${obligDateType} = 2 then    l.disbursedon_date between '${startDate}' and '${endDate}'	else 1 = 1	end)&#10;and l.loan_status_id = 600&#10;group by l.id,ounder.hierarchy, l.currency_code, c.account_no, l.account_no,cvl.code_value&#10;order by ounder.hierarchy, l.currency_code, c.account_no, l.account_no&#10;"/>
+            <where>report_name = 'Obligation Met Loans Details'</where>
+        </update>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="Update_Portfolio-Management-Report-Table_loan_report_INKO-398" context="mysql">
+        <sqlFile
+                encoding="utf8"
+                path="db/changelog/tenant/commands/update_portfolio_management_table_reports.sql"
+                relativeToChangelogFile="false"
+                splitStatements="true"
+                stripComments="true"/>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="Update_Rescheduled-Loans_report_INKO-417" context="mysql">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="stretchy_report"/>
+            <sqlCheck expectedResult="1">
+                select count(1) from stretchy_report
+                where report_name = 'Rescheduled Loans';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="&#10;SELECT concat(repeat('..', ((LENGTH(ounder.hierarchy) - LENGTH(REPLACE(ounder.hierarchy, '.', '')) - 1))), ounder.name)   as 'Office/Branch',&#10;coalesce(cur.display_symbol, ml.currency_code)  as 'Currency',&#10;c.account_no  as 'Client Account No.',&#10;c.display_name  AS 'Client Name',&#10;ml.account_no  AS 'Loan Account No.',&#10;mpl.name  AS 'Product Name',&#10;ml.disbursedon_date  AS 'Disbursed Date',&#10;lt.transaction_date    AS 'Written Off date',&#10;ml.principal_amount  as 'Loan Amount',&#10;coalesce(lt.principal_portion_derived, 0)  AS 'Rescheduled Principal',&#10;coalesce(lt.interest_portion_derived, 0)    AS 'Rescheduled Interest',&#10;coalesce(lt.fee_charges_portion_derived, 0)   AS 'Rescheduled Fees',&#10;coalesce(lt.penalty_charges_portion_derived, 0)    AS 'Rescheduled Penalties',&#10;join_mlrr.comment   AS 'Reason For Rescheduling',&#10;coalesce(ms.display_name, '-')   AS 'Loan Officer Name',&#10; extract(year from now()) - extract(year from c.date_of_birth) as 'Age',&#10; c.external_id    as 'Client UID',&#10; cdg.code_value    as 'Gender',&#10;cvc.code_value   as 'Cohort',&#10;ml.generic_loan_counter   as 'Cycle',&#10;cvn.code_value   as 'Nationality',&#10;cvl.code_value     as 'Location',&#10;cvs.code_value     AS 'Strata',&#10;ml.loan_status_id     AS 'Loan Status'&#10;FROM m_office o &#10;JOIN m_office ounder ON ounder.hierarchy like concat(o.hierarchy, '%') AND  ounder.hierarchy like CONCAT('${currentUserHierarchy}', '%')&#10;JOIN m_client c ON c.office_id = ounder.id&#10;JOIN m_loan ml ON ml.client_id = c.id&#10;JOIN m_product_loan mpl ON mpl.id = ml.product_id&#10;JOIN m_loan_transaction lt ON lt.loan_id = ml.id&#10;JOIN (SELECT MAX(mlrr.id) AS id, mlrr.loan_id, mlrr.reschedule_reason_comment as comment&#10;FROM m_loan_reschedule_request mlrr&#10;WHERE mlrr.status_enum = 200&#10;GROUP BY mlrr.loan_id, mlrr.reschedule_reason_comment) join_mlrr ON join_mlrr.loan_id = ml.id&#10;LEFT JOIN m_staff ms ON ms.id = ml.loan_officer_id&#10;LEFT JOIN m_note n ON n.loan_transaction_id = lt.id&#10;LEFT JOIN m_currency cur on cur.code = ml.currency_code&#10;left join m_client_other_info coi on coi.client_id = c.id&#10;left join m_code_value cdg on cdg.id = c.gender_cv_id&#10;left join m_client_recruitment_survey crs on crs.client_id = c.id&#10;left join m_code_value cvc on cvc.id = crs.cohort_cv_id&#10;left join m_code_value cvn on cvn.id = coi.nationality_cv_id&#10;left join m_code_value cvl on cvl.id = crs.survey_location_cv_id&#10;left join m_code_value cvs on cvs.id = coi.strata_cv_id&#10;WHERE lt.is_reversed is false&#10;AND o.id = ${officeId}&#10;AND (mpl.id = ${loanProductId} OR ${loanProductId} = -1)&#10;AND lt.transaction_date BETWEEN '${startDate}' AND '${endDate}'&#10;AND (ml.currency_code = '${currencyId}' or '-1' = '${currencyId}')&#10;ORDER BY ounder.hierarchy, coalesce(cur.display_symbol, ml.currency_code), ml.account_no&#10;"/>
+            <where>report_name = 'Rescheduled Loans'</where>
+        </update>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="Update_IC-Minutes_report_INKO-400" context="mysql">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="stretchy_report"/>
+            <sqlCheck expectedResult="1">
+                select count(1) from stretchy_report
+                where report_name = 'IC Minutes';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="&#10;select c.external_id      as 'Client UID', concat(c.firstname, c.lastname)       as 'Client/Company Name', &#10;l.generic_loan_counter      as 'Cycle', &#10;cvg.code_value        as 'Gender', &#10;cvs.code_value      as 'Strata', &#10;cvb.code_value    as 'Business Sector',&#10;loanPurposeTble.code_value    as 'Purpose of the loan',&#10;l.principal_amount_proposed    as 'Applied Amount', &#10;icReviewTbl.IC_Level_One      as 'IC Decision Level One',&#10;icReviewTbl.IC_Level_Two     as 'IC Decision Level Two',&#10;icReviewTbl.IC_Level_Three     as 'IC Decision Level Three', &#10;icReviewTbl.IC_Level_Four    as 'IC Decision Level Four',&#10;icReviewTbl.IC_Level_Five   as 'IC Decision Level Five', &#10;l.approved_principal     as 'IC Approved Amount',&#10;l.term_frequency      as 'Loan Tenure in months', &#10;''       as 'IC Approved Amount in Words',&#10;l.principal_disbursed_derived         as 'Installment Amount', &#10;l.penalty_charges_charged_derived     as 'Late Fees',&#10;coi.tax_identification_number         as 'Company Tin Number', &#10;cvn.code_value      as 'Nationality',&#10;villageTbl.code_value     as 'Village',&#10;cellTbl.code_value     as 'Cell', &#10;cvb.code_value      as 'Sector',&#10;districtTbl.code_value    as 'District', &#10;coi.telephone_no      as 'Contact Number', &#10;coi.co_signors      as 'Cosigner Number', &#10;l.account_no      as 'Loan ID Number', &#10;coi.bank_account_number    as 'Bank Account Number', &#10;coi.bank_name   as 'Bank Name', &#10;ccma.UPI_NO     as 'UPI Number',&#10;cvp.code_value    as 'Province', &#10;ccma.collateral_owner_first           as 'Owners Name 1', &#10;ccma.collateral_owner_second          as 'Owners Name 2', &#10;ccma.id_no_of_collateral_owner_first  as 'Owners ID 1', &#10;ccma.id_no_of_collateral_owner_second as 'Owners ID 2', &#10; ''      as 'OMV Figures', &#10;''      as 'OMV in letters', &#10;coi.guarantor  as 'Witness Name' &#10;from m_office o &#10;join m_office ounder ON ounder.hierarchy like concat(o.hierarchy, '%') AND  ounder.hierarchy like CONCAT('${currentUserHierarchy}', '%')  &#10;join m_client c ON c.office_id = ounder.id  &#10;join m_loan l ON l.client_id = c.id &#10;left join m_loan_arrears_aging laa on laa.loan_id = l.id &#10;join m_product_loan p ON p.id = l.product_id &#10;left join m_code_value cvg ON cvg.id = c.gender_cv_id &#10;left join m_client_other_info coi ON coi.client_id = c.id  &#10;left join m_client_recruitment_survey crs on crs.client_id = c.id &#10;left join m_code_value cvn ON cvn.id = coi.nationality_cv_id  &#10;left join m_code_value cvs ON cvs.id = coi.strata_cv_id  &#10;left join m_business_detail bd on bd.client_id = c.id  &#10;left join m_code_value cvb on cvb.id = bd.business_type_id  &#10;left join m_loan_collateral_management lcm on lcm.loan_id = l.id  &#10;left join m_client_collateral_management_additional_details ccma  on ccma.client_collateral_id = lcm.client_collateral_id  &#10; left join m_code_value cvp on cvp.id = ccma.province_cv_id  &#10; left join m_code_value loanPurposeTble on loanPurposeTble.id = l.loanpurpose_cv_id  &#10;left join m_code_value villageTbl on villageTbl.id = ccma.village_cv_id  &#10;left join m_code_value districtTbl on districtTbl.id = ccma.district_cv_id   &#10;left join m_code_value cellTbl on cellTbl.id = ccma.cell_cv_id  &#10;left join (select ld.loan_id, &#10;case &#10;when ld.loan_decision_state = 1000 then 'Review Application' &#10;when ld.loan_decision_state = 1200 then 'Due Diligence' &#10;when ld.loan_decision_state = 1300 then 'Collateral Review' &#10;when ld.loan_decision_state = 1400 then 'IC Review Level One' &#10;when ld.loan_decision_state = 1500 then 'IC Review Level Two'  &#10;when ld.loan_decision_state = 1600 then 'IC Review Level Three' &#10;when ld.loan_decision_state = 1700 then 'IC Review Level Four' &#10;when ld.loan_decision_state = 1800 then 'IC Review Level Five' &#10;when ld.loan_decision_state = 1900 then 'Prepare And Sign Contract' &#10;end    as loanDecisionState,&#10;ld.next_loan_ic_review_decision_state                                      as 'Next IC Level',&#10;if(ld.is_ic_review_decision_level_one_signed = true, 'Approved',&#10;if(ld.is_reject_ic_review_decision_level_one = true, 'Rejected', ''))   as 'IC_Level_One',&#10;if(ld.is_ic_review_decision_level_two_signed = true, 'Approved', &#10;if(ld.is_reject_ic_review_decision_level_two = true, 'Rejected', ''))   as 'IC_Level_Two', &#10;if(ld.is_ic_review_decision_level_three_signed = true, 'Approved', &#10;if(ld.is_reject_ic_review_decision_level_three = true, 'Rejected', '')) as 'IC_Level_Three', &#10;if(ld.is_ic_review_decision_level_four_signed = true, 'Approved', &#10;if(ld.is_reject_ic_review_decision_level_four = true, 'Rejected', ''))  as 'IC_Level_Four', &#10;if(ld.is_ic_review_decision_level_five_signed = true, 'Approved', &#10;if(ld.is_reject_ic_review_decision_level_five = true, 'Rejected', ''))  as 'IC_Level_Five' &#10;from m_loan_decision ld) as icReviewTbl on icReviewTbl.loan_id = l.id&#10;where o.id = ${officeId}&#10;and (l.product_id = '${loanProductId}' or '-1' = '${loanProductId}')&#10;and (ifnull(l.loan_officer_id, -10) = '${loanOfficerId}' or '-1' = '${loanOfficerId}')&#10;and (ifnull(l.fund_id, -10) = ${fundId} or -1 = ${fundId})&#10;and (ifnull(l.loanpurpose_cv_id, -10) = ${loanPurposeId} or -1 = ${loanPurposeId})&#10;and (date(l.submittedon_date) between date('${startDate}') and date('${endDate}'))&#10;"/>
+            <where>report_name = 'IC Minutes'</where>
+        </update>
+    </changeSet>
+</databaseChangeLog>

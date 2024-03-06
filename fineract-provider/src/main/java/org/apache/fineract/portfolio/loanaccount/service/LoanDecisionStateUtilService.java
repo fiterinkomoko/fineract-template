@@ -28,6 +28,7 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
+import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarInstance;
@@ -79,6 +80,20 @@ public class LoanDecisionStateUtilService {
                         "error.msg.loan.account.should.extend.decision.engine.to.review.Loan.application",
                         "Loan Account is not permitted for Approval since new workflow [Add-More-Stages-To-A-Loan-Life-Cycle] is activated and next status is [Review Application]");
             }
+            if (!LoanDecisionState.fromInt(loan.getLoanDecisionState()).isPrepareAndSignContract()) {
+                if (loan.getLoanType().equals(AccountType.GLIM.getValue())) {
+                    throw new GeneralPlatformDomainRuleException("error.msg.glim.loan.approval.state.invalid",
+                            "Loan Account cannot be approved because it's Decision state is invalid. Expected "
+                                    + LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue() + " but found " + loan.getLoanDecisionState(),
+                            loan.getAccountNumber());
+                } else {
+                    throw new GeneralPlatformDomainRuleException(
+                            "error.msg.loan.approval.is.terminated.expected.state.is.prepare.and.sign.contract.but.found.different",
+                            "Loan Account can't be approved because it's Decision state is invalid. Expected "
+                                    + LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue() + " but found " + loan.getLoanDecisionState());
+                }
+            }
+
             if (loanDecision != null && !loanDecision.getReviewApplicationSigned()) {
                 throw new GeneralPlatformDomainRuleException(
                         "error.msg.loan.account.should.extend.decision.engine.required.state.is.review.application",
@@ -248,8 +263,8 @@ public class LoanDecisionStateUtilService {
     @NotNull
     public Boolean isLoanAccountInICReview(LoanDecisionState loanDecisionState) {
         switch (loanDecisionState) {
-            case COLLATERAL_REVIEW: // For the loan to have collateral review, it's next stage is IC Review Level One
-                                    // Making COLLATERAL_REVIEW necessary to this action
+            case DUE_DILIGENCE: // For the loan to have due diligence review, it's next stage is IC Review Level One
+                                // Making DUE_DILIGENCE necessary to this action
             case IC_REVIEW_LEVEL_ONE:
             case IC_REVIEW_LEVEL_TWO:
             case IC_REVIEW_LEVEL_THREE:

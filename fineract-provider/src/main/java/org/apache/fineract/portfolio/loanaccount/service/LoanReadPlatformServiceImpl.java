@@ -1470,7 +1470,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String loanExternalId = rs.getString("loanExternalId");
             final Long officeId = rs.getLong("officeId");
             final String officeName = rs.getString("officeName");
-            final int transactionTypeInt = JdbcSupport.getInteger(rs, "transactionType");
+            final Integer transactionTypeInt = JdbcSupport.getInteger(rs, "transactionType");
             final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(transactionTypeInt);
             final boolean manuallyReversed = rs.getBoolean("manuallyReversed");
 
@@ -3501,6 +3501,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         netCashFlowData.setPreviousMonth2(totalIncomePreviousMonth2.subtract(totalExpensePreviousMonth2));
 
         return netCashFlowData;
+    }
+
+    @Override
+    public Integer retriveGenericLoanCycle(final Long clientId) {
+        final String sql = "Select COUNT(l.id) from m_loan l where l.client_id = ?  and l.loan_status_id IN (300,600,601,700)";
+        return this.jdbcTemplate.queryForObject(sql, new Object[] { clientId }, Integer.class);
     }
 
 }

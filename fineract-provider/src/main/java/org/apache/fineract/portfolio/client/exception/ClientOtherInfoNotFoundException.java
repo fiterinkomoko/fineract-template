@@ -28,4 +28,9 @@ public class ClientOtherInfoNotFoundException extends AbstractPlatformResourceNo
     public ClientOtherInfoNotFoundException(final Long id) {
         super("error.msg.client.other.info.id.invalid", "Client Other Info with identifier " + id + " does not exist", id);
     }
+
+    public ClientOtherInfoNotFoundException(final Long id, final Long clientId) {
+        super("error.msg.client.other.info.clientId.invalid", "Client Other Info with clientId " + clientId + " does not exist", id,
+                clientId);
+    }
 }
