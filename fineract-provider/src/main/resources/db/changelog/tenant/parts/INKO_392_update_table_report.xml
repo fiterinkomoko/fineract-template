@@ -114,7 +114,7 @@
                 splitStatements="true"
                 stripComments="true"/>
     </changeSet>
-    <changeSet author="bosco@fiter.io" id="Update_Rescheduled Loans_report_INKO-417" context="mysql">
+    <changeSet author="bosco@fiter.io" id="Update_Rescheduled-Loans_report_INKO-417" context="mysql">
 
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="stretchy_report"/>
