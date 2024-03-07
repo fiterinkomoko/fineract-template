@@ -143,4 +143,19 @@
             <where>report_name = 'IC Minutes'</where>
         </update>
     </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="Update_Secured_and_Unsecured_loan_report_INKO-393-add-age-and-tenure-1" context="mysql">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="stretchy_report"/>
+            <sqlCheck expectedResult="1">
+                select count(1) from stretchy_report
+                where report_name = 'Secured and Unsecured loan';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="&#10;select o.name  as 'Office',&#10;cvl.code_value  as 'Location',&#10;concat(c.firstname, ' ', c.lastname) as 'Customer Name',&#10;c.external_id  as 'Client UID',&#10;FLOOR(DATEDIFF(NOW(), c.date_of_birth) / 365) as  'Age',&#10;l.account_no  as 'Loan ID Number',&#10;mpl.name  as 'Product Name',&#10;l.principal_disbursed_derived  as 'Loan Amount',&#10;l.principal_disbursed_derived  as 'Disbursed loan amount',&#10;if(lc.id is not null, 'Yes', 'No')   as 'Collateral',&#10;cdg.code_value  as 'Gender',&#10;cvc.code_value  as 'Cohort',&#10;l.loan_counter  as 'Cycle',&#10;cvn.code_value  as 'Nationality',&#10;l.total_outstanding_derived  as 'Outstanding Loan Amount',&#10;l.term_frequency  as 'Loan Tenure in months',&#10;cvs.code_value   as 'Strata'&#10;from m_office o&#10;join m_office ounder on ounder.hierarchy like concat(o.hierarchy, '%') and&#10;ounder.hierarchy like concat('${currentUserHierarchy}', '%')&#10;join m_client c on c.office_id = ounder.id&#10;join m_loan l on l.client_id = c.id&#10;join m_product_loan mpl on l.product_id = mpl.id&#10;left join m_currency cur on cur.code = l.currency_code&#10;left join m_client_other_info coi on coi.client_id = c.id&#10;left join m_code_value cdg on cdg.id = c.gender_cv_id&#10;left join m_client_recruitment_survey crs on crs.client_id = c.id&#10;left join m_code_value cvc on cvc.id = crs.cohort_cv_id&#10;left join m_code_value cvn on cvn.id = coi.nationality_cv_id&#10;left join m_code_value cvl on cvl.id = crs.survey_location_cv_id&#10;left join m_code_value cvs on cvs.id = coi.strata_cv_id&#10;left join m_loan_collateral_management lc on lc.loan_id = l.id&#10;where o.id = ${officeId}&#10;and (l.product_id = '${loanProductId}' or '-1' = '${loanProductId}')&#10;and (l.loan_officer_id = '${loanOfficerId}' or '-1' = '${loanOfficerId}')&#10;and (l.currency_code = '${currencyId}' or '-1' = '${currencyId}')&#10;and date(l.disbursedon_date) between date('${startDate}') and date('${endDate}')&#10;"/>
+            <where>report_name = 'Secured and Unsecured loan'</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>
