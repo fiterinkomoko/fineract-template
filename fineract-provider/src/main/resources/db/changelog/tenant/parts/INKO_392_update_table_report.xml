@@ -251,4 +251,55 @@
         </update>
     </changeSet>
 
+
+    <changeSet author="bosco@fiter.io" id="delete-all-parameters-from-Loan-in-arrears-Table-report" context="mysql">
+        <delete tableName="stretchy_report_parameter">
+            <where>report_id = (SELECT id FROM stretchy_report WHERE report_name = 'Loan in arrears Table')</where>
+        </delete>
+    </changeSet>
+    <changeSet id="add-branch-or-office-to-Loan-in-arrears-Table" author="bosco@fiter.io" context="mysql">
+        <insert tableName="stretchy_report_parameter">
+            <column name="report_id" valueComputed="(select sr.id from stretchy_report sr where sr.report_name ='Loan in arrears Table')"/>
+            <column name="parameter_id" valueNumeric="5"/>
+            <column name="report_parameter_name" value="officeId"/>
+        </insert>
+    </changeSet>
+    <changeSet id="add-loanofficerid-to-Loan-in-arrears-Table" author="bosco@fiter.io" context="mysql">
+        <insert tableName="stretchy_report_parameter">
+            <column name="report_id" valueComputed="(select sr.id from stretchy_report sr where sr.report_name ='Loan in arrears Table')"/>
+            <column name="parameter_id" valueNumeric="6"/>
+            <column name="report_parameter_name" value="loanOfficerId"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="add-start-date-to-Loan-parameter-Loan-in-arrears-Table-report" author="bosco@fiter.io" context="mysql">
+        <insert tableName="stretchy_report_parameter">
+            <column name="report_id" valueComputed="(select sr.id from stretchy_report sr where sr.report_name ='Loan in arrears Table')"/>
+            <column name="parameter_id" valueNumeric="1"/>
+            <column name="report_parameter_name" value="startDate"/>
+        </insert>
+    </changeSet>
+    <changeSet id="add-end-date-to-Loan-parameter-Loan-in-arrears-Table-report" author="bosco@fiter.io" context="mysql">
+        <insert tableName="stretchy_report_parameter">
+            <column name="report_id" valueComputed="(select sr.id from stretchy_report sr where sr.report_name ='Loan in arrears Table')"/>
+            <column name="parameter_id" valueNumeric="2"/>
+            <column name="report_parameter_name" value="endDate"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="Update_Loan-in-arrears-Table-report-add-startDate-and-end-date-param" context="mysql">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="stretchy_report"/>
+            <sqlCheck expectedResult="1">
+                select count(1) from stretchy_report
+                where report_name = 'Loan in arrears Table';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="&#10;select mc.id   AS 'ID',&#10;mc.firstname   AS 'First Name',&#10;mc.middlename    AS 'Middle Name',&#10;mc.lastname    AS 'Last Name',&#10;mc.display_name   AS 'Full Name',&#10;mc.mobile_no    AS 'Mobile No',&#10;ml.principal_amount    AS 'Loan Amount',&#10;(IFNULL(ml.principal_outstanding_derived, 0) + IFNULL(ml.interest_outstanding_derived, 0) + IFNULL(ml.fee_charges_outstanding_derived, 0) + IFNULL(ml.penalty_charges_outstanding_derived, 0))    AS 'Loan Outstanding',&#10;ml.principal_disbursed_derived    AS 'Loan Disbursed',&#10;laa.overdue_since_date_derived     AS 'Payment Due Date',&#10;IFNULL(laa.total_overdue_derived, 0)    AS 'Total Due',&#10;ounder.id    AS 'Office Number',&#10;ml.account_no    AS 'Account Number',&#10;gua.lastname     AS 'Guarantor Last Name',&#10;COUNT(gua.id)   AS 'Number Of Guarantors',&#10;g.display_name   AS 'Group Name',&#10;year(now()) - YEAR(mc.date_of_birth)    as 'Age',&#10;mc.external_id  as 'Client UID',&#10;cdg.code_value   as 'Gender',&#10;cvc.code_value   as 'Cohort',&#10;ml.generic_loan_counter   as 'Cycle',&#10;cvn.code_value    as 'Nationality',&#10;cvl.code_value   as 'Location',&#10;cvs.code_value   as 'Strata'&#10;FROM m_office mo&#10;JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(mo.hierarchy, '%')&#10;INNER JOIN m_client mc ON mc.office_id = ounder.id&#10;INNER JOIN m_loan ml ON ml.client_id = mc.id&#10;INNER JOIN r_enum_value rev ON rev.enum_id = ml.loan_status_id AND rev.enum_name = 'loan_status_id'&#10;INNER JOIN m_loan_arrears_aging laa ON laa.loan_id = ml.id&#10;LEFT JOIN m_currency cur ON cur.code = ml.currency_code&#10;LEFT JOIN m_group_client gc ON gc.client_id = mc.id&#10;LEFT JOIN m_group g ON g.id = gc.group_id&#10;LEFT JOIN m_staff lo ON lo.id = ml.loan_officer_id&#10;LEFT JOIN m_guarantor gua ON gua.loan_id = ml.id&#10;left join m_client_other_info coi on coi.client_id = mc.id&#10;left join m_code_value cdg on cdg.id = mc.gender_cv_id&#10;left join m_client_recruitment_survey crs on crs.client_id = mc.id&#10;left join m_code_value cvc on cvc.id = crs.cohort_cv_id&#10;left join m_code_value cvn on cvn.id = coi.nationality_cv_id&#10;left join m_code_value cvl on cvl.id = crs.survey_location_cv_id&#10;left join m_code_value cvs on cvs.id = coi.strata_cv_id&#10;WHERE ml.loan_status_id = 300&#10;AND mo.id = ${officeId}&#10;AND (IFNULL(ml.loan_officer_id, -10) = ${loanOfficerId} OR '-1' = '${loanOfficerId}')&#10;AND date(laa.overdue_since_date_derived) between date('${startDate}') and date('${endDate}')&#10;GROUP BY ml.id, ounder.hierarchy, ml.currency_code, mc.account_no, ml.account_no, gua.lastname, g.display_name,&#10;cvc.code_value, cvn.code_value, cvl.code_value, cvs.code_value&#10;ORDER BY ounder.hierarchy, ml.currency_code, mc.account_no, ml.account_no&#10;"/>
+            <where>report_name = 'Loan in arrears Table'</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
