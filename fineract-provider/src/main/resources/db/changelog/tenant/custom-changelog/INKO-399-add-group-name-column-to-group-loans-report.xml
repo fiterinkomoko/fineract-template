@@ -21,7 +21,7 @@
 -->
 
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.6.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
-    <changeSet author="tabrez@fiter.io" id="INKO-399-add-group-loans-report">
+    <changeSet author="tabrez@fiter.io" id="INKO-399-add-group-loans-report-2">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">select count(sr.id) from stretchy_report sr where sr.report_name='Group Loans' and sr.report_type='Table'</sqlCheck>
         </preConditions>
@@ -31,72 +31,72 @@
             <column name="report_subtype"/>
             <column name="report_category" value="Loan"/>
             <column name="report_sql" value="select
-	l.disbursedon_date as &quot;Disbursed On Date&quot;,
-	o.name as &quot;Office&quot;,
-	departmentTbl.code_value as &quot;Department&quot;,
-	cvn.code_value as &quot;Country&quot;,
-	cvl.code_value as &quot;Location&quot;,
-	concat(c.firstname,
-	' ',
-	c.lastname) as &quot;Member Name&quot;,
-	g.external_id as &quot;Group UID&quot;,
-	g.display_name as &quot;Group Name&quot;,
-	l.account_no as &quot;Loan Account Number&quot;,
-	l.principal_disbursed_derived as &quot;Loan Amount&quot;,
-	l.interest_charged_derived as &quot;Interest&quot;,
-	l.total_repayment_derived as &quot;Total Payments&quot;,
-	l.principal_repaid_derived as &quot;Total Principal Paid&quot;,
-	l.interest_repaid_derived as &quot;Total Interest Paid&quot;,
-	l.fee_charges_repaid_derived as &quot;Total Fees Paid&quot;,
-	l.penalty_charges_repaid_derived as &quot;Total Late Fees Paid&quot;,
-	l.principal_outstanding_derived as &quot;Outstanding Principal&quot;,
-	l.interest_outstanding_derived as &quot;Outstanding Interest&quot;,
-	l.fee_charges_outstanding_derived as &quot;Outstanding Fees&quot;,
-	l.penalty_charges_outstanding_derived as &quot;Outstanding Late Fees&quot;,
-	p.name as &quot;Product&quot;,
-	f.name as &quot;Fund&quot;
+    l.disbursedon_date as &quot;Disbursed On Date&quot;,
+    o.name as &quot;Office&quot;,
+    departmentTbl.code_value as &quot;Department&quot;,
+    cvn.code_value as &quot;Country&quot;,
+    cvl.code_value as &quot;Location&quot;,
+    concat(c.firstname,
+    ' ',
+    c.lastname) as &quot;Member Name&quot;,
+    g.external_id as &quot;Group UID&quot;,
+    g.display_name as &quot;Group Name&quot;,
+    l.account_no as &quot;Loan Account Number&quot;,
+    l.principal_disbursed_derived as &quot;Loan Amount&quot;,
+    l.interest_charged_derived as &quot;Interest&quot;,
+    l.total_repayment_derived as &quot;Total Payments&quot;,
+    l.principal_repaid_derived as &quot;Total Principal Paid&quot;,
+    l.interest_repaid_derived as &quot;Total Interest Paid&quot;,
+    l.fee_charges_repaid_derived as &quot;Total Fees Paid&quot;,
+    l.penalty_charges_repaid_derived as &quot;Total Late Fees Paid&quot;,
+    l.principal_outstanding_derived as &quot;Outstanding Principal&quot;,
+    l.interest_outstanding_derived as &quot;Outstanding Interest&quot;,
+    l.fee_charges_outstanding_derived as &quot;Outstanding Fees&quot;,
+    l.penalty_charges_outstanding_derived as &quot;Outstanding Late Fees&quot;,
+    p.name as &quot;Product&quot;,
+    f.name as &quot;Fund&quot;
 from
-	m_group topgroup
+    m_group topgroup
 join m_office o on
-	o.id = topgroup.office_id
-	and o.hierarchy like concat('${currentUserHierarchy}',
-	'%')
+    o.id = topgroup.office_id
+    and o.hierarchy like concat('${currentUserHierarchy}',
+    '%')
 join m_group g on
-	g.hierarchy like concat(topgroup.hierarchy,
-	'%')
+    g.hierarchy like concat(topgroup.hierarchy,
+    '%')
 join m_loan l on
-	l.group_id = g.id
+    l.group_id = g.id
 join m_product_loan p on
-	p.id = l.product_id
+    p.id = l.product_id
 left join m_group_client gc on
-	gc.group_id = l.group_id
+    gc.group_id = l.group_id
 left join m_client c on
-	c.id = gc.client_id
+    c.id = gc.client_id
 left join m_client_other_info coi on
-	coi.client_id = c.id
+    coi.client_id = c.id
 left join m_client_recruitment_survey crs on
-	crs.client_id = c.id
+    crs.client_id = c.id
 left join m_currency cur on
-	cur.code = l.currency_code
+    cur.code = l.currency_code
 left join m_fund f on
-	f.id = l.fund_id
+    f.id = l.fund_id
 left join m_code_value departmentTbl on
-	departmentTbl.id = l.department_cv_id
+    departmentTbl.id = l.department_cv_id
 left join m_code_value cvn on
-	cvn.id = coi.nationality_cv_id
+    cvn.id = coi.nationality_cv_id
 left join m_code_value cvl on
-	cvl.id = crs.survey_location_cv_id
+    cvl.id = crs.survey_location_cv_id
 where
-	o.id = ${officeId}
-	and (l.product_id = '${loanProductId}'
-		or '-1' = '${loanProductId}')
-	and (l.department_cv_id = '${departmentId}'
-		or '-1' = '${departmentId}')
-	and (l.loan_officer_id = '${loanOfficerId}'
-		or '-1' = '${loanOfficerId}')
-	and (l.fund_id = '${fundId}'
-		or '-1' = '${fundId}')
-	and date(l.disbursedon_date) between date('${startDate}') and date('${endDate}') " />
+    o.id = ${officeId}
+    and (l.product_id = '${loanProductId}'
+        or '-1' = '${loanProductId}')
+    and (l.department_cv_id = '${departmentId}'
+        or '-1' = '${departmentId}')
+    and (l.loan_officer_id = '${loanOfficerId}'
+        or '-1' = '${loanOfficerId}')
+    and (l.fund_id = '${fundId}'
+        or '-1' = '${fundId}')
+    and date(l.disbursedon_date) between date('${startDate}') and date('${endDate}') " />
             <column name="description" value="Groups Loan Table Report"/>
             <column name="core_report" valueBoolean="true"/>
             <column name="use_report" valueBoolean="true"/>
@@ -179,78 +179,78 @@ where
             <column name="report_parameter_name" value="departmentId"/>
         </insert>
     </changeSet>
-    <changeSet author="tabrez@fiter.io" id="INKO-399-add-group-name-column-to-group-loans-report">
+    <changeSet author="tabrez@fiter.io" id="INKO-399-add-group-name-column-to-group-loans-report-2">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">select count(sr.id) from stretchy_report sr where sr.report_name='Group Loans' and sr.report_type='Table'</sqlCheck>
         </preConditions>
         <update tableName="stretchy_report">
             <column name="report_sql" value="select
-	l.disbursedon_date as &quot;Disbursed On Date&quot;,
-	o.name as &quot;Office&quot;,
-	departmentTbl.code_value as &quot;Department&quot;,
-	cvn.code_value as &quot;Country&quot;,
-	cvl.code_value as &quot;Location&quot;,
-	concat(c.firstname,
-	' ',
-	c.lastname) as &quot;Member Name&quot;,
-	g.external_id as &quot;Group UID&quot;,
-	g.display_name as &quot;Group Name&quot;,
-	l.account_no as &quot;Loan Account Number&quot;,
-	l.principal_disbursed_derived as &quot;Loan Amount&quot;,
-	l.interest_charged_derived as &quot;Interest&quot;,
-	l.total_repayment_derived as &quot;Total Payments&quot;,
-	l.principal_repaid_derived as &quot;Total Principal Paid&quot;,
-	l.interest_repaid_derived as &quot;Total Interest Paid&quot;,
-	l.fee_charges_repaid_derived as &quot;Total Fees Paid&quot;,
-	l.penalty_charges_repaid_derived as &quot;Total Late Fees Paid&quot;,
-	l.principal_outstanding_derived as &quot;Outstanding Principal&quot;,
-	l.interest_outstanding_derived as &quot;Outstanding Interest&quot;,
-	l.fee_charges_outstanding_derived as &quot;Outstanding Fees&quot;,
-	l.penalty_charges_outstanding_derived as &quot;Outstanding Late Fees&quot;,
-	p.name as &quot;Product&quot;,
-	f.name as &quot;Fund&quot;
+    l.disbursedon_date as &quot;Disbursed On Date&quot;,
+    o.name as &quot;Office&quot;,
+    departmentTbl.code_value as &quot;Department&quot;,
+    cvn.code_value as &quot;Country&quot;,
+    cvl.code_value as &quot;Location&quot;,
+    concat(c.firstname,
+    ' ',
+    c.lastname) as &quot;Member Name&quot;,
+    g.external_id as &quot;Group UID&quot;,
+    g.display_name as &quot;Group Name&quot;,
+    l.account_no as &quot;Loan Account Number&quot;,
+    l.principal_disbursed_derived as &quot;Loan Amount&quot;,
+    l.interest_charged_derived as &quot;Interest&quot;,
+    l.total_repayment_derived as &quot;Total Payments&quot;,
+    l.principal_repaid_derived as &quot;Total Principal Paid&quot;,
+    l.interest_repaid_derived as &quot;Total Interest Paid&quot;,
+    l.fee_charges_repaid_derived as &quot;Total Fees Paid&quot;,
+    l.penalty_charges_repaid_derived as &quot;Total Late Fees Paid&quot;,
+    l.principal_outstanding_derived as &quot;Outstanding Principal&quot;,
+    l.interest_outstanding_derived as &quot;Outstanding Interest&quot;,
+    l.fee_charges_outstanding_derived as &quot;Outstanding Fees&quot;,
+    l.penalty_charges_outstanding_derived as &quot;Outstanding Late Fees&quot;,
+    p.name as &quot;Product&quot;,
+    f.name as &quot;Fund&quot;
 from
-	m_group topgroup
+    m_group topgroup
 join m_office o on
-	o.id = topgroup.office_id
-	and o.hierarchy like concat('${currentUserHierarchy}',
-	'%')
+    o.id = topgroup.office_id
+    and o.hierarchy like concat('${currentUserHierarchy}',
+    '%')
 join m_group g on
-	g.hierarchy like concat(topgroup.hierarchy,
-	'%')
+    g.hierarchy like concat(topgroup.hierarchy,
+    '%')
 join m_loan l on
-	l.group_id = g.id
+    l.group_id = g.id
 join m_product_loan p on
-	p.id = l.product_id
+    p.id = l.product_id
 left join m_group_client gc on
-	gc.group_id = l.group_id
+    gc.group_id = l.group_id
 left join m_client c on
-	c.id = gc.client_id
+    c.id = gc.client_id
 left join m_client_other_info coi on
-	coi.client_id = c.id
+    coi.client_id = c.id
 left join m_client_recruitment_survey crs on
-	crs.client_id = c.id
+    crs.client_id = c.id
 left join m_currency cur on
-	cur.code = l.currency_code
+    cur.code = l.currency_code
 left join m_fund f on
-	f.id = l.fund_id
+    f.id = l.fund_id
 left join m_code_value departmentTbl on
-	departmentTbl.id = l.department_cv_id
+    departmentTbl.id = l.department_cv_id
 left join m_code_value cvn on
-	cvn.id = coi.nationality_cv_id
+    cvn.id = coi.nationality_cv_id
 left join m_code_value cvl on
-	cvl.id = crs.survey_location_cv_id
+    cvl.id = crs.survey_location_cv_id
 where
-	o.id = ${officeId}
-	and (l.product_id = '${loanProductId}'
-		or '-1' = '${loanProductId}')
-	and (l.department_cv_id = '${departmentId}'
-		or '-1' = '${departmentId}')
-	and (l.loan_officer_id = '${loanOfficerId}'
-		or '-1' = '${loanOfficerId}')
-	and (l.fund_id = '${fundId}'
-		or '-1' = '${fundId}')
-	and date(l.disbursedon_date) between date('${startDate}') and date('${endDate}') " />
+    o.id = ${officeId}
+    and (l.product_id = '${loanProductId}'
+        or '-1' = '${loanProductId}')
+    and (l.department_cv_id = '${departmentId}'
+        or '-1' = '${departmentId}')
+    and (l.loan_officer_id = '${loanOfficerId}'
+        or '-1' = '${loanOfficerId}')
+    and (l.fund_id = '${fundId}'
+        or '-1' = '${fundId}')
+    and date(l.disbursedon_date) between date('${startDate}') and date('${endDate}') " />
             <where>report_name='Group Loans'</where>
         </update>
     </changeSet>
