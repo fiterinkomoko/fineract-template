@@ -317,4 +317,19 @@
         </update>
     </changeSet>
 
+    <changeSet author="bosco@fiter.io" id="Update_Loan-fully-repaid-Table-report-and-fix-cycle-column" context="mysql">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="stretchy_report"/>
+            <sqlCheck expectedResult="1">
+                select count(1) from stretchy_report
+                where report_name = 'Loan fully repaid Table';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="&#10;SELECT c.id     AS 'id',&#10;c.firstname     AS 'firstName', &#10;c.middlename    AS 'middleName', &#10;c.lastname      AS 'lastName', &#10;c.display_name     AS 'fullName', &#10;c.mobile_no      AS 'mobileNo', &#10;l.principal_amount      AS 'loanAmount', &#10;(IFNULL(l.principal_outstanding_derived, 0) + IFNULL(l.interest_outstanding_derived, 0) + &#10;IFNULL(l.fee_charges_outstanding_derived, 0) + &#10;IFNULL(l.penalty_charges_outstanding_derived, 0))    AS 'loanOutstanding', &#10;l.principal_disbursed_derived     AS 'loanDisbursed', &#10;o.id      AS 'officeNumber', &#10;l.account_no    AS 'loanAccountId', &#10;gua.lastname     AS 'guarantorLastName', &#10;COUNT(gua.id)     AS 'numberOfGuarantors', &#10;l.maturedon_date     AS 'dueDate', &#10;laa.total_overdue_derived   AS 'totalDue', &#10;gp.display_name    AS 'groupName', &#10;l.total_repayment_derived      AS 'totalFullyPaid', &#10;year(now()) - YEAR(c.date_of_birth)      as 'Age', &#10;c.external_id     as 'Client UID', &#10;cdg.code_value      as 'Gender', &#10;cvc.code_value      as 'Cohort', &#10;l.generic_loan_counter     as 'Cycle',  &#10;cvn.code_value    as 'Nationality', &#10;cvl.code_value     as 'Location', &#10;cvs.code_value     AS 'Strata'&#10;FROM m_office o&#10;JOIN m_office ounder ON ounder.hierarchy LIKE CONCAT(o.hierarchy, '%')&#10;JOIN m_client c ON c.office_id = ounder.id&#10;JOIN m_loan l ON l.client_id = c.id&#10;LEFT JOIN m_staff lo ON lo.id = l.loan_officer_id&#10;LEFT JOIN m_currency cur ON cur.code = l.currency_code&#10;LEFT JOIN m_group_client gc ON gc.client_id = c.id&#10;LEFT JOIN m_group gp ON gp.id = l.group_id&#10;LEFT JOIN m_guarantor gua ON gua.loan_id = l.id&#10;LEFT JOIN m_loan_arrears_aging laa ON laa.loan_id = l.id&#10;left join m_client_other_info coi on coi.client_id = c.id&#10;left join m_code_value cdg on cdg.id = c.gender_cv_id&#10;left join m_client_recruitment_survey crs on crs.client_id = c.id&#10;left join m_code_value cvc on cvc.id = crs.cohort_cv_id&#10;left join m_code_value cvn on cvn.id = coi.nationality_cv_id&#10;left join m_code_value cvl on cvl.id = crs.survey_location_cv_id&#10;left join m_code_value cvs on cvs.id = coi.strata_cv_id&#10;WHERE o.id = ${officeId}&#10;AND (IFNULL(l.loan_officer_id, -10) = ${loanOfficerId} OR '-1' = ${loanOfficerId})&#10;AND date(l.closedon_date) between date('${startDate}') and date('${endDate}')&#10;AND (l.loan_status_id IN (600, 700))&#10;GROUP BY l.id, ounder.hierarchy, l.currency_code, c.account_no, l.account_no, gua.lastname, l.maturedon_date, cvc.code_value,&#10; cvn.code_value, cvl.code_value, cvs.code_value&#10;ORDER BY ounder.hierarchy, l.currency_code, c.account_no, l.account_no&#10;"/>
+            <where>report_name = 'Loan fully repaid Table'</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
