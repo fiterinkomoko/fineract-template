@@ -302,4 +302,19 @@
         </update>
     </changeSet>
 
+    <changeSet author="bosco@fiter.io" id="Update_Collateral-report-fix-collateral-type" context="mysql">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="stretchy_report"/>
+            <sqlCheck expectedResult="1">
+                select count(1) from stretchy_report
+                where report_name = 'Collateral';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="&#10;select o.name    as Office, &#10;c.external_id     as UID, &#10;concat(c.firstname, ' ', c.lastname) as 'Customer Name', &#10;l.account_no     as 'Loan Id Number', &#10;mpl.name   as 'Product Name', &#10;l.principal_amount     as 'Loan Amount', &#10;cvs.code_value    as Strata, &#10;mcm.quality    as 'Type of Collateral', &#10;ccma.worth_of_collateral   as 'Collateral Coverage', &#10;''  as OMV, &#10;''    as FSV, &#10;cvp.code_value  as Province, &#10;cvd.code_value    as District, &#10;cvsec.code_value   as Sector, &#10;cvcell.code_value   as Cell, &#10;cvv.code_value    as Village&#10;from m_office o &#10;join m_office ounder on ounder.hierarchy like concat(o.hierarchy, '%') and &#10; ounder.hierarchy like concat('${currentUserHierarchy}', '%') &#10;join m_client c on c.office_id = ounder.id&#10;join m_loan l on l.client_id = c.id &#10;join m_product_loan mpl on l.product_id = mpl.id &#10;left join m_client_other_info coi on coi.client_id = c.id &#10;left join m_code_value cvs on cvs.id = coi.strata_cv_id &#10;left join m_client_collateral_management mccm on c.id = mccm.client_id &#10;left join m_loan_collateral_management lcm on mccm.id = lcm.client_collateral_id &#10;left join m_collateral_management mcm on mccm.collateral_id = mcm.id &#10;left join m_client_collateral_management_additional_details ccma &#10;on ccma.client_collateral_id = lcm.client_collateral_id &#10;left join m_code_value cvp on cvp.id = ccma.province_cv_id &#10;left join m_code_value cvd on cvd.id = ccma.district_cv_id &#10;left join m_code_value cvsec on cvsec.id = ccma.sector_cv_id &#10;left join m_code_value cvcell on cvcell.id = ccma.cell_cv_id  &#10;left join m_code_value cvv on cvv.id = ccma.village_cv_id&#10;where o.id = ${officeId} &#10;and (l.product_id = '${loanProductId}' or '-1' = '${loanProductId}')&#10;and (l.fund_id = '${fundId}' or '-1' = '${fundId}')&#10;and (l.loan_officer_id = '${loanOfficerId}' or '-1' = '${loanOfficerId}')&#10;and (ccma.province_cv_id = '${provinceId}' or '-1' = '${provinceId}')&#10;GROUP BY o.name, c.external_id, CONCAT(c.firstname, ' ', c.lastname), l.account_no, mpl.name, l.principal_amount,&#10;mcm.quality, mcm.unit_type,&#10;cvp.code_value, cvd.code_value, cvsec.code_value, cvcell.code_value, cvv.code_value, cvs.code_value,&#10;ccma.worth_of_collateral&#10;"/>
+            <where>report_name = 'Collateral'</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
