@@ -332,24 +332,6 @@
         </update>
     </changeSet>
 
-    <changeSet author="bosco@fiter.io" id="update_Rwanda_Consumer_Credit_To_TransUnion_CRB_Report_mysql" context="mysql">
-        <sqlFile
-                encoding="utf8"
-                path="db/changelog/tenant/commands/update_Rwanda_Consumer_Credit_To_TransUnion_CRB_Report_mysql.sql"
-                relativeToChangelogFile="false"
-                splitStatements="true"
-                stripComments="true"/>
-    </changeSet>
-
-    <changeSet author="bosco@fiter.io" id="update_Rwanda_Corporate_Credit_To_TransUnion_CRB_Report_mysql" context="mysql">
-        <sqlFile
-                encoding="utf8"
-                path="db/changelog/tenant/commands/update_Rwanda_Corporate_Credit_To_TransUnion_CRB_Report_mysql.sql"
-                relativeToChangelogFile="false"
-                splitStatements="true"
-                stripComments="true"/>
-    </changeSet>
-
     <changeSet author="bosco@fiter.io" id="Update_Rescheduled-Loans_report_INKO-417-fix-reason-2" context="mysql">
 
         <preConditions onFail="MARK_RAN">
@@ -378,6 +360,24 @@
             <column name="report_sql" value="&#10;select l.id, &#10;o.name     as Office,  &#10;cvl.code_value        as 'Client Location', &#10;c.external_id       as UID, &#10;concat(c.firstname, ' ', c.lastname)        as 'Customer Name',  &#10;l.account_no        as 'Loan Id Number',  &#10;l.principal_amount          as 'Loan Amount',  &#10;l.interest_charged_derived       as Interest, &#10;l.term_frequency               as 'Total Payments',  &#10;l.principal_repaid_derived         as 'Total Principal Paid',  &#10;l.fee_charges_repaid_derived        as 'Total Fees Paid', &#10;l.interest_repaid_derived         as 'Total Interest Paid',  &#10;l.penalty_charges_charged_derived        as 'Total Late Fees', &#10;l.total_outstanding_derived           as 'Outstanding Balance',  &#10;l.interest_outstanding_derived     as 'Outstanding Interest',  &#10;l.fee_charges_outstanding_derived     as 'Outstanding Fees',  &#10;cvs.code_value     as 'Client Classification',   &#10;case  &#10;when (con.enabled = false) then loanStatusTable.loanStatus   &#10;when con.enabled = true then case     &#10;when loanStatusTable.loanStatus = 'Pending Approval' and    &#10;loanStatusTable.loanDecisionState is null    &#10;then loanStatusTable.loanStatus      &#10;when loanStatusTable.loanStatus = 'Pending Approval' and      &#10;loanStatusTable.loanDecisionState is not null and        &#10;loanStatusTable.loanDecisionState != 'Prepare And Sign Contract' &#10;then loanStatusTable.loanDecisionState  &#10;when loanStatusTable.loanStatus != 'Pending Approval'     &#10;then loanStatusTable.loanStatus      &#10;when loanStatusTable.loanStatus = 'Pending Approval' and   &#10; loanStatusTable.loanDecisionState = 'Prepare And Sign Contract'     &#10; then loanStatusTable.loanStatus end end as 'Status',      &#10;YEAR(now()) - YEAR(c.date_of_birth)                                              as Age,     &#10;cvg.code_value                                                                   as Gender,      &#10;cvc.code_value                                                                   as Cohort,   &#10;l.generic_loan_counter                                                           as Cycle,       &#10;cvn.code_value                                                                   as Nationality,       &#10;cvl.code_value                                                                   as Location &#10;from m_office o &#10;join m_office ounder on ounder.hierarchy like concat(o.hierarchy, '%') and &#10;ounder.hierarchy like concat('${currentUserHierarchy}', '%')  &#10;join m_client c on c.office_id = ounder.id  &#10;join m_loan l on l.client_id = c.id  &#10;join m_product_loan pl on pl.id = l.product_id &#10;left join m_client_other_info coi on coi.client_id = c.id  &#10;left join m_client_recruitment_survey crs on crs.client_id = c.id  &#10;left join m_code_value cvl on cvl.id = crs.survey_location_cv_id  &#10;left join m_code_value cvs on cvs.id = coi.strata_cv_id    &#10;left join m_code_value cvg on cvg.id = c.gender_cv_id    &#10;left join m_code_value cvc on cvc.id = crs.cohort_cv_id    &#10;left join m_code_value cvn on cvn.id = coi.nationality_cv_id    &#10;left join m_fund f on f.id = l.fund_id    &#10;left join m_staff lo on lo.id = l.loan_officer_id   &#10;left join m_loan_decision ld on ld.loan_id = l.id  &#10;left join c_configuration con on con.name = 'Add-More-Stages-To-A-Loan-Life-Cycle' &#10;left join (select l.id   as loanId,    &#10;case   &#10;when l.loan_status_id = 100 then 'Pending Approval'   &#10;when l.loan_status_id = 200 then 'Approval' &#10;when l.loan_status_id = 300 then 'Active'  &#10;when l.loan_status_id = 303 then 'Transfer In Progress' &#10;when l.loan_status_id = 304 then 'Transfer On Hold'   &#10;when l.loan_status_id = 400 then 'Withdrawn By Client'    &#10;when l.loan_status_id = 500 then 'Rejected'    &#10;when l.loan_status_id = 600 then 'Closed Obligations Met'   &#10;when l.loan_status_id = 601 then 'Closed Written Off'     &#10;when l.loan_status_id = 602 then 'Closed Reschedule Outstanding Amount'   &#10;when l.loan_status_id = 700 then 'Overpaid' end                        as loanStatus,  &#10;case   &#10; when l.loan_decision_state = 1000 then 'Review Application'    &#10;when l.loan_decision_state = 1200 then 'Due Diligence'  &#10;when l.loan_decision_state = 1300 then 'Collateral Review' &#10;when l.loan_decision_state = 1400 then 'IC Review Level One'  &#10;when l.loan_decision_state = 1500 then 'IC Review Level Two'  &#10;when l.loan_decision_state = 1600 then 'IC Review Level Three'  &#10;when l.loan_decision_state = 1700 then 'IC Review Level Four'  &#10;when l.loan_decision_state = 1800 then 'IC Review Level Five'  &#10;when l.loan_decision_state = 1900   &#10;then 'Prepare And Sign Contract' end    as loanDecisionState    &#10;from m_loan l   &#10;left join m_loan_decision ld on ld.loan_id = l.id) as loanStatusTable  &#10;on loanStatusTable.loanId = l.id&#10;where o.id = ${officeId}  &#10;and (l.product_id = '${loanProductId}' or '-1' = '${loanProductId}')  &#10;and (l.fund_id = '${fundId}' or '-1' = '${fundId}')  &#10;and (ifnull(l.loan_officer_id, -10) = '${loanOfficerId}' or '-1' = '${loanOfficerId}')  &#10;and (l.disbursedon_date between date('${startDate}') and date('${endDate}'))  &#10;and (c.id = '${clientId}' or '-1' = '${clientId}')&#10;"/>
             <where>report_name = 'Client Statement'</where>
         </update>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="update_Rwanda_Consumer_Credit_To_TransUnion_CRB_Report_mysql-2" context="mysql">
+        <sqlFile
+                encoding="utf8"
+                path="db/changelog/tenant/commands/update_Rwanda_Consumer_Credit_To_TransUnion_CRB_Report_mysql2.sql"
+                relativeToChangelogFile="false"
+                splitStatements="true"
+                stripComments="true"/>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="update_Rwanda_Corporate_Credit_To_TransUnion_CRB_Report_mysql-2" context="mysql">
+        <sqlFile
+                encoding="utf8"
+                path="db/changelog/tenant/commands/update_Rwanda_Corporate_Credit_To_TransUnion_CRB_Report_mysql2.sql"
+                relativeToChangelogFile="false"
+                splitStatements="true"
+                stripComments="true"/>
     </changeSet>
 
 </databaseChangeLog>
