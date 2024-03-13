@@ -74,7 +74,7 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
                     + "           WHEN l.repayment_period_frequency_enum = 3 THEN 'ANN' " + "           ELSE 'IRR' "
                     + "           END                                                                           AS accountRepaymentTerm, "
                     + "       l.total_outstanding_derived                                                       AS currentBalance, "
-                    + "       'O'                                                                               AS accountOwner, "
+                    + "       IF(l.loan_type_enum = 1, 'O', 'G')                                                AS accountOwner, "
                     + "       CASE " + "           WHEN l.repayment_period_frequency_enum = 1 THEN 'W' "
                     + "           WHEN l.repayment_period_frequency_enum = 2 THEN 'M' "
                     + "           WHEN l.repayment_period_frequency_enum = 3 THEN 'A' "
