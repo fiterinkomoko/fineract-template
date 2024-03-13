@@ -27,6 +27,8 @@ import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaConsumerCreditData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements TransUnionCrbPostConsumerCreditReadPlatformService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(TransUnionCrbServiceImpl.class);
+
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseTypeResolver databaseTypeResolver;
 
@@ -42,6 +46,7 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
     public Collection<TransUnionRwandaConsumerCreditData> retrieveAllConsumerCredits() {
         final ConsumerCreditMapper mapper = new ConsumerCreditMapper();
         final String sql = mapper.schema() + " order by l.id ";
+        LOG.info("retrieveAllConsumerCredits: " + sql);
         return this.jdbcTemplate.query(sql, mapper, new Object[] {});
     }
 
@@ -122,9 +127,31 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
                     + "       ra.physical_address_cell                                                          AS physicalAddressCell, "
                     + "       13                                                                                AS nature, "
                     + "       other_info.national_identification_number                                         AS nationalId, "
-                    + "       other_info.passport_number                                                        AS passportNumber, "
-                    + "       1                                                                                 AS classification, "
-                    + "       ''                                                                                AS emailAddress, "
+                    + "       other_info.passport_number                                                        AS passportNumber, ");
+            if (databaseTypeResolver.isMySQL()) {
+                sql.append("       CASE " + "           WHEN mlaa.overdue_since_date_derived IS NULL OR "
+                        + "                DATEDIFF(NOW(), mlaa.overdue_since_date_derived) < 30 THEN 1 "
+                        + "           WHEN DATEDIFF(NOW(), mlaa.overdue_since_date_derived) BETWEEN 31 AND 90 " + "               THEN 2 "
+                        + "          WHEN DATEDIFF(NOW(), mlaa.overdue_since_date_derived) BETWEEN 91 AND 180 " + "               THEN 3 "
+                        + "            WHEN DATEDIFF(NOW(), mlaa.overdue_since_date_derived) BETWEEN 181 AND 365 "
+                        + "               THEN 4 " + "           WHEN DATEDIFF(NOW(), mlaa.overdue_since_date_derived) BETWEEN 366 AND 719 "
+                        + "               THEN 5 " + "           WHEN DATEDIFF(NOW(), mlaa.overdue_since_date_derived) > 720 THEN 6 "
+                        + "          END                                                                                            AS classification, ");
+            } else {
+                sql.append("       CASE " + "           WHEN mlaa.overdue_since_date_derived IS NULL OR "
+                        + "                EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) < 30 THEN 1 "
+                        + "           WHEN EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) BETWEEN 31 AND 90 "
+                        + "               THEN 2 "
+                        + "          WHEN EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) BETWEEN 91 AND 180 "
+                        + "               THEN 3 "
+                        + "            WHEN EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) BETWEEN 181 AND 365 "
+                        + "               THEN 4 "
+                        + "           WHEN EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) BETWEEN 366 AND 719 "
+                        + "               THEN 5 "
+                        + "           WHEN EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) > 720 THEN 6 "
+                        + "          END                                                                                            AS classification, ");
+            }
+            sql.append("      ''                                                                                AS emailAddress, "
                     + "       'T'                                                                               AS residenceType, "
                     + "       0                                                                                 AS availableCredit, "
                     + "       0                                                                                 AS income, "
