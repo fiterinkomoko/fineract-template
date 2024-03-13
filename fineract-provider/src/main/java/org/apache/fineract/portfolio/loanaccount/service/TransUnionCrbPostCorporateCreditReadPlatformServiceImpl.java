@@ -27,8 +27,6 @@ import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.portfolio.loanaccount.data.TransUnionRwandaCorporateCreditData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -37,8 +35,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TransUnionCrbPostCorporateCreditReadPlatformServiceImpl implements TransUnionCrbPostCorporateCreditReadPlatformService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TransUnionCrbServiceImpl.class);
-
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseTypeResolver databaseTypeResolver;
 
@@ -46,7 +42,6 @@ public class TransUnionCrbPostCorporateCreditReadPlatformServiceImpl implements 
     public Collection<TransUnionRwandaCorporateCreditData> retrieveAllCorporateCredits() {
         final CorporateCreditMapper mapper = new CorporateCreditMapper();
         final String sql = mapper.schema() + " order by l.id ";
-        LOG.info("retrieveAllCorporateCredits: " + sql);
         return this.jdbcTemplate.query(sql, mapper, new Object[] {});
     }
 
