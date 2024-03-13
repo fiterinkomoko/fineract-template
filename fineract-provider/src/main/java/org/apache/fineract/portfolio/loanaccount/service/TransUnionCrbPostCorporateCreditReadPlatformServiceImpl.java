@@ -108,9 +108,33 @@ public class TransUnionCrbPostCorporateCreditReadPlatformServiceImpl implements 
                     + "       0                                                                                 AS numberOfJointLoanParticipants, "
                     + "       ra.physical_address_cell                                                          AS physicalAddressCell, "
                     + "       ra.address_line_1                                                                 AS physicalAddressLine1, "
-                    + "       13                                                                                AS nature, "
-                    + "       1                                                                                 AS classification, "
-                    + "       ''                                                                                AS emailAddress, "
+                    + "       13                                                                                AS nature, ");
+
+            if (databaseTypeResolver.isMySQL()) {
+                sql.append("       CASE " + "           WHEN mlaa.overdue_since_date_derived IS NULL OR "
+                        + "                DATEDIFF(NOW(), mlaa.overdue_since_date_derived) < 30 THEN 1 "
+                        + "           WHEN DATEDIFF(NOW(), mlaa.overdue_since_date_derived) BETWEEN 31 AND 90 " + "               THEN 2 "
+                        + "          WHEN DATEDIFF(NOW(), mlaa.overdue_since_date_derived) BETWEEN 91 AND 180 " + "               THEN 3 "
+                        + "            WHEN DATEDIFF(NOW(), mlaa.overdue_since_date_derived) BETWEEN 181 AND 365 "
+                        + "               THEN 4 " + "           WHEN DATEDIFF(NOW(), mlaa.overdue_since_date_derived) BETWEEN 366 AND 719 "
+                        + "               THEN 5 " + "           WHEN DATEDIFF(NOW(), mlaa.overdue_since_date_derived) > 720 THEN 6 "
+                        + "          END                                                                                            AS classification, ");
+            } else {
+                sql.append("       CASE " + "           WHEN mlaa.overdue_since_date_derived IS NULL OR "
+                        + "                EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) < 30 THEN 1 "
+                        + "           WHEN EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) BETWEEN 31 AND 90 "
+                        + "               THEN 2 "
+                        + "          WHEN EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) BETWEEN 91 AND 180 "
+                        + "               THEN 3 "
+                        + "            WHEN EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) BETWEEN 181 AND 365 "
+                        + "               THEN 4 "
+                        + "           WHEN EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) BETWEEN 366 AND 719 "
+                        + "               THEN 5 "
+                        + "           WHEN EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) > 720 THEN 6 "
+                        + "          END                                                                                            AS classification, ");
+            }
+
+            sql.append("      ''                                                                                AS emailAddress, "
                     + "       'T'                                                                               AS residenceType, "
                     + "       0                                                                                 AS availableCredit, "
                     + "       0                                                                                 AS income, "
