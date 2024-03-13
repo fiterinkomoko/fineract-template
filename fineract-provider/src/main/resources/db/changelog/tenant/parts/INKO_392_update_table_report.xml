@@ -350,4 +350,19 @@
                 stripComments="true"/>
     </changeSet>
 
+    <changeSet author="bosco@fiter.io" id="Update_Rescheduled-Loans_report_INKO-417-fix-reason-2" context="mysql">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="stretchy_report"/>
+            <sqlCheck expectedResult="1">
+                select count(1) from stretchy_report
+                where report_name = 'Rescheduled Loans';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="&#10;SELECT concat(repeat('..', ((LENGTH(ounder.hierarchy) - LENGTH(REPLACE(ounder.hierarchy, '.', '')) - 1))), ounder.name)   as 'Office/Branch',&#10;coalesce(cur.display_symbol, ml.currency_code)  as 'Currency',&#10;c.account_no  as 'Client Account No.',&#10;c.display_name  AS 'Client Name',&#10;ml.account_no  AS 'Loan Account No.',&#10;mpl.name  AS 'Product Name',&#10;ml.disbursedon_date  AS 'Disbursed Date',&#10;ml.writtenoffon_date    AS 'Written Off date',&#10;ml.principal_amount  as 'Loan Amount',&#10;join_mlrr.reason   AS 'Reason For Rescheduling',&#10;coalesce(ms.display_name, '-')   AS 'Loan Officer Name', &#10;extract(year from now()) - extract(year from c.date_of_birth) as 'Age', &#10;c.external_id    as 'Client UID', &#10;cdg.code_value    as 'Gender',&#10;cvc.code_value   as 'Cohort',&#10;ml.generic_loan_counter   as 'Cycle',&#10;cvn.code_value   as 'Nationality',&#10;cvl.code_value     as 'Location',&#10;cvs.code_value     AS 'Strata',&#10;ml.loan_status_id     AS 'Loan Status'&#10;FROM m_office o&#10;JOIN m_office ounder ON ounder.hierarchy like concat(o.hierarchy, '%') AND  ounder.hierarchy like CONCAT('${currentUserHierarchy}', '%')&#10;JOIN m_client c ON c.office_id = ounder.id&#10;JOIN m_loan ml ON ml.client_id = c.id&#10;JOIN m_product_loan mpl ON mpl.id = ml.product_id&#10;JOIN (SELECT MAX(mlrr.id) AS id, mlrr.loan_id, cvs.code_value as reason,mlrr.reschedule_from_date as rescheduleDate&#10;FROM m_loan_reschedule_request mlrr&#10;left join m_code_value cvs on cvs.id = mlrr.reschedule_reason_cv_id&#10;WHERE mlrr.status_enum = 200&#10;GROUP BY mlrr.loan_id, cvs.code_value,mlrr.reschedule_from_date) join_mlrr ON join_mlrr.loan_id = ml.id&#10;LEFT JOIN m_staff ms ON ms.id = ml.loan_officer_id&#10;LEFT JOIN m_currency cur on cur.code = ml.currency_code&#10;left join m_client_other_info coi on coi.client_id = c.id&#10;left join m_code_value cdg on cdg.id = c.gender_cv_id&#10;left join m_client_recruitment_survey crs on crs.client_id = c.id&#10;left join m_code_value cvc on cvc.id = crs.cohort_cv_id&#10;left join m_code_value cvn on cvn.id = coi.nationality_cv_id&#10;left join m_code_value cvl on cvl.id = crs.survey_location_cv_id&#10;left join m_code_value cvs on cvs.id = coi.strata_cv_id&#10;WHERE  o.id = ${officeId}&#10;AND (mpl.id = ${loanProductId} OR ${loanProductId} = -1)&#10;AND join_mlrr.rescheduleDate BETWEEN '${startDate}' AND '${endDate}'&#10;AND (ml.currency_code = '${currencyId}' or '-1' = '${currencyId}')&#10;ORDER BY ounder.hierarchy, coalesce(cur.display_symbol, ml.currency_code), ml.account_no&#10;"/>
+            <where>report_name = 'Rescheduled Loans'</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>
