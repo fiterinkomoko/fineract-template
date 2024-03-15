@@ -309,6 +309,35 @@ public class OdooServiceImpl implements OdooService {
 
                 // Create journal entry
                 if (debit.getAmount().doubleValue() != 0 || credit.getAmount().doubleValue() != 0) {
+
+                    JournalEntryToOdooData journalEntryToOdooData = new JournalEntryToOdooData();
+                    DebitOrCreditData debitData = new DebitOrCreditData();
+                    DebitOrCreditData creditData = new DebitOrCreditData();
+                    JournalData journalData = new JournalData();
+
+                    journalEntryToOdooData.setUsername(username);
+                    journalEntryToOdooData.setPassword(password);
+
+                    journalData.setJournal_id(348);
+                    journalData.setCompany_id(2);
+                    journalData.setRef("Journal Entry made by CBS ");
+
+                    debitData.setAccount_id(debitAccountId);
+                    debitData.setPartner_id(debitPartnerId);
+                    debitData.setName(debit.getEntityId());
+                    debitData.setCredit(Double.valueOf(0));
+                    debitData.setDebit(debit.getAmount().doubleValue());
+
+                    creditData.setAccount_id(creditAccountId);
+                    creditData.setPartner_id(creditPartnerId);
+                    creditData.setName(credit.getEntityId());
+                    creditData.setCredit(credit.getAmount().doubleValue());
+                    creditData.setDebit(Double.valueOf(0));
+
+                    journalEntryToOdooData.setJournal(journalData);
+                    journalEntryToOdooData.setDebit(debitData);
+                    journalEntryToOdooData.setCredit(creditData);
+
                     id = (Integer) models.execute("execute_kw",
                             Arrays.asList(
                                     odooDB, uid, password, "account.move", "create", Arrays.asList(Map.of("line_ids", Arrays.asList(
