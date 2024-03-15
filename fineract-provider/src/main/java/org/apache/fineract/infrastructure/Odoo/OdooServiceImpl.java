@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.Odoo;
 
+import com.google.common.base.Splitter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository;
 import org.apache.fineract.infrastructure.Odoo.exception.OdooFailedException;
@@ -78,11 +80,11 @@ public class OdooServiceImpl implements OdooService {
     @Override
     public Integer loginToOddo() {
         try {
-            final XmlRpcClientConfigImpl common_config = new XmlRpcClientConfigImpl();
+            final XmlRpcClientConfigImpl commonConfig = new XmlRpcClientConfigImpl();
             final XmlRpcClient client = new XmlRpcClient();
-            common_config.setServerURL(new URL(String.format("%s/xmlrpc/2/common", url)));
+            commonConfig.setServerURL(new URL(String.format("%s/xmlrpc/2/common", url)));
 
-            Object uid = (Object) client.execute(common_config, "authenticate",
+            Object uid = (Object) client.execute(commonConfig, "authenticate",
                     Arrays.asList(odooDB, username, password, Collections.emptyMap()));
             if (!uid.equals(false)) {
                 LOG.info("Odoo Authentication successful uid" + uid);
@@ -92,7 +94,7 @@ public class OdooServiceImpl implements OdooService {
                 return 0;
             }
         } catch (Exception e) {
-            LOG.error("Odoo Authentication failure message", e);
+            LOG.error(e.getMessage());
         }
         return 0;
     }
@@ -439,7 +441,7 @@ public class OdooServiceImpl implements OdooService {
             if (uid > 0) {
                 final List glAccount = Arrays.asList((Object[]) models.execute("execute_kw",
                         Arrays.asList(odooDB, uid, password, "account.account", "search_read",
-                                Arrays.asList(Arrays.asList(Arrays.asList("code", "=", entry.getGlAccount().getGlCode()))),
+                                Arrays.asList(Arrays.asList(Arrays.asList("code", "=", extractGlCode(entry.getGlAccount().getGlCode())))),
                                 Map.of("fields", Arrays.asList("id"), "limit", 5))));
                 Integer id = null;
                 if (glAccount != null && glAccount.size() > 0) {
@@ -453,6 +455,21 @@ public class OdooServiceImpl implements OdooService {
             throw new OdooFailedException(e);
         }
         return null;
+    }
+
+    /*
+     * This will help extract the GL Code from the concatenated GL code with id posted to fineract during data
+     * migration. The Code on Odoo is not unique so we concatenate the GL code with the GL id {code_id} so we need to
+     * extract the GLCode from the code again if we want the integration with Odoo from Fineract work as expected. We
+     * accommodated the aspect of the GL code not concatenated with the id if this is created in fineract direct
+     */
+    private String extractGlCode(String glCode) {
+        if (glCode.contains("-")) {
+            List<String> parts = Splitter.on(Pattern.compile("-", Pattern.LITERAL)).splitToList(glCode);
+            return parts.get(0);
+        } else {
+            return glCode;
+        }
     }
 
 }
