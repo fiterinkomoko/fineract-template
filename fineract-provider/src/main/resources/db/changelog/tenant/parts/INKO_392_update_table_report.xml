@@ -379,19 +379,19 @@
     </changeSet>
 
 
-    <changeSet author="bosco@fiter.io" id="update_Rwanda_Consumer_Credit_To_TransUnion_CRB_Report_mysql-3" context="mysql">
+    <changeSet author="bosco@fiter.io" id="update_Rwanda_Consumer_Credit_To_TransUnion_CRB_Report_mysql-4" context="mysql">
         <sqlFile
                 encoding="utf8"
-                path="db/changelog/tenant/commands/update_Rwanda_Consumer_Credit_To_TransUnion_CRB_Report_mysql3.sql"
+                path="db/changelog/tenant/commands/update_Rwanda_Consumer_Credit_To_TransUnion_CRB_Report_mysql4.sql"
                 relativeToChangelogFile="false"
                 splitStatements="true"
                 stripComments="true"/>
     </changeSet>
 
-    <changeSet author="bosco@fiter.io" id="update_Rwanda_Corporate_Credit_To_TransUnion_CRB_Report_mysql-3" context="mysql">
+    <changeSet author="bosco@fiter.io" id="update_Rwanda_Corporate_Credit_To_TransUnion_CRB_Report_mysql-4" context="mysql">
         <sqlFile
                 encoding="utf8"
-                path="db/changelog/tenant/commands/update_Rwanda_Corporate_Credit_To_TransUnion_CRB_Report_mysql3.sql"
+                path="db/changelog/tenant/commands/update_Rwanda_Corporate_Credit_To_TransUnion_CRB_Report_mysql4.sql"
                 relativeToChangelogFile="false"
                 splitStatements="true"
                 stripComments="true"/>
