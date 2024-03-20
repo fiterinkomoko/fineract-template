@@ -104,12 +104,12 @@ public class TransUnionCrbPostCorporateCreditReadPlatformServiceImpl implements 
                     + "       ra.physical_address_district                                                      AS physicalAddressDistrict, "
                     + "       ''                                                                                AS groupName, ");
             if (databaseTypeResolver.isMySQL()) {
-                sql.append(" CASE " + "    WHEN DATEDIFF(NOW(), mlaa.overdue_since_date_derived) =< 90   THEN 'C' "
+                sql.append(" CASE " + "    WHEN DATEDIFF(NOW(), mlaa.overdue_since_date_derived) <= 90   THEN 'C' "
                         + "    WHEN l.loan_status_id IN(600,601,700) THEN 'C' " + "    ELSE 'D' "
                         + "    END        AS currentBalanceIndicator, ");
             } else {
                 sql.append(" CASE "
-                        + "    WHEN EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP))  =< 90   THEN 'C' "
+                        + "    WHEN EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP))  <= 90   THEN 'C' "
                         + "    WHEN l.loan_status_id IN(600,601,700) THEN 'C' " + "    ELSE 'D' "
                         + "    END        AS currentBalanceIndicator, ");
             }
