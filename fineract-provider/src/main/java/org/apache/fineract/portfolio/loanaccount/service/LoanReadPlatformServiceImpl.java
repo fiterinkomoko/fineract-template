@@ -758,7 +758,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " topup.topup_amount as topupAmount ,l.department_cv_id as departmentId,departmentV.code_value as departmentCode, "
                     + " ds.loan_decision_state as loanDecisionState , ds.next_loan_ic_review_decision_state as nextLoanIcReviewDecisionState, "
                     + " l.description as description , l.kiva_id as kivaId , l.kiva_uuid as kivaUUId , lp.allowable_dscr as allowableDscr, "
-                    + " l.loan_with_another_institution_amount as loanWithAnotherInstitutionAmount " + " from m_loan l" //
+                    + " l.loan_with_another_institution_amount as loanWithAnotherInstitutionAmount ,c.legal_form_enum as clientLegalForm "
+                    + " from m_loan l" //
                     + " join m_product_loan lp on lp.id = l.product_id" //
                     + " left join m_loan_recalculation_details lir on lir.loan_id = l.id " + " join m_currency rc on rc."
                     + sqlGenerator.escape("code") + " = l.currency_code" //
@@ -883,6 +884,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final Long departmentId = JdbcSupport.getLong(rs, "departmentId");
             final String departmentCode = rs.getString("departmentCode");
             final CodeValueData department = CodeValueData.instance(departmentId, departmentCode);
+            final Integer clientLegalForm = JdbcSupport.getInteger(rs, "clientLegalForm");
 
             final LoanApplicationTimelineData timeline = new LoanApplicationTimelineData(submittedOnDate, submittedByUsername,
                     submittedByFirstname, submittedByLastname, rejectedOnDate, rejectedByUsername, rejectedByFirstname, rejectedByLastname,
@@ -1137,6 +1139,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             loanAccountData.setApprovedICReview(approvedICReview);
             loanAccountData.setAllowableDscr(allowableDscr);
             loanAccountData.setLoanWithAnotherInstitutionAmount(loanWithAnotherInstitutionAmount);
+            loanAccountData.setClientLegalForm(clientLegalForm);
             return loanAccountData;
         }
     }
