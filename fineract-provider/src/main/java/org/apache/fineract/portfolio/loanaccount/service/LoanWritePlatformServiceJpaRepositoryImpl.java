@@ -303,6 +303,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Long parentLoanId = loanId;
         Boolean isExtendLoanLifeCycleConfig = loanDecisionStateUtilService.isExtendLoanLifeCycleConfig();
 
+        // Block Bulk disbursement. Disbursement should be done on individual loans
+
+        if (parentLoanId != null) {
+            throw new GLIMLoanCannotBeDisbursedDirectlyException(parentLoanId);
+        }
+
         GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(parentLoanId).orElseThrow();
         List<Loan> childLoans = this.loanRepository.findByGlimId(loanId);
         CommandProcessingResult result = null;
@@ -356,13 +362,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
-        final Boolean isExtendLoanLifeCycleConfig = this.loanDecisionStateUtilService.isExtendLoanLifeCycleConfig();
-
-        // block loan Disbursement if loan is associated to GLIM and is direct Disbursement not passing through bulk
-        // GLIM Operation call
-        if (isExtendLoanLifeCycleConfig && loan.getLoanType().equals(AccountType.GLIM.getValue()) && !isGlimBulkDisbursement) {
-            throw new GLIMLoanCannotBeDisbursedDirectlyException(loanId);
-        }
 
         this.loanDecisionStateUtilService.validateLoanReviewApplicationStateIsFiredBeforeDisbursal(loan, command);
         if (loan.loanProduct().isDisallowExpectedDisbursements()) {
