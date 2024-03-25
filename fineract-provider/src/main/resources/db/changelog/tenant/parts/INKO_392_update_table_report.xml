@@ -397,4 +397,130 @@
                 stripComments="true"/>
     </changeSet>
 
+    <changeSet author="bosco@fiter.io" id="ClientTrendsByDay-fix-sql" context="mysql">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="stretchy_report"/>
+            <sqlCheck expectedResult="1">
+                select count(1) from stretchy_report
+                where report_name = 'ClientTrendsByDay';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="&#10;SELECT 	COUNT(cl.id) AS count,&#10;cl.activation_date AS days&#10;FROM m_office x&#10;LEFT JOIN m_client cl on x.id = cl.office_id&#10;WHERE x.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )&#10;AND (cl.activation_date BETWEEN DATE_SUB(CURDATE(), INTERVAL 12 DAY) AND DATE(NOW()- INTERVAL 1 DAY))&#10;GROUP BY days&#10;"/>
+            <where>report_name = 'ClientTrendsByDay'</where>
+        </update>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="LoanTrendsByDay-fix-sql" context="mysql">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="stretchy_report"/>
+            <sqlCheck expectedResult="1">
+                select count(1) from stretchy_report
+                where report_name = 'LoanTrendsByDay';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="&#10;SELECT 	COUNT(ln.id) AS lcount,	&#10;ln.disbursedon_date AS days&#10;FROM m_office x	&#10;LEFT JOIN m_client cl on x.id = cl.office_id	&#10;LEFT JOIN m_loan ln on cl.id = ln.client_id&#10;WHERE x.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )	&#10;AND (ln.disbursedon_date BETWEEN DATE_SUB(CURDATE(), INTERVAL 12 DAY) AND DATE(NOW()- INTERVAL 1 DAY))&#10;GROUP BY days&#10;"/>
+            <where>report_name = 'LoanTrendsByDay'</where>
+        </update>
+    </changeSet>
+
+
+    <changeSet author="bosco@fiter.io" id="ClientTrendsByMonth-fix-sql" context="mysql">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="stretchy_report"/>
+            <sqlCheck expectedResult="1">
+                select count(1) from stretchy_report
+                where report_name = 'ClientTrendsByMonth';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="&#10; SELECT 	COUNT(cl.id) AS count,&#10;MONTHNAME(cl.activation_date) AS Months&#10;FROM m_office x&#10;LEFT JOIN m_client cl on x.id = cl.office_id&#10;WHERE x.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )&#10;AND (cl.activation_date BETWEEN DATE_SUB(CURDATE(), INTERVAL 12 MONTH) AND DATE(NOW()))&#10;GROUP BY Months &#10;"/>
+            <where>report_name = 'ClientTrendsByMonth'</where>
+        </update>
+    </changeSet>
+
+
+    <changeSet author="bosco@fiter.io" id="LoanTrendsByMonth-fix-sql" context="mysql">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="stretchy_report"/>
+            <sqlCheck expectedResult="1">
+                select count(1) from stretchy_report
+                where report_name = 'LoanTrendsByMonth';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="&#10;SELECT 	COUNT(ln.id) AS lcount,	&#10;MONTHNAME(ln.disbursedon_date) AS Months&#10;FROM m_office x	&#10;LEFT JOIN m_client cl on x.id = cl.office_id	&#10;LEFT JOIN m_loan ln on cl.id = ln.client_id&#10;WHERE x.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )&#10;AND (ln.disbursedon_date BETWEEN DATE_SUB(CURDATE(), INTERVAL 12 MONTH) AND DATE(NOW()))&#10;GROUP BY Months&#10;"/>
+            <where>report_name = 'LoanTrendsByMonth'</where>
+        </update>
+    </changeSet>
+
+
+    <changeSet author="bosco@fiter.io" id="ClientTrendsByWeek-fix-sql" context="mysql">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="stretchy_report"/>
+            <sqlCheck expectedResult="1">
+                select count(1) from stretchy_report
+                where report_name = 'ClientTrendsByWeek';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="&#10;SELECT 	COUNT(cl.id) AS count,&#10;WEEK(cl.activation_date) AS Weeks&#10;FROM m_office x&#10;LEFT JOIN m_client cl on x.id = cl.office_id&#10;WHERE x.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )&#10;AND (cl.activation_date BETWEEN DATE_SUB(CURDATE(), INTERVAL 12 WEEK) AND DATE(NOW()))&#10;GROUP BY Weeks&#10;"/>
+            <where>report_name = 'ClientTrendsByWeek'</where>
+        </update>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="LoanTrendsByWeek-fix-sql" context="mysql">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="stretchy_report"/>
+            <sqlCheck expectedResult="1">
+                select count(1) from stretchy_report
+                where report_name = 'LoanTrendsByWeek';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="&#10;SELECT 	COUNT(ln.id) AS lcount,	&#10;WEEK(ln.disbursedon_date) AS Weeks&#10;FROM m_office x	&#10;LEFT JOIN m_client cl on x.id = cl.office_id	&#10;LEFT JOIN m_loan ln on cl.id = ln.client_id&#10;WHERE x.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )&#10;AND (ln.disbursedon_date BETWEEN DATE_SUB(CURDATE(), INTERVAL 12 WEEK) AND DATE(NOW()))&#10;GROUP BY Weeks&#10;"/>
+            <where>report_name = 'LoanTrendsByWeek'</where>
+        </update>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="Demand_Vs_Collection-fix-sql" context="mysql">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="stretchy_report"/>
+            <sqlCheck expectedResult="1">
+                select count(1) from stretchy_report
+                where report_name = 'Demand_Vs_Collection';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="&#10;select amount.AmountDue-amount.AmountPaid as AmountDue, amount.AmountPaid as AmountPaid from&#10;(SELECT&#10;(IFNULL(SUM(ls.principal_amount),0) - IFNULL(SUM(ls.principal_writtenoff_derived),0) + IFNULL(SUM(ls.interest_amount),0) - IFNULL(SUM(ls.interest_writtenoff_derived),0) - IFNULL(SUM(ls.interest_waived_derived),0) + IFNULL(SUM(ls.fee_charges_amount),0) - IFNULL(SUM(ls.fee_charges_writtenoff_derived),0) - IFNULL(SUM(ls.fee_charges_waived_derived),0) + IFNULL(SUM(ls.penalty_charges_amount),0) - IFNULL(SUM(ls.penalty_charges_writtenoff_derived),0) - IFNULL(SUM(ls.penalty_charges_waived_derived),0)) AS AmountDue,&#10;(IFNULL(SUM(ls.principal_completed_derived),0) - IFNULL(SUM(ls.principal_writtenoff_derived),0) + IFNULL(SUM(ls.interest_completed_derived),0) - IFNULL(SUM(ls.interest_writtenoff_derived),0) - IFNULL(SUM(ls.interest_waived_derived),0) + IFNULL(SUM(ls.fee_charges_completed_derived),0) - IFNULL(SUM(ls.fee_charges_writtenoff_derived),0) - IFNULL(SUM(ls.fee_charges_waived_derived),0) + IFNULL(SUM(ls.penalty_charges_completed_derived),0) - IFNULL(SUM(ls.penalty_charges_writtenoff_derived),0) - IFNULL(SUM(ls.penalty_charges_waived_derived),0)&#10;) AS AmountPaid&#10;FROM m_office x&#10;LEFT JOIN m_client cl ON x.id = cl.office_id&#10;LEFT JOIN m_loan ln ON cl.id = ln.client_id&#10;LEFT JOIN m_loan_repayment_schedule ls ON ln.id = ls.loan_id&#10;WHERE ls.duedate = DATE(NOW()) AND &#10;(x.hierarchy LIKE CONCAT((&#10;SELECT ino.hierarchy&#10;FROM m_office ino&#10;WHERE ino.id = ${officeId}),'%'))) as amount&#10;"/>
+            <where>report_name = 'Demand_Vs_Collection'</where>
+        </update>
+    </changeSet>
+
+
+    <changeSet author="bosco@fiter.io" id="Disbursal_Vs_Awaitingdisbursal-fix-sql" context="mysql">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="stretchy_report"/>
+            <sqlCheck expectedResult="1">
+                select count(1) from stretchy_report
+                where report_name = 'Disbursal_Vs_Awaitingdisbursal';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="&#10;select awaitinddisbursal.amount-disbursedAmount.amount as amountToBeDisburse, disbursedAmount.amount as disbursedAmount from&#10;(&#10;SELECT 	COUNT(ln.id) AS noOfLoans,			&#10;IFNULL(SUM(ln.principal_amount),0) AS amount&#10;FROM&#10;m_office x&#10;LEFT JOIN m_client cl ON cl.office_id = x.id&#10;LEFT JOIN m_loan ln ON cl.id = ln.client_id&#10;WHERE&#10;ln.expected_disbursedon_date = DATE(NOW()) AND&#10;(ln.loan_status_id=200 OR ln.loan_status_id=300) AND &#10;x.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )&#10;) awaitinddisbursal,&#10;(&#10;SELECT 	COUNT(ltrxn.id) as count,			&#10;IFNULL(SUM(ltrxn.amount),0) as amount&#10;FROM&#10;m_office x&#10;LEFT JOIN m_client cl ON cl.office_id = x.id&#10;LEFT JOIN m_loan ln ON cl.id = ln.client_id&#10;LEFT JOIN m_loan_transaction ltrxn ON ln.id = ltrxn.loan_id&#10;WHERE&#10;ltrxn.transaction_date = DATE(NOW()) AND&#10;ltrxn.is_reversed = 0 AND&#10;ltrxn.transaction_type_enum=1 AND &#10;x.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),'%' )&#10;) disbursedAmount&#10;"/>
+            <where>report_name = 'Disbursal_Vs_Awaitingdisbursal'</where>
+        </update>
+    </changeSet>
+
+
+
 </databaseChangeLog>
