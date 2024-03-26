@@ -49,8 +49,6 @@ import org.apache.fineract.infrastructure.documentmanagement.service.DocumentWri
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.tika.Tika;
-import org.apache.tika.io.TikaInputStream;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,17 +91,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                 final byte[] bytes = baos.toByteArray();
                 InputStream clonedInputStream = new ByteArrayInputStream(bytes);
                 final BufferedInputStream bis = new BufferedInputStream(new ByteArrayInputStream(bytes));
-                final Tika tika = new Tika();
-                final TikaInputStream tikaInputStream = TikaInputStream.get(bis);
-                final String fileType = tika.detect(tikaInputStream);
-                if (!fileType.contains("msoffice") && !fileType.contains("application/vnd.ms-excel")) {
-                    // We had a problem where we tried to upload the downloaded
-                    // file from the import options, it was somehow changed the
-                    // extension we use this fix.
-                    throw new GeneralPlatformDomainRuleException("error.msg.invalid.file.extension",
-                            "Uploaded file extension is not recognized.");
 
-                }
                 Workbook workbook = new HSSFWorkbook(clonedInputStream);
                 GlobalEntityType entityType = null;
                 int primaryColumn = 0;
