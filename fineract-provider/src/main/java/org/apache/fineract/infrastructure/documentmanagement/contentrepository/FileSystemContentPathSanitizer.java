@@ -29,10 +29,6 @@ import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.documentmanagement.exception.ContentManagementException;
 import org.apache.tika.Tika;
-import org.apache.tika.io.TikaInputStream;
-import org.apache.tika.metadata.Metadata;
-import org.apache.tika.parser.AutoDetectParser;
-import org.apache.tika.sax.BodyContentHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +96,7 @@ public class FileSystemContentPathSanitizer implements ContentPathSanitizer {
                             String.format("Detected mime type %s for filename %s not allowed!", extensionMimeType, fileName));
                 }
 
-                String contentMimeType = detectContentMimeType(is);
+                String contentMimeType = extensionMimeType;
 
                 if (StringUtils.isEmpty(contentMimeType)) {
                     throw new RuntimeException(String.format("Could not detect content mime type for %s!", fileName));
@@ -129,16 +125,5 @@ public class FileSystemContentPathSanitizer implements ContentPathSanitizer {
         } catch (Exception e) {
             throw new ContentManagementException(path, e.getMessage(), e);
         }
-    }
-
-    private String detectContentMimeType(BufferedInputStream bis) throws Exception {
-        TikaInputStream tis = TikaInputStream.get(bis);
-        AutoDetectParser parser = new AutoDetectParser();
-        // NOTE: turn off write limit with "-1"
-        BodyContentHandler handler = new BodyContentHandler(-1);
-        Metadata metadata = new Metadata();
-        parser.parse(tis, handler, metadata);
-
-        return metadata.get("Content-Type");
     }
 }
