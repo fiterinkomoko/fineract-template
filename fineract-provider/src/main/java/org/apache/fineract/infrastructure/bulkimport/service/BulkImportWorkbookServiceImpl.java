@@ -24,6 +24,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.net.URLConnection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -243,7 +244,8 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
         this.securityContext.authenticatedUser();
         final ImportTemplateLocationMapper importTemplateLocationMapper = new ImportTemplateLocationMapper();
         final String sql = "select " + importTemplateLocationMapper.schema();
-        DocumentData documentData = this.jdbcTemplate.queryForObject(sql, importTemplateLocationMapper, new Object[] { importDocumentId }); // NOSONAR
+        DocumentData documentData = this.jdbcTemplate.queryForObject(sql, importTemplateLocationMapper,
+                new Object[] { new BigInteger(importDocumentId) }); // NOSONAR
         return buildResponse(documentData);
     }
 
