@@ -38,10 +38,10 @@ public class MetropolCrbReadPlatformServiceImpl implements MetropolCrbReadPlatfo
 
     @Override
     public CrbKenyaMetropolRequestData fetchIdentityVerificationDetails(Integer loanId) {
-        try{
-        final IdentityVerificationCreditMapper mapper = new IdentityVerificationCreditMapper();
-        final String sql = "SELECT " + mapper.schema() + " order by idty.id DESC LIMIT 1 ";
-        return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { loanId });
+        try {
+            final IdentityVerificationCreditMapper mapper = new IdentityVerificationCreditMapper();
+            final String sql = "SELECT " + mapper.schema() + " order by idty.id DESC LIMIT 1 ";
+            return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { loanId });
         } catch (final EmptyResultDataAccessException e) {
             return new CrbKenyaMetropolRequestData();
         }

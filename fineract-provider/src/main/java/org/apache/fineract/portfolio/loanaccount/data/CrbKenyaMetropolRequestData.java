@@ -55,8 +55,7 @@ public class CrbKenyaMetropolRequestData {
     private String createdOn;
     private MetropolCrbCreditInfoEnchancedData metropolCrbCreditInfoEnchancedData;
 
-    public CrbKenyaMetropolRequestData() {
-    }
+    public CrbKenyaMetropolRequestData() {}
 
     public CrbKenyaMetropolRequestData(Integer report_type, String identity_number, String identity_type) {
         this.report_type = report_type;
