@@ -88,7 +88,11 @@ UPDATE stretchy_report SET report_sql = "WITH RankedAddresses AS (SELECT client_
                                                 'I'                                                                        AS accountType,
                                                 ra.physical_address_district                                               AS physicalAddressDistrict,
                                                 ''                                                                         AS groupName,
-                                                'D'                                                                        AS currentBalanceIndicator,
+                                                CASE
+                                                    WHEN DATEDIFF(NOW(), mlaa.overdue_since_date_derived) <= 90   THEN 'C'
+                                                    WHEN l.loan_status_id IN(600,601,700) THEN 'C'
+                                                    ELSE 'D'
+                                                    END                                                                    AS currentBalanceIndicator,
                                                 ra.physical_address_sector                                                 AS physicalAddressSector,
                                                 0                                                                          AS numberOfJointLoanParticipants,
                                                 ra.physical_address_cell                                                   AS physicalAddressCell,

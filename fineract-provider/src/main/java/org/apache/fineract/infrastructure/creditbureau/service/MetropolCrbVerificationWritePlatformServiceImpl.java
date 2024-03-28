@@ -113,10 +113,10 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
         try {
             if (clientObj.getLegalForm().equals(LegalForm.PERSON.getValue())) {
                 individualClient = this.verificationReadPlatformService.retrieveConsumer(clientObj.getId());
-                metropolCrbIdentityReport = verifyIdentityDocument(individualClient.getNationalID(), loan, clientObj);
+                metropolCrbIdentityReport = verifyIdentityDocument(individualClient.getNationalID(), loan, clientObj, "001");
             } else {
                 corporateClient = this.verificationReadPlatformService.retrieveCorporate(clientObj.getId());
-                metropolCrbIdentityReport = verifyIdentityDocument(corporateClient.getCompanyRegNo(), loan, clientObj);
+                metropolCrbIdentityReport = verifyIdentityDocument(corporateClient.getCompanyRegNo(), loan, clientObj, "005");
             }
         } catch (Exception e) {
             throw new GeneralPlatformDomainRuleException("Verification failed with error: ", e.getMessage());
@@ -144,10 +144,10 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
         try {
             if (clientObj.getLegalForm().equals(LegalForm.PERSON.getValue())) {
                 individualClient = this.verificationReadPlatformService.retrieveConsumer(clientObj.getId());
-                metropolCrbCreditInfoEnhancedReport = verifyCreditInfoEnhanced(individualClient.getNationalID(), loan, clientObj);
+                metropolCrbCreditInfoEnhancedReport = verifyCreditInfoEnhanced(individualClient.getNationalID(), loan, clientObj, "001");
             } else {
                 corporateClient = this.verificationReadPlatformService.retrieveCorporate(clientObj.getId());
-                metropolCrbCreditInfoEnhancedReport = verifyCreditInfoEnhanced(corporateClient.getCompanyRegNo(), loan, clientObj);
+                metropolCrbCreditInfoEnhancedReport = verifyCreditInfoEnhanced(corporateClient.getCompanyRegNo(), loan, clientObj, "005");
             }
         } catch (Exception e) {
             throw new GeneralPlatformDomainRuleException("Credit Info Enhanced report failed with error: ", e.getMessage());
@@ -175,10 +175,10 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
         try {
             if (clientObj.getLegalForm().equals(LegalForm.PERSON.getValue())) {
                 individualClient = this.verificationReadPlatformService.retrieveConsumer(clientObj.getId());
-                metropolCrbCreditInfoEnhancedReport = verifyReportJson(individualClient.getNationalID(), loan, clientObj);
+                metropolCrbCreditInfoEnhancedReport = verifyReportJson(individualClient.getNationalID(), loan, clientObj, "001");
             } else {
                 corporateClient = this.verificationReadPlatformService.retrieveCorporate(clientObj.getId());
-                metropolCrbCreditInfoEnhancedReport = verifyReportJson(corporateClient.getCompanyRegNo(), loan, clientObj);
+                metropolCrbCreditInfoEnhancedReport = verifyReportJson(corporateClient.getCompanyRegNo(), loan, clientObj, "005");
             }
         } catch (Exception e) {
             throw new GeneralPlatformDomainRuleException("Report Json failed with error: ", e.getMessage());
@@ -189,9 +189,9 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
                 .build();
     }
 
-    private MetropolCrbIdentityReport verifyIdentityDocument(String documentId, Loan loan, Client client)
+    private MetropolCrbIdentityReport verifyIdentityDocument(String documentId, Loan loan, Client client, String identityType)
             throws NoSuchAlgorithmException, IOException {
-        CrbKenyaMetropolRequestData requestData = new CrbKenyaMetropolRequestData(1, documentId, "001");
+        CrbKenyaMetropolRequestData requestData = new CrbKenyaMetropolRequestData(1, documentId, identityType);
         String jsonPayload = convertRequestPayloadToJson(requestData);
 
         String timestamp = DateUtils.generateTimestamp();
@@ -205,9 +205,9 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
         return metropolCrbIdentityReport;
     }
 
-    private MetropolCrbCreditInfoEnhancedReport verifyCreditInfoEnhanced(String documentId, Loan loan, Client client)
+    private MetropolCrbCreditInfoEnhancedReport verifyCreditInfoEnhanced(String documentId, Loan loan, Client client, String identityType)
             throws NoSuchAlgorithmException, IOException {
-        CrbKenyaMetropolRequestData requestData = new CrbKenyaMetropolRequestData(10, "45555", documentId, "001",
+        CrbKenyaMetropolRequestData requestData = new CrbKenyaMetropolRequestData(10, "45555", documentId, identityType,
                 loan.getApprovedPrincipal().intValue(), 1);
         String jsonPayload = convertRequestPayloadToJson(requestData);
 
@@ -508,9 +508,9 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
         }
     }
 
-    private MetropolCrbCreditInfoEnhancedReport verifyReportJson(String documentId, Loan loan, Client client)
+    private MetropolCrbCreditInfoEnhancedReport verifyReportJson(String documentId, Loan loan, Client client, String identityType)
             throws NoSuchAlgorithmException, IOException {
-        CrbKenyaMetropolRequestData requestData = new CrbKenyaMetropolRequestData(5, documentId, "001",
+        CrbKenyaMetropolRequestData requestData = new CrbKenyaMetropolRequestData(5, documentId, identityType,
                 loan.getApprovedPrincipal().intValue(), 1);
         String jsonPayload = convertRequestPayloadToJson(requestData);
 

@@ -23,7 +23,8 @@ import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainR
 public class GLIMLoanCannotBeDisbursedDirectlyException extends AbstractPlatformDomainRuleException {
 
     public GLIMLoanCannotBeDisbursedDirectlyException(final Long id) {
-        super("error.msg.glim.loan.cannot.be.disbursed.directly",
-                "GLIM Loan [ " + id + " ] cannot be disbursed directly. Please Disburse the GLIM Account associated to this loan", id);
+        super("error.msg.glim.loan.cannot.be.disbursed.in.bulk", "GLIM Loan [ " + id
+                + " ] cannot be disbursed in bulk. Please Disburse the GLIM Loan Account associated to this individually ", id);
     }
+
 }

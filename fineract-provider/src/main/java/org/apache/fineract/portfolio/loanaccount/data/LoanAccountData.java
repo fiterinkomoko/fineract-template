@@ -267,6 +267,7 @@ public final class LoanAccountData {
     private BigDecimal approvedICReview;
     private Double allowableDscr;
     private BigDecimal loanWithAnotherInstitutionAmount;
+    private Integer clientLegalForm;
 
     public static LoanAccountData importInstanceIndividual(EnumOptionData loanTypeEnumOption, Long clientId, Long productId,
             Long loanOfficerId, LocalDate submittedOnDate, Long fundId, BigDecimal principal, Integer numberOfRepayments,
@@ -835,6 +836,7 @@ public final class LoanAccountData {
         loanAccountData.setKivaId(acc.kivaId);
         loanAccountData.setKivaUUId(acc.kivaUUId);
         loanAccountData.setAllowableDscr(acc.allowableDscr);
+        loanAccountData.setClientLegalForm(acc.clientLegalForm);
         return loanAccountData;
     }
 
@@ -1419,6 +1421,7 @@ public final class LoanAccountData {
         loanAccountData.setApprovedICReview(acc.approvedICReview);
         loanAccountData.setAllowableDscr(acc.allowableDscr);
         loanAccountData.setLoanWithAnotherInstitutionAmount(acc.loanWithAnotherInstitutionAmount);
+        loanAccountData.setClientLegalForm(acc.clientLegalForm);
         return loanAccountData;
     }
 
@@ -1450,6 +1453,7 @@ public final class LoanAccountData {
         loanAccountData.setKivaId(acc.kivaId);
         loanAccountData.setKivaUUId(acc.kivaUUId);
         loanAccountData.setAllowableDscr(acc.allowableDscr);
+        loanAccountData.setClientLegalForm(acc.clientLegalForm);
         return loanAccountData;
     }
 
@@ -1498,6 +1502,7 @@ public final class LoanAccountData {
         loanAccountData.setKivaId(acc.kivaId);
         loanAccountData.setKivaUUId(acc.kivaUUId);
         loanAccountData.setAllowableDscr(acc.allowableDscr);
+        loanAccountData.setClientLegalForm(acc.clientLegalForm);
         return loanAccountData;
     }
 
@@ -1617,6 +1622,7 @@ public final class LoanAccountData {
         loanAccountData.setKivaId(acc.kivaId);
         loanAccountData.setKivaUUId(acc.kivaUUId);
         loanAccountData.setAllowableDscr(acc.allowableDscr);
+        loanAccountData.setClientLegalForm(acc.clientLegalForm);
         return loanAccountData;
     }
 
@@ -1662,6 +1668,7 @@ public final class LoanAccountData {
         loanAccountData.setKivaId(acc.kivaId);
         loanAccountData.setKivaUUId(acc.kivaUUId);
         loanAccountData.setAllowableDscr(acc.allowableDscr);
+        loanAccountData.setClientLegalForm(acc.clientLegalForm);
         return loanAccountData;
     }
 
@@ -2240,5 +2247,13 @@ public final class LoanAccountData {
 
     public void setLoanWithAnotherInstitutionAmount(BigDecimal loanWithAnotherInstitutionAmount) {
         this.loanWithAnotherInstitutionAmount = loanWithAnotherInstitutionAmount;
+    }
+
+    public Integer getClientLegalForm() {
+        return clientLegalForm;
+    }
+
+    public void setClientLegalForm(Integer clientLegalForm) {
+        this.clientLegalForm = clientLegalForm;
     }
 }

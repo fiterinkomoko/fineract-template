@@ -102,9 +102,18 @@ public class TransUnionCrbPostCorporateCreditReadPlatformServiceImpl implements 
                     + "       'Other personal service activities n.e.c.'                                        AS sectorOfActivity, "
                     + "       'I'                                                                               AS accountType, "
                     + "       ra.physical_address_district                                                      AS physicalAddressDistrict, "
-                    + "       ''                                                                                AS groupName, "
-                    + "       'D'                                                                               AS currentBalanceIndicator, "
-                    + "       ra.physical_address_sector                                                        AS physicalAddressSector, "
+                    + "       ''                                                                                AS groupName, ");
+            if (databaseTypeResolver.isMySQL()) {
+                sql.append(" CASE " + "    WHEN DATEDIFF(NOW(), mlaa.overdue_since_date_derived) <= 90   THEN 'C' "
+                        + "    WHEN l.loan_status_id IN(600,601,700) THEN 'C' " + "    ELSE 'D' "
+                        + "    END        AS currentBalanceIndicator, ");
+            } else {
+                sql.append(" CASE "
+                        + "    WHEN EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP))  <= 90   THEN 'C' "
+                        + "    WHEN l.loan_status_id IN(600,601,700) THEN 'C' " + "    ELSE 'D' "
+                        + "    END        AS currentBalanceIndicator, ");
+            }
+            sql.append("       ra.physical_address_sector                                                        AS physicalAddressSector, "
                     + "       0                                                                                 AS numberOfJointLoanParticipants, "
                     + "       ra.physical_address_cell                                                          AS physicalAddressCell, "
                     + "       ra.address_line_1                                                                 AS physicalAddressLine1, "

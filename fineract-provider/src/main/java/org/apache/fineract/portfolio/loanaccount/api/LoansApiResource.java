@@ -1290,4 +1290,18 @@ public class LoansApiResource {
         return this.toApiJsonSerializer.serialize(result);
     }
 
+    @GET
+    @Path("/retrieveLoanByAccountNumber/{accountNo}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveLoanByAccountNumber(@PathParam("accountNo") final String accountNo, @Context final UriInfo uriInfo) {
+
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+
+        final LoanAccountData loanBasicDetails = this.loanReadPlatformService.retrieveLoanByLoanAccount(accountNo);
+
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, loanBasicDetails, this.loanDataParameters);
+    }
+
 }

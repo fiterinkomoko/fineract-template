@@ -36,7 +36,7 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
-UPDATE stretchy_report SET report_sql = "WITH RankedAddresses AS (SELECT client_id,
+UPDATE stretchy_report SET report_sql = " WITH RankedAddresses AS (SELECT client_id,
                                                                          address_id,
                                                                          ROW_NUMBER() OVER (PARTITION BY client_id ORDER BY address_id DESC) AS row_num
                                                                   FROM m_client_address)
@@ -102,7 +102,11 @@ UPDATE stretchy_report SET report_sql = "WITH RankedAddresses AS (SELECT client_
                                                 'I'                                                                                                AS accountType,
                                                 ra.physical_address_district                                                                       AS physicalAddressDistrict,
                                                 ''                                                                                                 AS groupName,
-                                                'D'                                                                                                AS currentBalanceIndicator,
+                                                CASE
+                                                    WHEN DATEDIFF(NOW(), mlaa.overdue_since_date_derived) <= 90   THEN 'C'
+                                                    WHEN l.loan_status_id IN(600,601,700) THEN 'C'
+                                                    ELSE 'D'
+                                                    END                                                                                                AS currentBalanceIndicator,
                                                 ra.physical_address_sector                                                                         AS physicalAddressSector,
                                                 0                                                                                                  AS numberOfJointLoanParticipants,
                                                 ra.physical_address_cell                                                                           AS physicalAddressCell,
