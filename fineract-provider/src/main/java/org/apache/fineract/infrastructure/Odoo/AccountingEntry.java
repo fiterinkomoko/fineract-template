@@ -19,13 +19,35 @@
 package org.apache.fineract.infrastructure.Odoo;
 
 import lombok.Data;
+import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
 
 @Data
-public class DebitOrCreditData {
+public class AccountingEntry {
 
+    private String type;
     private Integer account_id;
     private Integer partner_id;
     private Long name;
     private Double credit;
     private Double debit;
+
+    public AccountingEntry() {
+    }
+
+    public AccountingEntry (JournalEntry journalEntry,Integer accountId,Integer partnerId) {
+        this.account_id = accountId;
+        this.partner_id = partnerId;
+        this.name = journalEntry.getId();
+
+        if(journalEntry.getType() == 2){
+            this.debit = journalEntry.getAmount().doubleValue();
+            this.credit = 0.0;
+            this.type = "debit";
+        } else {
+            this.credit = journalEntry.getAmount().doubleValue();
+            this.debit = 0.0;
+            this.type = "credit";
+        }
+
+    }
 }

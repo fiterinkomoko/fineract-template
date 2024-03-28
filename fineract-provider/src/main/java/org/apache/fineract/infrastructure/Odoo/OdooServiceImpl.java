@@ -28,6 +28,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository;
 import org.apache.fineract.infrastructure.Odoo.exception.OdooFailedException;
@@ -278,94 +280,44 @@ public class OdooServiceImpl implements OdooService {
 
     @Override
     public Integer createJournalEntryToOddo(List<JournalEntry> list) {
-        try {
-            final Integer uid = loginToOddo();
-            if (uid > 0) {
-                XmlRpcClient models = getCommonConfig();
 
-                Integer currencyId = getCurrency(list.get(0), uid, models);
-                Integer id = 0;
+        final Integer uid = loginToOddo();
+        if (uid > 0) {
+            XmlRpcClient models = getCommonConfig();
 
-                JournalEntry debitJournalEntry = null;
-                JournalEntry creditJournalEntry = null;
+            AccountingEntry journalEntry = null;
+            List<AccountingEntry> accounting_entries = new ArrayList<>();
 
-                for (JournalEntry journalEntry : list) {
-                    if (journalEntry.isDebitEntry()) {
-                        debitJournalEntry = journalEntry;
-                    } else {
-                        creditJournalEntry = journalEntry;
-                    }
-                }
-                JournalEntry debit = debitJournalEntry != null ? debitJournalEntry : list.get(0);
-                JournalEntry credit = creditJournalEntry != null ? creditJournalEntry : list.get(1);
+            JournalEntryToOdooData journalEntryToOdooData = new JournalEntryToOdooData();
+            JournalData journalData = new JournalData();
 
-                Integer debitAccountId = getGlAccounts(debit, uid, models);
-                Integer creditAccountId = getGlAccounts(credit, uid, models);
+            for (JournalEntry entry : list) {
 
-                if (debitAccountId == null || creditAccountId == null) {
-                    return null;
-                }
+                Integer accountId = getGlAccounts(entry, uid, models);
+                Client client = entry.getClient();
+                Integer partnerId = getPartner(client.getId(), uid, models);
 
-                Integer debitPartnerId = getPartner((debit.getClient() != null ? debit.getClient().getId() : null), uid, models);
-                Integer creditPartnerId = getPartner((credit.getClient() != null ? credit.getClient().getId() : null), uid, models);
-
-                // Create journal entry
-                if (debit.getAmount().doubleValue() != 0 || credit.getAmount().doubleValue() != 0) {
-
-                    JournalEntryToOdooData journalEntryToOdooData = new JournalEntryToOdooData();
-                    DebitOrCreditData debitData = new DebitOrCreditData();
-                    DebitOrCreditData creditData = new DebitOrCreditData();
-                    JournalData journalData = new JournalData();
-
-                    journalEntryToOdooData.setUsername(username);
-                    journalEntryToOdooData.setPassword(password);
-
-                    journalData.setJournal_id(348);
-                    journalData.setCompany_id(2);
-                    journalData.setRef("Journal Entry made by CBS ");
-
-                    debitData.setAccount_id(debitAccountId);
-                    debitData.setPartner_id(debitPartnerId);
-                    debitData.setName(debit.getEntityId());
-                    debitData.setCredit(Double.valueOf(0));
-                    debitData.setDebit(debit.getAmount().doubleValue());
-
-                    creditData.setAccount_id(creditAccountId);
-                    creditData.setPartner_id(creditPartnerId);
-                    creditData.setName(credit.getEntityId());
-                    creditData.setCredit(credit.getAmount().doubleValue());
-                    creditData.setDebit(Double.valueOf(0));
-
-                    journalEntryToOdooData.setJournal(journalData);
-                    journalEntryToOdooData.setDebit(debitData);
-                    journalEntryToOdooData.setCredit(creditData);
-
-                    id = (Integer) models.execute("execute_kw",
-                            Arrays.asList(
-                                    odooDB, uid, password, "account.move", "create", Arrays.asList(Map.of("line_ids", Arrays.asList(
-                                            Arrays.asList(0, 0,
-                                                    Map.of("account_id", debitAccountId, "amount_currency", currencyId, "credit", 0,
-                                                            "debit", debit.getAmount().doubleValue(), "partner_id",
-                                                            debitPartnerId != null ? debitPartnerId
-                                                                    : false,
-                                                            "name", debit.getEntityId() != null ? debit.getEntityId().toString() : false)),
-                                            Arrays.asList(0, 0,
-                                                    Map.of("account_id", creditAccountId, "amount_currency", currencyId, "credit",
-                                                            credit.getAmount().doubleValue(), "debit", 0, "partner_id",
-                                                            creditPartnerId != null ? creditPartnerId : false, "name",
-                                                            credit.getEntityId() != null ? credit.getEntityId().toString() : false)))))));
-                    LOG.info("Odoo Journal Entry created with id " + id);
-                    Boolean status = (Boolean) models.execute("execute_kw",
-                            Arrays.asList(odooDB, uid, password, "account.move", "action_post", Arrays.asList(Arrays.asList(id))));
-                    LOG.info("Odoo Journal Entry posted Successfully " + status);
-                    return id;
-                }
+                journalEntry = new AccountingEntry(entry, accountId, partnerId);
+                accounting_entries.add(journalEntry);
             }
 
-        } catch (XmlRpcException e) {
-            throw new OdooFailedException(e);
+            // Create journal entry
+            journalEntryToOdooData.setUsername(username);
+            journalEntryToOdooData.setPassword(password);
+
+            if (!CollectionUtils.isEmpty(list)) {
+                journalEntryToOdooData.setCbs_journal_entry_id(list.get(0).getTransactionId());
+            }
+            journalData.setRef("Journal Entry made by CBS ");
+            journalData.setTransaction_type_name("Journal Entry");
+            journalData.setTransaction_type_unique_id("Journal Entry");
+
+            journalEntryToOdooData.setJournal(journalData);
+            journalEntryToOdooData.setAccounting_entries(accounting_entries);
+            LOG.info("Journal Entry to Odoo " + journalEntryToOdooData);
         }
-        return null;
+        return 1;
+
     }
 
     @Override
@@ -384,7 +336,7 @@ public class OdooServiceImpl implements OdooService {
                     try {
                         journalEntryDebitCredit.add(entry);
 
-                        if (journalEntryDebitCredit.size() > 1 && journalEntryDebitCredit.size() <= 2) {
+                        if (journalEntryDebitCredit.size() > 1 ) {
                             Integer id = createJournalEntryToOddo(journalEntryDebitCredit);
                             if (id != null) {
                                 for (JournalEntry je : journalEntryDebitCredit) {
@@ -411,29 +363,6 @@ public class OdooServiceImpl implements OdooService {
                 throw new JobExecutionException(errors);
             }
         }
-    }
-
-    private Integer getCurrency(JournalEntry entry, Integer uid, XmlRpcClient models) {
-        List currency;
-        try {
-            if (uid > 0) {
-                currency = Arrays.asList((Object[]) models.execute("execute_kw",
-                        Arrays.asList(odooDB, uid, password, "res.currency", "search_read",
-                                Arrays.asList(Arrays.asList(Arrays.asList("name", "=", entry.getCurrencyCode()))), Map.of(
-
-                                        "fields", Arrays.asList("id"), "limit", 5))));
-                Integer currencyId = null;
-                if (currency != null && currency.size() > 0) {
-                    HashMap currencyData = (HashMap) currency.get(0);
-                    currencyId = (Integer) currencyData.get("id");
-                }
-
-                return currencyId;
-            }
-        } catch (XmlRpcException e) {
-            throw new OdooFailedException(e);
-        }
-        return null;
     }
 
     private Integer getGlAccounts(JournalEntry entry, Integer uid, XmlRpcClient models) {

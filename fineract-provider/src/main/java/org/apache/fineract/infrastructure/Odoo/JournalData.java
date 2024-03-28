@@ -23,7 +23,7 @@ import lombok.Data;
 @Data
 public class JournalData {
 
-    private Integer journal_id;
-    private Integer company_id;
+    private String transaction_type_name;
+    private String transaction_type_unique_id;
     private String ref;
 }
