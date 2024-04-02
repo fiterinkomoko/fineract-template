@@ -16,18 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.Odoo;
+package org.apache.fineract.portfolio.loanaccount.data;
 
-import java.util.List;
 import lombok.Data;
 
 @Data
+public class LoanTransactionNotPostedToOdooInstanceData {
 
-public class JournalEntryToOdooData {
+    private final Long loanTransactionId;
+    private final Long loanId;
+    private final Long transactionType;
 
-    private String username;
-    private String password;
-    private String cbs_journal_entry_id;
-    private JournalData journal;
-    private List<AccountingEntry> accounting_entries;
 }

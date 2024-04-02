@@ -35,7 +35,7 @@ public interface OdooService {
 
     public void postCustomerUpdatedDetailsToOddo() throws JobExecutionException;
 
-    Integer createJournalEntryToOddo(List<JournalEntry> entry);
+    Integer createJournalEntryToOddo(List<JournalEntry> entry, Long loanTransactionId, Long transactionType);
 
     void postJournalEntryToOddo() throws JobExecutionException;
 

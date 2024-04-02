@@ -42,6 +42,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentScheduleInsta
 import org.apache.fineract.portfolio.loanaccount.data.LoanScheduleAccrualData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionNotPostedToOdooInstanceData;
 import org.apache.fineract.portfolio.loanaccount.data.PaidInAdvanceData;
 import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -216,4 +217,6 @@ public interface LoanReadPlatformService {
     LoanCashFlowReport retrieveCashFlowReport(Long loanId);
 
     Integer retriveGenericLoanCycle(final Long clientId);
+
+    List<LoanTransactionNotPostedToOdooInstanceData> retrieveLoanTransactionWhoseJournalEntriesAreNotPostedToOdoo();
 }

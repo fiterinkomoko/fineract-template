@@ -31,15 +31,14 @@ public class AccountingEntry {
     private Double credit;
     private Double debit;
 
-    public AccountingEntry() {
-    }
+    public AccountingEntry() {}
 
-    public AccountingEntry (JournalEntry journalEntry,Integer accountId,Integer partnerId) {
+    public AccountingEntry(JournalEntry journalEntry, Integer accountId, Integer partnerId) {
         this.account_id = accountId;
         this.partner_id = partnerId;
         this.name = journalEntry.getId();
 
-        if(journalEntry.getType() == 2){
+        if (journalEntry.getType() == 2) {
             this.debit = journalEntry.getAmount().doubleValue();
             this.credit = 0.0;
             this.type = "debit";
