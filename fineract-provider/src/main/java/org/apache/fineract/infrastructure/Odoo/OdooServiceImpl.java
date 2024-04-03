@@ -51,12 +51,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import java.io.IOException;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 @Service
 @SuppressWarnings({ "unchecked", "rawtypes", "cast" })
 public class OdooServiceImpl implements OdooService {
 
     private static final Logger LOG = LoggerFactory.getLogger(OdooServiceImpl.class);
+    public static final String FORM_URL_CONTENT_TYPE = "Content-Type";
 
     @Value("${fineract.integrations.odoo.db}")
     private String odooDB;
@@ -284,7 +295,7 @@ public class OdooServiceImpl implements OdooService {
     }
 
     @Override
-    public Integer createJournalEntryToOddo(List<JournalEntry> list, Long loanTransactionId, Long transactionType) {
+    public String createJournalEntryToOddo(List<JournalEntry> list, Long loanTransactionId, Long transactionType) throws IOException {
 
         final Integer uid = loginToOddo();
         if (uid > 0) {
@@ -322,8 +333,32 @@ public class OdooServiceImpl implements OdooService {
             journalEntryToOdooData.setJournal(journalData);
             journalEntryToOdooData.setAccounting_entries(accounting_entries);
             LOG.info("Journal Entry to Odoo " + journalEntryToOdooData);
+            String jsonPayload = convertRequestPayloadToJson(journalEntryToOdooData);
+
+            JsonObject res = sendRequest(jsonPayload);
+            return getStringField(res, "journal_entry_no");
         }
-        return 1;
+        return null;
+    }
+    private JsonObject sendRequest(String payload)
+            throws IOException {
+        OkHttpClient httpClient = new OkHttpClient();
+
+        RequestBody requestBody = RequestBody.create(MediaType.parse(FORM_URL_CONTENT_TYPE), payload);
+        Request request = new Request.Builder().url(url+"/cbs/dev/journal_entry").post(requestBody)
+                .addHeader("Content-Type", "application/json").build();
+
+        Response response = httpClient.newCall(request).execute();
+
+        if (response.isSuccessful()) {
+
+            String resObject = response.body().string();
+            LOG.info("Response on Odoo Journal Entry Posting: " + resObject);
+            return JsonParser.parseString(resObject).getAsJsonObject();
+        } else {
+            throw new GeneralPlatformDomainRuleException("error.msg.journal.entry.posting.to.odoo.failed",
+                    " Failed to post Journal Entries to Odoo: " + response.code() + ":" + response.message());
+        }
 
     }
 
@@ -358,16 +393,14 @@ public class OdooServiceImpl implements OdooService {
             try {
 
                 if (journalEntryDebitCredit.size() > 1) {
-                    Integer id = createJournalEntryToOddo(journalEntryDebitCredit, loanTransactionId, transactionType);
+                    String id = createJournalEntryToOddo(journalEntryDebitCredit, loanTransactionId, transactionType);
                     if (id != null) {
                         for (JournalEntry je : journalEntryDebitCredit) {
                             je.setOddoPosted(true);
                             je.setOdooJournalId(id);
                             this.journalEntryRepository.saveAndFlush(je);
                         }
-                        journalEntryDebitCredit.clear();
                     }
-                    journalEntryDebitCredit.clear();
                 }
             } catch (Exception e) {
                 Throwable realCause = e;
@@ -415,6 +448,19 @@ public class OdooServiceImpl implements OdooService {
         } else {
             return glCode;
         }
+    }
+    private String convertRequestPayloadToJson(JournalEntryToOdooData journalEntryToOdooData) {
+        Gson gson = new GsonBuilder().create();
+        String request = gson.toJson(journalEntryToOdooData);
+        LOG.info("Actual (Journal Entries) Payload to be sent to Odoo API - - >" + request);
+        return request;
+    }
+    public String getStringField(JsonObject jsonObject, String fieldName) {
+        if (jsonObject != null && jsonObject.has(fieldName) && jsonObject.get(fieldName).isJsonPrimitive()
+                && jsonObject.get(fieldName).getAsJsonPrimitive().isString()) {
+            return jsonObject.get(fieldName).getAsString();
+        }
+        return null;
     }
 
 }

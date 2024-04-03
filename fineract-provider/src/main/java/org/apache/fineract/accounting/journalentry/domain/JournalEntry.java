@@ -108,7 +108,7 @@ public class JournalEntry extends AbstractAuditableCustom {
     private boolean isOddoPosted;
 
     @Column(name = "odoo_journal_id")
-    private Integer odooJournalId;
+    private String odooJournalId;
 
     public static JournalEntry createNew(final Office office, final PaymentDetail paymentDetail, final GLAccount glAccount,
             final String currencyCode, final String transactionId, final boolean manualEntry, final LocalDate transactionDate,
@@ -253,11 +253,11 @@ public class JournalEntry extends AbstractAuditableCustom {
         this.isOddoPosted = isOddoPosted;
     }
 
-    public Integer getOdooJournalId() {
+    public String getOdooJournalId() {
         return this.odooJournalId;
     }
 
-    public void setOdooJournalId(Integer odooJournalId) {
+    public void setOdooJournalId(String odooJournalId) {
         this.odooJournalId = odooJournalId;
     }
 
