@@ -19,6 +19,11 @@
 package org.apache.fineract.infrastructure.Odoo;
 
 import com.google.common.base.Splitter;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -28,6 +33,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository;
@@ -51,16 +61,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import java.io.IOException;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
 @Service
 @SuppressWarnings({ "unchecked", "rawtypes", "cast" })
@@ -315,9 +315,12 @@ public class OdooServiceImpl implements OdooService {
 
                 journalEntry = new AccountingEntry(entry, accountId, partnerId);
                 accounting_entries.add(journalEntry);
-                if(partnerId == null || accountId == null){
-                    throw new GeneralPlatformDomainRuleException("error.posting.journal.entries.to.odoo.has.failed.due.to.missing.client.or.gl.account","Error occurred while creating Journal Entry to Odoo with Loan Transaction Id  " + loanTransactionId + " and Type "
-                            + transactionType + " Error: Account or Partner not found. The Client is not posted or GL account is not available");
+                if (partnerId == null || accountId == null) {
+                    throw new GeneralPlatformDomainRuleException(
+                            "error.posting.journal.entries.to.odoo.has.failed.due.to.missing.client.or.gl.account",
+                            "Error occurred while creating Journal Entry to Odoo with Loan Transaction Id  " + loanTransactionId
+                                    + " and Type " + transactionType
+                                    + " Error: Account or Partner not found. The Client is not posted or GL account is not available");
                 }
             }
 
@@ -340,12 +343,12 @@ public class OdooServiceImpl implements OdooService {
         }
         return null;
     }
-    private JsonObject sendRequest(String payload)
-            throws IOException {
+
+    private JsonObject sendRequest(String payload) throws IOException {
         OkHttpClient httpClient = new OkHttpClient();
 
         RequestBody requestBody = RequestBody.create(MediaType.parse(FORM_URL_CONTENT_TYPE), payload);
-        Request request = new Request.Builder().url(url+"/cbs/dev/journal_entry").post(requestBody)
+        Request request = new Request.Builder().url(url + "/cbs/dev/journal_entry").post(requestBody)
                 .addHeader("Content-Type", "application/json").build();
 
         Response response = httpClient.newCall(request).execute();
@@ -449,12 +452,14 @@ public class OdooServiceImpl implements OdooService {
             return glCode;
         }
     }
+
     private String convertRequestPayloadToJson(JournalEntryToOdooData journalEntryToOdooData) {
         Gson gson = new GsonBuilder().create();
         String request = gson.toJson(journalEntryToOdooData);
         LOG.info("Actual (Journal Entries) Payload to be sent to Odoo API - - >" + request);
         return request;
     }
+
     public String getStringField(JsonObject jsonObject, String fieldName) {
         if (jsonObject != null && jsonObject.has(fieldName) && jsonObject.get(fieldName).isJsonPrimitive()
                 && jsonObject.get(fieldName).getAsJsonPrimitive().isString()) {
