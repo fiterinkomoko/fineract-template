@@ -95,6 +95,9 @@ public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom {
      * @return
      */
     public boolean isEndDateAfter(final LocalDate compareDate) {
+        if (this.endDate == null) {
+            return false;
+        }
         return this.endDate.isAfter(compareDate);
     }
 
