@@ -329,15 +329,15 @@ public class OdooServiceImpl implements OdooService {
             journalEntryToOdooData.setPassword(password);
             journalEntryToOdooData.setCbs_journal_entry_id(loanTransactionId.toString());
 
-            journalData.setRef("Journal Entry made by CBS ");
-            journalData.setTransaction_type_name(LoanTransactionType.fromInt(transactionType.intValue()).getCode());
+            journalData.setRef("Journal Entry made by CBS for Loan Transaction id :> " + loanTransactionId);
+            journalData.setTransaction_type_name(LoanTransactionType.fromInt(transactionType.intValue()).name());
             journalData.setTransaction_type_unique_id(transactionType.toString());
 
             journalEntryToOdooData.setJournal(journalData);
             journalEntryToOdooData.setAccounting_entries(accounting_entries);
             LOG.info("Journal Entry to Odoo " + journalEntryToOdooData);
             String jsonPayload = convertRequestPayloadToJson(journalEntryToOdooData);
-
+            LOG.info("Journal Entry to Odoo JSON Payload " + jsonPayload);
             JsonObject res = sendRequest(jsonPayload);
             return getStringField(res, "journal_entry_no");
         }
