@@ -46,7 +46,7 @@ public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom {
     private LocalDate endDate;
 
     public static LoanOfficerAssignmentHistory createNew(final Loan loan, final Staff loanOfficer, final LocalDate startDate) {
-        return new LoanOfficerAssignmentHistory(loan, loanOfficer, startDate, null);
+        return new LoanOfficerAssignmentHistory(loan, loanOfficer, startDate, loan.getMaturityDate());
     }
 
     protected LoanOfficerAssignmentHistory() {
