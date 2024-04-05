@@ -18,6 +18,12 @@
  */
 package org.apache.fineract.infrastructure.Odoo;
 
+import com.google.common.base.Splitter;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -26,16 +32,27 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository;
 import org.apache.fineract.infrastructure.Odoo.exception.OdooFailedException;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
+import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionNotPostedToOdooInstanceData;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
@@ -50,6 +67,7 @@ import org.springframework.stereotype.Service;
 public class OdooServiceImpl implements OdooService {
 
     private static final Logger LOG = LoggerFactory.getLogger(OdooServiceImpl.class);
+    public static final String FORM_URL_CONTENT_TYPE = "Content-Type";
 
     @Value("${fineract.integrations.odoo.db}")
     private String odooDB;
@@ -66,23 +84,25 @@ public class OdooServiceImpl implements OdooService {
     private ConfigurationDomainService configurationDomainService;
 
     private final JournalEntryRepository journalEntryRepository;
+    private final LoanReadPlatformService loanReadPlatformService;
 
     @Autowired
     public OdooServiceImpl(ClientRepositoryWrapper clientRepository, ConfigurationDomainService configurationDomainService,
-            JournalEntryRepository journalEntryRepository) {
+            JournalEntryRepository journalEntryRepository, LoanReadPlatformService loanReadPlatformService) {
         this.clientRepository = clientRepository;
         this.configurationDomainService = configurationDomainService;
         this.journalEntryRepository = journalEntryRepository;
+        this.loanReadPlatformService = loanReadPlatformService;
     }
 
     @Override
     public Integer loginToOddo() {
         try {
-            final XmlRpcClientConfigImpl common_config = new XmlRpcClientConfigImpl();
+            final XmlRpcClientConfigImpl commonConfig = new XmlRpcClientConfigImpl();
             final XmlRpcClient client = new XmlRpcClient();
-            common_config.setServerURL(new URL(String.format("%s/xmlrpc/2/common", url)));
+            commonConfig.setServerURL(new URL(String.format("%s/xmlrpc/2/common", url)));
 
-            Object uid = (Object) client.execute(common_config, "authenticate",
+            Object uid = (Object) client.execute(commonConfig, "authenticate",
                     Arrays.asList(odooDB, username, password, Collections.emptyMap()));
             if (!uid.equals(false)) {
                 LOG.info("Odoo Authentication successful uid" + uid);
@@ -92,7 +112,7 @@ public class OdooServiceImpl implements OdooService {
                 return 0;
             }
         } catch (Exception e) {
-            LOG.error("Odoo Authentication failure message", e);
+            LOG.error(e.getMessage());
         }
         return 0;
     }
@@ -275,134 +295,129 @@ public class OdooServiceImpl implements OdooService {
     }
 
     @Override
-    public Integer createJournalEntryToOddo(List<JournalEntry> list) {
-        try {
-            final Integer uid = loginToOddo();
-            if (uid > 0) {
-                XmlRpcClient models = getCommonConfig();
+    public String createJournalEntryToOddo(List<JournalEntry> list, Long loanTransactionId, Long transactionType) throws IOException {
 
-                Integer currencyId = getCurrency(list.get(0), uid, models);
-                Integer id = 0;
+        final Integer uid = loginToOddo();
+        if (uid > 0) {
+            XmlRpcClient models = getCommonConfig();
 
-                JournalEntry debitJournalEntry = null;
-                JournalEntry creditJournalEntry = null;
+            AccountingEntry journalEntry = null;
+            List<AccountingEntry> accounting_entries = new ArrayList<>();
 
-                for (JournalEntry journalEntry : list) {
-                    if (journalEntry.isDebitEntry()) {
-                        debitJournalEntry = journalEntry;
-                    } else {
-                        creditJournalEntry = journalEntry;
-                    }
-                }
-                JournalEntry debit = debitJournalEntry != null ? debitJournalEntry : list.get(0);
-                JournalEntry credit = creditJournalEntry != null ? creditJournalEntry : list.get(1);
+            JournalEntryToOdooData journalEntryToOdooData = new JournalEntryToOdooData();
+            JournalData journalData = new JournalData();
 
-                Integer debitAccountId = getGlAccounts(debit, uid, models);
-                Integer creditAccountId = getGlAccounts(credit, uid, models);
+            for (JournalEntry entry : list) {
 
-                if (debitAccountId == null || creditAccountId == null) {
-                    return null;
-                }
+                Integer accountId = getGlAccounts(entry, uid, models);
+                Client client = entry.getClient();
+                Integer partnerId = getPartner(client.getId(), uid, models);
 
-                Integer debitPartnerId = getPartner((debit.getClient() != null ? debit.getClient().getId() : null), uid, models);
-                Integer creditPartnerId = getPartner((credit.getClient() != null ? credit.getClient().getId() : null), uid, models);
-
-                // Create journal entry
-                if (debit.getAmount().doubleValue() != 0 || credit.getAmount().doubleValue() != 0) {
-                    id = (Integer) models.execute("execute_kw",
-                            Arrays.asList(
-                                    odooDB, uid, password, "account.move", "create", Arrays.asList(Map.of("line_ids", Arrays.asList(
-                                            Arrays.asList(0, 0,
-                                                    Map.of("account_id", debitAccountId, "amount_currency", currencyId, "credit", 0,
-                                                            "debit", debit.getAmount().doubleValue(), "partner_id",
-                                                            debitPartnerId != null ? debitPartnerId
-                                                                    : false,
-                                                            "name", debit.getEntityId() != null ? debit.getEntityId().toString() : false)),
-                                            Arrays.asList(0, 0,
-                                                    Map.of("account_id", creditAccountId, "amount_currency", currencyId, "credit",
-                                                            credit.getAmount().doubleValue(), "debit", 0, "partner_id",
-                                                            creditPartnerId != null ? creditPartnerId : false, "name",
-                                                            credit.getEntityId() != null ? credit.getEntityId().toString() : false)))))));
-                    LOG.info("Odoo Journal Entry created with id " + id);
-                    Boolean status = (Boolean) models.execute("execute_kw",
-                            Arrays.asList(odooDB, uid, password, "account.move", "action_post", Arrays.asList(Arrays.asList(id))));
-                    LOG.info("Odoo Journal Entry posted Successfully " + status);
-                    return id;
+                journalEntry = new AccountingEntry(entry, accountId, partnerId);
+                accounting_entries.add(journalEntry);
+                if (partnerId == null || accountId == null) {
+                    throw new GeneralPlatformDomainRuleException(
+                            "error.posting.journal.entries.to.odoo.has.failed.due.to.missing.client.or.gl.account",
+                            "Error occurred while creating Journal Entry to Odoo with Loan Transaction Id  " + loanTransactionId
+                                    + " and Type " + transactionType
+                                    + " Error: Account or Partner not found. The Client is not posted or GL account is not available");
                 }
             }
 
-        } catch (XmlRpcException e) {
-            throw new OdooFailedException(e);
+            // Create journal entry
+            journalEntryToOdooData.setUsername(username);
+            journalEntryToOdooData.setPassword(password);
+            journalEntryToOdooData.setCbs_journal_entry_id(loanTransactionId.toString());
+
+            journalData.setRef("Journal Entry made by CBS for Loan Transaction id : " + loanTransactionId);
+            journalData.setTransaction_type_name(LoanTransactionType.fromInt(transactionType.intValue()).name());
+            journalData.setTransaction_type_unique_id(transactionType.toString());
+
+            journalEntryToOdooData.setJournal(journalData);
+            journalEntryToOdooData.setAccounting_entries(accounting_entries);
+            LOG.info("Journal Entry to Odoo " + journalEntryToOdooData);
+            String jsonPayload = convertRequestPayloadToJson(journalEntryToOdooData);
+            LOG.info("Journal Entry to Odoo JSON Payload " + jsonPayload);
+            JsonObject res = sendRequest(jsonPayload);
+            return getStringField(res, "journal_entry_no");
         }
         return null;
+    }
+
+    private JsonObject sendRequest(String payload) throws IOException {
+        OkHttpClient httpClient = new OkHttpClient();
+
+        RequestBody requestBody = RequestBody.create(MediaType.parse(FORM_URL_CONTENT_TYPE), payload);
+        Request request = new Request.Builder().url(url + "/cbs/dev/journal_entry").post(requestBody)
+                .addHeader("Content-Type", "application/json").build();
+
+        Response response = httpClient.newCall(request).execute();
+
+        if (response.isSuccessful()) {
+
+            String resObject = response.body().string();
+            LOG.info("Response on Odoo Journal Entry Posting: " + resObject);
+            return JsonParser.parseString(resObject).getAsJsonObject();
+        } else {
+            String resObject = response.body().string();
+            JsonObject js = JsonParser.parseString(resObject).getAsJsonObject();
+            throw new GeneralPlatformDomainRuleException("error.msg.journal.entry.posting.to.odoo.failed",
+                    " Failed to post Journal Entries to Odoo: " + response.code() + ":" + response.message() + " -Code From Odoo :-"
+                            + getStringField(js, "responseCode") + " -Message From Odoo :-" + getStringField(js, "responseMessage"));
+        }
+
     }
 
     @Override
     @CronTarget(jobName = JobName.POST_JOURNAL_ENTRY_TO_ODDO)
     public void postJournalEntryToOddo() throws JobExecutionException {
         Boolean isOdooEnabled = this.configurationDomainService.isOdooIntegrationEnabled();
+        List<Throwable> errors = new ArrayList<>();
         if (isOdooEnabled) {
-            List<JournalEntry> JE = this.journalEntryRepository.findJournalEntriesByIsOddoPosted(false);
-
-            List<Throwable> errors = new ArrayList<>();
-
-            List<JournalEntry> journalEntryDebitCredit = new ArrayList<>();
-            if (JE != null && JE.size() > 0) {
-                for (JournalEntry entry : JE) {
-
-                    try {
-                        journalEntryDebitCredit.add(entry);
-
-                        if (journalEntryDebitCredit.size() > 1 && journalEntryDebitCredit.size() <= 2) {
-                            Integer id = createJournalEntryToOddo(journalEntryDebitCredit);
-                            if (id != null) {
-                                for (JournalEntry je : journalEntryDebitCredit) {
-                                    je.setOddoPosted(true);
-                                    je.setOdooJournalId(id);
-                                    this.journalEntryRepository.saveAndFlush(je);
-                                }
-                                journalEntryDebitCredit.clear();
-                            }
-                            journalEntryDebitCredit.clear();
-                        }
-                    } catch (Exception e) {
-                        Throwable realCause = e;
-                        if (e.getCause() != null) {
-                            realCause = e.getCause();
-                        }
-                        LOG.error("Error occurred while updating Journals to Odoo with entity id  " + entry.getEntityId() + " message "
-                                + realCause.getMessage());
-                        errors.add(realCause);
-                    }
+            // get loan accounts with transactions not posted to Odoo
+            List<LoanTransactionNotPostedToOdooInstanceData> loanTransactionNotPostedToOdooInstanceData = loanReadPlatformService
+                    .retrieveLoanTransactionWhoseJournalEntriesAreNotPostedToOdoo();
+            LOG.info("Loan Transaction Not Posted to Odoo " + loanTransactionNotPostedToOdooInstanceData.toString());
+            if (!CollectionUtils.isEmpty(loanTransactionNotPostedToOdooInstanceData)) {
+                for (LoanTransactionNotPostedToOdooInstanceData transaction : loanTransactionNotPostedToOdooInstanceData) {
+                    LOG.info("Loan Transaction Not Posted to Odoo " + transaction.toString());
+                    List<JournalEntry> JE = this.journalEntryRepository.findJournalEntriesByIsOddoPosted(false,
+                            transaction.getLoanTransactionId());
+                    postJournalEntries(errors, JE, transaction.getLoanTransactionId(), transaction.getTransactionType());
                 }
             }
+
             if (errors.size() > 0) {
                 throw new JobExecutionException(errors);
             }
         }
     }
 
-    private Integer getCurrency(JournalEntry entry, Integer uid, XmlRpcClient models) {
-        List currency;
-        try {
-            if (uid > 0) {
-                currency = Arrays.asList((Object[]) models.execute("execute_kw",
-                        Arrays.asList(odooDB, uid, password, "res.currency", "search_read",
-                                Arrays.asList(Arrays.asList(Arrays.asList("name", "=", entry.getCurrencyCode()))), Map.of(
+    private void postJournalEntries(List<Throwable> errors, List<JournalEntry> journalEntryDebitCredit, Long loanTransactionId,
+            Long transactionType) {
+        if (!CollectionUtils.isEmpty(journalEntryDebitCredit)) {
+            try {
 
-                                        "fields", Arrays.asList("id"), "limit", 5))));
-                Integer currencyId = null;
-                if (currency != null && currency.size() > 0) {
-                    HashMap currencyData = (HashMap) currency.get(0);
-                    currencyId = (Integer) currencyData.get("id");
+                if (journalEntryDebitCredit.size() > 1) {
+                    String id = createJournalEntryToOddo(journalEntryDebitCredit, loanTransactionId, transactionType);
+                    if (id != null) {
+                        for (JournalEntry je : journalEntryDebitCredit) {
+                            je.setOddoPosted(true);
+                            je.setOdooJournalId(id);
+                            this.journalEntryRepository.saveAndFlush(je);
+                        }
+                    }
                 }
-
-                return currencyId;
+            } catch (Exception e) {
+                Throwable realCause = e;
+                if (e.getCause() != null) {
+                    realCause = e.getCause();
+                }
+                LOG.error("Error occurred while Posting Journals to Odoo with Loan Transaction Id  " + loanTransactionId + " and Type "
+                        + transactionType + realCause.getMessage());
+                errors.add(realCause);
             }
-        } catch (XmlRpcException e) {
-            throw new OdooFailedException(e);
         }
-        return null;
     }
 
     private Integer getGlAccounts(JournalEntry entry, Integer uid, XmlRpcClient models) {
@@ -410,7 +425,7 @@ public class OdooServiceImpl implements OdooService {
             if (uid > 0) {
                 final List glAccount = Arrays.asList((Object[]) models.execute("execute_kw",
                         Arrays.asList(odooDB, uid, password, "account.account", "search_read",
-                                Arrays.asList(Arrays.asList(Arrays.asList("code", "=", entry.getGlAccount().getGlCode()))),
+                                Arrays.asList(Arrays.asList(Arrays.asList("code", "=", extractGlCode(entry.getGlAccount().getGlCode())))),
                                 Map.of("fields", Arrays.asList("id"), "limit", 5))));
                 Integer id = null;
                 if (glAccount != null && glAccount.size() > 0) {
@@ -422,6 +437,36 @@ public class OdooServiceImpl implements OdooService {
             }
         } catch (XmlRpcException e) {
             throw new OdooFailedException(e);
+        }
+        return null;
+    }
+
+    /*
+     * This will help extract the GL Code from the concatenated GL code with id posted to fineract during data
+     * migration. The Code on Odoo is not unique so we concatenate the GL code with the GL id {code_id} so we need to
+     * extract the GLCode from the code again if we want the integration with Odoo from Fineract work as expected. We
+     * accommodated the aspect of the GL code not concatenated with the id if this is created in fineract direct
+     */
+    private String extractGlCode(String glCode) {
+        if (glCode.contains("-")) {
+            List<String> parts = Splitter.on(Pattern.compile("-", Pattern.LITERAL)).splitToList(glCode);
+            return parts.get(0);
+        } else {
+            return glCode;
+        }
+    }
+
+    private String convertRequestPayloadToJson(JournalEntryToOdooData journalEntryToOdooData) {
+        Gson gson = new GsonBuilder().create();
+        String request = gson.toJson(journalEntryToOdooData);
+        LOG.info("Actual (Journal Entries) Payload to be sent to Odoo API - - >" + request);
+        return request;
+    }
+
+    public String getStringField(JsonObject jsonObject, String fieldName) {
+        if (jsonObject != null && jsonObject.has(fieldName) && jsonObject.get(fieldName).isJsonPrimitive()
+                && jsonObject.get(fieldName).getAsJsonPrimitive().isString()) {
+            return jsonObject.get(fieldName).getAsString();
         }
         return null;
     }

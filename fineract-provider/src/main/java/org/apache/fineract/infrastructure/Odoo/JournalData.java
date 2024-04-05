@@ -18,26 +18,12 @@
  */
 package org.apache.fineract.infrastructure.Odoo;
 
-import java.io.IOException;
-import java.util.List;
-import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
-import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
-import org.apache.fineract.portfolio.client.domain.Client;
+import lombok.Data;
 
-public interface OdooService {
+@Data
+public class JournalData {
 
-    Integer loginToOddo();
-
-    public Integer createCustomerToOddo(Client client);
-
-    public void postClientsToOddo() throws JobExecutionException;
-
-    public Boolean updateCustomerToOddo(Client client);
-
-    public void postCustomerUpdatedDetailsToOddo() throws JobExecutionException;
-
-    String createJournalEntryToOddo(List<JournalEntry> entry, Long loanTransactionId, Long transactionType) throws IOException;
-
-    void postJournalEntryToOddo() throws JobExecutionException;
-
+    private String transaction_type_name;
+    private String transaction_type_unique_id;
+    private String ref;
 }

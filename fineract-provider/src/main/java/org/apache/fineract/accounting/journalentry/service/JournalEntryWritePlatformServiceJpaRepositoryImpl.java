@@ -348,12 +348,10 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             }
             // save the reversal entry
             this.glJournalEntryRepository.saveAndFlush(reversalJournalEntry);
-            this.helper.postJournalsToOdoo(reversalJournalEntry);
             journalEntry.setReversed(true);
             journalEntry.setReversalJournalEntry(reversalJournalEntry);
             // save the updated journal entry
             this.glJournalEntryRepository.saveAndFlush(journalEntry);
-            this.helper.postJournalsToOdoo(journalEntry);
         }
         return reversalTransactionId;
     }
@@ -383,12 +381,10 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             }
             // save the reversal entry
             this.glJournalEntryRepository.saveAndFlush(reversalJournalEntry);
-            this.helper.postJournalsToOdoo(reversalJournalEntry);
             journalEntry.setReversalJournalEntry(reversalJournalEntry);
             journalEntry.setReversed(true);
             // save the updated journal entry
             this.glJournalEntryRepository.saveAndFlush(journalEntry);
-            this.helper.postJournalsToOdoo(journalEntry);
         }
         return reversalTransactionId;
 
@@ -553,12 +549,10 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                 }
                 // save the reversal entry
                 this.glJournalEntryRepository.saveAndFlush(reversalJournalEntry);
-                this.helper.postJournalsToOdoo(reversalJournalEntry);
                 journalEntry.setReversalJournalEntry(reversalJournalEntry);
                 journalEntry.setReversed(true);
                 // save the updated journal entry
                 this.glJournalEntryRepository.saveAndFlush(journalEntry);
-                this.helper.postJournalsToOdoo(journalEntry);
             }
         }
     }
@@ -619,7 +613,6 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                     manualEntry, transactionDate, type, singleDebitOrCreditEntryCommand.getAmount(), comments, null, null, referenceNumber,
                     null, null, clientTransaction, shareTransactionId);
             JournalEntry JE = this.glJournalEntryRepository.saveAndFlush(glJournalEntry);
-            this.helper.postJournalsToOdoo(JE);
         }
     }
 
@@ -733,13 +726,11 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                     transactionDate, type, singleDebitOrCreditEntryCommand.getAmount(), comments, null, null, null, null, null,
                     clientTransaction, shareTransactionId);
             JournalEntry JE = this.glJournalEntryRepository.saveAndFlush(glJournalEntry);
-            this.helper.postJournalsToOdoo(JE);
 
             final JournalEntry contraEntry = JournalEntry.createNew(office, null, contraAccount, currencyCode, transactionId, manualEntry,
                     transactionDate, contraType, singleDebitOrCreditEntryCommand.getAmount(), comments, null, null, null, null, null,
                     clientTransaction, shareTransactionId);
             this.glJournalEntryRepository.saveAndFlush(contraEntry);
-            this.helper.postJournalsToOdoo(contraEntry);
         }
     }
 
