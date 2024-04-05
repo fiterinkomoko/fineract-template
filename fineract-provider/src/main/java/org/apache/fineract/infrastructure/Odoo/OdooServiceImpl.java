@@ -329,7 +329,7 @@ public class OdooServiceImpl implements OdooService {
             journalEntryToOdooData.setPassword(password);
             journalEntryToOdooData.setCbs_journal_entry_id(loanTransactionId.toString());
 
-            journalData.setRef("Journal Entry made by CBS for Loan Transaction id :> " + loanTransactionId);
+            journalData.setRef("Journal Entry made by CBS for Loan Transaction id : " + loanTransactionId);
             journalData.setTransaction_type_name(LoanTransactionType.fromInt(transactionType.intValue()).name());
             journalData.setTransaction_type_unique_id(transactionType.toString());
 
@@ -359,8 +359,11 @@ public class OdooServiceImpl implements OdooService {
             LOG.info("Response on Odoo Journal Entry Posting: " + resObject);
             return JsonParser.parseString(resObject).getAsJsonObject();
         } else {
+            String resObject = response.body().string();
+            JsonObject js = JsonParser.parseString(resObject).getAsJsonObject();
             throw new GeneralPlatformDomainRuleException("error.msg.journal.entry.posting.to.odoo.failed",
-                    " Failed to post Journal Entries to Odoo: " + response.code() + ":" + response.message());
+                    " Failed to post Journal Entries to Odoo: " + response.code() + ":" + response.message() + " -Code From Odoo :-"
+                            + getStringField(js, "responseCode") + " -Message From Odoo :-" + getStringField(js, "responseMessage"));
         }
 
     }
@@ -410,7 +413,7 @@ public class OdooServiceImpl implements OdooService {
                 if (e.getCause() != null) {
                     realCause = e.getCause();
                 }
-                LOG.error("Error occurred while updating Journals to Odoo with Loan Transaction Id  " + loanTransactionId + " and Type "
+                LOG.error("Error occurred while Posting Journals to Odoo with Loan Transaction Id  " + loanTransactionId + " and Type "
                         + transactionType + realCause.getMessage());
                 errors.add(realCause);
             }
