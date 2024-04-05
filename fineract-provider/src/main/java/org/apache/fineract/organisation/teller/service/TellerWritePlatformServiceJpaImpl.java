@@ -462,9 +462,7 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
                                                                         // Txn
 
             this.glJournalEntryRepository.saveAndFlush(debitJournalEntry);
-            this.accountingProcessorHelper.postJournalsToOdoo(debitJournalEntry);
             this.glJournalEntryRepository.saveAndFlush(creditJournalEntry);
-            this.accountingProcessorHelper.postJournalsToOdoo(creditJournalEntry);
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //

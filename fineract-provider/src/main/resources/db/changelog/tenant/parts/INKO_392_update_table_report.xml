@@ -521,6 +521,23 @@
         </update>
     </changeSet>
 
-
+    <changeSet id="update-column-acc_gl_journal_entry-type-from-int-to-string-2" author="bosco@fiter.io" context="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="acc_gl_journal_entry" columnName="odoo_journal_id" />
+        </preConditions>
+        <sql>
+            ALTER TABLE acc_gl_journal_entry
+            ALTER COLUMN odoo_journal_id TYPE VARCHAR(255);
+        </sql>
+    </changeSet>
+    <changeSet id="update-column-acc_gl_journal_entry-type-from-int-to-string-5" author="bosco@fiter.io" context="mysql">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="acc_gl_journal_entry" columnName="odoo_journal_id" />
+        </preConditions>
+        <sql>
+            ALTER TABLE acc_gl_journal_entry
+            MODIFY COLUMN odoo_journal_id VARCHAR(255);
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>

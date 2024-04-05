@@ -822,7 +822,6 @@ public class AccountingProcessorHelper {
                 manualEntry, transactionDate, JournalEntryType.CREDIT, amount, null, PortfolioProductType.CLIENT.getValue(), clientId, null,
                 loanTransaction, savingsAccountTransaction, clientTransaction, shareTransactionId);
         JournalEntry JE = this.glJournalEntryRepository.saveAndFlush(journalEntry);
-        postJournalsToOdoo(JE);
     }
 
     private void createCreditJournalEntryForSavings(final Office office, final String currencyCode, final GLAccount account,
@@ -845,7 +844,6 @@ public class AccountingProcessorHelper {
                 null, loanTransaction, savingsAccountTransaction, clientTransaction, shareTransactionId);
 
         JournalEntry JE = this.glJournalEntryRepository.saveAndFlush(journalEntry);
-        postJournalsToOdoo(JE);
     }
 
     private void createCreditJournalEntryForLoan(final Office office, final String currencyCode, final GLAccount account, final Long loanId,
@@ -866,7 +864,6 @@ public class AccountingProcessorHelper {
                 manualEntry, transactionDate, JournalEntryType.CREDIT, amount, null, PortfolioProductType.LOAN.getValue(), loanId, null,
                 loanTransaction, savingsAccountTransaction, clientTransaction, shareTransactionId);
         JournalEntry JE = this.glJournalEntryRepository.saveAndFlush(journalEntry);
-        postJournalsToOdoo(JE);
     }
 
     public void createProvisioningDebitJournalEntry(LocalDate transactionDate, Long provisioningentryId, Office office, String currencyCode,
@@ -882,7 +879,6 @@ public class AccountingProcessorHelper {
                 manualEntry, transactionDate, JournalEntryType.DEBIT, amount, null, PortfolioProductType.PROVISIONING.getValue(),
                 provisioningentryId, null, loanTransaction, savingsAccountTransaction, clientTransaction, shareTransactionId);
         JournalEntry JE = this.glJournalEntryRepository.saveAndFlush(journalEntry);
-        postJournalsToOdoo(JE);
     }
 
     public void createProvisioningCreditJournalEntry(LocalDate transactionDate, Long provisioningentryId, Office office,
@@ -898,7 +894,6 @@ public class AccountingProcessorHelper {
                 manualEntry, transactionDate, JournalEntryType.CREDIT, amount, null, PortfolioProductType.PROVISIONING.getValue(),
                 provisioningentryId, null, loanTransaction, savingsAccountTransaction, clientTransaction, shareTransactionId);
         JournalEntry JE = this.glJournalEntryRepository.saveAndFlush(journalEntry);
-        postJournalsToOdoo(JE);
     }
 
     private void createDebitJournalEntryForLoan(final Office office, final String currencyCode, final GLAccount account, final Long loanId,
@@ -919,7 +914,6 @@ public class AccountingProcessorHelper {
                 manualEntry, transactionDate, JournalEntryType.DEBIT, amount, null, PortfolioProductType.LOAN.getValue(), loanId, null,
                 loanTransaction, savingsAccountTransaction, clientTransaction, shareTransactionId);
         JournalEntry JE = this.glJournalEntryRepository.saveAndFlush(journalEntry);
-        postJournalsToOdoo(JE);
     }
 
     private void createDebitJournalEntryForSavings(final Office office, final String currencyCode, final GLAccount account,
@@ -941,7 +935,6 @@ public class AccountingProcessorHelper {
                 loanTransaction, savingsAccountTransaction, clientTransaction, shareTransactionId);
 
         JournalEntry JE = this.glJournalEntryRepository.saveAndFlush(journalEntry);
-        postJournalsToOdoo(JE);
     }
 
     private void createDebitJournalEntryForClientPayments(final Office office, final String currencyCode, final GLAccount account,
@@ -961,7 +954,6 @@ public class AccountingProcessorHelper {
                 manualEntry, transactionDate, JournalEntryType.DEBIT, amount, null, PortfolioProductType.CLIENT.getValue(), clientId, null,
                 loanTransaction, savingsAccountTransaction, clientTransaction, shareTransactionId);
         JournalEntry JE = this.glJournalEntryRepository.saveAndFlush(journalEntry);
-        postJournalsToOdoo(JE);
     }
 
     public void createJournalEntriesForShares(final Office office, final String currencyCode, final int accountTypeToDebitId,
@@ -1079,7 +1071,6 @@ public class AccountingProcessorHelper {
                 manualEntry, transactionDate, JournalEntryType.DEBIT, amount, null, PortfolioProductType.SHARES.getValue(), shareAccountId,
                 null, loanTransaction, savingsAccountTransaction, clientTransaction, shareTransactionId);
         JournalEntry JE = this.glJournalEntryRepository.saveAndFlush(journalEntry);
-        postJournalsToOdoo(JE);
     }
 
     private void createCreditJournalEntryForShares(final Office office, final String currencyCode, final GLAccount account,
@@ -1099,7 +1090,6 @@ public class AccountingProcessorHelper {
                 manualEntry, transactionDate, JournalEntryType.CREDIT, amount, null, PortfolioProductType.SHARES.getValue(), shareAccountId,
                 null, loanTransaction, savingsAccountTransaction, clientTransaction, shareTransactionId);
         JournalEntry JE = this.glJournalEntryRepository.saveAndFlush(journalEntry);
-        postJournalsToOdoo(JE);
     }
 
     public GLAccount getLinkedGLAccountForLoanProduct(final Long loanProductId, final int accountMappingTypeId, final Long paymentTypeId) {
@@ -1382,23 +1372,4 @@ public class AccountingProcessorHelper {
         }
     }
 
-    @SuppressWarnings("unused")
-    List<JournalEntry> list = new ArrayList<JournalEntry>();
-
-    public void postJournalsToOdoo(JournalEntry entry) {
-        boolean isEnabled = this.configurationDomainService.isOdooIntegrationEnabled();
-        list.add(entry);
-        if (list.size() > 1 && isEnabled) {
-            Integer odooJournalId = this.oddoService.createJournalEntryToOddo(list);
-            if (odooJournalId != null) {
-                for (JournalEntry journalEntry : list) {
-                    journalEntry.setOddoPosted(true);
-                    journalEntry.setOdooJournalId(odooJournalId);
-                    this.glJournalEntryRepository.saveAndFlush(journalEntry);
-                }
-                list.clear();
-
-            }
-        }
-    }
 }

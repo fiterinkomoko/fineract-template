@@ -112,6 +112,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanSummaryData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionNotPostedToOdooInstanceData;
 import org.apache.fineract.portfolio.loanaccount.data.PaidInAdvanceData;
 import org.apache.fineract.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
@@ -3510,6 +3511,45 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     public Integer retriveGenericLoanCycle(final Long clientId) {
         final String sql = "Select COUNT(l.id) from m_loan l where l.client_id = ?  and l.loan_status_id IN (300,600,601,700)";
         return this.jdbcTemplate.queryForObject(sql, new Object[] { clientId }, Integer.class);
+    }
+
+    @Override
+    public List<LoanTransactionNotPostedToOdooInstanceData> retrieveLoanTransactionWhoseJournalEntriesAreNotPostedToOdoo() {
+        this.context.authenticatedUser();
+        final LoanTransactionNotPostedToOdooInstanceMapper rm = new LoanTransactionNotPostedToOdooInstanceMapper(sqlGenerator);
+
+        final String sql = "select " + rm.loanTransactionNotPostedToOdoo();
+
+        return this.jdbcTemplate.query(sql, rm);
+    }
+
+    private static final class LoanTransactionNotPostedToOdooInstanceMapper
+            implements RowMapper<LoanTransactionNotPostedToOdooInstanceData> {
+
+        private final DatabaseSpecificSQLGenerator sqlGenerator;
+
+        LoanTransactionNotPostedToOdooInstanceMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
+            this.sqlGenerator = sqlGenerator;
+        }
+
+        public String loanTransactionNotPostedToOdoo() {
+            return " DISTINCT gl.loan_transaction_id AS loanTransactionId,gl.entity_id AS loanId,mlt.transaction_type_enum AS transactionType FROM acc_gl_journal_entry gl "
+                    + " INNER JOIN m_loan_transaction mlt on gl.loan_transaction_id = mlt.id "
+                    + " INNER JOIN m_loan ml on mlt.loan_id = ml.id " + " INNER JOIN m_client mc on ml.client_id = mc.id "
+                    + " WHERE gl.is_oddo_posted = false AND mlt.is_reversed = false "
+                    + " AND mc.is_odoo_customer_posted = true AND odoo_customer_id IS NOT NULL AND mlt.transaction_type_enum IN (1,2,4,5,6,8,9,10,19,26,27)   "
+                    + " ORDER BY gl.entity_id ASC ";
+        }
+
+        @Override
+        public LoanTransactionNotPostedToOdooInstanceData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
+                throws SQLException {
+            final Long loanTransactionId = rs.getLong("loanTransactionId");
+            final Long loanId = rs.getLong("loanId");
+            final Long transactionType = rs.getLong("transactionType");
+
+            return new LoanTransactionNotPostedToOdooInstanceData(loanTransactionId, loanId, transactionType);
+        }
     }
 
 }
