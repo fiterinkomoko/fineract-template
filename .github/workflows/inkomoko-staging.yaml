@@ -1,0 +1,58 @@
+name: Fineract Client Build
+
+on:
+  push:
+    branches:
+      - inkomoko
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v6
+
+      - uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v1
+        with:
+          java-version: 17
+
+      - name: Build with Gradles
+        run: ./gradlew --no-daemon -q -x rat -x compileTestJava -x test -x spotlessJavaCheck -x spotlessJava bootJar
+
+      - name: List directory contents
+        run: |
+          echo "Listing contents of the directory:"
+          ls -l ./fineract-provider/build/libs/
+
+      - name: Get Shortened Commit SHA
+        id: shortened_sha
+        run: |
+          FULL_SHA=$GITHUB_SHA
+          SHORTENED_SHA=${FULL_SHA:0:8}
+          echo "::set-output name=shortened_sha::$SHORTENED_SHA"
+
+
+      - name: Update known hosts
+        run: |
+          mkdir -p ~/.ssh
+          touch ~/.ssh/known_hosts
+          ssh-keyscan -t rsa ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Copy file using SCP
+        run: |
+          HOST=${{ secrets.VM_HOST }}
+          USER=${{ secrets.VM_USER_DEV }}
+          SOURCE_FILE=./fineract-provider/build/libs/fineract-provider-0.0.0-${{ steps.shortened_sha.outputs.shortened_sha }}.jar
+          DESTINATION_DIR=/home/ubuntu/fineract/
+          echo "${{ secrets.VM_KEY_DEV }}" > key.pem
+          chmod 400 key.pem
+          scp -i key.pem -p ${{ secrets.VM_PORT_DEV }} -o StrictHostKeyChecking=no $SOURCE_FILE ${{ secrets.VM_USER_DEV }}@${{ secrets.VM_HOST }}:$DESTINATION_DIR
+
+
+      - name: Build image on server and deploy
+        run: ssh -i key.pem -p ${{ secrets.VM_PORT_DEV }} - -o StrictHostKeyChecking=no -l ${{ secrets.VM_USER_DEV}} ${{ secrets.VM_HOST }} '/home/mifosdev/fineract_deployment/fineract/build.sh'
