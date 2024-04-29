@@ -32,7 +32,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
+import javax.annotation.PostConstruct;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -43,10 +46,13 @@ import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository;
 import org.apache.fineract.infrastructure.Odoo.exception.OdooFailedException;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
+import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
@@ -60,6 +66,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -85,6 +93,7 @@ public class OdooServiceImpl implements OdooService {
 
     private final JournalEntryRepository journalEntryRepository;
     private final LoanReadPlatformService loanReadPlatformService;
+    private ExecutorService genericExecutorService;
 
     @Autowired
     public OdooServiceImpl(ClientRepositoryWrapper clientRepository, ConfigurationDomainService configurationDomainService,
@@ -93,6 +102,11 @@ public class OdooServiceImpl implements OdooService {
         this.configurationDomainService = configurationDomainService;
         this.journalEntryRepository = journalEntryRepository;
         this.loanReadPlatformService = loanReadPlatformService;
+    }
+
+    @PostConstruct
+    public void initializeExecutorService() {
+        genericExecutorService = Executors.newSingleThreadExecutor();
     }
 
     @Override
@@ -299,7 +313,6 @@ public class OdooServiceImpl implements OdooService {
 
         final Integer uid = loginToOddo();
         if (uid > 0) {
-            XmlRpcClient models = getCommonConfig();
 
             AccountingEntry journalEntry = null;
             List<AccountingEntry> accounting_entries = new ArrayList<>();
@@ -309,18 +322,25 @@ public class OdooServiceImpl implements OdooService {
 
             for (JournalEntry entry : list) {
 
-                Integer accountId = getGlAccounts(entry, uid, models);
+                Integer accountId = extractGlCode(entry.getGlAccount().getGlCode());
                 Client client = entry.getClient();
-                Integer partnerId = getPartner(client.getId(), uid, models);
+                Integer partnerId = client.getOdooCustomerId();
 
                 journalEntry = new AccountingEntry(entry, accountId, partnerId);
                 accounting_entries.add(journalEntry);
-                if (partnerId == null || accountId == null) {
+                if (partnerId == null) {
                     throw new GeneralPlatformDomainRuleException(
-                            "error.posting.journal.entries.to.odoo.has.failed.due.to.missing.client.or.gl.account",
+                            "error.posting.journal.entries.to.odoo.has.failed.due.to.missing.client.id.or.partner.id",
                             "Error occurred while creating Journal Entry to Odoo with Loan Transaction Id  " + loanTransactionId
-                                    + " and Type " + transactionType
-                                    + " Error: Account or Partner not found. The Client is not posted or GL account is not available");
+                                    + " and Type " + transactionType + " Error: Client or Partner id not found. Client is Posted =  : "
+                                    + client.isOdooCustomerPosted());
+                }
+                if (accountId == null) {
+                    throw new GeneralPlatformDomainRuleException(
+                            "error.posting.journal.entries.to.odoo.has.failed.due.missing.gl.account.id",
+                            "Error occurred while creating Journal Entry to Odoo with Loan Transaction Id  " + loanTransactionId
+                                    + " and Type " + transactionType + " Error: GL Account  not found. GL Account ID on CBS  =: "
+                                    + entry.getGlAccount().getId());
                 }
             }
 
@@ -393,6 +413,16 @@ public class OdooServiceImpl implements OdooService {
         }
     }
 
+    @Override
+    public void postClientToOdooOnCreateTask(Client client) {
+        this.genericExecutorService.execute(new PostClientCreationToOdoo(client, ThreadLocalContextUtil.getContext()));
+    }
+
+    @Override
+    public void postClientToOdooOnUpdateTask(Map<String, Object> changes, Client client) {
+        this.genericExecutorService.execute(new PostClientUpdateToOdoo(changes, client, ThreadLocalContextUtil.getContext()));
+    }
+
     private void postJournalEntries(List<Throwable> errors, List<JournalEntry> journalEntryDebitCredit, Long loanTransactionId,
             Long transactionType) {
         if (!CollectionUtils.isEmpty(journalEntryDebitCredit)) {
@@ -420,39 +450,20 @@ public class OdooServiceImpl implements OdooService {
         }
     }
 
-    private Integer getGlAccounts(JournalEntry entry, Integer uid, XmlRpcClient models) {
-        try {
-            if (uid > 0) {
-                final List glAccount = Arrays.asList((Object[]) models.execute("execute_kw",
-                        Arrays.asList(odooDB, uid, password, "account.account", "search_read",
-                                Arrays.asList(Arrays.asList(Arrays.asList("code", "=", extractGlCode(entry.getGlAccount().getGlCode())))),
-                                Map.of("fields", Arrays.asList("id"), "limit", 5))));
-                Integer id = null;
-                if (glAccount != null && glAccount.size() > 0) {
-                    HashMap account = (HashMap) glAccount.get(0);
-                    id = (Integer) account.get("id");
-                }
-
-                return id;
-            }
-        } catch (XmlRpcException e) {
-            throw new OdooFailedException(e);
-        }
-        return null;
-    }
-
     /*
      * This will help extract the GL Code from the concatenated GL code with id posted to fineract during data
      * migration. The Code on Odoo is not unique so we concatenate the GL code with the GL id {code_id} so we need to
      * extract the GLCode from the code again if we want the integration with Odoo from Fineract work as expected. We
      * accommodated the aspect of the GL code not concatenated with the id if this is created in fineract direct
      */
-    private String extractGlCode(String glCode) {
+    private Integer extractGlCode(String glCode) {
         if (glCode.contains("-")) {
             List<String> parts = Splitter.on(Pattern.compile("-", Pattern.LITERAL)).splitToList(glCode);
-            return parts.get(0);
+            return Integer.parseInt(parts.get(1));
         } else {
-            return glCode;
+            throw new GeneralPlatformDomainRuleException("error.msg.gl.code.not.concatenated.with.id",
+                    "The GL Code is not concatenated with the GL Id. Please ensure the GL Code is concatenated with the GL Id for :-"
+                            + glCode);
         }
     }
 
@@ -469,6 +480,90 @@ public class OdooServiceImpl implements OdooService {
             return jsonObject.get(fieldName).getAsString();
         }
         return null;
+    }
+
+    class PostClientCreationToOdoo implements Runnable, ApplicationListener<ContextClosedEvent> {
+
+        private final FineractContext context;
+        private final Client client;
+
+        public PostClientCreationToOdoo(Client client, FineractContext context) {
+            this.context = context;
+            this.client = client;
+        }
+
+        @Override
+        public void run() {
+            ThreadLocalContextUtil.init(context);
+            postClientToOdoo(client);
+        }
+
+        @Override
+        public void onApplicationEvent(ContextClosedEvent event) {
+            genericExecutorService.shutdown();
+            LOG.info("Shutting down the ExecutorService");
+        }
+
+        private void postClientToOdoo(Client newClient) {
+
+            boolean isOdooIntegrationEnable = configurationDomainService.isOdooIntegrationEnabled();
+            if (isOdooIntegrationEnable) {
+                Integer customerId = createCustomerToOddo(newClient);
+                if (customerId != null) {
+                    newClient.setOdooCustomerId(customerId);
+                    newClient.setOdooCustomerPosted(true);
+                    clientRepository.save(newClient);
+                }
+            }
+        }
+
+    }
+
+    class PostClientUpdateToOdoo implements Runnable, ApplicationListener<ContextClosedEvent> {
+
+        private final FineractContext context;
+        private final Client client;
+        private final Map<String, Object> changes;
+
+        public PostClientUpdateToOdoo(Map<String, Object> changes, Client client, FineractContext context) {
+            this.context = context;
+            this.client = client;
+            this.changes = changes;
+        }
+
+        @Override
+        public void run() {
+            ThreadLocalContextUtil.init(context);
+            updateClientOnOdoo(changes, client);
+        }
+
+        @Override
+        public void onApplicationEvent(ContextClosedEvent event) {
+            genericExecutorService.shutdown();
+            LOG.info("Shutting down the ExecutorService");
+        }
+
+        private void updateClientOnOdoo(Map<String, Object> changes, Client clientForUpdate) {
+
+            boolean isOdooEnabled = configurationDomainService.isOdooIntegrationEnabled();
+            if (isOdooEnabled) {
+                if (changes.containsKey(ClientApiConstants.firstnameParamName) || changes.containsKey(ClientApiConstants.fullnameParamName)
+                        || changes.containsKey(ClientApiConstants.lastnameParamName)
+                        || changes.containsKey(ClientApiConstants.middlenameParamName)
+                        || changes.containsKey(ClientApiConstants.mobileNoParamName)) {
+
+                    boolean status = updateCustomerToOddo(clientForUpdate);
+                    if (status) {
+                        clientForUpdate.setUpdatedToOdoo(true);
+                    } else {
+                        clientForUpdate.setUpdatedToOdoo(false);
+                    }
+                }
+            } else {
+                clientForUpdate.setUpdatedToOdoo(false);
+            }
+
+        }
     }
 
 }
