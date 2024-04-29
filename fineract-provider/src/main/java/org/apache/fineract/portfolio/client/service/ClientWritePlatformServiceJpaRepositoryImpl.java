@@ -30,6 +30,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import javax.annotation.PostConstruct;
 import javax.persistence.PersistenceException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -63,7 +66,6 @@ import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.address.service.AddressWritePlatformService;
 import org.apache.fineract.portfolio.businessevent.domain.client.ClientActivateBusinessEvent;
-import org.apache.fineract.portfolio.businessevent.domain.client.ClientCreateBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.client.ClientRejectBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
@@ -143,6 +145,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final ValidationLimitRepository validationLimitRepository;
 
     private final OdooService odooService;
+    private ExecutorService triggeredExecutorService;
 
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -192,6 +195,11 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.clientAdditionalInfoRepository = clientAdditionalInfoRepository;
         this.validationLimitRepository = validationLimitRepository;
         this.odooService = odooService;
+    }
+
+    @PostConstruct
+    public void initializeExecutorService() {
+        triggeredExecutorService = Executors.newSingleThreadExecutor();
     }
 
     @Transactional
@@ -259,7 +267,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     @Transactional
     @Override
     public CommandProcessingResult createClient(final JsonCommand command) {
-
         try {
             final AppUser currentUser = this.context.authenticatedUser();
 
@@ -383,17 +390,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                         EntityTables.CLIENT.getName(), newClient.getId(), null,
                         command.arrayOfParameterNamed(ClientApiConstants.datatables));
             }
-            boolean isOdooIntegrationEnable = this.configurationDomainService.isOdooIntegrationEnabled();
-            if (isOdooIntegrationEnable) {
-                Integer customerId = this.odooService.createCustomerToOddo(newClient);
-                if (customerId != null) {
-                    newClient.setOdooCustomerId(customerId);
-                    newClient.setOdooCustomerPosted(true);
-                    this.clientRepository.save(newClient);
-                }
-            }
 
-            businessEventNotifierService.notifyPostBusinessEvent(new ClientCreateBusinessEvent(newClient));
+            this.odooService.postClientToOdooOnCreateTask(newClient);
 
             entityDatatableChecksWritePlatformService.runTheCheck(newClient.getId(), EntityTables.CLIENT.getName(),
                     StatusEnum.CREATE.getCode().longValue(), EntityTables.CLIENT.getForeignKeyColumnNameOnDatatable());
@@ -696,23 +694,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             }
 
             updateClientAdditionalInfo(clientForUpdate, command);
-            boolean isOdooEnabled = this.configurationDomainService.isOdooIntegrationEnabled();
-            if (isOdooEnabled) {
-                if (changes.containsKey(ClientApiConstants.firstnameParamName) || changes.containsKey(ClientApiConstants.fullnameParamName)
-                        || changes.containsKey(ClientApiConstants.lastnameParamName)
-                        || changes.containsKey(ClientApiConstants.middlenameParamName)
-                        || changes.containsKey(ClientApiConstants.mobileNoParamName)) {
 
-                    boolean status = this.odooService.updateCustomerToOddo(clientForUpdate);
-                    if (status) {
-                        clientForUpdate.setUpdatedToOdoo(true);
-                    } else {
-                        clientForUpdate.setUpdatedToOdoo(false);
-                    }
-                }
-            } else {
-                clientForUpdate.setUpdatedToOdoo(false);
-            }
+            this.odooService.postClientToOdooOnUpdateTask(changes, clientForUpdate);
+
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withOfficeId(clientForUpdate.officeId()) //
