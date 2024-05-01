@@ -540,4 +540,144 @@
         </sql>
     </changeSet>
 
+    <changeSet id="insert-x_registered_table-for-failed_client_on_migration" author="bosco@fiter.io">
+        <preConditions>
+            <sqlCheck expectedResult="0">select count(*) from x_registered_table where registered_table_name = 'failed_client_on_migration'</sqlCheck>
+        </preConditions>
+        <sql>
+            <![CDATA[
+          INSERT INTO  x_registered_table (registered_table_name,application_table_name,entity_subtype,category) VALUES ('failed_client_on_migration','m_office',null,100);
+             ]]>
+        </sql>
+    </changeSet>
+    <changeSet id="create-failed_client_on_migration-data_table" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="failed_client_on_migration"/>
+            </not>
+        </preConditions>
+        <createTable tableName="failed_client_on_migration">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="office_Id" type="bigint" defaultValueNumeric="1">
+                <constraints nullable="false" foreignKeyName="FK_failed_client_on_migration_office" references="m_office(id)"/>
+            </column>
+            <column name="external_Id"  type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="firstname"  type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="lastname"  type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="error_msg"  type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="datetime">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+
+    <changeSet author="bosco@fiter.io" id="add_m_permission_CREATE_failed_client_on_migration">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'CREATE_failed_client_on_migration'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="CREATE_failed_client_on_migration" />
+            <column name="entity_name" value="failed_client_on_migration" />
+            <column name="action_name" value="CREATE" />
+            <column name="can_maker_checker" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_CREATE_failed_client_on_migration_CHECKER">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'CREATE_failed_client_on_migration_CHECKER'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="CREATE_failed_client_on_migration_CHECKER" />
+            <column name="entity_name" value="failed_client_on_migration" />
+            <column name="action_name" value="CREATE" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_READ_failed_client_on_migration">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'READ_failed_client_on_migration'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="READ_failed_client_on_migration" />
+            <column name="entity_name" value="failed_client_on_migration" />
+            <column name="action_name" value="READ" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_UPDATE_failed_client_on_migration">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'UPDATE_failed_client_on_migration'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="UPDATE_failed_client_on_migration" />
+            <column name="entity_name" value="failed_client_on_migration" />
+            <column name="action_name" value="UPDATE" />
+            <column name="can_maker_checker" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_UPDATE_failed_client_on_migration_CHECKER">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'UPDATE_failed_client_on_migration_CHECKER'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="UPDATE_failed_client_on_migration_CHECKER" />
+            <column name="entity_name" value="failed_client_on_migration" />
+            <column name="action_name" value="UPDATE" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_DELETE_failed_client_on_migration">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'DELETE_failed_client_on_migration'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="DELETE_failed_client_on_migration" />
+            <column name="entity_name" value="failed_client_on_migration" />
+            <column name="action_name" value="DELETE" />
+            <column name="can_maker_checker" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_m_permission_DELETE_failed_client_on_migration_CHECKER">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'DELETE_failed_client_on_migration_CHECKER'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="datatable" />
+            <column name="code" value="DELETE_failed_client_on_migration_CHECKER" />
+            <column name="entity_name" value="failed_client_on_migration" />
+            <column name="action_name" value="DELETE" />
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>
