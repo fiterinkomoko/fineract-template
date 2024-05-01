@@ -24,6 +24,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import okhttp3.Credentials;
@@ -38,6 +40,7 @@ import org.apache.fineract.portfolio.client.domain.ClientOtherInfoRepository;
 import org.apache.fineract.portfolio.client.exception.ClientOtherInfoNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementRequestData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanDisbursementRequestException;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
@@ -108,14 +111,26 @@ public class DisbursementRequestServiceImpl implements DisbursementRequestServic
         if (clientOtherInfo == null) {
             throw new ClientOtherInfoNotFoundException(null, loan.client().getId());
         }
+
+        BigDecimal totalDisbursementCharge = getDisbursementChargeAmount(loan);
+
+        if (totalDisbursementCharge.compareTo(loan.getPrincpal().getAmount()) > 0) {
+            throw new LoanDisbursementRequestException("Disbursement charge is greater than the loan amount ",
+                    "integration.disbursementRequest.chargeGreaterThanLoanAmount");
+        }
+
+        BigDecimal totalPrincipalToBeDisbursed = loan.getPrincpal().getAmount().subtract(totalDisbursementCharge);
+        LOG.info(" Loan Id :=>  [ " + loan.getId() + " ]  Original Principal  [" + loan.getPrincpal().getAmount() + "  ]  Currency   [ "
+                + loan.getPrincpal().getCurrencyCode() + "  ]  Total Principal to be disbursed to middleware  ==>  ["
+                + totalPrincipalToBeDisbursed + " ]  Total Disbursement Charge  ==>  " + totalDisbursementCharge);
+
         Long paymentTypeId = command.longValueOfParameterNamed("paymentTypeId");
         final PaymentTypeData paymentTypes = this.paymentTypeReadPlatformService.retrieveOne(paymentTypeId);
         String uniqueId = UUID.randomUUID().toString() + "-" + System.currentTimeMillis();
         final String requestId = "cbs_" + loan.getId() + "_" + uniqueId;
         DisbursementRequestData disbursementRequestData = new DisbursementRequestData(requestId, loan.getAccountNumber(),
-                loan.getPrincpal().getAmount(), loan.getPrincpal().getCurrencyCode(), paymentTypes.getName(),
-                clientOtherInfo.getTelephoneNo(), clientOtherInfo.getBankAccountNumber(), clientOtherInfo.getBankName(), "CBS",
-                paymentTypeId);
+                totalPrincipalToBeDisbursed, loan.getPrincpal().getCurrencyCode(), paymentTypes.getName(), clientOtherInfo.getTelephoneNo(),
+                clientOtherInfo.getBankAccountNumber(), clientOtherInfo.getBankName(), "CBS", paymentTypeId);
 
         MediaType JSON = MediaType.get("application/json; charset=utf-8");
         String requestJson = gson.toJson(disbursementRequestData);
@@ -143,5 +158,17 @@ public class DisbursementRequestServiceImpl implements DisbursementRequestServic
         } catch (IOException e) {
             throw new LoanDisbursementRequestException("Unexpected response received  from  inkomoko ", "loan", e);
         }
+    }
+
+    private static BigDecimal getDisbursementChargeAmount(Loan loan) {
+        BigDecimal chargeAmount = BigDecimal.ZERO;
+        final Set<LoanCharge> loanCharges = loan.charges();
+
+        for (final LoanCharge loanCharge : loanCharges) {
+            if (loanCharge.isDueAtDisbursement() && loanCharge.isChargePending()) {
+                chargeAmount = chargeAmount.add(loanCharge.amount());
+            }
+        }
+        return chargeAmount;
     }
 }
