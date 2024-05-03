@@ -45,4 +45,6 @@ public interface OdooService {
 
     void postClientToOdooOnUpdateTask(final Map<String, Object> changes, Client client);
 
+    void postFailedClientsOnMigration(Client client, String errorMsg, String jsonObject);
+
 }
