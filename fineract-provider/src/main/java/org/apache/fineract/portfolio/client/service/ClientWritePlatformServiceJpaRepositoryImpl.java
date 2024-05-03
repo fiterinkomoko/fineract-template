@@ -267,6 +267,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     @Transactional
     @Override
     public CommandProcessingResult createClient(final JsonCommand command) {
+        Client newClient = null;
         try {
             final AppUser currentUser = this.context.authenticatedUser();
 
@@ -337,8 +338,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 }
             }
 
-            final Client newClient = Client.createNew(currentUser, clientOffice, clientParentGroup, staff, savingsProductId, gender,
-                    clientType, clientClassification, legalFormValue, command);
+            newClient = Client.createNew(currentUser, clientOffice, clientParentGroup, staff, savingsProductId, gender, clientType,
+                    clientClassification, legalFormValue, command);
             this.clientRepository.saveAndFlush(newClient);
 
             createClientAdditionalInfo(newClient, command);
@@ -406,9 +407,11 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .setRollbackTransaction(result.isRollbackTransaction())//
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            this.odooService.postFailedClientsOnMigration(newClient, dve.getMessage(), command.json());
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
+            this.odooService.postFailedClientsOnMigration(newClient, dve.getMessage(), command.json());
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();

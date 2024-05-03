@@ -55,6 +55,8 @@ import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
+import org.apache.fineract.portfolio.client.domain.FailedClientCreationOnDataMigration;
+import org.apache.fineract.portfolio.client.domain.FailedClientCreationOnDataMigrationRepository;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionNotPostedToOdooInstanceData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
@@ -69,6 +71,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @SuppressWarnings({ "unchecked", "rawtypes", "cast" })
@@ -94,14 +98,17 @@ public class OdooServiceImpl implements OdooService {
     private final JournalEntryRepository journalEntryRepository;
     private final LoanReadPlatformService loanReadPlatformService;
     private ExecutorService genericExecutorService;
+    private FailedClientCreationOnDataMigrationRepository failedClientCreationOnDataMigrationRepository;
 
     @Autowired
     public OdooServiceImpl(ClientRepositoryWrapper clientRepository, ConfigurationDomainService configurationDomainService,
-            JournalEntryRepository journalEntryRepository, LoanReadPlatformService loanReadPlatformService) {
+            JournalEntryRepository journalEntryRepository, LoanReadPlatformService loanReadPlatformService,
+            FailedClientCreationOnDataMigrationRepository failedClientCreationOnDataMigrationRepository) {
         this.clientRepository = clientRepository;
         this.configurationDomainService = configurationDomainService;
         this.journalEntryRepository = journalEntryRepository;
         this.loanReadPlatformService = loanReadPlatformService;
+        this.failedClientCreationOnDataMigrationRepository = failedClientCreationOnDataMigrationRepository;
     }
 
     @PostConstruct
@@ -423,6 +430,12 @@ public class OdooServiceImpl implements OdooService {
         this.genericExecutorService.execute(new PostClientUpdateToOdoo(changes, client, ThreadLocalContextUtil.getContext()));
     }
 
+    @Override
+    public void postFailedClientsOnMigration(Client client, String errorMsg, String jsonObject) {
+        this.genericExecutorService
+                .execute(new LogFailedClientCreationOnDataMigration(client, ThreadLocalContextUtil.getContext(), errorMsg, jsonObject));
+    }
+
     private void postJournalEntries(List<Throwable> errors, List<JournalEntry> journalEntryDebitCredit, Long loanTransactionId,
             Long transactionType) {
         if (!CollectionUtils.isEmpty(journalEntryDebitCredit)) {
@@ -564,6 +577,49 @@ public class OdooServiceImpl implements OdooService {
             }
 
         }
+    }
+
+    class LogFailedClientCreationOnDataMigration implements Runnable, ApplicationListener<ContextClosedEvent> {
+
+        private final FineractContext context;
+        private final Client client;
+        private final String errorMsg;
+        private final String jsonObject;
+
+        public LogFailedClientCreationOnDataMigration(Client client, FineractContext context, String errorMsg, String jsonObject) {
+            this.context = context;
+            this.client = client;
+            this.errorMsg = errorMsg;
+            this.jsonObject = jsonObject;
+        }
+
+        @Override
+        public void run() {
+            ThreadLocalContextUtil.init(context);
+            postFailedClients(client, errorMsg, jsonObject);
+        }
+
+        @Override
+        public void onApplicationEvent(ContextClosedEvent event) {
+            genericExecutorService.shutdown();
+            LOG.info("Shutting down the ExecutorService");
+        }
+
+        @Transactional(propagation = Propagation.REQUIRES_NEW)
+        private void postFailedClients(Client newClient, String errorMsg, String jsonObject) {
+
+            FailedClientCreationOnDataMigration failedClientCreationOnDataMigration = new FailedClientCreationOnDataMigration();
+            failedClientCreationOnDataMigration.setExternalId(newClient.getExternalId());
+            failedClientCreationOnDataMigration.setOffice(newClient.getOffice());
+            failedClientCreationOnDataMigration.setClientType(newClient.getLegalForm());
+            failedClientCreationOnDataMigration.setFirstname(newClient.getFirstname());
+            failedClientCreationOnDataMigration.setLastname(newClient.getLastname());
+            failedClientCreationOnDataMigration.setErrorMsg(errorMsg);
+            failedClientCreationOnDataMigration.setJsonObject(jsonObject);
+
+            failedClientCreationOnDataMigrationRepository.saveAndFlush(failedClientCreationOnDataMigration);
+        }
+
     }
 
 }

@@ -680,4 +680,43 @@
             <column name="can_maker_checker" valueBoolean="false"/>
         </insert>
     </changeSet>
+
+
+    <changeSet id="create-m_failed_client_creation_on_data_migration" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_failed_client_creation_on_data_migration"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_failed_client_creation_on_data_migration">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="office_Id" type="bigint" defaultValueNumeric="1">
+                <constraints nullable="false" foreignKeyName="FK_m_failed_client_creation_on_data_migration_office" references="m_office(id)"/>
+            </column>
+            <column name="external_Id"  type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="client_type"  type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="firstname"  type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="lastname"  type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="error_msg"  type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="json_object"  type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="datetime">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>
