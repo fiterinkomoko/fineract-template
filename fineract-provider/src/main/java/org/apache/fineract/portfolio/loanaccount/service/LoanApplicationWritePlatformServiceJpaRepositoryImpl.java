@@ -39,6 +39,7 @@ import javax.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.fineract.infrastructure.Odoo.OdooService;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatRepositoryWrapper;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccountType;
@@ -228,6 +229,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final LoanApprovalMatrixRepository loanApprovalMatrixRepository;
     private final LoanDecisionAssembler loanDecisionAssembler;
     private final LoanCashFlowProjectionRepository loanCashFlowProjectionRepository;
+    private final OdooService odooService;
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
         final List<LoanStatus> allowedLoanStatuses = Arrays.asList(LoanStatus.values());
@@ -237,7 +239,12 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Transactional
     @Override
     public CommandProcessingResult submitApplication(final JsonCommand command) {
+        // captute params to log before exceptions are thrown
 
+        BigDecimal amount = this.fromJsonHelper.extractBigDecimalWithLocaleNamed("principal", command.parsedJson());
+        Long clientID = this.fromJsonHelper.extractLongNamed("clientId", command.parsedJson());
+        String odooLoanNumber = this.fromJsonHelper.extractStringNamed("accountNo", command.parsedJson());
+        String odooLoanId = this.fromJsonHelper.extractStringNamed("externalId", command.parsedJson());
         try {
             boolean isMeetingMandatoryForJLGLoans = configurationDomainService.isMeetingMandatoryForJLGLoans();
             final Long productId = this.fromJsonHelper.extractLongNamed("productId", command.parsedJson());
@@ -592,9 +599,17 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     .withGroupId(newLoanApplication.getGroupId()) //
                     .withLoanId(newLoanApplication.getId()).withGlimId(newLoanApplication.getGlimId()).build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            this.odooService.postFailedLoansOnMigration(amount, clientID, odooLoanNumber, odooLoanId, dve.getMessage(), command.json());
             handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve);
             return CommandProcessingResult.empty();
         } catch (final PersistenceException dve) {
+            this.odooService.postFailedLoansOnMigration(amount, clientID, odooLoanNumber, odooLoanId, dve.getMessage(), command.json());
+            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+            handleDataIntegrityIssues(command, throwable, dve);
+            return CommandProcessingResult.empty();
+        } catch (final Exception dve) {
+            // For other generic exceptions log them here
+            this.odooService.postFailedLoansOnMigration(amount, clientID, odooLoanNumber, odooLoanId, dve.getMessage(), command.json());
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
