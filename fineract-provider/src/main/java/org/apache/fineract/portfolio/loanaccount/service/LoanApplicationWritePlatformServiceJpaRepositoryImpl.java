@@ -607,9 +607,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
-        } catch (final Exception dve) {
-            // For other generic exceptions log them here
-            this.odooService.postFailedLoansOnMigration(amount, clientID, odooLoanNumber, odooLoanId, dve.getMessage(), command.json());
+        } catch (PlatformApiDataValidationException | GeneralPlatformDomainRuleException dve) {
+            this.odooService.postFailedLoansOnMigration(amount, clientID, odooLoanNumber, odooLoanId, dve.getDefaultUserMessage(),
+                    command.json());
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
