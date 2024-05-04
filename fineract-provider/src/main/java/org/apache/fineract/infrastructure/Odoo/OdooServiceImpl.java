@@ -428,25 +428,41 @@ public class OdooServiceImpl implements OdooService {
 
     @Override
     public void postClientToOdooOnCreateTask(Client client) {
-        this.genericExecutorService.execute(new PostClientCreationToOdoo(client, ThreadLocalContextUtil.getContext()));
+        try {
+            this.genericExecutorService.execute(new PostClientCreationToOdoo(client, ThreadLocalContextUtil.getContext()));
+        } catch (Exception ex) {
+            // don't throw exception here
+        }
     }
 
     @Override
     public void postClientToOdooOnUpdateTask(Map<String, Object> changes, Client client) {
-        this.genericExecutorService.execute(new PostClientUpdateToOdoo(changes, client, ThreadLocalContextUtil.getContext()));
+        try {
+            this.genericExecutorService.execute(new PostClientUpdateToOdoo(changes, client, ThreadLocalContextUtil.getContext()));
+        } catch (Exception ex) {
+            // don't throw exception here
+        }
     }
 
     @Override
     public void postFailedClientsOnMigration(Client client, String errorMsg, String jsonObject) {
-        this.genericExecutorService
-                .execute(new LogFailedClientCreationOnDataMigration(client, ThreadLocalContextUtil.getContext(), errorMsg, jsonObject));
+        try {
+            this.genericExecutorService
+                    .execute(new LogFailedClientCreationOnDataMigration(client, ThreadLocalContextUtil.getContext(), errorMsg, jsonObject));
+        } catch (Exception ex) {
+            // don't throw exception here
+        }
     }
 
     @Override
     public void postFailedLoansOnMigration(BigDecimal amount, Long clientID, String odooLoanNumber, String odooLoanId, String errorMsg,
             String jsonObject) {
-        this.genericExecutorService.execute(new LogFailedLoanCreationOnDataMigration(amount, clientID, odooLoanNumber, odooLoanId,
-                ThreadLocalContextUtil.getContext(), errorMsg, jsonObject));
+        try {
+            this.genericExecutorService.execute(new LogFailedLoanCreationOnDataMigration(amount, clientID, odooLoanNumber, odooLoanId,
+                    ThreadLocalContextUtil.getContext(), errorMsg, jsonObject));
+        } catch (Exception ex) {
+            // don't throw exception here
+        }
     }
 
     private void postJournalEntries(List<Throwable> errors, List<JournalEntry> journalEntryDebitCredit, Long loanTransactionId,
