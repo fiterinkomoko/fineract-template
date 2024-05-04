@@ -21,8 +21,6 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 import java.math.BigDecimal;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.Data;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
@@ -32,15 +30,8 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Table(name = "m_failed_loan_repayment_on_data_migration")
 public class FailedLoanRepaymentOnDataMigration extends AbstractPersistableCustom {
 
-    @ManyToOne
-    @JoinColumn(name = "loan_id")
-    private Loan loan;
-
-    @Column(name = "odoo_loan_number")
-    private String odooLoanNumber;
-
-    @Column(name = "odoo_loan_id")
-    private String odooLoanId;
+    @Column(name = "loan_id")
+    private Long loanId;
 
     @Column(name = "transaction_amount")
     private BigDecimal transactionAmount;
