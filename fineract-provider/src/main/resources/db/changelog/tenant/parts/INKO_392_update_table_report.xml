@@ -719,7 +719,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="create-m_failed_loan_creation_on_data_migration-3" author="bosco@fiter.io">
+    <changeSet id="create-m_failed_loan_creation_on_data_migration-4" author="bosco@fiter.io">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="m_failed_loan_creation_on_data_migration"/>
@@ -733,7 +733,7 @@
                 <constraints nullable="true" />
             </column>
             <column name="odoo_loan_number"  type="varchar(100)">
-                <constraints nullable="true"/>
+                <constraints nullable="false"   unique="true"/>
             </column>
             <column name="odoo_loan_id"   type="varchar(50)">
                 <constraints nullable="true"/>
