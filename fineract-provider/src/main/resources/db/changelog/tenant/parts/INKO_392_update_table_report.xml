@@ -682,7 +682,7 @@
     </changeSet>
 
 
-    <changeSet id="create-m_failed_client_creation_on_data_migration" author="bosco@fiter.io">
+    <changeSet id="create-m_failed_client_creation_on_data_migration-2" author="bosco@fiter.io">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="m_failed_client_creation_on_data_migration"/>
@@ -713,7 +713,41 @@
             <column name="json_object"  type="TEXT">
                 <constraints nullable="true"/>
             </column>
-            <column name="created_at" type="datetime">
+            <column name="created_at" type="datetime" defaultValueComputed="now()">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create-m_failed_loan_creation_on_data_migration-3" author="bosco@fiter.io">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_failed_loan_creation_on_data_migration"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_failed_loan_creation_on_data_migration">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"  />
+            </column>
+            <column name="client_Id" type="long" >
+                <constraints nullable="true" />
+            </column>
+            <column name="odoo_loan_number"  type="varchar(100)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="odoo_loan_id"   type="varchar(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="amount" type="decimal(19,6)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="error_msg"  type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="json_object"  type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="datetime" defaultValueComputed="now()">
                 <constraints nullable="true"/>
             </column>
         </createTable>

@@ -24,6 +24,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -59,6 +60,8 @@ import org.apache.fineract.portfolio.client.domain.FailedClientCreationOnDataMig
 import org.apache.fineract.portfolio.client.domain.FailedClientCreationOnDataMigrationRepository;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionNotPostedToOdooInstanceData;
+import org.apache.fineract.portfolio.loanaccount.domain.FailedLoanCreationOnDataMigration;
+import org.apache.fineract.portfolio.loanaccount.domain.FailedLoanCreationOnDataMigrationRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.xmlrpc.XmlRpcException;
@@ -99,16 +102,19 @@ public class OdooServiceImpl implements OdooService {
     private final LoanReadPlatformService loanReadPlatformService;
     private ExecutorService genericExecutorService;
     private FailedClientCreationOnDataMigrationRepository failedClientCreationOnDataMigrationRepository;
+    private FailedLoanCreationOnDataMigrationRepository failedLoanCreationOnDataMigrationRepository;
 
     @Autowired
     public OdooServiceImpl(ClientRepositoryWrapper clientRepository, ConfigurationDomainService configurationDomainService,
             JournalEntryRepository journalEntryRepository, LoanReadPlatformService loanReadPlatformService,
-            FailedClientCreationOnDataMigrationRepository failedClientCreationOnDataMigrationRepository) {
+            FailedClientCreationOnDataMigrationRepository failedClientCreationOnDataMigrationRepository,
+            FailedLoanCreationOnDataMigrationRepository failedLoanCreationOnDataMigrationRepository) {
         this.clientRepository = clientRepository;
         this.configurationDomainService = configurationDomainService;
         this.journalEntryRepository = journalEntryRepository;
         this.loanReadPlatformService = loanReadPlatformService;
         this.failedClientCreationOnDataMigrationRepository = failedClientCreationOnDataMigrationRepository;
+        this.failedLoanCreationOnDataMigrationRepository = failedLoanCreationOnDataMigrationRepository;
     }
 
     @PostConstruct
@@ -436,6 +442,13 @@ public class OdooServiceImpl implements OdooService {
                 .execute(new LogFailedClientCreationOnDataMigration(client, ThreadLocalContextUtil.getContext(), errorMsg, jsonObject));
     }
 
+    @Override
+    public void postFailedLoansOnMigration(BigDecimal amount, Long clientID, String odooLoanNumber, String odooLoanId, String errorMsg,
+            String jsonObject) {
+        this.genericExecutorService.execute(new LogFailedLoanCreationOnDataMigration(amount, clientID, odooLoanNumber, odooLoanId,
+                ThreadLocalContextUtil.getContext(), errorMsg, jsonObject));
+    }
+
     private void postJournalEntries(List<Throwable> errors, List<JournalEntry> journalEntryDebitCredit, Long loanTransactionId,
             Long transactionType) {
         if (!CollectionUtils.isEmpty(journalEntryDebitCredit)) {
@@ -618,6 +631,56 @@ public class OdooServiceImpl implements OdooService {
             failedClientCreationOnDataMigration.setJsonObject(jsonObject);
 
             failedClientCreationOnDataMigrationRepository.saveAndFlush(failedClientCreationOnDataMigration);
+        }
+
+    }
+
+    class LogFailedLoanCreationOnDataMigration implements Runnable, ApplicationListener<ContextClosedEvent> {
+
+        private final FineractContext context;
+        private final String errorMsg;
+        private final String jsonObject;
+        private final BigDecimal amount;
+        private final Long clientID;
+        private final String odooLoanNumber;
+        private final String odooLoanId;
+
+        public LogFailedLoanCreationOnDataMigration(BigDecimal amount, Long clientID, String odooLoanNumber, String odooLoanId,
+                FineractContext context, String errorMsg, String jsonObject) {
+            this.context = context;
+            this.amount = amount;
+            this.clientID = clientID;
+            this.odooLoanNumber = odooLoanNumber;
+            this.odooLoanId = odooLoanId;
+            this.errorMsg = errorMsg;
+            this.jsonObject = jsonObject;
+        }
+
+        @Override
+        public void run() {
+            ThreadLocalContextUtil.init(context);
+            postFailedLoans(amount, clientID, odooLoanNumber, odooLoanId, errorMsg, jsonObject);
+        }
+
+        @Override
+        public void onApplicationEvent(ContextClosedEvent event) {
+            genericExecutorService.shutdown();
+            LOG.info("Shutting down the ExecutorService for failed loans  . . ");
+        }
+
+        @Transactional(propagation = Propagation.REQUIRES_NEW)
+        private void postFailedLoans(BigDecimal amount, Long clientID, String odooLoanNumber, String odooLoanId, String errorMsg,
+                String jsonObject) {
+
+            FailedLoanCreationOnDataMigration failedLoanCreationOnDataMigration = new FailedLoanCreationOnDataMigration();
+            failedLoanCreationOnDataMigration.setOdooLoanNumber(odooLoanNumber);
+            failedLoanCreationOnDataMigration.setClient(clientID);
+            failedLoanCreationOnDataMigration.setOdooLoanId(odooLoanId);
+            failedLoanCreationOnDataMigration.setAmount(amount);
+            failedLoanCreationOnDataMigration.setErrorMsg(errorMsg);
+            failedLoanCreationOnDataMigration.setJsonObject(jsonObject);
+
+            failedLoanCreationOnDataMigrationRepository.saveAndFlush(failedLoanCreationOnDataMigration);
         }
 
     }

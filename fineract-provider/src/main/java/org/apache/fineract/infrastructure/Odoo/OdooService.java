@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.Odoo;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
@@ -46,5 +47,8 @@ public interface OdooService {
     void postClientToOdooOnUpdateTask(final Map<String, Object> changes, Client client);
 
     void postFailedClientsOnMigration(Client client, String errorMsg, String jsonObject);
+
+    void postFailedLoansOnMigration(BigDecimal amount, Long clientID, String odooLoanNumber, String odooLoanId, String errorMsg,
+            String jsonObject);
 
 }
