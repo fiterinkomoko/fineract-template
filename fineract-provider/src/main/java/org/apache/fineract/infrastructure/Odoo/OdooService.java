@@ -51,4 +51,7 @@ public interface OdooService {
     void postFailedLoansOnMigration(BigDecimal amount, Long clientID, String odooLoanNumber, String odooLoanId, String errorMsg,
             String jsonObject);
 
+    void postFailedLoanRepaymentOnMigration(BigDecimal transactionAmount, Long loanId, String transactionDate, String note,
+            String paymentType, String errorMsg, String jsonObject);
+
 }

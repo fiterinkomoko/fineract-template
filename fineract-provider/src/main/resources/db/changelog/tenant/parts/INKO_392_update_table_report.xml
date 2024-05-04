@@ -753,7 +753,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="create-m_failed_loan_repayment_on_data_migration-3" author="bosco@fiter.io">
+    <changeSet id="create-m_failed_loan_repayment_on_data_migration-5" author="bosco@fiter.io">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="m_failed_loan_repayment_on_data_migration"/>
@@ -763,23 +763,17 @@
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints nullable="false" primaryKey="true"  />
             </column>
-            <column name="loan_id" type="bigint" defaultValueNumeric="1">
-                <constraints nullable="false" foreignKeyName="FK_m_failed_loan_repayment_on_data_migration" references="m_loan(id)"/>
+            <column name="loan_id" type="bigint" >
+                <constraints nullable="false" />
             </column>
-            <column name="odoo_loan_number"  type="varchar(100)">
-                <constraints nullable="true"/>
-            </column>
-            <column name="odoo_loan_id"   type="varchar(50)">
-                <constraints nullable="true"/>
-            </column>
-            <column name="transactionAmount" type="decimal(19,6)">
-                <constraints nullable="true"/>
-            </column>
-            <column name="transaction_date"   type="varchar(50)">
+            <column name="transaction_amount" type="decimal(19,6)">
                 <constraints nullable="true"/>
             </column>
             <column name="note"   type="varchar(255)">
-                <constraints nullable="true"/>
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="transaction_date"   type="varchar(20)">
+                <constraints nullable="true" />
             </column>
             <column name="payment_type"   type="int">
                 <constraints nullable="true"/>

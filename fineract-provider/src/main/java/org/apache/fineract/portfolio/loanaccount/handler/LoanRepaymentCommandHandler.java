@@ -18,12 +18,15 @@
  */
 package org.apache.fineract.portfolio.loanaccount.handler;
 
+import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.DataIntegrityErrorHandler;
+import org.apache.fineract.infrastructure.Odoo.OdooService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -38,18 +41,30 @@ public class LoanRepaymentCommandHandler implements NewCommandSourceHandler {
 
     private final LoanWritePlatformService writePlatformService;
     private final DataIntegrityErrorHandler dataIntegrityErrorHandler;
+    private final OdooService odooService;
+    private final FromJsonHelper fromJsonHelper;
 
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
+        BigDecimal transactionAmount = this.fromJsonHelper.extractBigDecimalWithLocaleNamed("transactionAmount", command.parsedJson());
+        String transactionDate = this.fromJsonHelper.extractStringNamed("transactionDate", command.parsedJson());
+        String note = this.fromJsonHelper.extractStringNamed("note", command.parsedJson());
+        String paymentTypeId = this.fromJsonHelper.extractStringNamed("paymentTypeId", command.parsedJson());
         try {
             final boolean isRecoveryRepayment = false;
             final boolean isPayOff = false;
             return this.writePlatformService.makeLoanRepayment(LoanTransactionType.REPAYMENT, command.getLoanId(), command,
                     isRecoveryRepayment, isPayOff);
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            this.odooService.postFailedLoanRepaymentOnMigration(transactionAmount, command.getLoanId(), transactionDate, note,
+                    paymentTypeId, dve.getMessage(), command.json());
             dataIntegrityErrorHandler.handleDataIntegrityIssues(command, dve.getMostSpecificCause(), dve, "loan.repayment", "Repayment");
             return CommandProcessingResult.empty();
+        } catch (final Exception dve) {
+            this.odooService.postFailedLoanRepaymentOnMigration(transactionAmount, command.getLoanId(), transactionDate, note,
+                    paymentTypeId, dve.getMessage(), command.json());
+            throw dve;
         }
     }
 }
