@@ -30,9 +30,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import javax.annotation.PostConstruct;
 import javax.persistence.PersistenceException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -145,7 +142,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final ValidationLimitRepository validationLimitRepository;
 
     private final OdooService odooService;
-    private ExecutorService triggeredExecutorService;
 
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -195,11 +191,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.clientAdditionalInfoRepository = clientAdditionalInfoRepository;
         this.validationLimitRepository = validationLimitRepository;
         this.odooService = odooService;
-    }
-
-    @PostConstruct
-    public void initializeExecutorService() {
-        triggeredExecutorService = Executors.newSingleThreadExecutor();
     }
 
     @Transactional
