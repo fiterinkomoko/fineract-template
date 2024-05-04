@@ -607,7 +607,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
-        } catch (PlatformApiDataValidationException | GeneralPlatformDomainRuleException dve) {
+        } catch (PlatformApiDataValidationException | GeneralPlatformDomainRuleException | LoanApplicationDateException
+                | GroupMemberNotFoundInGSIMException dve) {
             this.odooService.postFailedLoansOnMigration(amount, clientID, odooLoanNumber, odooLoanId, dve.getDefaultUserMessage(),
                     command.json());
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
