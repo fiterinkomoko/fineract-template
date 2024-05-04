@@ -62,6 +62,8 @@ import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionNotPostedToOdooInstanceData;
 import org.apache.fineract.portfolio.loanaccount.domain.FailedLoanCreationOnDataMigration;
 import org.apache.fineract.portfolio.loanaccount.domain.FailedLoanCreationOnDataMigrationRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.FailedLoanRepaymentOnDataMigration;
+import org.apache.fineract.portfolio.loanaccount.domain.FailedLoanRepaymentOnDataMigrationRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.apache.xmlrpc.XmlRpcException;
@@ -103,18 +105,21 @@ public class OdooServiceImpl implements OdooService {
     private ExecutorService genericExecutorService;
     private FailedClientCreationOnDataMigrationRepository failedClientCreationOnDataMigrationRepository;
     private FailedLoanCreationOnDataMigrationRepository failedLoanCreationOnDataMigrationRepository;
+    private FailedLoanRepaymentOnDataMigrationRepository failedLoanRepaymentOnDataMigrationRepository;
 
     @Autowired
     public OdooServiceImpl(ClientRepositoryWrapper clientRepository, ConfigurationDomainService configurationDomainService,
             JournalEntryRepository journalEntryRepository, LoanReadPlatformService loanReadPlatformService,
             FailedClientCreationOnDataMigrationRepository failedClientCreationOnDataMigrationRepository,
-            FailedLoanCreationOnDataMigrationRepository failedLoanCreationOnDataMigrationRepository) {
+            FailedLoanCreationOnDataMigrationRepository failedLoanCreationOnDataMigrationRepository,
+            FailedLoanRepaymentOnDataMigrationRepository failedLoanRepaymentOnDataMigrationRepository) {
         this.clientRepository = clientRepository;
         this.configurationDomainService = configurationDomainService;
         this.journalEntryRepository = journalEntryRepository;
         this.loanReadPlatformService = loanReadPlatformService;
         this.failedClientCreationOnDataMigrationRepository = failedClientCreationOnDataMigrationRepository;
         this.failedLoanCreationOnDataMigrationRepository = failedLoanCreationOnDataMigrationRepository;
+        this.failedLoanRepaymentOnDataMigrationRepository = failedLoanRepaymentOnDataMigrationRepository;
     }
 
     @PostConstruct
@@ -465,6 +470,17 @@ public class OdooServiceImpl implements OdooService {
         }
     }
 
+    @Override
+    public void postFailedLoanRepaymentOnMigration(BigDecimal transactionAmount, Long loanId, String transactionDate, String note,
+            String paymentType, String errorMsg, String jsonObject) {
+        try {
+            this.genericExecutorService.execute(new LogFailedLoanRepaymentOnDataMigration(transactionAmount, loanId, transactionDate, note,
+                    paymentType, ThreadLocalContextUtil.getContext(), errorMsg, jsonObject));
+        } catch (Exception ex) {
+            // don't throw exception here
+        }
+    }
+
     private void postJournalEntries(List<Throwable> errors, List<JournalEntry> journalEntryDebitCredit, Long loanTransactionId,
             Long transactionType) {
         if (!CollectionUtils.isEmpty(journalEntryDebitCredit)) {
@@ -697,6 +713,59 @@ public class OdooServiceImpl implements OdooService {
             failedLoanCreationOnDataMigration.setJsonObject(jsonObject);
 
             failedLoanCreationOnDataMigrationRepository.saveAndFlush(failedLoanCreationOnDataMigration);
+        }
+
+    }
+
+    class LogFailedLoanRepaymentOnDataMigration implements Runnable, ApplicationListener<ContextClosedEvent> {
+
+        private final FineractContext context;
+        private final String errorMsg;
+        private final String jsonObject;
+        private final BigDecimal transactionAmount;
+        private final Long loanId;
+        private final String transactionDate;
+        private final String paymentType;
+        private final String note;
+
+        public LogFailedLoanRepaymentOnDataMigration(BigDecimal transactionAmount, Long loanId, String transactionDate, String note,
+                String paymentType, FineractContext context, String errorMsg, String jsonObject) {
+            this.context = context;
+            this.errorMsg = errorMsg;
+            this.jsonObject = jsonObject;
+            this.transactionAmount = transactionAmount;
+            this.loanId = loanId;
+            this.transactionDate = transactionDate;
+            this.paymentType = paymentType;
+            this.note = note;
+        }
+
+        @Override
+        public void run() {
+            ThreadLocalContextUtil.init(context);
+            postFailedLoanRepayment(transactionAmount, loanId, transactionDate, note, paymentType, errorMsg, jsonObject);
+        }
+
+        @Override
+        public void onApplicationEvent(ContextClosedEvent event) {
+            genericExecutorService.shutdown();
+            LOG.info("Shutting down the ExecutorService for failed loans   Repayment. . ");
+        }
+
+        @Transactional(propagation = Propagation.REQUIRES_NEW)
+        private void postFailedLoanRepayment(BigDecimal transactionAmount, Long loanId, String transactionDate, String note,
+                String paymentType, String errorMsg, String jsonObject) {
+
+            FailedLoanRepaymentOnDataMigration failedLoanRepaymentOnDataMigration = new FailedLoanRepaymentOnDataMigration();
+            failedLoanRepaymentOnDataMigration.setTransactionAmount(transactionAmount);
+            failedLoanRepaymentOnDataMigration.setLoanId(loanId);
+            failedLoanRepaymentOnDataMigration.setTransactionDate(transactionDate);
+            failedLoanRepaymentOnDataMigration.setNote(note);
+            failedLoanRepaymentOnDataMigration.setPaymentType(paymentType);
+            failedLoanRepaymentOnDataMigration.setErrorMsg(errorMsg);
+            failedLoanRepaymentOnDataMigration.setJsonObject(jsonObject);
+
+            failedLoanRepaymentOnDataMigrationRepository.saveAndFlush(failedLoanRepaymentOnDataMigration);
         }
 
     }
