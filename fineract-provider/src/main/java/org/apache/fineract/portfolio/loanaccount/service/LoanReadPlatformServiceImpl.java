@@ -3349,10 +3349,25 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
         BigDecimal netMargin = netCashFlow.divide(purchases, mc);
 
-        BigDecimal rotation = purchases.divide(financialRatioData.getInventoryStock(), mc);
-        BigDecimal liquidity = financialRatioData.getTotalCurrentAssets().divide(financialRatioData.getTotalShortTerm(), mc);
-        BigDecimal leverage = financialRatioData.getTotalShortTerm().divide(financialRatioData.getEquity(), mc);
-        BigDecimal capitalization = financialRatioData.getEquity().divide(financialRatioData.getTotalFixedAssets(), mc);
+        BigDecimal rotation = BigDecimal.ZERO;
+        BigDecimal liquidity = BigDecimal.ZERO;
+        BigDecimal leverage = BigDecimal.ZERO;
+        BigDecimal capitalization = BigDecimal.ZERO;
+
+        if (financialRatioData.getInventoryStock().compareTo(BigDecimal.ZERO) != 0) {
+            rotation = purchases.divide(financialRatioData.getInventoryStock(), mc);
+        }
+        if (financialRatioData.getTotalShortTerm().compareTo(BigDecimal.ZERO) != 0) {
+            liquidity = financialRatioData.getTotalCurrentAssets().divide(financialRatioData.getTotalShortTerm(), mc);
+        }
+
+        if (financialRatioData.getEquity().compareTo(BigDecimal.ZERO) != 0) {
+            leverage = financialRatioData.getTotalShortTerm().divide(financialRatioData.getEquity(), mc);
+        }
+        if (financialRatioData.getTotalFixedAssets().compareTo(BigDecimal.ZERO) != 0) {
+            capitalization = financialRatioData.getEquity().divide(financialRatioData.getTotalFixedAssets(), mc);
+        }
+
         BigDecimal dscr = null;
         if (loan.getLoanDecisionState().equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())) {
             LoanRepaymentScheduleInstallment installment = loan.getRepaymentScheduleInstallments().get(0);
