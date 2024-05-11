@@ -146,14 +146,20 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
             this.fromApiJsonDeserializer.validateForCreate(command.json());
             validateInputDates(command);
-
+            final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
             final Fund fund = findFundByIdIfProvided(command.longValueOfParameterNamed("fundId"));
 
             final Long transactionProcessingStrategyId = command.longValueOfParameterNamed("transactionProcessingStrategyId");
             final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(
                     transactionProcessingStrategyId);
 
-            final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
+            final String shortName = command.stringValueOfParameterNamed(LoanProductConstants.SHORT_NAME);
+            LoanProduct loanP = loanProductRepository.retrieveLoanProductsShortName(shortName);
+            if (loanP != null) {
+                throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.short.name",
+                        "Loan product with short name `" + shortName + "` already exists", "shortName", shortName);
+            }
+
             final List<Charge> charges = assembleListOfProductCharges(command, currencyCode);
             final List<Rate> rates = assembleListOfProductRates(command);
 
