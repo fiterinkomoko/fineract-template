@@ -1023,6 +1023,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public CommandProcessingResult makeLoanRepayment(final LoanTransactionType repaymentTransactionType, final Long loanId,
             final JsonCommand command, final boolean isRecoveryRepayment, final boolean isPayOff) {
         final AppUser currentUser = getAppUserIfPresent();
+        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        if (loan.getLoanStatus() != 300) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.not.in.active.status.repayment.or.waiver.is.not.allowed",
+                    "Loan is not in active status so repayment or waiver is not allowed");
+        }
         if (command.integerValueOfParameterNamed("paymentTypeId") == 100) {
             // Route to Waive Interest.
             // Note This is for Data Migration Only.
@@ -1047,7 +1052,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (StringUtils.isNotBlank(noteText)) {
             changes.put("note", noteText);
         }
-        final Loan loan = this.loanAssembler.assembleFrom(loanId);
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
         final Boolean isHolidayValidationDone = false;
         final HolidayDetailDTO holidayDetailDto = null;

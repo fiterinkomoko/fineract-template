@@ -7198,4 +7198,8 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     public void setGenericLoanCounter(Integer genericLoanCounter) {
         this.genericLoanCounter = genericLoanCounter;
     }
+
+    public Integer getLoanStatus() {
+        return loanStatus;
+    }
 }
