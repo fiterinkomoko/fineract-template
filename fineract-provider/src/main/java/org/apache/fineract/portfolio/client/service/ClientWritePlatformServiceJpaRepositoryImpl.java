@@ -406,6 +406,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             handleDataIntegrityIssues(command, throwable, dve);
             return CommandProcessingResult.empty();
+        } catch (final Exception dve) {
+            this.odooService.postFailedClientsOnMigration(newClient, dve.getMessage(), command.json());
+            throw dve;
         }
     }
 
