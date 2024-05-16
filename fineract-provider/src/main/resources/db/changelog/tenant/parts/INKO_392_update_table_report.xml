@@ -797,5 +797,15 @@
                 splitStatements="true"
                 stripComments="true"/>
     </changeSet>
+    <changeSet id="update-m_permission-with-grouping-value" author="bosco@fiter.io">
+        <preConditions>
+            <sqlCheck expectedResult="1">select count(*) from m_permission p  WHERE p.code = 'WITHDRAWAL_REDRAW_LOAN' AND p.entity_name = 'LOAN' AND p.action_name = 'WITHDRAWAL_REDRAW' AND p.`grouping` IS NULL</sqlCheck>
+        </preConditions>
+        <sql>
+            <![CDATA[
+          UPDATE m_permission p SET p.`grouping` = 'transaction_loan' WHERE p.code = 'WITHDRAWAL_REDRAW_LOAN' AND p.entity_name = 'LOAN' AND p.action_name = 'WITHDRAWAL_REDRAW' AND p.id > 0;
+             ]]>
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>
