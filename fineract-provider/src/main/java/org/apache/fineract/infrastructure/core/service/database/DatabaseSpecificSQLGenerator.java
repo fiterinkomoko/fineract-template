@@ -93,6 +93,15 @@ public class DatabaseSpecificSQLGenerator {
         }
     }
 
+    public String countLastExecutedQueryResultUsingCount(String sql) {
+        if (databaseTypeResolver.isMySQL()) {
+            String finalQuery = sql.replaceAll("SQL_CALC_FOUND_ROWS|LIMIT\\s+\\d+,\\d+", "");
+            return "SELECT COUNT(*) FROM (" + finalQuery + ") AS temp";
+        } else {
+            return countQueryResult(sql);
+        }
+    }
+
     public String countQueryResult(String sql) {
         return format("SELECT COUNT(*) FROM (%s) AS temp", sql);
     }
