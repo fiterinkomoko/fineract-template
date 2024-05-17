@@ -108,11 +108,8 @@ public class WebHookProcessor implements HookProcessor {
         if ((clientId != null || payLoadMap.containsKey("clientId")) && !"DELETE".equals(actionName)) {
             clientId = null != clientId ? clientId : Long.parseLong(String.valueOf(payLoadMap.containsKey("clientId")));
             Client client = clientRepository.findOneWithNotFoundDetection(clientId);
-            // Get BVN Datatable
-            String clientBVN = dataService.getClientBVN("Bank Information", clientId);
 
             payLoadMap.put("client", client);
-            payLoadMap.put("bvn", clientBVN);
         }
 
         if ((savingsAccountId != null || payLoadMap.containsKey("savingsAccountId")) && !"DELETE".equals(actionName)) {
@@ -172,7 +169,11 @@ public class WebHookProcessor implements HookProcessor {
                 if (!result) return;
             }
         }
-        final String compilePayLoad = compilePayLoad(hook.getUgdTemplate(), payLoadMap);
+        String compilePayLoad = payload;
+
+        if (hook.getUgdTemplate() != null) {
+            compilePayLoad = compilePayLoad(hook.getUgdTemplate(), payLoadMap);
+        }
         url = getValueFromPayLoad(url, payLoadMap);
         sendRequest(url, contentType, compilePayLoad, entityName, actionName, context, basicAuthCreds, apiKey, apiKeyValue);
     }
