@@ -83,7 +83,7 @@ public class UserImportHandler implements ImportHandler {
         String officeName = ImportHandlerUtils.readAsString(UserConstants.OFFICE_NAME_COL, row);
         Long officeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName);
         String staffName = ImportHandlerUtils.readAsString(UserConstants.STAFF_NAME_COL, row);
-        Long staffId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME), staffName);
+        Long staffId = staffName != null ? ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME), staffName) : null;
         String userName = ImportHandlerUtils.readAsString(UserConstants.USER_NAME_COL, row);
         String firstName = ImportHandlerUtils.readAsString(UserConstants.FIRST_NAME_COL, row);
         String lastName = ImportHandlerUtils.readAsString(UserConstants.LAST_NAME_COL, row);
