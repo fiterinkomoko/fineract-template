@@ -807,5 +807,18 @@
              ]]>
         </sql>
     </changeSet>
+    <changeSet id="update-m_permission-with-grouping-value-for-PROVISIONING_ENTRIES" author="bosco@fiter.io">
+        <sql>
+            <![CDATA[
+          UPDATE m_permission p SET  p.entity_name = 'PROVISIONCRITERIA'  WHERE  p.`grouping` = 'LOAN_PROVISIONING' AND   p.code = 'CREATE_PROVISIONCRITERIA' AND p.entity_name = 'PROVISIONINGCRITERIA' AND p.action_name = 'CREATE'  AND p.id > 0 ;
+          UPDATE m_permission p SET  p.entity_name = 'PROVISIONCRITERIA'  WHERE  p.`grouping` = 'LOAN_PROVISIONING'  AND  p.code = 'UPDATE_PROVISIONCRITERIA' AND p.entity_name = 'PROVISIONINGCRITERIA' AND p.action_name = 'UPDATE'  AND p.id > 0 ;
+          UPDATE m_permission p SET  p.entity_name = 'PROVISIONCRITERIA'  WHERE  p.`grouping` = 'LOAN_PROVISIONING'  AND  p.code = 'DELETE_PROVISIONCRITERIA' AND p.entity_name = 'PROVISIONINGCRITERIA' AND p.action_name = 'DELETE'  AND p.id > 0 ;
+
+          UPDATE m_permission p SET  p.entity_name = 'PROVISIONENTRIES'  WHERE  p.`grouping` = 'LOAN_PROVISIONING' AND  p.code = 'CREATE_PROVISIONENTRIES' AND p.entity_name = 'PROVISIONINGENTRIES' AND p.action_name = 'CREATE'  AND p.id > 0 ;
+          UPDATE m_permission p SET  p.entity_name = 'PROVISIONENTRIES'  WHERE  p.`grouping` = 'LOAN_PROVISIONING'  AND  p.code = 'CREATE_PROVISIONJOURNALENTRIES' AND p.entity_name = 'PROVISIONINGENTRIES' AND p.action_name = 'CREATE'  AND p.id > 0 ;
+          UPDATE m_permission p SET  p.entity_name = 'PROVISIONENTRIES'  WHERE  p.`grouping` = 'LOAN_PROVISIONING'  AND   p.code = 'RECREATE_PROVISIONENTRIES' AND p.entity_name = 'PROVISIONINGENTRIES' AND p.action_name = 'RECREATE'  AND p.id > 0 ;
+             ]]>
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>
