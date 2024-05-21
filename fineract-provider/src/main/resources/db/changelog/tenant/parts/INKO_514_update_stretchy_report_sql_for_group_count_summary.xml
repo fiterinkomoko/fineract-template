@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="deepika@fiter.io" id="update_group_count_summary">
+        <update tableName="stretchy_report">
+            <column name="report_sql" value="/* Active Client is a client linked to the 'group' via m_group_client and with an active 'status_enum'.) Active Borrowers - Borrower may be a client or a 'group' */ SELECT t.*, u.overdueGroupLoans FROM (SELECT x.* FROM m_office o, m_group g, (SELECT a.activeClients, (b.activeClientLoans + c.activeGroupLoans) AS activeLoans, b.activeClientLoans, c.activeGroupLoans, (b.activeClientBorrowers + c.activeGroupBorrowers) AS activeBorrowers, b.activeClientBorrowers, c.activeGroupBorrowers, b.overdueClientLoans FROM (SELECT COUNT(*) AS activeClients FROM m_group topgroup JOIN m_group_client gc ON gc.group_id = topgroup.id JOIN m_client c ON c.id = gc.client_id WHERE topgroup.id = ${groupId} AND c.status_enum = 300) a, (SELECT COUNT(*) AS activeClientLoans, COUNT(DISTINCT l.client_id) AS activeClientBorrowers, IFNULL(SUM(IF(laa.loan_id IS NOT NULL, 1, 0)), 0) AS overdueClientLoans FROM glim_accounts glim JOIN m_loan l ON glim.id = l.glim_id LEFT JOIN m_loan_arrears_aging laa ON laa.loan_id = l.id WHERE glim.group_id = ${groupId} AND l.loan_status_id = 300) b, (SELECT COUNT(DISTINCT glim.id) AS activeGroupLoans, COUNT(DISTINCT l.group_id) AS activeGroupBorrowers FROM glim_accounts glim JOIN m_loan l ON glim.id = l.glim_id LEFT JOIN m_loan_arrears_aging laa ON laa.loan_id = l.id WHERE glim.group_id = ${groupId} AND l.loan_status_id = 300) c) x WHERE g.id = ${groupId} AND o.id = g.office_id AND o.hierarchy LIKE CONCAT('${currentUserHierarchy}', '%')) t JOIN (SELECT COUNT(DISTINCT l.glim_id) AS overdueGroupLoans FROM glim_accounts glim JOIN m_loan l ON glim.id = l.glim_id INNER JOIN m_loan_arrears_aging laa ON laa.loan_id = l.id WHERE glim.group_id = ${groupId} AND l.loan_status_id = 300) u"/>
+            <where>id='96' AND report_name='GroupSummaryCounts'</where>
+        </update>
+    </changeSet>
+</databaseChangeLog>
