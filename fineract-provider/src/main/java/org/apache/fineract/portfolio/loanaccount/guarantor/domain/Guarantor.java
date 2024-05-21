@@ -167,7 +167,12 @@ public class Guarantor extends AbstractPersistableCustom {
             final String email = command.stringValueOfParameterNamed(GuarantorJSONinputParams.EMAIL.getValue());
             final String bvn = command.stringValueOfParameterNamed(GuarantorJSONinputParams.BVN.getValue());
             final String middleName = command.stringValueOfParameterNamed(GuarantorJSONinputParams.MIDDLE_NAME.getValue());
-            final boolean isPep = command.booleanObjectValueOfParameterNamed(GuarantorJSONinputParams.PEP.getValue());
+            final Boolean isPep;
+            if (GuarantorJSONinputParams.PEP.getValue() != null) {
+                isPep = command.booleanObjectValueOfParameterNamed(GuarantorJSONinputParams.PEP.getValue());
+            } else {
+                isPep = false;
+            }
 
             return new Guarantor(loan, clientRelationshipType, gurantorType, entityId, firstname, lastname, dateOfBirth, addressLine1,
                     addressLine2, city, state, country, zip, housePhoneNumber, mobilePhoneNumber, comment, active, fundingDetails, gender,
