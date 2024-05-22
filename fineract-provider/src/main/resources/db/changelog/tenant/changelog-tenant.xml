@@ -130,5 +130,6 @@
     <include file="parts/INKO_392_update_table_report.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO_514_update_stretchy_report_sql_for_group_count_summary.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO_499_update_stretchy_report_sql_for_portfolio_management.xml" relativeToChangelogFile="true" />
+    <include file="parts/INKO-522_permission_add_READ_familymembers.xml" relativeToChangelogFile="true" />
     <includeAll path="custom-changelog" relativeToChangelogFile="true"/>
 </databaseChangeLog>
