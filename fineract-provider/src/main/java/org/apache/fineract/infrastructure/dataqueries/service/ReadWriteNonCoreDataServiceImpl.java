@@ -89,6 +89,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.math.RoundingMode;
 
 @Service
 @RequiredArgsConstructor
@@ -1551,7 +1552,12 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final List<String> columnValues = new ArrayList<>();
             for (int i = 0; i < rsmd.getColumnCount(); i++) {
                 final String columnName = rsmd.getColumnName(i + 1);
-                final String columnValue = rowSet.getString(columnName);
+                String columnValue = rowSet.getString(columnName);
+                String columnTypeName = rsmd.getColumnTypeName(i+1);
+                if(columnTypeName.equals("DECIMAL") && columnValue != null) {
+                    BigDecimal typeConvert = new BigDecimal(columnValue);
+                    columnValue = typeConvert.setScale(2, RoundingMode.DOWN).toString();
+                }
                 columnValues.add(columnValue);
             }
 
@@ -1819,6 +1825,10 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                         if (queryParamColumnUnderscored.equalsIgnoreCase(columnHeaderUnderscored)) {
                             pValue = queryParams.get(key);
                             pValue = validateColumn(columnHeader, pValue, dateFormat, clientApplicationLocale);
+                            if(columnHeader.isDecimalDisplayType()){
+                                BigDecimal typeConvert = new BigDecimal(pValue);
+                                pValue = typeConvert.setScale(2, RoundingMode.DOWN).toString();
+                            }
                             affectedColumns.put(columnHeader.getColumnName(), pValue);
                             notFound = false;
                         }
