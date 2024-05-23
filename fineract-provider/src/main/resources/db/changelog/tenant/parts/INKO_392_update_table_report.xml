@@ -820,5 +820,18 @@
              ]]>
         </sql>
     </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_loan_contract_document_id_for_migration">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_document" columnName="data_migration_loan_number"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_document">
+            <column name="data_migration_loan_number" type="VARCHAR(500)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>
