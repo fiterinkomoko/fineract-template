@@ -370,6 +370,7 @@ public class OdooServiceImpl implements OdooService {
             journalData.setRef("Journal Entry made by CBS for Loan Transaction id : " + loanTransactionId);
             journalData.setTransaction_type_name(LoanTransactionType.fromInt(transactionType.intValue()).name());
             journalData.setTransaction_type_unique_id(transactionType.toString());
+            journalData.set_reversed(false);
 
             journalEntryToOdooData.setJournal(journalData);
             journalEntryToOdooData.setAccounting_entries(accounting_entries);

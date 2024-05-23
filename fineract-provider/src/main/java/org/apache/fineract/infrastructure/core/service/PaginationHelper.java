@@ -55,7 +55,8 @@ public class PaginationHelper {
         return new Page<>(items, totalFilteredRecords);
     }
 
-    public <E> Page<E> fetchPageWithCount(final JdbcTemplate jt, final String sqlFetchRows, final Object[] args, final RowMapper<E> rowMapper) {
+    public <E> Page<E> fetchPageWithCount(final JdbcTemplate jt, final String sqlFetchRows, final Object[] args,
+            final RowMapper<E> rowMapper) {
 
         final List<E> items = jt.query(sqlFetchRows, rowMapper, args); // NOSONAR
 
