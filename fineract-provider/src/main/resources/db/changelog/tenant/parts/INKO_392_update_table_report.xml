@@ -550,7 +550,7 @@
              ]]>
         </sql>
     </changeSet>
-    <changeSet id="create-failed_client_on_migration-data_table" author="bosco@fiter.io">
+    <changeSet id="create-failed_client_on_migration-data_table-1" author="bosco@fiter.io" context="mysql">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="failed_client_on_migration"/>
@@ -719,7 +719,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="create-m_failed_loan_creation_on_data_migration-4" author="bosco@fiter.io">
+    <changeSet id="create-m_failed_loan_creation_on_data_migration-5" author="bosco@fiter.io" context="mysql">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="m_failed_loan_creation_on_data_migration"/>
@@ -797,8 +797,8 @@
                 splitStatements="true"
                 stripComments="true"/>
     </changeSet>
-    <changeSet id="update-m_permission-with-grouping-value" author="bosco@fiter.io">
-        <preConditions>
+    <changeSet id="update-m_permission-with-grouping-value-1" author="bosco@fiter.io" context="mysql">
+        <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">select count(*) from m_permission p  WHERE p.code = 'WITHDRAWAL_REDRAW_LOAN' AND p.entity_name = 'LOAN' AND p.action_name = 'WITHDRAWAL_REDRAW' AND p.`grouping` IS NULL</sqlCheck>
         </preConditions>
         <sql>
@@ -807,7 +807,7 @@
              ]]>
         </sql>
     </changeSet>
-    <changeSet id="update-m_permission-with-grouping-value-for-PROVISIONING_ENTRIES" author="bosco@fiter.io">
+    <changeSet id="update-m_permission-with-grouping-value-for-PROVISIONING_ENTRIES-1" author="bosco@fiter.io" context="mysql">
         <sql>
             <![CDATA[
           UPDATE m_permission p SET  p.entity_name = 'PROVISIONCRITERIA'  WHERE  p.`grouping` = 'LOAN_PROVISIONING' AND   p.code = 'CREATE_PROVISIONCRITERIA' AND p.entity_name = 'PROVISIONINGCRITERIA' AND p.action_name = 'CREATE'  AND p.id > 0 ;
@@ -819,6 +819,19 @@
           UPDATE m_permission p SET  p.entity_name = 'PROVISIONENTRIES'  WHERE  p.`grouping` = 'LOAN_PROVISIONING'  AND   p.code = 'RECREATE_PROVISIONENTRIES' AND p.entity_name = 'PROVISIONINGENTRIES' AND p.action_name = 'RECREATE'  AND p.id > 0 ;
              ]]>
         </sql>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_loan_contract_document_id_for_migration">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_document" columnName="data_migration_loan_number"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_document">
+            <column name="data_migration_loan_number" type="VARCHAR(500)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
     </changeSet>
 
 </databaseChangeLog>
