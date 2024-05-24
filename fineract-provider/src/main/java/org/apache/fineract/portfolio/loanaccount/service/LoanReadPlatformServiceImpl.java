@@ -3479,7 +3479,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String particularType = rs.getString("particularType");
             final String name = rs.getString("name");
 
-            final BigDecimal amount = rs.getBigDecimal("amount");
+            BigDecimal amount = rs.getBigDecimal("amount");
+            amount = amount.setScale(2, RoundingMode.DOWN);
 
             return new LoanCashFlowProjectionData(id, cashflowInfoId, scheduleInstallmentId, projectionRate, loanId, cashFlowType,
                     particularType, name, amount);
@@ -3515,9 +3516,16 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 cashFlow -> cashFlow.getCashFlowType().equals("EXPENSE") && expenseParticularTypes.contains(cashFlow.getParticularType()))
                 .map(LoanCashFlowData::getPreviousMonth2).reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
 
-        netCashFlowData.setMonth0(totalIncomeMonth0.subtract(totalExpenseMonth0));
-        netCashFlowData.setPreviousMonth1(totalIncomePreviousMonth1.subtract(totalExpensePreviousMonth1));
-        netCashFlowData.setPreviousMonth2(totalIncomePreviousMonth2.subtract(totalExpensePreviousMonth2));
+        BigDecimal totalIncomeMonth0Net = totalIncomeMonth0.subtract(totalExpenseMonth0);
+        totalIncomeMonth0Net = totalIncomeMonth0Net.setScale(2, RoundingMode.HALF_UP);
+        BigDecimal totalIncomePreviousMonth1Net = totalIncomePreviousMonth1.subtract(totalExpensePreviousMonth1);
+        totalIncomePreviousMonth1Net = totalIncomePreviousMonth1Net.setScale(2, RoundingMode.HALF_UP);
+        BigDecimal totalIncomePreviousMonth2Net = totalIncomePreviousMonth2.subtract(totalExpensePreviousMonth2);
+        totalIncomePreviousMonth2Net = totalIncomePreviousMonth2Net.setScale(2, RoundingMode.HALF_UP);
+
+        netCashFlowData.setMonth0(totalIncomeMonth0Net);
+        netCashFlowData.setPreviousMonth1(totalIncomePreviousMonth1Net);
+        netCashFlowData.setPreviousMonth2(totalIncomePreviousMonth2Net);
 
         return netCashFlowData;
     }

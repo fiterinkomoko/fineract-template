@@ -2328,14 +2328,35 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         Integer incomeProjectionRate = projectionRate;
         Integer expenseProjectionRate = projectionRate;
 
+        List<LoanCashFlowProjection> projectionList = this.loanCashFlowProjectionRepository.findByLoanId(loanId);
+        Map<Long, List<LoanCashFlowProjection>> particularCashFlowProjectionList = new HashMap<>();
+        for (LoanCashFlowProjection data : projectionList){
+            if(particularCashFlowProjectionList.containsKey(data.getCashflowInfoId())) {
+                particularCashFlowProjectionList.get(data.getCashflowInfoId()).add(data);
+            }else {
+                List<LoanCashFlowProjection> list = new ArrayList<>();
+                list.add(data);
+                particularCashFlowProjectionList.put(data.getCashflowInfoId(), list);
+            }
+        }
         this.loanCashFlowProjectionRepository.deleteByLoanId(loanId);
+
         for (LoanRepaymentScheduleInstallment installment : loan.getRepaymentScheduleInstallments()) {
             LOG.info("installment id: " + installment.getId() + " Month " + installment.getInstallmentNumber());
+
             for (LoanCashFlowData cashFlow : loanCashFlowDataList) {
 
                 if (cashFlow.getCashFlowType().equals("INCOME") && cashFlow.getParticularType().equals("Sales Income")) {
                     LOG.info("INCOME -- cashflow Data :- " + cashFlow.getName() + " " + cashFlow.getMonth0() + "    * *"
                             + cashFlow.getCashFlowType());
+
+                    if (!particularCashFlowProjectionList.isEmpty()){
+                        List<LoanCashFlowProjection> list = particularCashFlowProjectionList.get(cashFlow.getId());
+                        if (list != null && !list.isEmpty()){
+                            incomeProjectionRate = list.get(installment.getInstallmentNumber()-1).getProjectionRate();
+                        }
+                    }
+
                     if (cashFlowType != null && cashFlowType == 1 && month != null
                             && Objects.equals(month, installment.getInstallmentNumber())) {
                         incomeProjectionRate = updatedProjectionRate;
@@ -2355,6 +2376,14 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 if (cashFlow.getCashFlowType().equals("EXPENSE") && cashFlow.getParticularType().equals("Purchases")) {
                     LOG.info("EXPENSE -- cashflow Data :- " + cashFlow.getName() + " " + cashFlow.getMonth0() + "    * *"
                             + cashFlow.getCashFlowType());
+
+                    if (!particularCashFlowProjectionList.isEmpty()){
+                        List<LoanCashFlowProjection> list = particularCashFlowProjectionList.get(cashFlow.getId());
+                        if (list != null && !list.isEmpty()){
+                            expenseProjectionRate = list.get(installment.getInstallmentNumber()-1).getProjectionRate();
+                        }
+                    }
+
                     if (cashFlowType != null && cashFlowType == 2 && month != null
                             && Objects.equals(month, installment.getInstallmentNumber())) {
                         expenseProjectionRate = updatedProjectionRate;
@@ -2373,6 +2402,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
                 }
             }
+           // incomeProjectionRate = projectionRate;
+          //  expenseProjectionRate = projectionRate;
         }
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
