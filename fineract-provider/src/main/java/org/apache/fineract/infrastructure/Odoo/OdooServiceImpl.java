@@ -327,7 +327,8 @@ public class OdooServiceImpl implements OdooService {
     }
 
     @Override
-    public String createJournalEntryToOddo(List<JournalEntry> list, Long loanTransactionId, Long transactionType) throws IOException {
+    public String createJournalEntryToOddo(List<JournalEntry> list, Long loanTransactionId, Long transactionType, Boolean isReversed)
+            throws IOException {
 
         final Integer uid = loginToOddo();
         if (uid > 0) {
@@ -370,7 +371,7 @@ public class OdooServiceImpl implements OdooService {
             journalData.setRef("Journal Entry made by CBS for Loan Transaction id : " + loanTransactionId);
             journalData.setTransaction_type_name(LoanTransactionType.fromInt(transactionType.intValue()).name());
             journalData.setTransaction_type_unique_id(transactionType.toString());
-            journalData.set_reversed(false);
+            journalData.set_reversed(isReversed);
 
             journalEntryToOdooData.setJournal(journalData);
             journalEntryToOdooData.setAccounting_entries(accounting_entries);
@@ -422,7 +423,8 @@ public class OdooServiceImpl implements OdooService {
                     LOG.info("Loan Transaction Not Posted to Odoo " + transaction.toString());
                     List<JournalEntry> JE = this.journalEntryRepository.findJournalEntriesByIsOddoPosted(false,
                             transaction.getLoanTransactionId());
-                    postJournalEntries(errors, JE, transaction.getLoanTransactionId(), transaction.getTransactionType());
+                    postJournalEntries(errors, JE, transaction.getLoanTransactionId(), transaction.getTransactionType(),
+                            transaction.getIsReversed());
                 }
             }
 
@@ -483,12 +485,12 @@ public class OdooServiceImpl implements OdooService {
     }
 
     private void postJournalEntries(List<Throwable> errors, List<JournalEntry> journalEntryDebitCredit, Long loanTransactionId,
-            Long transactionType) {
+            Long transactionType, Boolean isReversed) {
         if (!CollectionUtils.isEmpty(journalEntryDebitCredit)) {
             try {
 
                 if (journalEntryDebitCredit.size() > 1) {
-                    String id = createJournalEntryToOddo(journalEntryDebitCredit, loanTransactionId, transactionType);
+                    String id = createJournalEntryToOddo(journalEntryDebitCredit, loanTransactionId, transactionType, isReversed);
                     if (id != null) {
                         for (JournalEntry je : journalEntryDebitCredit) {
                             je.setOddoPosted(true);
