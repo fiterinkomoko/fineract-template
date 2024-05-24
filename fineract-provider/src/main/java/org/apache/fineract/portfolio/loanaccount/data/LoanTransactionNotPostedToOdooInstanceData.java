@@ -26,5 +26,6 @@ public class LoanTransactionNotPostedToOdooInstanceData {
     private final Long loanTransactionId;
     private final Long loanId;
     private final Long transactionType;
+    private final Boolean isReversed;
 
 }
