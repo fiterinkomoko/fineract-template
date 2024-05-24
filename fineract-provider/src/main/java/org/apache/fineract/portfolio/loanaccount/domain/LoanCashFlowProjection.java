@@ -22,6 +22,8 @@ import java.math.BigDecimal;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+
+import lombok.Getter;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.springframework.stereotype.Component;
 
@@ -33,9 +35,11 @@ public class LoanCashFlowProjection extends AbstractAuditableCustom {
     @Column(name = "schedule_id")
     private Integer installmentNumber;
 
+    @Getter
     @Column(name = "cashflow_info_id")
     private Long cashflowInfoId;
 
+    @Getter
     @Column(name = "projection_rate")
     private Integer projectionRate;
     @Column(name = "amount")

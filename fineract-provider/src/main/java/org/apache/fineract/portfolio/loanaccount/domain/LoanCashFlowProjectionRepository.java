@@ -23,10 +23,15 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
+
 public interface LoanCashFlowProjectionRepository
         extends JpaRepository<LoanCashFlowProjection, Long>, JpaSpecificationExecutor<LoanCashFlowProjection> {
 
     @Modifying
     @Query(value = "delete from m_loan_cashflow_projection where cashflow_info_id in (select id from loan_cashflow_information where loan_id = ?1)", nativeQuery = true)
     void deleteByLoanId(Long loanId);
+
+    @Query(value = "select * from m_loan_cashflow_projection as pr where pr.cashflow_info_id in (select id from loan_cashflow_information where loan_id = ?1)", nativeQuery = true)
+    List<LoanCashFlowProjection> findByLoanId(Long loanId);
 }
