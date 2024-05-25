@@ -28,9 +28,8 @@ public class ContentManagementException extends AbstractPlatformDomainRuleExcept
     }
 
     public ContentManagementException(final String name, final Long fileSize, final int maxFileSize) {
-        super("", "Unable to save the document with name" + name + " since its file Size of "
-                + fileSize / (1024 * 1024 * 10) + " MB exceeds the max permissable file size  of " + maxFileSize + " MB", name, fileSize,
-                maxFileSize);
+        super("", "Unable to save the document with name" + name + " since its file Size of " + fileSize / (1024 * 1024 * 10)
+                + " MB exceeds the max permissable file size  of " + maxFileSize + " MB", name, fileSize, maxFileSize);
     }
 
     public ContentManagementException(String filename, String message, Exception exception) {

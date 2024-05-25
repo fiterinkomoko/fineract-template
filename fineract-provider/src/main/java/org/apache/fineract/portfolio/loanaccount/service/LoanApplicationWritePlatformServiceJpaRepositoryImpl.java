@@ -2330,10 +2330,10 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         List<LoanCashFlowProjection> projectionList = this.loanCashFlowProjectionRepository.findByLoanId(loanId);
         Map<Long, List<LoanCashFlowProjection>> particularCashFlowProjectionList = new HashMap<>();
-        for (LoanCashFlowProjection data : projectionList){
-            if(particularCashFlowProjectionList.containsKey(data.getCashflowInfoId())) {
+        for (LoanCashFlowProjection data : projectionList) {
+            if (particularCashFlowProjectionList.containsKey(data.getCashflowInfoId())) {
                 particularCashFlowProjectionList.get(data.getCashflowInfoId()).add(data);
-            }else {
+            } else {
                 List<LoanCashFlowProjection> list = new ArrayList<>();
                 list.add(data);
                 particularCashFlowProjectionList.put(data.getCashflowInfoId(), list);
@@ -2350,10 +2350,10 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     LOG.info("INCOME -- cashflow Data :- " + cashFlow.getName() + " " + cashFlow.getMonth0() + "    * *"
                             + cashFlow.getCashFlowType());
 
-                    if (!particularCashFlowProjectionList.isEmpty()){
+                    if (!particularCashFlowProjectionList.isEmpty()) {
                         List<LoanCashFlowProjection> list = particularCashFlowProjectionList.get(cashFlow.getId());
-                        if (list != null && !list.isEmpty()){
-                            incomeProjectionRate = list.get(installment.getInstallmentNumber()-1).getProjectionRate();
+                        if (list != null && !list.isEmpty()) {
+                            incomeProjectionRate = list.get(installment.getInstallmentNumber() - 1).getProjectionRate();
                         }
                     }
 
@@ -2377,10 +2377,10 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     LOG.info("EXPENSE -- cashflow Data :- " + cashFlow.getName() + " " + cashFlow.getMonth0() + "    * *"
                             + cashFlow.getCashFlowType());
 
-                    if (!particularCashFlowProjectionList.isEmpty()){
+                    if (!particularCashFlowProjectionList.isEmpty()) {
                         List<LoanCashFlowProjection> list = particularCashFlowProjectionList.get(cashFlow.getId());
-                        if (list != null && !list.isEmpty()){
-                            expenseProjectionRate = list.get(installment.getInstallmentNumber()-1).getProjectionRate();
+                        if (list != null && !list.isEmpty()) {
+                            expenseProjectionRate = list.get(installment.getInstallmentNumber() - 1).getProjectionRate();
                         }
                     }
 
@@ -2402,8 +2402,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
                 }
             }
-           // incomeProjectionRate = projectionRate;
-          //  expenseProjectionRate = projectionRate;
+            // incomeProjectionRate = projectionRate;
+            // expenseProjectionRate = projectionRate;
         }
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
