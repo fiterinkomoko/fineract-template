@@ -22,7 +22,6 @@ import java.math.BigDecimal;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.springframework.stereotype.Component;

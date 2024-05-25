@@ -3556,12 +3556,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
 
         public String loanTransactionNotPostedToOdoo() {
-            return " DISTINCT gl.loan_transaction_id AS loanTransactionId,gl.entity_id AS loanId,mlt.transaction_type_enum AS transactionType ,mlt.is_reversed   AS  isReversed  FROM acc_gl_journal_entry gl "
-                    + " INNER JOIN m_loan_transaction mlt on gl.loan_transaction_id = mlt.id "
-                    + " INNER JOIN m_loan ml on mlt.loan_id = ml.id " + " INNER JOIN m_client mc on ml.client_id = mc.id "
-                    + " WHERE gl.is_oddo_posted = false  "
-                    + " AND mc.is_odoo_customer_posted = true AND odoo_customer_id IS NOT NULL AND mlt.transaction_type_enum IN (1,2,4,5,6,8,9,10,19,26,27)   "
-                    + " ORDER BY gl.entity_id ASC ";
+            return "  DISTINCT gl.loan_transaction_id AS loanTransactionId,gl.entity_id AS loanId,mlt.transaction_type_enum AS transactionType ,mlt.is_reversed   AS  isReversed  FROM acc_gl_journal_entry gl "
+                    + "  INNER JOIN m_loan_transaction mlt on gl.loan_transaction_id = mlt.id "
+                    + "  INNER JOIN m_loan ml on mlt.loan_id = ml.id " + " INNER JOIN m_client mc on ml.client_id = mc.id "
+                    + "  WHERE gl.is_oddo_posted = false  "
+                    + "  AND mc.is_odoo_customer_posted = true AND odoo_customer_id IS NOT NULL AND mlt.transaction_type_enum IN (1,2,4,5,6,8,9,10,19,26,27)   AND ml.currency_code NOT IN ('ETB')   "
+                    + "  ORDER BY gl.entity_id ASC ";
         }
 
         @Override
