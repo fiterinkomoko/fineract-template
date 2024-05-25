@@ -26,6 +26,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
@@ -89,7 +90,6 @@ import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.math.RoundingMode;
 
 @Service
 @RequiredArgsConstructor
@@ -1553,8 +1553,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             for (int i = 0; i < rsmd.getColumnCount(); i++) {
                 final String columnName = rsmd.getColumnName(i + 1);
                 String columnValue = rowSet.getString(columnName);
-                String columnTypeName = rsmd.getColumnTypeName(i+1);
-                if(columnTypeName.equals("DECIMAL") && columnValue != null) {
+                String columnTypeName = rsmd.getColumnTypeName(i + 1);
+                if (columnTypeName.equals("DECIMAL") && columnValue != null) {
                     BigDecimal typeConvert = new BigDecimal(columnValue);
                     columnValue = typeConvert.setScale(2, RoundingMode.DOWN).toString();
                 }
@@ -1825,7 +1825,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                         if (queryParamColumnUnderscored.equalsIgnoreCase(columnHeaderUnderscored)) {
                             pValue = queryParams.get(key);
                             pValue = validateColumn(columnHeader, pValue, dateFormat, clientApplicationLocale);
-                            if(columnHeader.isDecimalDisplayType()){
+                            if (columnHeader.isDecimalDisplayType()) {
                                 BigDecimal typeConvert = new BigDecimal(pValue);
                                 pValue = typeConvert.setScale(2, RoundingMode.DOWN).toString();
                             }
