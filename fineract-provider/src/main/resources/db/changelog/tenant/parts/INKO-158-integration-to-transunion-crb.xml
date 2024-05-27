@@ -1593,4 +1593,70 @@ WHERE l.loan_status_id IN (300, 600, 601, 700)
             </column>
         </createTable>
     </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_account_account_classification">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_transunion_crb_account" columnName="account_classification"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_transunion_crb_account">
+            <column name="account_classification" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_account_account_closing_date">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_transunion_crb_account" columnName="account_closing_date"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_transunion_crb_account">
+            <column name="account_closing_date" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_summary_enq_91_days_all_sectors">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_transunion_crb_summary" columnName="enq_91_days_all_sectors"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_transunion_crb_summary">
+            <column name="enq_91_days_all_sectors" type="int">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_summary_enq_91_days_my_sector">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_transunion_crb_summary" columnName="enq_91_days_my_sector"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_transunion_crb_summary">
+            <column name="enq_91_days_my_sector" type="int">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_summary_enq_91_days_other_sectors">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_transunion_crb_summary" columnName="enq_91_days_other_sectors"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_transunion_crb_summary">
+            <column name="enq_91_days_other_sectors" type="int">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

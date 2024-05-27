@@ -162,6 +162,12 @@ public class TransunionCrbSummary extends AbstractPersistableCustom {
     private Integer insurancePoliciesMySector;
     @Column(name = "insurance_policies_other_sectors")
     private Integer insurancePoliciesOtherSectors;
+    @Column(name = "enq_91_days_all_sectors")
+    private Integer enq91DaysAllSectors;
+    @Column(name = "enq_91_days_my_sector")
+    private Integer enq91DaysMySector;
+    @Column(name = "enq_91_days_other_sectors")
+    private Integer enq91DaysOtherSectors;
 
     public TransunionCrbSummary() {}
 
@@ -218,6 +224,9 @@ public class TransunionCrbSummary extends AbstractPersistableCustom {
         this.enq91to180DaysAllSectors = summary.getEnquiries91Days().getAllSectors();
         this.enq91to180DaysMySector = summary.getEnquiries91Days().getMySector();
         this.enq91to180DaysOtherSectors = summary.getEnquiries91Days().getOtherSectors();
+        this.enq91DaysAllSectors = summary.getEnquiries91Days().getAllSectors();
+        this.enq91DaysMySector = summary.getEnquiries91Days().getMySector();
+        this.enq91DaysOtherSectors = summary.getEnquiries91Days().getOtherSectors();
         this.enqLast30DaysAllSectors = summary.getEnquiriesLast30Days().getAllSectors();
         this.enqLast30DaysMySector = summary.getEnquiriesLast30Days().getMySector();
         this.enqLast30DaysOtherSectors = summary.getEnquiriesLast30Days().getOtherSectors();

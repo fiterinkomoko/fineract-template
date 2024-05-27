@@ -682,6 +682,8 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
     private AccountListData extractAccountListData(Element account) {
         AccountListData accountListData = new AccountListData();
 
+        accountListData.setAccountClassification(getElementTextContent(account, "accountClassification"));
+        accountListData.setAccountClosingDate(getElementTextContent(account, "accountClosingDate"));
         accountListData.setAccountNo(getElementTextContent(account, "accountNo"));
         accountListData.setAccountOpeningDate(getElementTextContent(account, "accountOpeningDate"));
         accountListData.setAccountOwner(getElementTextContent(account, "accountOwner"));

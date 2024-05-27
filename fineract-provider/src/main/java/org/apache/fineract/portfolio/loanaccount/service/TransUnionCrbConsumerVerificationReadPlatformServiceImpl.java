@@ -243,6 +243,9 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
                     + "       summary.enq_91_to_180_days_all_sectors AS enq91to180DaysAllSectors, "
                     + "       summary.enq_91_to_180_days_my_sector AS enq91to180DaysMySector, "
                     + "       summary.enq_91_to_180_days_other_sectors AS enq91to180DaysOtherSectors, "
+                    + "       summary.enq_91_days_all_sectors AS enq91DaysAllSectors, "
+                    + "       summary.enq_91_days_my_sector AS enq91DaysMySector, "
+                    + "       summary.enq_91_days_other_sectors AS enq91DaysOtherSectors, "
                     + "       summary.enq_last_30_days_all_sectors AS enqLast30DaysAllSectors, "
                     + "       summary.enq_last_30_days_my_sector AS enqLast30DaysMySector, "
                     + "       summary.enq_last_30_days_other_sectors AS enqLast30DaysOtherSectors, "
@@ -317,6 +320,9 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
             final Integer enq91to180DaysAllSectors = rs.getInt("enq91to180DaysAllSectors");
             final Integer enq91to180DaysMySector = rs.getInt("enq91to180DaysMySector");
             final Integer enq91to180DaysOtherSectors = rs.getInt("enq91to180DaysOtherSectors");
+            final Integer enq91DaysAllSectors = rs.getInt("enq91DaysAllSectors");
+            final Integer enq91DaysMySector = rs.getInt("enq91DaysMySector");
+            final Integer enq91DaysOtherSectors = rs.getInt("enq91DaysOtherSectors");
             final Integer enqLast30DaysAllSectors = rs.getInt("enqLast30DaysAllSectors");
             final Integer enqLast30DaysMySector = rs.getInt("enqLast30DaysMySector");
             final Integer enqLast30DaysOtherSectors = rs.getInt("enqLast30DaysOtherSectors");
@@ -343,7 +349,8 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
                     enqLast30DaysAllSectors, enqLast30DaysMySector, enqLast30DaysOtherSectors, paClosedAccountsAllSectors,
                     paClosedAccountsMySector, paClosedAccountsOtherSectors, paClosedAccountsWithDhAllSectors,
                     paClosedAccountsWithDhMySector, paClosedAccountsWithDhOtherSectors, insurancePoliciesAllSectors,
-                    insurancePoliciesMySector, insurancePoliciesOtherSectors);
+                    insurancePoliciesMySector, insurancePoliciesOtherSectors, enq91DaysAllSectors, enq91DaysMySector,
+                    enq91DaysOtherSectors);
 
         }
     }
@@ -353,7 +360,8 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
         public String schema() {
             final StringBuilder sql = new StringBuilder();
 
-            sql.append(" h.id                        AS id,  " + "       ac.account_no               AS accountNo,  "
+            sql.append(" h.id                        AS id,  "
+                    + "       ac.account_no               AS accountNo,   ac.account_classification               AS accountClassification,   ac.account_closing_date               AS accountClosingDate,  "
                     + "       ac.account_opening_date     AS accountOpeningDate,  "
                     + "       ac.account_owner            AS accountOwner,  " + "       ac.account_status           AS accountStatus,  "
                     + "       ac.account_type             AS accountType,  " + "       ac.arrear_amount            AS arrearAmount,  "
@@ -375,6 +383,8 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
                 throws SQLException {
             final Integer id = rs.getInt("id");
             final String accountNo = rs.getString("accountNo");
+            final String accountClassification = rs.getString("accountClassification");
+            final String accountClosingDate = rs.getString("accountClosingDate");
             final String accountOpeningDate = rs.getString("accountOpeningDate");
             final String accountOwner = rs.getString("accountOwner");
             final String accountStatus = rs.getString("accountStatus");
@@ -396,7 +406,8 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
 
             return new TransUnionRwandaCrbAccountReportData(id, accountNo, accountOpeningDate, accountOwner, accountStatus, accountType,
                     arrearAmount, arrearDays, balanceAmount, currency, disputed, isMyAccount, lastPaymentDate, listingDate, principalAmount,
-                    repaymentDuration, repaymentTerm, scheduledPaymentAmount, tradeSector, worstArrear);
+                    repaymentDuration, repaymentTerm, scheduledPaymentAmount, tradeSector, worstArrear, accountClassification,
+                    accountClosingDate);
 
         }
     }

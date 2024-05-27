@@ -75,6 +75,9 @@ public class TransUnionRwandaCrbSummaryReportData {
     private Integer enq91to180DaysAllSectors;
     private Integer enq91to180DaysMySector;
     private Integer enq91to180DaysOtherSectors;
+    private Integer enq91DaysAllSectors;
+    private Integer enq91DaysMySector;
+    private Integer enq91DaysOtherSectors;
     private Integer enqLast30DaysAllSectors;
     private Integer enqLast30DaysMySector;
     private Integer enqLast30DaysOtherSectors;
@@ -107,7 +110,7 @@ public class TransUnionRwandaCrbSummaryReportData {
             Integer enqLast30DaysOtherSectors, Integer paClosedAccountsAllSectors, Integer paClosedAccountsMySector,
             Integer paClosedAccountsOtherSectors, Integer paClosedAccountsWithDhAllSectors, Integer paClosedAccountsWithDhMySector,
             Integer paClosedAccountsWithDhOtherSectors, Integer insurancePoliciesAllSectors, Integer insurancePoliciesMySector,
-            Integer insurancePoliciesOtherSectors) {
+            Integer insurancePoliciesOtherSectors, Integer enq91DaysAllSectors, Integer enq91DaysMySector, Integer enq91DaysOtherSectors) {
         this.id = id;
         this.bcAllSectors = bcAllSectors;
         this.bcMySector = bcMySector;
@@ -160,6 +163,9 @@ public class TransUnionRwandaCrbSummaryReportData {
         this.enq91to180DaysAllSectors = enq91to180DaysAllSectors;
         this.enq91to180DaysMySector = enq91to180DaysMySector;
         this.enq91to180DaysOtherSectors = enq91to180DaysOtherSectors;
+        this.enq91DaysAllSectors = enq91DaysAllSectors;
+        this.enq91DaysMySector = enq91DaysMySector;
+        this.enq91DaysOtherSectors = enq91DaysOtherSectors;
         this.enqLast30DaysAllSectors = enqLast30DaysAllSectors;
         this.enqLast30DaysMySector = enqLast30DaysMySector;
         this.enqLast30DaysOtherSectors = enqLast30DaysOtherSectors;

@@ -26,6 +26,8 @@ public class TransUnionRwandaCrbAccountReportData {
 
     private Integer id;
     private String accountNo;
+    private String accountClassification;
+    private String accountClosingDate;
     private String accountOpeningDate;
     private String accountOwner;
     private String accountStatus;
@@ -50,7 +52,8 @@ public class TransUnionRwandaCrbAccountReportData {
     public TransUnionRwandaCrbAccountReportData(Integer id, String accountNo, String accountOpeningDate, String accountOwner,
             String accountStatus, String accountType, BigDecimal arrearAmount, Integer arrearDays, BigDecimal balanceAmount,
             String currency, Boolean disputed, Boolean isMyAccount, String lastPaymentDate, String listingDate, BigDecimal principalAmount,
-            Integer repaymentDuration, String repaymentTerm, BigDecimal scheduledPaymentAmount, String tradeSector, Integer worstArrear) {
+            Integer repaymentDuration, String repaymentTerm, BigDecimal scheduledPaymentAmount, String tradeSector, Integer worstArrear,
+            String accountClassification, String accountClosingDate) {
         this.id = id;
         this.accountNo = accountNo;
         this.accountOpeningDate = accountOpeningDate;
@@ -71,5 +74,7 @@ public class TransUnionRwandaCrbAccountReportData {
         this.scheduledPaymentAmount = scheduledPaymentAmount;
         this.tradeSector = tradeSector;
         this.worstArrear = worstArrear;
+        this.accountClassification = accountClassification;
+        this.accountClosingDate = accountClosingDate;
     }
 }
