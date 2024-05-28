@@ -49,6 +49,10 @@ public class SummaryData {
     private CrbAccountsSummaryData paClosedAccounts;
     private CrbAccountsSummaryData paClosedAccountsWithDh;
     private CrbAccountsSummaryData insurancePolicies;
+    private CrbAccountsSummaryData npaOpenAccounts;
+    private CrbAccountsSummaryObjData npaTotalValueList;
+    private CrbAccountsSummaryData paOpenAccounts;
+    private CrbAccountsSummaryData paOpenAccountsWithDh;
 
     @XmlElement(name = "bouncedCheques")
     public CrbAccountsSummaryData getBouncedCheques() {
@@ -273,6 +277,42 @@ public class SummaryData {
 
     public void setLastInsurancePolicyDate(String lastInsurancePolicyDate) {
         this.lastInsurancePolicyDate = lastInsurancePolicyDate;
+    }
+
+    @XmlElement(name = "npaOpenAccounts")
+    public CrbAccountsSummaryData getNpaOpenAccounts() {
+        return npaOpenAccounts;
+    }
+
+    public void setNpaOpenAccounts(CrbAccountsSummaryData npaOpenAccounts) {
+        this.npaOpenAccounts = npaOpenAccounts;
+    }
+
+    @XmlElement(name = "npaTotalValueList")
+    public CrbAccountsSummaryObjData getNpaTotalValueList() {
+        return npaTotalValueList;
+    }
+
+    public void setNpaTotalValueList(CrbAccountsSummaryObjData npaTotalValueList) {
+        this.npaTotalValueList = npaTotalValueList;
+    }
+
+    @XmlElement(name = "paOpenAccounts")
+    public CrbAccountsSummaryData getPaOpenAccounts() {
+        return paOpenAccounts;
+    }
+
+    public void setPaOpenAccounts(CrbAccountsSummaryData paOpenAccounts) {
+        this.paOpenAccounts = paOpenAccounts;
+    }
+
+    @XmlElement(name = "paOpenAccountsWithDh")
+    public CrbAccountsSummaryData getPaOpenAccountsWithDh() {
+        return paOpenAccountsWithDh;
+    }
+
+    public void setPaOpenAccountsWithDh(CrbAccountsSummaryData paOpenAccountsWithDh) {
+        this.paOpenAccountsWithDh = paOpenAccountsWithDh;
     }
 
     @Override

@@ -1659,4 +1659,169 @@ WHERE l.loan_status_id IN (300, 600, 601, 700)
             </column>
         </addColumn>
     </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_summary_npa_open_accounts_all_sectors-1">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_transunion_crb_summary" columnName="npa_open_accounts_all_sectors"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_transunion_crb_summary">
+            <column name="npa_open_accounts_all_sectors" type="int">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_summary_npa_open_accounts_my_sector">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_transunion_crb_summary" columnName="npa_open_accounts_my_sector"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_transunion_crb_summary">
+            <column name="npa_open_accounts_my_sector" type="int">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_summary_npa_open_accounts_other_sectors">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_transunion_crb_summary" columnName="npa_open_accounts_other_sectors"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_transunion_crb_summary">
+            <column name="npa_open_accounts_other_sectors" type="int">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+
+
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_summary_npa_total_value_all_sectors">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_transunion_crb_summary" columnName="npa_total_value_all_sectors"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_transunion_crb_summary">
+            <column name="npa_total_value_all_sectors"  type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_summary_npa_total_value_listed_my_sector">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_transunion_crb_summary" columnName="npa_total_value_listed_my_sector"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_transunion_crb_summary">
+            <column name="npa_total_value_listed_my_sector"  type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_summary_npa_total_value_listed_other_sectors">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_transunion_crb_summary" columnName="npa_total_value_listed_other_sectors"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_transunion_crb_summary">
+            <column name="npa_total_value_listed_other_sectors" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_summary_pa_open_accounts_all_sectors">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_transunion_crb_summary" columnName="pa_open_accounts_all_sectors"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_transunion_crb_summary">
+            <column name="pa_open_accounts_all_sectors" type="int">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_summary_pa_open_accounts_my_sector">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_transunion_crb_summary" columnName="pa_open_accounts_my_sector"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_transunion_crb_summary">
+            <column name="pa_open_accounts_my_sector" type="int">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_summary_pa_open_accounts_other_sectors">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_transunion_crb_summary" columnName="pa_open_accounts_other_sectors"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_transunion_crb_summary">
+            <column name="pa_open_accounts_other_sectors" type="int">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_summary_pa_open_accounts_with_dh_all_sectors">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_transunion_crb_summary" columnName="pa_open_accounts_with_dh_all_sectors"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_transunion_crb_summary">
+            <column name="pa_open_accounts_with_dh_all_sectors" type="int">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_summary_pa_open_accounts_with_dh_my_sector">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_transunion_crb_summary" columnName="pa_open_accounts_with_dh_my_sector"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_transunion_crb_summary">
+            <column name="pa_open_accounts_with_dh_my_sector" type="int">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_summary_pa_open_accounts_with_dh_other_sectors">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_transunion_crb_summary" columnName="pa_open_accounts_with_dh_other_sectors"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_transunion_crb_summary">
+            <column name="pa_open_accounts_with_dh_other_sectors" type="int">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+
+
 </databaseChangeLog>

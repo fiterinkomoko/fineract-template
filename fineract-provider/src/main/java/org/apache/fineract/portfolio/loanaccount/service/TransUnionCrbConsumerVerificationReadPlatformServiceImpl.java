@@ -257,7 +257,24 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
                     + "       summary.pa_closed_accounts_with_dh_other_sectors AS paClosedAccountsWithDhOtherSectors, "
                     + "       summary.insurance_policies_my_sector AS insurancePoliciesMySector, "
                     + "       summary.insurance_policies_all_sectors AS insurancePoliciesAllSectors, "
-                    + "       summary.insurance_policies_my_sector AS insurancePoliciesOtherSectors "
+                    + "       summary.insurance_policies_my_sector AS insurancePoliciesOtherSectors, "
+
+                    + "       summary.npa_open_accounts_all_sectors AS npaOpenAccountsAllSectors, "
+                    + "       summary.npa_open_accounts_my_sector AS npaOpenAccountsMySector ,"
+                    + "       summary.npa_open_accounts_other_sectors AS npaOpenAccountsOtherSectors ,"
+
+                    + "       summary.npa_total_value_all_sectors AS npaTotalValueListedAllSectors, "
+                    + "       summary.npa_total_value_listed_my_sector AS npaTotalValueListedMySector ,"
+                    + "       summary.npa_total_value_listed_other_sectors AS npaTotalValueListedOtherSectors ,"
+
+                    + "       summary.pa_open_accounts_all_sectors AS paOpenAccountsAllSectors, "
+                    + "       summary.pa_open_accounts_my_sector AS paOpenAccountsMySector ,"
+                    + "       summary.pa_open_accounts_other_sectors AS paOpenAccountsOtherSectors ,"
+
+                    + "       summary.pa_open_accounts_with_dh_all_sectors AS paOpenAccountsWithDhAllSectors, "
+                    + "       summary.pa_open_accounts_with_dh_my_sector AS paOpenAccountsWithDhMySector ,"
+                    + "       summary.pa_open_accounts_with_dh_other_sectors AS paOpenAccountsWithDhOtherSectors "
+
                     + "  FROM m_transunion_crb_summary  summary " + "  INNER JOIN m_transunion_crb_header h on summary.header_id = h.id "
                     + " WHERE h.id =  ? ");
             return sql.toString();
@@ -336,6 +353,22 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
             final Integer insurancePoliciesMySector = rs.getInt("insurancePoliciesMySector");
             final Integer insurancePoliciesOtherSectors = rs.getInt("insurancePoliciesOtherSectors");
 
+            final Integer npaOpenAccountsAllSectors = rs.getInt("npaOpenAccountsAllSectors");
+            final Integer npaOpenAccountsMySector = rs.getInt("npaOpenAccountsMySector");
+            final Integer npaOpenAccountsOtherSectors = rs.getInt("npaOpenAccountsOtherSectors");
+
+            final String npaTotalValueListedAllSectors = rs.getString("npaTotalValueListedAllSectors");
+            final String npaTotalValueListedMySector = rs.getString("npaTotalValueListedMySector");
+            final String npaTotalValueListedOtherSectors = rs.getString("npaTotalValueListedOtherSectors");
+
+            final Integer paOpenAccountsAllSectors = rs.getInt("paOpenAccountsAllSectors");
+            final Integer paOpenAccountsMySector = rs.getInt("paOpenAccountsMySector");
+            final Integer paOpenAccountsOtherSectors = rs.getInt("paOpenAccountsOtherSectors");
+
+            final Integer paOpenAccountsWithDhAllSectors = rs.getInt("paOpenAccountsWithDhAllSectors");
+            final Integer paOpenAccountsWithDhMySector = rs.getInt("paOpenAccountsWithDhMySector");
+            final Integer paOpenAccountsWithDhOtherSectors = rs.getInt("paOpenAccountsWithDhOtherSectors");
+
             return new TransUnionRwandaCrbSummaryReportData(id, bcAllSectors, bcMySector, bcOtherSectors, bc180AllSectors, bc180MySector,
                     bc180OtherSectors, bc90AllSectors, bc90MySector, bc90OtherSectors, bc365AllSectors, bc365MySector, bc365OtherSectors,
                     fcAllSectors, fcMySector, fcOtherSectors, lastBouncedChequeDate, lastCreditApplicationDate, lastFraudDate,
@@ -349,8 +382,11 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
                     enqLast30DaysAllSectors, enqLast30DaysMySector, enqLast30DaysOtherSectors, paClosedAccountsAllSectors,
                     paClosedAccountsMySector, paClosedAccountsOtherSectors, paClosedAccountsWithDhAllSectors,
                     paClosedAccountsWithDhMySector, paClosedAccountsWithDhOtherSectors, insurancePoliciesAllSectors,
-                    insurancePoliciesMySector, insurancePoliciesOtherSectors, enq91DaysAllSectors, enq91DaysMySector,
-                    enq91DaysOtherSectors);
+                    insurancePoliciesMySector, insurancePoliciesOtherSectors, enq91DaysAllSectors, enq91DaysMySector, enq91DaysOtherSectors,
+                    npaOpenAccountsAllSectors, npaOpenAccountsMySector, npaOpenAccountsOtherSectors, npaTotalValueListedAllSectors,
+                    npaTotalValueListedMySector, npaTotalValueListedOtherSectors, paOpenAccountsAllSectors, paOpenAccountsMySector,
+                    paOpenAccountsOtherSectors, paOpenAccountsWithDhAllSectors, paOpenAccountsWithDhMySector,
+                    paOpenAccountsWithDhOtherSectors);
 
         }
     }
