@@ -40,12 +40,12 @@ public interface ReadReportingService {
 
     // TODO Move the following x3 methods into the (new; FINERACT-1173) DatatableReportingProcessService?
 
-    String retrieveReportPDF(String name, String type, Map<String, String> extractedQueryParams, boolean isSelfServiceUserReport);
+    String retrieveReportPDF(String name, String type, Map<String, String> extractedQueryParams, boolean isSelfServiceUserReport, final Integer limit, final Integer offset);
 
-    StreamingOutput retrieveReportCSV(String name, String type, Map<String, String> extractedQueryParams, boolean isSelfServiceUserReport);
+    StreamingOutput retrieveReportCSV(String name, String type, Map<String, String> extractedQueryParams, boolean isSelfServiceUserReport, final Integer limit, final Integer offset);
 
     GenericResultsetData retrieveGenericResultset(String name, String type, Map<String, String> extractedQueryParams,
-            boolean isSelfServiceUserReport);
+            boolean isSelfServiceUserReport, final Integer limit, final Integer offset);
 
     // TODO This is weird, could they not be using the retrieveGenericResultset() above after all?
     // needed for smsCampaign and emailCampaign jobs where securityContext is null

@@ -67,12 +67,20 @@ public class DatatableReportingProcessService implements ReportingProcessService
         final boolean exportCsv = ApiParameterHelper.exportCsv(queryParams);
         final boolean exportPdf = ApiParameterHelper.exportPdf(queryParams);
         final String parameterTypeValue = ApiParameterHelper.parameterType(queryParams) ? "parameter" : "report";
+        Integer limit = null;
+        Integer offset = null;
+        if (queryParams.getFirst("limit") != null) {
+            limit = Integer.valueOf(queryParams.getFirst("limit"));
+            if(queryParams.getFirst("offset") != null){
+                offset = Integer.valueOf(queryParams.getFirst("offset"));
+            }
+        }
 
         // PDF format
         if (exportPdf) {
             final Map<String, String> reportParams = getReportParams(queryParams);
             final String pdfFileName = this.readExtraDataAndReportingService.retrieveReportPDF(reportName, parameterTypeValue, reportParams,
-                    isSelfServiceUserReport);
+                    isSelfServiceUserReport, limit, offset);
 
             final File file = new File(pdfFileName);
 
@@ -88,7 +96,7 @@ public class DatatableReportingProcessService implements ReportingProcessService
             final Map<String, String> reportParams = getReportParams(queryParams);
 
             final GenericResultsetData result = this.readExtraDataAndReportingService.retrieveGenericResultset(reportName,
-                    parameterTypeValue, reportParams, isSelfServiceUserReport);
+                    parameterTypeValue, reportParams, isSelfServiceUserReport, limit, offset);
 
             // INKO-202
             if (reportParams.containsKey("${loanProductId}")) {
@@ -114,7 +122,7 @@ public class DatatableReportingProcessService implements ReportingProcessService
         // CSV format
         final Map<String, String> reportParams = getReportParams(queryParams);
         final StreamingOutput result = this.readExtraDataAndReportingService.retrieveReportCSV(reportName, parameterTypeValue, reportParams,
-                isSelfServiceUserReport);
+                isSelfServiceUserReport, limit, offset);
 
         return Response.ok().entity(result).type("text/csv")
                 .header("Content-Disposition", "attachment;filename=" + reportName.replaceAll(" ", "") + ".csv").build();
