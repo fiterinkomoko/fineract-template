@@ -25,6 +25,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "accountList")
 public class AccountListData {
 
+    private String accountClassification;
+    private String accountClosingDate;
     private String accountNo;
     private String accountOpeningDate;
     private String accountOwner;
@@ -44,6 +46,24 @@ public class AccountListData {
     private BigDecimal scheduledPaymentAmount;
     private String tradeSector;
     private Integer worstArrear;
+
+    @XmlElement(name = "accountClassification")
+    public String getAccountClassification() {
+        return accountClassification;
+    }
+
+    public void setAccountClassification(String accountClassification) {
+        this.accountClassification = accountClassification;
+    }
+
+    @XmlElement(name = "accountClosingDate")
+    public String getAccountClosingDate() {
+        return accountClosingDate;
+    }
+
+    public void setAccountClosingDate(String accountClosingDate) {
+        this.accountClosingDate = accountClosingDate;
+    }
 
     @XmlElement(name = "accountNo")
     public String getAccountNo() {

@@ -243,6 +243,9 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
                     + "       summary.enq_91_to_180_days_all_sectors AS enq91to180DaysAllSectors, "
                     + "       summary.enq_91_to_180_days_my_sector AS enq91to180DaysMySector, "
                     + "       summary.enq_91_to_180_days_other_sectors AS enq91to180DaysOtherSectors, "
+                    + "       summary.enq_91_days_all_sectors AS enq91DaysAllSectors, "
+                    + "       summary.enq_91_days_my_sector AS enq91DaysMySector, "
+                    + "       summary.enq_91_days_other_sectors AS enq91DaysOtherSectors, "
                     + "       summary.enq_last_30_days_all_sectors AS enqLast30DaysAllSectors, "
                     + "       summary.enq_last_30_days_my_sector AS enqLast30DaysMySector, "
                     + "       summary.enq_last_30_days_other_sectors AS enqLast30DaysOtherSectors, "
@@ -254,7 +257,24 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
                     + "       summary.pa_closed_accounts_with_dh_other_sectors AS paClosedAccountsWithDhOtherSectors, "
                     + "       summary.insurance_policies_my_sector AS insurancePoliciesMySector, "
                     + "       summary.insurance_policies_all_sectors AS insurancePoliciesAllSectors, "
-                    + "       summary.insurance_policies_my_sector AS insurancePoliciesOtherSectors "
+                    + "       summary.insurance_policies_my_sector AS insurancePoliciesOtherSectors, "
+
+                    + "       summary.npa_open_accounts_all_sectors AS npaOpenAccountsAllSectors, "
+                    + "       summary.npa_open_accounts_my_sector AS npaOpenAccountsMySector ,"
+                    + "       summary.npa_open_accounts_other_sectors AS npaOpenAccountsOtherSectors ,"
+
+                    + "       summary.npa_total_value_all_sectors AS npaTotalValueListedAllSectors, "
+                    + "       summary.npa_total_value_listed_my_sector AS npaTotalValueListedMySector ,"
+                    + "       summary.npa_total_value_listed_other_sectors AS npaTotalValueListedOtherSectors ,"
+
+                    + "       summary.pa_open_accounts_all_sectors AS paOpenAccountsAllSectors, "
+                    + "       summary.pa_open_accounts_my_sector AS paOpenAccountsMySector ,"
+                    + "       summary.pa_open_accounts_other_sectors AS paOpenAccountsOtherSectors ,"
+
+                    + "       summary.pa_open_accounts_with_dh_all_sectors AS paOpenAccountsWithDhAllSectors, "
+                    + "       summary.pa_open_accounts_with_dh_my_sector AS paOpenAccountsWithDhMySector ,"
+                    + "       summary.pa_open_accounts_with_dh_other_sectors AS paOpenAccountsWithDhOtherSectors "
+
                     + "  FROM m_transunion_crb_summary  summary " + "  INNER JOIN m_transunion_crb_header h on summary.header_id = h.id "
                     + " WHERE h.id =  ? ");
             return sql.toString();
@@ -317,6 +337,9 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
             final Integer enq91to180DaysAllSectors = rs.getInt("enq91to180DaysAllSectors");
             final Integer enq91to180DaysMySector = rs.getInt("enq91to180DaysMySector");
             final Integer enq91to180DaysOtherSectors = rs.getInt("enq91to180DaysOtherSectors");
+            final Integer enq91DaysAllSectors = rs.getInt("enq91DaysAllSectors");
+            final Integer enq91DaysMySector = rs.getInt("enq91DaysMySector");
+            final Integer enq91DaysOtherSectors = rs.getInt("enq91DaysOtherSectors");
             final Integer enqLast30DaysAllSectors = rs.getInt("enqLast30DaysAllSectors");
             final Integer enqLast30DaysMySector = rs.getInt("enqLast30DaysMySector");
             final Integer enqLast30DaysOtherSectors = rs.getInt("enqLast30DaysOtherSectors");
@@ -329,6 +352,22 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
             final Integer insurancePoliciesAllSectors = rs.getInt("insurancePoliciesAllSectors");
             final Integer insurancePoliciesMySector = rs.getInt("insurancePoliciesMySector");
             final Integer insurancePoliciesOtherSectors = rs.getInt("insurancePoliciesOtherSectors");
+
+            final Integer npaOpenAccountsAllSectors = rs.getInt("npaOpenAccountsAllSectors");
+            final Integer npaOpenAccountsMySector = rs.getInt("npaOpenAccountsMySector");
+            final Integer npaOpenAccountsOtherSectors = rs.getInt("npaOpenAccountsOtherSectors");
+
+            final String npaTotalValueListedAllSectors = rs.getString("npaTotalValueListedAllSectors");
+            final String npaTotalValueListedMySector = rs.getString("npaTotalValueListedMySector");
+            final String npaTotalValueListedOtherSectors = rs.getString("npaTotalValueListedOtherSectors");
+
+            final Integer paOpenAccountsAllSectors = rs.getInt("paOpenAccountsAllSectors");
+            final Integer paOpenAccountsMySector = rs.getInt("paOpenAccountsMySector");
+            final Integer paOpenAccountsOtherSectors = rs.getInt("paOpenAccountsOtherSectors");
+
+            final Integer paOpenAccountsWithDhAllSectors = rs.getInt("paOpenAccountsWithDhAllSectors");
+            final Integer paOpenAccountsWithDhMySector = rs.getInt("paOpenAccountsWithDhMySector");
+            final Integer paOpenAccountsWithDhOtherSectors = rs.getInt("paOpenAccountsWithDhOtherSectors");
 
             return new TransUnionRwandaCrbSummaryReportData(id, bcAllSectors, bcMySector, bcOtherSectors, bc180AllSectors, bc180MySector,
                     bc180OtherSectors, bc90AllSectors, bc90MySector, bc90OtherSectors, bc365AllSectors, bc365MySector, bc365OtherSectors,
@@ -343,7 +382,11 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
                     enqLast30DaysAllSectors, enqLast30DaysMySector, enqLast30DaysOtherSectors, paClosedAccountsAllSectors,
                     paClosedAccountsMySector, paClosedAccountsOtherSectors, paClosedAccountsWithDhAllSectors,
                     paClosedAccountsWithDhMySector, paClosedAccountsWithDhOtherSectors, insurancePoliciesAllSectors,
-                    insurancePoliciesMySector, insurancePoliciesOtherSectors);
+                    insurancePoliciesMySector, insurancePoliciesOtherSectors, enq91DaysAllSectors, enq91DaysMySector, enq91DaysOtherSectors,
+                    npaOpenAccountsAllSectors, npaOpenAccountsMySector, npaOpenAccountsOtherSectors, npaTotalValueListedAllSectors,
+                    npaTotalValueListedMySector, npaTotalValueListedOtherSectors, paOpenAccountsAllSectors, paOpenAccountsMySector,
+                    paOpenAccountsOtherSectors, paOpenAccountsWithDhAllSectors, paOpenAccountsWithDhMySector,
+                    paOpenAccountsWithDhOtherSectors);
 
         }
     }
@@ -353,7 +396,8 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
         public String schema() {
             final StringBuilder sql = new StringBuilder();
 
-            sql.append(" h.id                        AS id,  " + "       ac.account_no               AS accountNo,  "
+            sql.append(" h.id                        AS id,  "
+                    + "       ac.account_no               AS accountNo,   ac.account_classification               AS accountClassification,   ac.account_closing_date               AS accountClosingDate,  "
                     + "       ac.account_opening_date     AS accountOpeningDate,  "
                     + "       ac.account_owner            AS accountOwner,  " + "       ac.account_status           AS accountStatus,  "
                     + "       ac.account_type             AS accountType,  " + "       ac.arrear_amount            AS arrearAmount,  "
@@ -375,6 +419,8 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
                 throws SQLException {
             final Integer id = rs.getInt("id");
             final String accountNo = rs.getString("accountNo");
+            final String accountClassification = rs.getString("accountClassification");
+            final String accountClosingDate = rs.getString("accountClosingDate");
             final String accountOpeningDate = rs.getString("accountOpeningDate");
             final String accountOwner = rs.getString("accountOwner");
             final String accountStatus = rs.getString("accountStatus");
@@ -396,7 +442,8 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
 
             return new TransUnionRwandaCrbAccountReportData(id, accountNo, accountOpeningDate, accountOwner, accountStatus, accountType,
                     arrearAmount, arrearDays, balanceAmount, currency, disputed, isMyAccount, lastPaymentDate, listingDate, principalAmount,
-                    repaymentDuration, repaymentTerm, scheduledPaymentAmount, tradeSector, worstArrear);
+                    repaymentDuration, repaymentTerm, scheduledPaymentAmount, tradeSector, worstArrear, accountClassification,
+                    accountClosingDate);
 
         }
     }

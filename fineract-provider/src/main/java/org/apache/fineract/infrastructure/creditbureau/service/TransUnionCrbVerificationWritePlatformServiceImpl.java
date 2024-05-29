@@ -50,6 +50,7 @@ import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.apache.fineract.portfolio.loanaccount.data.AccountListData;
 import org.apache.fineract.portfolio.loanaccount.data.CorporateProfileData;
 import org.apache.fineract.portfolio.loanaccount.data.CrbAccountsSummaryData;
+import org.apache.fineract.portfolio.loanaccount.data.CrbAccountsSummaryObjData;
 import org.apache.fineract.portfolio.loanaccount.data.HeaderData;
 import org.apache.fineract.portfolio.loanaccount.data.PersonalProfileData;
 import org.apache.fineract.portfolio.loanaccount.data.PhoneListData;
@@ -576,6 +577,10 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
             summaryData.setPaClosedAccountsWithDh(createCrbSummaryDetails(summaryElement, "paClosedAccountsWithDh"));
             summaryData.setPaAccounts(createCrbSummaryDetails(summaryElement, "paOpenAccounts"));
             summaryData.setInsurancePolicies(createCrbSummaryDetails(summaryElement, "insurancePolicies"));
+            summaryData.setNpaOpenAccounts(createCrbSummaryDetails(summaryElement, "npaOpenAccounts"));
+            summaryData.setNpaTotalValueList(createCrbSummaryDetailsObj(summaryElement, "npaTotalValueList"));
+            summaryData.setPaOpenAccounts(createCrbSummaryDetails(summaryElement, "paOpenAccounts"));
+            summaryData.setPaOpenAccountsWithDh(createCrbSummaryDetails(summaryElement, "paOpenAccountsWithDh"));
 
             Element lastBouncedChequeDatelement = (Element) summaryElement.getElementsByTagName("lastBouncedChequeDate").item(0);
             if (lastBouncedChequeDatelement != null) {
@@ -662,6 +667,40 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
         return crbAccountsSummaryData;
     }
 
+    private CrbAccountsSummaryObjData createCrbSummaryDetailsObj(Element summaryElement, String tag) {
+        CrbAccountsSummaryObjData crbAccountsSummaryData = new CrbAccountsSummaryObjData();
+        Element summaryElements = (Element) summaryElement.getElementsByTagName(tag).item(0);
+
+        if (summaryElements != null) {
+
+            Element allSectorsElement = (Element) summaryElements.getElementsByTagName("currency").item(0);
+            if (allSectorsElement != null) {
+                String allSectorsValue = allSectorsElement.getTextContent();
+                if (allSectorsValue != null && !allSectorsValue.isEmpty()) {
+                    crbAccountsSummaryData.setAllSectors(allSectorsValue);
+                }
+            }
+
+            Element mySectorElement = (Element) summaryElements.getElementsByTagName("mySector").item(0);
+            if (mySectorElement != null) {
+                String mySectorValue = mySectorElement.getTextContent();
+                if (mySectorValue != null && !mySectorValue.isEmpty()) {
+                    crbAccountsSummaryData.setMySector(mySectorValue);
+                }
+            }
+
+            Element otherSectorsElement = (Element) summaryElements.getElementsByTagName("otherSectors").item(0);
+            if (otherSectorsElement != null) {
+                String otherSectorsValue = otherSectorsElement.getTextContent();
+                if (otherSectorsValue != null && !otherSectorsValue.isEmpty()) {
+                    crbAccountsSummaryData.setOtherSectors(otherSectorsValue);
+                }
+            }
+        }
+
+        return crbAccountsSummaryData;
+    }
+
     private List<AccountListData> extractAccountList(Element returnElement) {
         List<AccountListData> accountList = new ArrayList<>();
 
@@ -682,6 +721,8 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
     private AccountListData extractAccountListData(Element account) {
         AccountListData accountListData = new AccountListData();
 
+        accountListData.setAccountClassification(getElementTextContent(account, "accountClassification"));
+        accountListData.setAccountClosingDate(getElementTextContent(account, "accountClosingDate"));
         accountListData.setAccountNo(getElementTextContent(account, "accountNo"));
         accountListData.setAccountOpeningDate(getElementTextContent(account, "accountOpeningDate"));
         accountListData.setAccountOwner(getElementTextContent(account, "accountOwner"));

@@ -38,6 +38,10 @@ public class TransunionCrbAccount extends AbstractPersistableCustom {
     @ManyToOne
     @JoinColumn(name = "header_id", nullable = true)
     private TransunionCrbHeader headerId;
+    @Column(name = "account_classification")
+    private String accountClassification;
+    @Column(name = "account_closing_date")
+    private String accountClosingDate;
     @Column(name = "account_no")
     private String accountNo;
     @Column(name = "account_opening_date")
@@ -81,6 +85,8 @@ public class TransunionCrbAccount extends AbstractPersistableCustom {
 
     public TransunionCrbAccount(TransunionCrbHeader headerId, AccountListData ac) {
         this.headerId = headerId;
+        this.accountClassification = ac.getAccountClassification();
+        this.accountClosingDate = ac.getAccountClosingDate();
         this.accountNo = ac.getAccountNo();
         this.accountOpeningDate = ac.getAccountOpeningDate();
         this.accountOwner = ac.getAccountOwner();
