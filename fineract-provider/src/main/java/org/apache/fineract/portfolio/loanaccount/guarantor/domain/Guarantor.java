@@ -214,7 +214,9 @@ public class Guarantor extends AbstractPersistableCustom {
             }
 
             this.gender = gender;
-            actualChanges.put(GuarantorJSONinputParams.GENDER_ID.getValue(), gender.getId());
+            if(this.gender != null) {
+                actualChanges.put(GuarantorJSONinputParams.GENDER_ID.getValue(), gender.getId());
+            }
 
             updateExistingEntityToNull();
         }
