@@ -162,6 +162,40 @@ public class TransunionCrbSummary extends AbstractPersistableCustom {
     private Integer insurancePoliciesMySector;
     @Column(name = "insurance_policies_other_sectors")
     private Integer insurancePoliciesOtherSectors;
+    @Column(name = "enq_91_days_all_sectors")
+    private Integer enq91DaysAllSectors;
+    @Column(name = "enq_91_days_my_sector")
+    private Integer enq91DaysMySector;
+    @Column(name = "enq_91_days_other_sectors")
+    private Integer enq91DaysOtherSectors;
+
+    @Column(name = "npa_open_accounts_all_sectors")
+    private Integer npaOpenAccountsAllSectors;
+    @Column(name = "npa_open_accounts_my_sector")
+    private Integer npaOpenAccountsMySector;
+    @Column(name = "npa_open_accounts_other_sectors")
+    private Integer npaOpenAccountsOtherSectors;
+
+    @Column(name = "npa_total_value_all_sectors")
+    private String npaTotalValueListedAllSectors;
+    @Column(name = "npa_total_value_listed_my_sector")
+    private String npaTotalValueListedMySector;
+    @Column(name = "npa_total_value_listed_other_sectors")
+    private String npaTotalValueListedOtherSectors;
+
+    @Column(name = "pa_open_accounts_all_sectors")
+    private Integer paOpenAccountsAllSectors;
+    @Column(name = "pa_open_accounts_my_sector")
+    private Integer paOpenAccountsMySector;
+    @Column(name = "pa_open_accounts_other_sectors")
+    private Integer paOpenAccountsOtherSectors;
+
+    @Column(name = "pa_open_accounts_with_dh_all_sectors")
+    private Integer paOpenAccountsWithDhAllSectors;
+    @Column(name = "pa_open_accounts_with_dh_my_sector")
+    private Integer paOpenAccountsWithDhMySector;
+    @Column(name = "pa_open_accounts_with_dh_other_sectors")
+    private Integer paOpenAccountsWithDhOtherSectors;
 
     public TransunionCrbSummary() {}
 
@@ -218,6 +252,9 @@ public class TransunionCrbSummary extends AbstractPersistableCustom {
         this.enq91to180DaysAllSectors = summary.getEnquiries91Days().getAllSectors();
         this.enq91to180DaysMySector = summary.getEnquiries91Days().getMySector();
         this.enq91to180DaysOtherSectors = summary.getEnquiries91Days().getOtherSectors();
+        this.enq91DaysAllSectors = summary.getEnquiries91Days().getAllSectors();
+        this.enq91DaysMySector = summary.getEnquiries91Days().getMySector();
+        this.enq91DaysOtherSectors = summary.getEnquiries91Days().getOtherSectors();
         this.enqLast30DaysAllSectors = summary.getEnquiriesLast30Days().getAllSectors();
         this.enqLast30DaysMySector = summary.getEnquiriesLast30Days().getMySector();
         this.enqLast30DaysOtherSectors = summary.getEnquiriesLast30Days().getOtherSectors();
@@ -230,5 +267,21 @@ public class TransunionCrbSummary extends AbstractPersistableCustom {
         this.insurancePoliciesAllSectors = summary.getInsurancePolicies().getAllSectors();
         this.insurancePoliciesMySector = summary.getInsurancePolicies().getMySector();
         this.insurancePoliciesOtherSectors = summary.getInsurancePolicies().getOtherSectors();
+
+        this.npaOpenAccountsAllSectors = summary.getNpaOpenAccounts().getAllSectors();
+        this.npaOpenAccountsMySector = summary.getNpaOpenAccounts().getMySector();
+        this.npaOpenAccountsOtherSectors = summary.getNpaOpenAccounts().getOtherSectors();
+
+        this.npaTotalValueListedAllSectors = summary.getNpaTotalValueList().getAllSectors();
+        this.npaTotalValueListedMySector = summary.getNpaTotalValueList().getMySector();
+        this.npaTotalValueListedOtherSectors = summary.getNpaTotalValueList().getOtherSectors();
+
+        this.paOpenAccountsAllSectors = summary.getPaOpenAccounts().getAllSectors();
+        this.paOpenAccountsMySector = summary.getPaOpenAccounts().getMySector();
+        this.paOpenAccountsOtherSectors = summary.getPaOpenAccounts().getOtherSectors();
+
+        this.paOpenAccountsWithDhAllSectors = summary.getPaOpenAccountsWithDh().getAllSectors();
+        this.paOpenAccountsWithDhMySector = summary.getPaOpenAccountsWithDh().getMySector();
+        this.paOpenAccountsWithDhOtherSectors = summary.getPaOpenAccountsWithDh().getOtherSectors();
     }
 }
