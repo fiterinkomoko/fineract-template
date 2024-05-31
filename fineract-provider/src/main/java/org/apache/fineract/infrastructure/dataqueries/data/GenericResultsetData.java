@@ -19,6 +19,8 @@
 package org.apache.fineract.infrastructure.dataqueries.data;
 
 import java.util.List;
+
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -28,6 +30,8 @@ public final class GenericResultsetData {
 
     private final List<ResultsetColumnHeaderData> columnHeaders;
     private final List<ResultsetRowData> data;
+    @Setter
+    private Integer count;
 
     public GenericResultsetData(final List<ResultsetColumnHeaderData> columnHeaders, final List<ResultsetRowData> resultsetDataRows) {
         this.columnHeaders = columnHeaders;
@@ -75,4 +79,5 @@ public final class GenericResultsetData {
             }
         }
     }
+
 }

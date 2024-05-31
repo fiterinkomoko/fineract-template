@@ -76,11 +76,11 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
     @Override
     public StreamingOutput retrieveReportCSV(final String name, final String type, final Map<String, String> queryParams,
-            final boolean isSelfServiceUserReport) {
+            final boolean isSelfServiceUserReport, final Integer limit, final Integer offset) {
         return out -> {
             try {
 
-                final GenericResultsetData result = retrieveGenericResultset(name, type, queryParams, isSelfServiceUserReport);
+                final GenericResultsetData result = retrieveGenericResultset(name, type, queryParams, isSelfServiceUserReport, limit, offset);
                 final StringBuilder sb = generateCsvFileBuffer(result);
 
                 final InputStream in = new ByteArrayInputStream(sb.toString().getBytes(StandardCharsets.UTF_8));
@@ -152,7 +152,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
     @Override
     public GenericResultsetData retrieveGenericResultset(final String name, final String type, final Map<String, String> queryParams,
-            final boolean isSelfServiceUserReport) {
+            final boolean isSelfServiceUserReport, final Integer limit, final Integer offset) {
 
         final long startTime = System.currentTimeMillis();
         if (log.isDebugEnabled()) {
@@ -160,9 +160,14 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                     LogParameterEscapeUtil.escapeLogParameter(type));
         }
 
-        final String sql = getSQLtoRun(name, type, queryParams, isSelfServiceUserReport);
+        final String sql = getSQLtoRun(name, type, queryParams, isSelfServiceUserReport, limit, offset);
 
         final GenericResultsetData result = this.genericDataService.fillGenericResultSet(sql);
+        String finalQuery = sql.replaceAll("\\s+LIMIT\\s+\\d+\\s+OFFSET\\s+\\d+", "");
+        final String sqlCountRows = "SELECT COUNT(*) FROM (" + finalQuery + ") AS temp";
+        Integer count = this.jdbcTemplate.queryForObject(sqlCountRows, Integer.class);
+        final Integer totalFilteredRecords = (count != null) ? count : 0;
+        result.setCount(totalFilteredRecords);
 
         final long elapsed = System.currentTimeMillis() - startTime;
         if (log.isDebugEnabled()) {
@@ -173,7 +178,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     private String getSQLtoRun(final String name, final String type, final Map<String, String> queryParams,
-            final boolean isSelfServiceUserReport) {
+            final boolean isSelfServiceUserReport, final Integer limit, final Integer offset) {
 
         String sql = getSql(name, type);
 
@@ -201,6 +206,10 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         if (!name.equalsIgnoreCase("FullParameterList")) {
             sql = this.genericDataService.wrapSQL(sql);
         }
+        if(limit != null && offset != null) {
+            sql = sql + " LIMIT " + limit + " OFFSET " + offset;
+        }
+
         return sql;
     }
 
@@ -243,7 +252,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
     @Override
     public String retrieveReportPDF(final String reportName, final String type, final Map<String, String> queryParams,
-            final boolean isSelfServiceUserReport) {
+            final boolean isSelfServiceUserReport, final Integer limit, final Integer offset) {
 
         final String fileLocation = fineractProperties.getContent().getFilesystem().getRootFolder() + File.separator + "";
         if (!new File(fileLocation).isDirectory()) {
@@ -253,7 +262,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         final String genaratePdf = fileLocation + File.separator + reportName + ".pdf";
 
         try {
-            final GenericResultsetData result = retrieveGenericResultset(reportName, type, queryParams, isSelfServiceUserReport);
+            final GenericResultsetData result = retrieveGenericResultset(reportName, type, queryParams, isSelfServiceUserReport, limit, offset);
 
             final List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
             final List<ResultsetRowData> data = result.getData();
