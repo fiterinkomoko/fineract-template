@@ -54,4 +54,6 @@ public interface ReadReportingService {
     // TODO kill this when tackling https://issues.apache.org/jira/browse/FINERACT-1264
     ByteArrayOutputStream generatePentahoReportAsOutputStream(String reportName, String outputTypeParam, Map<String, String> queryParams,
             Locale locale, AppUser runReportAsUser, StringBuilder errorLog);
+
+    byte[] retrieveReportXLSX(String name, String type, Map<String, String> extractedQueryParams, boolean isSelfServiceUserReport, final Integer limit, final Integer offset);
 }

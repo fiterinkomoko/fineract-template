@@ -118,6 +118,15 @@ public final class ApiParameterHelper {
         return exportPDF;
     }
 
+    public static boolean exportXLSX(final MultivaluedMap<String, String> queryParams) {
+        boolean exportXLSX = false;
+        if (queryParams.getFirst("exportXLSX") != null) {
+            final String exportXLSXValue = queryParams.getFirst("exportXLSX");
+            exportXLSX = "true".equalsIgnoreCase(exportXLSXValue);
+        }
+        return exportXLSX;
+    }
+
     public static boolean parameterType(final MultivaluedMap<String, String> queryParams) {
         boolean parameterType = false;
         if (queryParams.getFirst("parameterType") != null) {
