@@ -18,6 +18,15 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.StreamingOutput;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.dataqueries.api.RunreportsApiResource;
@@ -29,16 +38,6 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.StreamingOutput;
-import java.io.File;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Service
 @ReportService(type = { "Table", "Chart", "SMS" })
@@ -73,7 +72,7 @@ public class DatatableReportingProcessService implements ReportingProcessService
         Integer offset = null;
         if (queryParams.getFirst("limit") != null) {
             limit = Integer.valueOf(queryParams.getFirst("limit"));
-            if(queryParams.getFirst("offset") != null){
+            if (queryParams.getFirst("offset") != null) {
                 offset = Integer.valueOf(queryParams.getFirst("offset"));
             }
         }
@@ -93,7 +92,7 @@ public class DatatableReportingProcessService implements ReportingProcessService
             return response.build();
         }
 
-        if(exportXLSX){
+        if (exportXLSX) {
 
             final Map<String, String> reportParams = getReportParams(queryParams);
             final byte[] excelBytes = this.readExtraDataAndReportingService.retrieveReportXLSX(reportName, parameterTypeValue, reportParams,

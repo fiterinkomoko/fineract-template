@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.dataqueries.data;
 
 import java.util.List;
-
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 
