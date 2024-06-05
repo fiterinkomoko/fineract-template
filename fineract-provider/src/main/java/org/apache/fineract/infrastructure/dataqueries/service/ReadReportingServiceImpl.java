@@ -27,6 +27,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -55,6 +56,11 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.infrastructure.security.service.SqlInjectionPreventerService;
 import org.apache.fineract.infrastructure.security.utils.LogParameterEscapeUtil;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.owasp.esapi.ESAPI;
 import org.owasp.esapi.codecs.UnixCodec;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -583,5 +589,53 @@ public class ReadReportingServiceImpl implements ReadReportingService {
          *
          */
         return null;
+    }
+
+    @Override
+    public byte[] retrieveReportXLSX(final String reportName, final String type, final Map<String, String> queryParams,
+                                     final boolean isSelfServiceUserReport, final Integer limit, final Integer offset) {
+        try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            // Create a sheet
+            Sheet sheet = workbook.createSheet("Sheet 1");
+
+            // Retrieve data from your service
+            final GenericResultsetData result = retrieveGenericResultset(reportName, type, queryParams, isSelfServiceUserReport, limit, offset);
+
+            // Generate header row
+            List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
+            Row headerRow = sheet.createRow(0);
+            for (int i = 0; i < columnHeaders.size(); i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(columnHeaders.get(i).getColumnName());
+            }
+
+            // Generate data rows
+            List<ResultsetRowData> data = result.getData();
+            for (int i = 0; i < data.size(); i++) {
+                Row dataRow = sheet.createRow(i + 1);
+                List<String> row = data.get(i).getRow();
+                for (int j = 0; j < row.size(); j++) {
+                    Cell cell = dataRow.createCell(j);
+                    String currColType = columnHeaders.get(j).getColumnType();
+                    String currVal = row.get(j);
+                    if (currVal != null) {
+                        if (currColType.equals("DECIMAL") || currColType.equals("DOUBLE") || currColType.equals("BIGINT")
+                                || currColType.equals("SMALLINT") || currColType.equals("INT")) {
+
+                            cell.setCellValue(Double.parseDouble(currVal));
+                        } else {
+                            cell.setCellValue(genericDataService.replace(currVal, "\"", "\"\""));
+                        }
+                    }
+                }
+            }
+
+            // Write workbook to the output stream
+            workbook.write(outputStream);
+            return outputStream.toByteArray();
+        }
+        catch (final IOException e) {
+            throw new PlatformDataIntegrityException("error.msg.reporting.error", "Table Report failed: " + e.getMessage());
+        }
     }
 }

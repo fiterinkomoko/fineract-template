@@ -18,15 +18,6 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.service;
 
-import java.io.File;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.StreamingOutput;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.dataqueries.api.RunreportsApiResource;
@@ -38,6 +29,16 @@ import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.StreamingOutput;
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 @ReportService(type = { "Table", "Chart", "SMS" })
@@ -66,6 +67,7 @@ public class DatatableReportingProcessService implements ReportingProcessService
         final boolean prettyPrint = ApiParameterHelper.prettyPrint(queryParams);
         final boolean exportCsv = ApiParameterHelper.exportCsv(queryParams);
         final boolean exportPdf = ApiParameterHelper.exportPdf(queryParams);
+        final boolean exportXLSX = ApiParameterHelper.exportXLSX(queryParams);
         final String parameterTypeValue = ApiParameterHelper.parameterType(queryParams) ? "parameter" : "report";
         Integer limit = null;
         Integer offset = null;
@@ -89,6 +91,16 @@ public class DatatableReportingProcessService implements ReportingProcessService
             response.header("content-Type", "application/pdf");
 
             return response.build();
+        }
+
+        if(exportXLSX){
+
+            final Map<String, String> reportParams = getReportParams(queryParams);
+            final byte[] excelBytes = this.readExtraDataAndReportingService.retrieveReportXLSX(reportName, parameterTypeValue, reportParams,
+                    isSelfServiceUserReport, limit, offset);
+
+            return Response.ok().entity(excelBytes).type("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    .header("Content-Disposition", "attachment;filename=" + reportName.replaceAll(" ", "") + ".xlsx").build();
         }
 
         // JSON format
