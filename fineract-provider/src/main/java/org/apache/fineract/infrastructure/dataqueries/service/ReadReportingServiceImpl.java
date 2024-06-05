@@ -26,8 +26,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -86,7 +86,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         return out -> {
             try {
 
-                final GenericResultsetData result = retrieveGenericResultset(name, type, queryParams, isSelfServiceUserReport, limit, offset);
+                final GenericResultsetData result = retrieveGenericResultset(name, type, queryParams, isSelfServiceUserReport, limit,
+                        offset);
                 final StringBuilder sb = generateCsvFileBuffer(result);
 
                 final InputStream in = new ByteArrayInputStream(sb.toString().getBytes(StandardCharsets.UTF_8));
@@ -212,7 +213,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         if (!name.equalsIgnoreCase("FullParameterList")) {
             sql = this.genericDataService.wrapSQL(sql);
         }
-        if(limit != null && offset != null) {
+        if (limit != null && offset != null) {
             sql = sql + " LIMIT " + limit + " OFFSET " + offset;
         }
 
@@ -268,7 +269,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         final String genaratePdf = fileLocation + File.separator + reportName + ".pdf";
 
         try {
-            final GenericResultsetData result = retrieveGenericResultset(reportName, type, queryParams, isSelfServiceUserReport, limit, offset);
+            final GenericResultsetData result = retrieveGenericResultset(reportName, type, queryParams, isSelfServiceUserReport, limit,
+                    offset);
 
             final List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
             final List<ResultsetRowData> data = result.getData();
@@ -593,13 +595,14 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
     @Override
     public byte[] retrieveReportXLSX(final String reportName, final String type, final Map<String, String> queryParams,
-                                     final boolean isSelfServiceUserReport, final Integer limit, final Integer offset) {
+            final boolean isSelfServiceUserReport, final Integer limit, final Integer offset) {
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             // Create a sheet
             Sheet sheet = workbook.createSheet("Sheet 1");
 
             // Retrieve data from your service
-            final GenericResultsetData result = retrieveGenericResultset(reportName, type, queryParams, isSelfServiceUserReport, limit, offset);
+            final GenericResultsetData result = retrieveGenericResultset(reportName, type, queryParams, isSelfServiceUserReport, limit,
+                    offset);
 
             // Generate header row
             List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
@@ -633,8 +636,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             // Write workbook to the output stream
             workbook.write(outputStream);
             return outputStream.toByteArray();
-        }
-        catch (final IOException e) {
+        } catch (final IOException e) {
             throw new PlatformDataIntegrityException("error.msg.reporting.error", "Table Report failed: " + e.getMessage());
         }
     }

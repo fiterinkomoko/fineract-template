@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -293,6 +294,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private ActiveMqNotificationDomainServiceImpl activeMqNotificationDomainService;
     @Autowired
     private Environment env;
+    private final ReentrantLock lock = new ReentrantLock();
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
         final List<LoanStatus> allowedLoanStatuses = Arrays.asList(LoanStatus.values());
@@ -1022,90 +1024,97 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Override
     public CommandProcessingResult makeLoanRepayment(final LoanTransactionType repaymentTransactionType, final Long loanId,
             final JsonCommand command, final boolean isRecoveryRepayment, final boolean isPayOff) {
-        final AppUser currentUser = getAppUserIfPresent();
-        final Loan loan = this.loanAssembler.assembleFrom(loanId);
-        if (loan.getLoanStatus() != 300) {
-            throw new GeneralPlatformDomainRuleException("error.msg.loan.not.in.active.status.repayment.or.waiver.is.not.allowed",
-                    "Loan is not in active status so repayment or waiver is not allowed");
-        }
-        if (command.integerValueOfParameterNamed("paymentTypeId") == 100) {
-            // Route to Waive Interest.
-            // Note This is for Data Migration Only.
-            return waiveInterestOnLoan(command.getLoanId(), command);
-        }
 
-        this.loanUtilService.validateRepaymentTransactionType(repaymentTransactionType, isPayOff);
-        this.loanEventApiJsonValidator.validateNewRepaymentTransaction(command.json());
-
-        final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
-        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
-        final String txnExternalId = command.stringValueOfParameterNamedAllowingNull("externalId");
-
-        final Map<String, Object> changes = new LinkedHashMap<>();
-        changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
-        changes.put("transactionAmount", command.stringValueOfParameterNamed("transactionAmount"));
-        changes.put("locale", command.locale());
-        changes.put("dateFormat", command.dateFormat());
-        changes.put("paymentTypeId", command.stringValueOfParameterNamed("paymentTypeId"));
-
-        final String noteText = command.stringValueOfParameterNamed("note");
-        if (StringUtils.isNotBlank(noteText)) {
-            changes.put("note", noteText);
-        }
-        final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
-        final Boolean isHolidayValidationDone = false;
-        final HolidayDetailDTO holidayDetailDto = null;
-        boolean isAccountTransfer = false;
-        final CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder();
-        LoanTransaction loanTransaction = this.loanAccountDomainService.makeRepayment(repaymentTransactionType, loan,
-                commandProcessingResultBuilder, transactionDate, transactionAmount, paymentDetail, noteText, txnExternalId,
-                isRecoveryRepayment, isAccountTransfer, holidayDetailDto, isHolidayValidationDone);
-
-        // Update loan transaction on repayment.
-        if (AccountType.fromInt(loan.getLoanType()).isIndividualAccount()) {
-            Set<LoanCollateralManagement> loanCollateralManagements = loan.getLoanCollateralManagements();
-            for (LoanCollateralManagement loanCollateralManagement : loanCollateralManagements) {
-                loanCollateralManagement.setLoanTransactionData(loanTransaction);
-                ClientCollateralManagement clientCollateralManagement = loanCollateralManagement.getClientCollateralManagement();
-
-                if (loan.status().isClosed()) {
-                    loanCollateralManagement.setIsReleased(true);
-                    BigDecimal quantity = loanCollateralManagement.getQuantity();
-                    clientCollateralManagement.updateQuantity(clientCollateralManagement.getQuantity().add(quantity));
-                    loanCollateralManagement.setClientCollateralManagement(clientCollateralManagement);
-                }
-            }
-            this.loanAccountDomainService.updateLoanCollateralTransaction(loanCollateralManagements);
-        }
+        lock.lock();
         try {
-            final LoanRepaymentConfirmationData repaymentConfirmationData = loanReadPlatformService
-                    .generateLoanPaymentReceipt(loanTransaction.getId());
-            List<LoanRepaymentScheduleData> scheduleDataList = loanReadPlatformService.getLoanRepaymentScheduleData(loanId);
-            repaymentConfirmationData.setScheduleDataList(scheduleDataList);
+            final AppUser currentUser = getAppUserIfPresent();
+            final Loan loan = this.loanAssembler.assembleFrom(loanId);
+            if (loan.getLoanStatus() != 300 && isRecoveryRepayment != true) {
+                throw new GeneralPlatformDomainRuleException("error.msg.loan.not.in.active.status.repayment.or.waiver.is.not.allowed",
+                        "Loan is not in active status so repayment or waiver is not allowed");
+            }
+            if (command.integerValueOfParameterNamed("paymentTypeId") == 100 && isRecoveryRepayment != true) {
+                // Route to Waive Interest.
+                // Note This is for Data Migration Only.
+                return waiveInterestOnLoan(command.getLoanId(), command);
+            }
 
-            activeMqNotificationDomainService.buildNotification("ALL_FUNCTION", "LoanRepaymentConfirmation",
-                    repaymentConfirmationData.getTransactionId(), this.fromApiJsonHelper.toJson(repaymentConfirmationData), "PENDING",
-                    context.authenticatedUser().getId(), currentUser.getOffice().getId(),
-                    this.env.getProperty("fineract.activemq.loanRepaymentConfirmationQueue"));
-        } catch (Exception ex) {
-            throw ex;
-            // Don't react to this exception because If messaging fails, RpPayment Transaction shouldn't rollback
+            this.loanUtilService.validateRepaymentTransactionType(repaymentTransactionType, isPayOff);
+            this.loanEventApiJsonValidator.validateNewRepaymentTransaction(command.json());
+
+            final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
+            final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
+            final String txnExternalId = command.stringValueOfParameterNamedAllowingNull("externalId");
+
+            final Map<String, Object> changes = new LinkedHashMap<>();
+            changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
+            changes.put("transactionAmount", command.stringValueOfParameterNamed("transactionAmount"));
+            changes.put("locale", command.locale());
+            changes.put("dateFormat", command.dateFormat());
+            changes.put("paymentTypeId", command.stringValueOfParameterNamed("paymentTypeId"));
+
+            final String noteText = command.stringValueOfParameterNamed("note");
+            if (StringUtils.isNotBlank(noteText)) {
+                changes.put("note", noteText);
+            }
+            final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
+            final Boolean isHolidayValidationDone = false;
+            final HolidayDetailDTO holidayDetailDto = null;
+            boolean isAccountTransfer = false;
+            final CommandProcessingResultBuilder commandProcessingResultBuilder = new CommandProcessingResultBuilder();
+            LoanTransaction loanTransaction = this.loanAccountDomainService.makeRepayment(repaymentTransactionType, loan,
+                    commandProcessingResultBuilder, transactionDate, transactionAmount, paymentDetail, noteText, txnExternalId,
+                    isRecoveryRepayment, isAccountTransfer, holidayDetailDto, isHolidayValidationDone);
+
+            // Update loan transaction on repayment.
+            if (AccountType.fromInt(loan.getLoanType()).isIndividualAccount()) {
+                Set<LoanCollateralManagement> loanCollateralManagements = loan.getLoanCollateralManagements();
+                for (LoanCollateralManagement loanCollateralManagement : loanCollateralManagements) {
+                    loanCollateralManagement.setLoanTransactionData(loanTransaction);
+                    ClientCollateralManagement clientCollateralManagement = loanCollateralManagement.getClientCollateralManagement();
+
+                    if (loan.status().isClosed()) {
+                        loanCollateralManagement.setIsReleased(true);
+                        BigDecimal quantity = loanCollateralManagement.getQuantity();
+                        clientCollateralManagement.updateQuantity(clientCollateralManagement.getQuantity().add(quantity));
+                        loanCollateralManagement.setClientCollateralManagement(clientCollateralManagement);
+                    }
+                }
+                this.loanAccountDomainService.updateLoanCollateralTransaction(loanCollateralManagements);
+            }
+            try {
+                final LoanRepaymentConfirmationData repaymentConfirmationData = loanReadPlatformService
+                        .generateLoanPaymentReceipt(loanTransaction.getId());
+                List<LoanRepaymentScheduleData> scheduleDataList = loanReadPlatformService.getLoanRepaymentScheduleData(loanId);
+                repaymentConfirmationData.setScheduleDataList(scheduleDataList);
+
+                activeMqNotificationDomainService.buildNotification("ALL_FUNCTION", "LoanRepaymentConfirmation",
+                        repaymentConfirmationData.getTransactionId(), this.fromApiJsonHelper.toJson(repaymentConfirmationData), "PENDING",
+                        context.authenticatedUser().getId(), currentUser.getOffice().getId(),
+                        this.env.getProperty("fineract.activemq.loanRepaymentConfirmationQueue"));
+            } catch (Exception ex) {
+                throw ex;
+                // Don't react to this exception because If messaging fails, RpPayment Transaction shouldn't rollback
+            }
+
+            if (loan.getTotalOverpaid() != null) {
+                loanRepositoryWrapper.updateRedrawAmount(loan, currentUser, loanId, loan.getTotalOverpaid(), true, transactionDate,
+                        paymentDetail);
+            }
+            // update account to cache these value. They will be used on GLIM Overview Table and used to post Loan
+            // Account
+            // to CRB TransUnion
+            loan.setLastRepaymentDate(transactionDate);
+            loan.setLastRepaymentAmount(transactionAmount);
+            loanRepositoryWrapper.saveAndFlush(loan);
+
+            return commandProcessingResultBuilder.withCommandId(command.commandId()) //
+                    .withLoanId(loanId) //
+                    .with(changes) //
+                    .build();
+        } finally {
+            lock.unlock();
         }
-
-        if (loan.getTotalOverpaid() != null) {
-            loanRepositoryWrapper.updateRedrawAmount(loan, currentUser, loanId, loan.getTotalOverpaid(), true, transactionDate,
-                    paymentDetail);
-        }
-        // update account to cache these value. They will be used on GLIM Overview Table and used to post Loan Account
-        // to CRB TransUnion
-        loan.setLastRepaymentDate(transactionDate);
-        loan.setLastRepaymentAmount(transactionAmount);
-        loanRepositoryWrapper.saveAndFlush(loan);
-
-        return commandProcessingResultBuilder.withCommandId(command.commandId()) //
-                .withLoanId(loanId) //
-                .with(changes) //
-                .build();
     }
 
     @Transactional
