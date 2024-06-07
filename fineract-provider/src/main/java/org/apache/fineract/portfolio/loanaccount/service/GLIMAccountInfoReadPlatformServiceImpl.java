@@ -234,7 +234,7 @@ public class GLIMAccountInfoReadPlatformServiceImpl implements GLIMAccountInfoRe
 
         public String schema() {
             return " glim.id as glimId,loan.group_id as groupId,client.id as clientId,glim.account_number as parentLoanAccountNo,"
-                    + "glim.principal_amount as parentPrincipalAmount,loan.id as childLoanId,loan.account_no as childLoanAccountNo,loan.approved_principal as childPrincipalAmount,"
+                    + "glim.principal_amount as parentPrincipalAmount,loan.id as childLoanId,loan.account_no as childLoanAccountNo,loan.net_disbursal_amount as childPrincipalAmount,"
                     + "client.display_name as clientName , glim.actual_principal_amount as actualPrincipalAmount, "
                     + " loan.total_outstanding_derived as outStandingAmount,loan.last_repayment_date as lastRepaymentDate,loan.last_repayment_amount as lastRepaymentAmount,  "
                     + " loan.loan_status_id as statusId,ds.loan_decision_state as loanDecisionState ,la.overdue_since_date_derived as overdueSinceDate "
