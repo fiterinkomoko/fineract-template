@@ -3765,7 +3765,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         }
 
         return LoanTransaction.waiver(getOffice(), this, possibleInterestToWaive, transactionDate, possibleInterestToWaive,
-                possibleInterestToWaive.zero());
+                possibleInterestToWaive.zero(), null);
     }
 
     public ChangedTransactionDetail adjustExistingTransaction(final LoanTransaction newTransactionDetail,
