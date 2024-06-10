@@ -343,7 +343,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 LoanStatus.APPROVED.getValue(), LoanStatus.ACTIVE.getValue()));
         List<Loan> activeChild = this.loanRepository.findLoanByGlimIdAndLoanStatus(parentLoan.getId(), loanStatuses);
         if (!CollectionUtils.isEmpty(activeChild)) {
-            BigDecimal sum = activeChild.stream().map(Loan::getApprovedPrincipal).reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal sum = activeChild.stream().map(Loan::getNetDisbursalAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
 
             parentLoan.setActualPrincipalAmount(sum);
             glimRepository.save(parentLoan);
