@@ -1291,10 +1291,10 @@ public class LoansApiResource {
     }
 
     @GET
-    @Path("/retrieveLoanByAccountNumber/{accountNo}")
+    @Path("/retrieveLoanByAccountNumber/")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveLoanByAccountNumber(@PathParam("accountNo") final String accountNo, @Context final UriInfo uriInfo) {
+    public String retrieveLoanByAccountNumber(@QueryParam("accountNo") final String accountNo, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
