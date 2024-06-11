@@ -1824,4 +1824,59 @@ WHERE l.loan_status_id IN (300, 600, 601, 700)
     </changeSet>
 
 
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_summary_npa_closed_accounts_all_sectors">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_transunion_crb_summary" columnName="npa_closed_accounts_all_sectors"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_transunion_crb_summary">
+            <column name="npa_closed_accounts_all_sectors" type="int">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_summary_npa_closed_accounts_my_sector">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_transunion_crb_summary" columnName="npa_closed_accounts_my_sector"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_transunion_crb_summary">
+            <column name="npa_closed_accounts_my_sector" type="int">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_summary_npa_closed_accounts_other_sectors">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_transunion_crb_summary" columnName="npa_closed_accounts_other_sectors"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_transunion_crb_summary">
+            <column name="npa_closed_accounts_other_sectors" type="int">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_summary_npa_closed_accounts_other_sectors">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_transunion_crb_summary" columnName="npa_closed_accounts_other_sectors"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_transunion_crb_summary">
+            <column name="npa_closed_accounts_other_sectors" type="int">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+
+
 </databaseChangeLog>

@@ -46,6 +46,7 @@ public class AccountListData {
     private BigDecimal scheduledPaymentAmount;
     private String tradeSector;
     private Integer worstArrear;
+    private Integer jointLoanParticipants;
 
     @XmlElement(name = "accountClassification")
     public String getAccountClassification() {
@@ -240,5 +241,14 @@ public class AccountListData {
 
     public void setAccountType(String accountType) {
         this.accountType = accountType;
+    }
+
+    @XmlElement(name = "jointLoanParticipants")
+    public Integer getJointLoanParticipants() {
+        return jointLoanParticipants;
+    }
+
+    public void setJointLoanParticipants(Integer jointLoanParticipants) {
+        this.jointLoanParticipants = jointLoanParticipants;
     }
 }

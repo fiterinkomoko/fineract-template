@@ -27,6 +27,7 @@ public class CorporateProfileData {
     private String crn;
     private String companyName;
     private String companyRegNo;
+    private String companyRegDate;
 
     @XmlElement(name = "crn")
     public String getCrn() {
@@ -53,6 +54,15 @@ public class CorporateProfileData {
 
     public void setCompanyRegNo(String companyRegNo) {
         this.companyRegNo = companyRegNo;
+    }
+
+    @XmlElement(name = "companyRegDate")
+    public String getCompanyRegDate() {
+        return companyRegDate;
+    }
+
+    public void setCompanyRegDate(String companyRegDate) {
+        this.companyRegDate = companyRegDate;
     }
 
     @Override
