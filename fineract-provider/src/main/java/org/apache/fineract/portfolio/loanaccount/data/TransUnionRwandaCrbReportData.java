@@ -58,6 +58,7 @@ public class TransUnionRwandaCrbReportData {
     private String reasonCodeAarc2;
     private String reasonCodeAarc3;
     private String reasonCodeAarc4;
+    private String companyRegDate;
     private Integer clientType;
     private TransUnionRwandaCrbSummaryReportData transUnionRwandaCrbSummaryReportData;
     private List<TransUnionRwandaCrbAccountReportData> accountReportDataList;
@@ -67,7 +68,7 @@ public class TransUnionRwandaCrbReportData {
             String fullName, String gender, String healthInsuranceNo, String maritalStatus, String nationalId, String otherNames,
             String salutation, String surname, String corporateCrn, String companyRegNo, String companyName, String grade,
             String positiveScore, String possibility, String reasonCodeAarc1, String reasonCodeAarc2, String reasonCodeAarc3,
-            String reasonCodeAarc4, Integer clientType) {
+            String reasonCodeAarc4, Integer clientType, String companyRegDate) {
         this.id = id;
         this.crbName = crbName;
         this.pdfId = pdfId;
@@ -98,6 +99,7 @@ public class TransUnionRwandaCrbReportData {
         this.reasonCodeAarc3 = reasonCodeAarc3;
         this.reasonCodeAarc4 = reasonCodeAarc4;
         this.clientType = clientType;
+        this.companyRegDate = companyRegDate;
     }
 
 }

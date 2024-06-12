@@ -148,9 +148,9 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
                     + "       mtcso.grade               AS grade, " + "       mtcso.positive_score      AS positiveScore, "
                     + "       mtcso.possibility         AS possibility, " + "       mtcso.reason_code_aarc1   AS reasonCodeAarc1, "
                     + "       mtcso.reason_code_aarc2   AS reasonCodeAarc2, " + "       mtcso.reason_code_aarc3   AS reasonCodeAarc3, "
-                    + "       mtcso.reason_code_aarc4   AS reasonCodeAarc4, " + "       c.legal_form_enum         AS clientType "
-                    + " FROM m_transunion_crb_header h " + "         INNER JOIN m_loan l on h.loan_id = l.id "
-                    + "         INNER JOIN m_client c on h.client_id = c.id "
+                    + "       mtccp.company_reg_date   AS companyRegDate, " + "       mtcso.reason_code_aarc4   AS reasonCodeAarc4, "
+                    + "       c.legal_form_enum         AS clientType " + " FROM m_transunion_crb_header h "
+                    + "         INNER JOIN m_loan l on h.loan_id = l.id " + "         INNER JOIN m_client c on h.client_id = c.id "
                     + "         LEFT JOIN m_transunion_crb_corporate_profile mtccp on h.id = mtccp.header_id "
                     + "         LEFT JOIN m_transunion_crb_personal_profile mtcpp on h.id = mtcpp.header_id "
                     + "         LEFT JOIN m_transunion_crb_score_output mtcso on h.id = mtcso.header_id " + " WHERE h.loan_id = ? ");
@@ -189,11 +189,12 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
             final String reasonCodeAarc3 = rs.getString("reasonCodeAarc3");
             final String reasonCodeAarc4 = rs.getString("reasonCodeAarc4");
             final Integer clientType = rs.getInt("clientType");
+            final String companyRegDate = rs.getString("companyRegDate");
 
             return new TransUnionRwandaCrbReportData(id, crbName, pdfId, productDisplayName, reportDate, reportType, requestNo, requester,
                     createdOnDate, personalCrn, dateOfBirth, fullName, gender, healthInsuranceNo, maritalStatus, nationalId, otherNames,
                     salutation, surname, corporateCrn, companyRegNo, companyName, grade, positiveScore, possibility, reasonCodeAarc1,
-                    reasonCodeAarc2, reasonCodeAarc3, reasonCodeAarc4, clientType);
+                    reasonCodeAarc2, reasonCodeAarc3, reasonCodeAarc4, clientType, companyRegDate);
 
         }
     }
@@ -273,7 +274,11 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
 
                     + "       summary.pa_open_accounts_with_dh_all_sectors AS paOpenAccountsWithDhAllSectors, "
                     + "       summary.pa_open_accounts_with_dh_my_sector AS paOpenAccountsWithDhMySector ,"
-                    + "       summary.pa_open_accounts_with_dh_other_sectors AS paOpenAccountsWithDhOtherSectors "
+                    + "       summary.pa_open_accounts_with_dh_other_sectors AS paOpenAccountsWithDhOtherSectors, "
+
+                    + "       summary.npa_closed_accounts_all_sectors AS npaClosedAccountsAllSectors, "
+                    + "       summary.npa_closed_accounts_my_sector AS npaClosedAccountsMySector ,"
+                    + "       summary.npa_closed_accounts_other_sectors AS npaClosedAccountsOtherSectors "
 
                     + "  FROM m_transunion_crb_summary  summary " + "  INNER JOIN m_transunion_crb_header h on summary.header_id = h.id "
                     + " WHERE h.id =  ? ");
@@ -369,6 +374,10 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
             final Integer paOpenAccountsWithDhMySector = rs.getInt("paOpenAccountsWithDhMySector");
             final Integer paOpenAccountsWithDhOtherSectors = rs.getInt("paOpenAccountsWithDhOtherSectors");
 
+            final Integer npaClosedAccountsAllSectors = rs.getInt("npaClosedAccountsAllSectors");
+            final Integer npaClosedAccountsMySector = rs.getInt("npaClosedAccountsMySector");
+            final Integer npaClosedAccountsOtherSectors = rs.getInt("npaClosedAccountsOtherSectors");
+
             return new TransUnionRwandaCrbSummaryReportData(id, bcAllSectors, bcMySector, bcOtherSectors, bc180AllSectors, bc180MySector,
                     bc180OtherSectors, bc90AllSectors, bc90MySector, bc90OtherSectors, bc365AllSectors, bc365MySector, bc365OtherSectors,
                     fcAllSectors, fcMySector, fcOtherSectors, lastBouncedChequeDate, lastCreditApplicationDate, lastFraudDate,
@@ -386,7 +395,8 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
                     npaOpenAccountsAllSectors, npaOpenAccountsMySector, npaOpenAccountsOtherSectors, npaTotalValueListedAllSectors,
                     npaTotalValueListedMySector, npaTotalValueListedOtherSectors, paOpenAccountsAllSectors, paOpenAccountsMySector,
                     paOpenAccountsOtherSectors, paOpenAccountsWithDhAllSectors, paOpenAccountsWithDhMySector,
-                    paOpenAccountsWithDhOtherSectors);
+                    paOpenAccountsWithDhOtherSectors, npaClosedAccountsAllSectors, npaClosedAccountsMySector,
+                    npaClosedAccountsOtherSectors);
 
         }
     }
@@ -407,6 +417,7 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
                     + "       ac.listing_date             AS listingDate,  " + "       ac.principal_amount         AS principalAmount,  "
                     + "       ac.repayment_duration       AS repaymentDuration,  "
                     + "       ac.repayment_term           AS repaymentTerm,  "
+                    + "       ac.joint_loan_participants           AS jointLoanParticipants,  "
                     + "       ac.scheduled_payment_amount AS scheduledPaymentAmount,  "
                     + "       ac.trade_sector             AS tradeSector,  " + "       ac.worst_arrear             AS worstArrear  "
                     + " FROM m_transunion_crb_account ac  " + " INNER JOIN m_transunion_crb_header h on ac.header_id = h.id  "
@@ -439,11 +450,12 @@ public class TransUnionCrbConsumerVerificationReadPlatformServiceImpl implements
             final BigDecimal scheduledPaymentAmount = rs.getBigDecimal("scheduledPaymentAmount");
             final String tradeSector = rs.getString("tradeSector");
             final Integer worstArrear = rs.getInt("worstArrear");
+            final Integer jointLoanParticipants = rs.getInt("jointLoanParticipants");
 
             return new TransUnionRwandaCrbAccountReportData(id, accountNo, accountOpeningDate, accountOwner, accountStatus, accountType,
                     arrearAmount, arrearDays, balanceAmount, currency, disputed, isMyAccount, lastPaymentDate, listingDate, principalAmount,
                     repaymentDuration, repaymentTerm, scheduledPaymentAmount, tradeSector, worstArrear, accountClassification,
-                    accountClosingDate);
+                    accountClosingDate, jointLoanParticipants);
 
         }
     }
