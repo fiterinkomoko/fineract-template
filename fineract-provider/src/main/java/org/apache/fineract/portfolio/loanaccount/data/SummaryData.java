@@ -53,6 +53,7 @@ public class SummaryData {
     private CrbAccountsSummaryObjData npaTotalValueList;
     private CrbAccountsSummaryData paOpenAccounts;
     private CrbAccountsSummaryData paOpenAccountsWithDh;
+    private CrbAccountsSummaryData npaClosedAccounts;
 
     @XmlElement(name = "bouncedCheques")
     public CrbAccountsSummaryData getBouncedCheques() {
@@ -313,6 +314,15 @@ public class SummaryData {
 
     public void setPaOpenAccountsWithDh(CrbAccountsSummaryData paOpenAccountsWithDh) {
         this.paOpenAccountsWithDh = paOpenAccountsWithDh;
+    }
+
+    @XmlElement(name = "npaClosedAccounts")
+    public CrbAccountsSummaryData getNpaClosedAccounts() {
+        return npaClosedAccounts;
+    }
+
+    public void setNpaClosedAccounts(CrbAccountsSummaryData npaClosedAccounts) {
+        this.npaClosedAccounts = npaClosedAccounts;
     }
 
     @Override

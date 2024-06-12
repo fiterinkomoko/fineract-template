@@ -42,6 +42,8 @@ public class TransunionCrbCorporateProfile extends AbstractPersistableCustom {
     private String companyRegNo;
     @Column(name = "company_name")
     private String companyName;
+    @Column(name = "company_reg_date")
+    private String companyRegDate;
 
     public TransunionCrbCorporateProfile() {}
 
@@ -50,5 +52,6 @@ public class TransunionCrbCorporateProfile extends AbstractPersistableCustom {
         this.crn = corporateProfileData.getCrn();
         this.companyName = corporateProfileData.getCompanyName();
         this.companyRegNo = corporateProfileData.getCompanyRegNo();
+        this.companyRegDate = corporateProfileData.getCompanyRegDate();
     }
 }

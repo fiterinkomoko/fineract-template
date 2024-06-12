@@ -534,6 +534,7 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
             corporateProfileData.setCrn(corporateProfile1.getElementsByTagName("crn").item(0).getTextContent());
             corporateProfileData.setCompanyName(corporateProfile1.getElementsByTagName("companyName").item(0).getTextContent());
             corporateProfileData.setCompanyRegNo(corporateProfile1.getElementsByTagName("companyRegNo").item(0).getTextContent());
+            corporateProfileData.setCompanyRegDate(corporateProfile1.getElementsByTagName("companyRegDate").item(0).getTextContent());
         }
         return corporateProfileData;
     }
@@ -581,6 +582,7 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
             summaryData.setNpaTotalValueList(createCrbSummaryDetailsObj(summaryElement, "npaTotalValueList"));
             summaryData.setPaOpenAccounts(createCrbSummaryDetails(summaryElement, "paOpenAccounts"));
             summaryData.setPaOpenAccountsWithDh(createCrbSummaryDetails(summaryElement, "paOpenAccountsWithDh"));
+            summaryData.setNpaClosedAccounts(createCrbSummaryDetails(summaryElement, "npaClosedAccounts"));
 
             Element lastBouncedChequeDatelement = (Element) summaryElement.getElementsByTagName("lastBouncedChequeDate").item(0);
             if (lastBouncedChequeDatelement != null) {
@@ -742,6 +744,7 @@ public class TransUnionCrbVerificationWritePlatformServiceImpl implements TransU
         accountListData.setScheduledPaymentAmount(getElementBigDecimalContent(account, "scheduledPaymentAmount"));
         accountListData.setTradeSector(getElementTextContent(account, "tradeSector"));
         accountListData.setWorstArrear(getElementIntegerContent(account, "worstArrear"));
+        accountListData.setJointLoanParticipants(getElementIntegerContent(account, "jointLoanParticipants"));
 
         return accountListData;
     }
