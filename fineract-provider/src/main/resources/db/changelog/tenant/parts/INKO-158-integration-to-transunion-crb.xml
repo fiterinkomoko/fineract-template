@@ -1864,15 +1864,43 @@ WHERE l.loan_status_id IN (300, 600, 601, 700)
         </addColumn>
     </changeSet>
 
-    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_summary_npa_closed_accounts_other_sectors">
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_account_joint_loan_participants">
 
         <preConditions onFail="MARK_RAN">
             <not>
-                <columnExists tableName="m_transunion_crb_summary" columnName="npa_closed_accounts_other_sectors"/>
+                <columnExists tableName="m_transunion_crb_account" columnName="joint_loan_participants"/>
             </not>
         </preConditions>
-        <addColumn tableName="m_transunion_crb_summary">
-            <column name="npa_closed_accounts_other_sectors" type="int">
+        <addColumn tableName="m_transunion_crb_account">
+            <column name="joint_loan_participants" type="int">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_account_joint_loan_participants">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_transunion_crb_account" columnName="joint_loan_participants"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_transunion_crb_account">
+            <column name="joint_loan_participants" type="int">
+                <constraints nullable="true" />
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_column_m_transunion_crb_corporate_profile_company_reg_date">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_transunion_crb_corporate_profile" columnName="company_reg_date"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_transunion_crb_corporate_profile">
+            <column name="company_reg_date" type="varchar(255)">
                 <constraints nullable="true" />
             </column>
         </addColumn>

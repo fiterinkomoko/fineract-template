@@ -80,6 +80,8 @@ public class TransunionCrbAccount extends AbstractPersistableCustom {
     private String tradeSector;
     @Column(name = "worst_arrear")
     private Integer worstArrear;
+    @Column(name = "joint_loan_participants")
+    private Integer jointLoanParticipants;
 
     public TransunionCrbAccount() {}
 
@@ -106,5 +108,6 @@ public class TransunionCrbAccount extends AbstractPersistableCustom {
         this.scheduledPaymentAmount = ac.getScheduledPaymentAmount();
         this.tradeSector = ac.getTradeSector();
         this.worstArrear = ac.getWorstArrear();
+        this.jointLoanParticipants = ac.getJointLoanParticipants();
     }
 }

@@ -102,6 +102,9 @@ public class TransUnionRwandaCrbSummaryReportData {
     private Integer paOpenAccountsWithDhAllSectors;
     private Integer paOpenAccountsWithDhMySector;
     private Integer paOpenAccountsWithDhOtherSectors;
+    private Integer npaClosedAccountsAllSectors;
+    private Integer npaClosedAccountsMySector;
+    private Integer npaClosedAccountsOtherSectors;
 
     public TransUnionRwandaCrbSummaryReportData() {}
 
@@ -126,7 +129,8 @@ public class TransUnionRwandaCrbSummaryReportData {
             Integer npaOpenAccountsAllSectors, Integer npaOpenAccountsMySector, Integer npaOpenAccountsOtherSectors,
             String npaTotalValueListedAllSectors, String npaTotalValueListedMySector, String npaTotalValueListedOtherSectors,
             Integer paOpenAccountsAllSectors, Integer paOpenAccountsMySector, Integer paOpenAccountsOtherSectors,
-            Integer paOpenAccountsWithDhAllSectors, Integer paOpenAccountsWithDhMySector, Integer paOpenAccountsWithDhOtherSectors) {
+            Integer paOpenAccountsWithDhAllSectors, Integer paOpenAccountsWithDhMySector, Integer paOpenAccountsWithDhOtherSectors,
+            Integer npaClosedAccountsAllSectors, Integer npaClosedAccountsMySector, Integer npaClosedAccountsOtherSectors) {
         this.id = id;
         this.bcAllSectors = bcAllSectors;
         this.bcMySector = bcMySector;
@@ -210,5 +214,9 @@ public class TransUnionRwandaCrbSummaryReportData {
         this.paOpenAccountsWithDhAllSectors = paOpenAccountsWithDhAllSectors;
         this.paOpenAccountsWithDhMySector = paOpenAccountsWithDhMySector;
         this.paOpenAccountsWithDhOtherSectors = paOpenAccountsWithDhOtherSectors;
+
+        this.npaClosedAccountsAllSectors = npaClosedAccountsAllSectors;
+        this.npaClosedAccountsMySector = npaClosedAccountsMySector;
+        this.npaClosedAccountsOtherSectors = npaClosedAccountsOtherSectors;
     }
 }

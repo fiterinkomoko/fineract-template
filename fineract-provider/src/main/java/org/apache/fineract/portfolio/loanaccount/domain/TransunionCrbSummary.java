@@ -197,6 +197,13 @@ public class TransunionCrbSummary extends AbstractPersistableCustom {
     @Column(name = "pa_open_accounts_with_dh_other_sectors")
     private Integer paOpenAccountsWithDhOtherSectors;
 
+    @Column(name = "npa_closed_accounts_all_sectors")
+    private Integer npaClosedAccountsAllSectors;
+    @Column(name = "npa_closed_accounts_my_sector")
+    private Integer npaClosedAccountsMySector;
+    @Column(name = "npa_closed_accounts_other_sectors")
+    private Integer npaClosedAccountsOtherSectors;
+
     public TransunionCrbSummary() {}
 
     public TransunionCrbSummary(TransunionCrbHeader headerId, SummaryData summary) {
@@ -283,5 +290,9 @@ public class TransunionCrbSummary extends AbstractPersistableCustom {
         this.paOpenAccountsWithDhAllSectors = summary.getPaOpenAccountsWithDh().getAllSectors();
         this.paOpenAccountsWithDhMySector = summary.getPaOpenAccountsWithDh().getMySector();
         this.paOpenAccountsWithDhOtherSectors = summary.getPaOpenAccountsWithDh().getOtherSectors();
+
+        this.npaClosedAccountsAllSectors = summary.getNpaClosedAccounts().getAllSectors();
+        this.npaClosedAccountsMySector = summary.getNpaClosedAccounts().getMySector();
+        this.npaClosedAccountsOtherSectors = summary.getNpaClosedAccounts().getOtherSectors();
     }
 }
