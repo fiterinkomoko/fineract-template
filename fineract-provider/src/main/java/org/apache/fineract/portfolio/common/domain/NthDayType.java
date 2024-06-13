@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.common.domain;
 
+import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+
 public enum NthDayType {
 
     ONE(1, "nthDayType.one"), TWO(2, "nthDayType.two"), THREE(3, "nthDayType.three"), FOUR(4, "nthDayType.four"), FIVE(5,
@@ -81,5 +83,45 @@ public enum NthDayType {
 
     public boolean isOnDay() {
         return this.value.equals(NthDayType.ONDAY.value);
+    }
+
+    public static EnumOptionData fetchDisplayDetails(EnumOptionData nthDayType) {
+        EnumOptionData repaymentFrequencyNthDayType = nthDayType;
+        if (nthDayType != null) {
+            switch (nthDayType.getId().intValue()) {
+                case 1:
+                    repaymentFrequencyNthDayType = new EnumOptionData(NthDayType.ONE.getValue().longValue(), NthDayType.ONE.getCode(),
+                            "first");
+                    break;
+                case 2:
+                    repaymentFrequencyNthDayType = new EnumOptionData(NthDayType.TWO.getValue().longValue(), NthDayType.TWO.getCode(),
+                            "second");
+                    break;
+                case 3:
+                    repaymentFrequencyNthDayType = new EnumOptionData(NthDayType.THREE.getValue().longValue(), NthDayType.THREE.getCode(),
+                            "third");
+                    break;
+                case 4:
+                    repaymentFrequencyNthDayType = new EnumOptionData(NthDayType.FOUR.getValue().longValue(), NthDayType.FOUR.getCode(),
+                            "Fourth");
+                    break;
+                case 5:
+                    repaymentFrequencyNthDayType = new EnumOptionData(NthDayType.FIVE.getValue().longValue(), NthDayType.FIVE.getCode(),
+                            "Fifth");
+                    break;
+                case -1:
+                    repaymentFrequencyNthDayType = new EnumOptionData(NthDayType.LAST.getValue().longValue(), NthDayType.LAST.getCode(),
+                            "Last");
+                    break;
+                case -2:
+                    repaymentFrequencyNthDayType = new EnumOptionData(NthDayType.ONDAY.getValue().longValue(), NthDayType.ONDAY.getCode(),
+                            "On Day");
+                    break;
+                default:
+                    break;
+
+            }
+        }
+        return repaymentFrequencyNthDayType;
     }
 }
