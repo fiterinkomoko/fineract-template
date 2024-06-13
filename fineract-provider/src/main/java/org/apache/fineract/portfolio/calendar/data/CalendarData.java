@@ -500,11 +500,11 @@ public final class CalendarData implements Serializable {
     }
 
     public EnumOptionData getRepeatsOnDay() {
-        return this.repeatsOnDay;
+        return CalendarWeekDaysType.fetchDisplayDetails(this.repeatsOnDay);
     }
 
     public EnumOptionData getRepeatsOnNthDayOfMonth() {
-        return this.repeatsOnNthDayOfMonth;
+        return NthDayType.fetchDisplayDetails(this.repeatsOnNthDayOfMonth);
     }
 
     @Override
