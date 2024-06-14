@@ -132,5 +132,6 @@
     <include file="parts/INKO_499_update_stretchy_report_sql_for_portfolio_management.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO-522_permission_add_READ_familymembers.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO-487-correct_spell_for_start_date.xml" relativeToChangelogFile="true" />
+    <include file="parts/INKO_488_remove_space_for_report_name_client_summary.xml" relativeToChangelogFile="true" />
     <includeAll path="custom-changelog" relativeToChangelogFile="true"/>
 </databaseChangeLog>
