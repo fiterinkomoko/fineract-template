@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.calendar.domain;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.springframework.util.StringUtils;
 
@@ -111,33 +110,33 @@ public enum CalendarWeekDaysType {
                 case 1:
                     weekDayType = new EnumOptionData(CalendarWeekDaysType.MO.getValue().longValue(), CalendarWeekDaysType.MO.getCode(),
                             "Monday");
-                    break;
+                break;
                 case 2:
                     weekDayType = new EnumOptionData(CalendarWeekDaysType.TU.getValue().longValue(), CalendarWeekDaysType.TU.getCode(),
                             "Tuesday");
-                    break;
+                break;
                 case 3:
                     weekDayType = new EnumOptionData(CalendarWeekDaysType.WE.getValue().longValue(), CalendarWeekDaysType.WE.getCode(),
                             "Wednesday");
-                    break;
+                break;
                 case 4:
                     weekDayType = new EnumOptionData(CalendarWeekDaysType.TH.getValue().longValue(), CalendarWeekDaysType.TH.getCode(),
                             "Thursday");
-                    break;
+                break;
                 case 5:
                     weekDayType = new EnumOptionData(CalendarWeekDaysType.FR.getValue().longValue(), CalendarWeekDaysType.FR.getCode(),
                             "Friday");
-                    break;
+                break;
                 case 6:
                     weekDayType = new EnumOptionData(CalendarWeekDaysType.SA.getValue().longValue(), CalendarWeekDaysType.SA.getCode(),
                             "Saturday");
-                    break;
+                break;
                 case 7:
                     weekDayType = new EnumOptionData(CalendarWeekDaysType.SU.getValue().longValue(), CalendarWeekDaysType.SU.getCode(),
                             "Sunday");
-                    break;
+                break;
                 default:
-                    break;
+                break;
             }
         }
         return weekDayType;

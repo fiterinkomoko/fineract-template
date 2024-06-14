@@ -833,7 +833,7 @@
             </column>
         </addColumn>
     </changeSet>
-    <changeSet author="bosco@fiter.io" id="INKO-546-update_portfolio_management_table_reports-2" context="mysql">
+    <changeSet author="bosco@fiter.io" id="INKO-546-update_portfolio_management_table_reports-4" context="mysql">
         <sqlFile
                 encoding="utf8"
                 path="db/changelog/tenant/commands/INKO-546-update_portfolio_management_table_reports.sql"
