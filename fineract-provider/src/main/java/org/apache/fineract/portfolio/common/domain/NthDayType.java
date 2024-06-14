@@ -92,33 +92,33 @@ public enum NthDayType {
                 case 1:
                     repaymentFrequencyNthDayType = new EnumOptionData(NthDayType.ONE.getValue().longValue(), NthDayType.ONE.getCode(),
                             "first");
-                    break;
+                break;
                 case 2:
                     repaymentFrequencyNthDayType = new EnumOptionData(NthDayType.TWO.getValue().longValue(), NthDayType.TWO.getCode(),
                             "second");
-                    break;
+                break;
                 case 3:
                     repaymentFrequencyNthDayType = new EnumOptionData(NthDayType.THREE.getValue().longValue(), NthDayType.THREE.getCode(),
                             "third");
-                    break;
+                break;
                 case 4:
                     repaymentFrequencyNthDayType = new EnumOptionData(NthDayType.FOUR.getValue().longValue(), NthDayType.FOUR.getCode(),
                             "Fourth");
-                    break;
+                break;
                 case 5:
                     repaymentFrequencyNthDayType = new EnumOptionData(NthDayType.FIVE.getValue().longValue(), NthDayType.FIVE.getCode(),
                             "Fifth");
-                    break;
+                break;
                 case -1:
                     repaymentFrequencyNthDayType = new EnumOptionData(NthDayType.LAST.getValue().longValue(), NthDayType.LAST.getCode(),
                             "Last");
-                    break;
+                break;
                 case -2:
                     repaymentFrequencyNthDayType = new EnumOptionData(NthDayType.ONDAY.getValue().longValue(), NthDayType.ONDAY.getCode(),
                             "On Day");
-                    break;
+                break;
                 default:
-                    break;
+                break;
 
             }
         }
