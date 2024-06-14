@@ -185,7 +185,7 @@ UPDATE stretchy_report SET report_sql = "select DISTINCT l.account_no           
                                                              from m_loan_repayment_schedule lrs
                                                              where lrs.completed_derived = false
                                                                and lrs.duedate < now()
-                                                             group by lrs.loan_id) installmentArrears on installmentArrears.loan_id = l.id
+                                                             group by lrs.loan_id,lrs.id) installmentArrears on installmentArrears.loan_id = l.id
 
                                                   LEFT JOIN (
                                              SELECT lrs.duedate                                                      AS nextPaymentDueDate,
@@ -199,7 +199,7 @@ UPDATE stretchy_report SET report_sql = "select DISTINCT l.account_no           
                                                                           ROW_NUMBER() OVER (PARTITION BY lrs.loan_id ORDER BY lrs.installment ASC) AS row_num
                                                                    FROM m_loan_repayment_schedule lrs
                                                                    WHERE lrs.completed_derived = false AND lrs.obligations_met_on_date IS NULL
-                                                                   GROUP BY lrs.loan_id,lrs.installment ORDER BY lrs.installment ASC
+                                                                   GROUP BY lrs.loan_id,lrs.installment,lrs.id ORDER BY lrs.installment ASC
                                                   ) lrs
 
                                              WHERE lrs.row_num = 1
