@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.batch.service;
 
-import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -201,11 +200,12 @@ public class BatchApiServiceImpl implements BatchApiService {
         } catch (TransactionException ex) {
             ErrorInfo e = ErrorHandler.handler(ex);
             BatchResponse errResponse = new BatchResponse();
-            errResponse.setStatusCode(e.getStatusCode());
+
 
             for (BatchResponse res : responseList) {
                 if (!res.getStatusCode().equals(200)) {
-                    errResponse.setBody("Transaction is being rolled back. First erroneous request: \n" + new Gson().toJson(res));
+                    errResponse.setStatusCode(res.getStatusCode());
+                    errResponse.setBody(res.getBody());
                     break;
                 }
             }
@@ -217,11 +217,12 @@ public class BatchApiServiceImpl implements BatchApiService {
         } catch (final NonTransientDataAccessException ex) {
             ErrorInfo e = ErrorHandler.handler(ex);
             BatchResponse errResponse = new BatchResponse();
-            errResponse.setStatusCode(e.getStatusCode());
+
 
             for (BatchResponse res : responseList) {
                 if (!res.getStatusCode().equals(200)) {
-                    errResponse.setBody("Transaction is being rolled back. First erroneous request: \n" + new Gson().toJson(res));
+                    errResponse.setStatusCode(res.getStatusCode());
+                    errResponse.setBody(res.getBody());
                     break;
                 }
             }
