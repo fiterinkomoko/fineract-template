@@ -343,7 +343,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 LoanStatus.APPROVED.getValue(), LoanStatus.ACTIVE.getValue()));
         List<Loan> activeChild = this.loanRepository.findLoanByGlimIdAndLoanStatus(parentLoan.getId(), loanStatuses);
         if (!CollectionUtils.isEmpty(activeChild)) {
-            BigDecimal sum = activeChild.stream().map(Loan::getNetDisbursalAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal sum = activeChild.stream().filter(Loan::isDisbursed).map(Loan::getNetDisbursalAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
 
             parentLoan.setActualPrincipalAmount(sum);
             glimRepository.save(parentLoan);
@@ -554,6 +554,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             // auto create standing instruction
             createStandingInstruction(loan);
 
+            GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(loan.getGlimId()).orElseThrow();
+            updateGlimActualPrincipal(parentLoan);
             postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         }
 
@@ -947,6 +949,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 BigDecimal netDisbursalAmount = loan.getApprovedPrincipal().subtract(loanOutstanding);
                 loan.adjustNetDisbursalAmount(netDisbursalAmount);
             }
+            GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(loan.getGlimId()).orElseThrow();
+            updateGlimActualPrincipal(parentLoan);
             saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
             this.accountTransfersWritePlatformService.reverseAllTransactions(loanId, PortfolioAccountType.LOAN, loan);
             String noteText = null;
