@@ -417,7 +417,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                             glimAccountInfoWritePlatformService.addGLIMAccountInfo(accountNumber, group,
                                     command.bigDecimalValueOfParameterNamedDefaultToNullIfZero("totalLoan"), Long.valueOf(1), true,
                                     LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), applicationId,
-                                    command.bigDecimalValueOfParameterNamedDefaultToNullIfZero("totalLoan"));
+                                    BigDecimal.ZERO);
                             newLoanApplication.setGlim(glimRepository.findOneByAccountNumber(accountNumber));
                             this.loanRepositoryWrapper.save(newLoanApplication);
 
@@ -430,7 +430,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                             glimAccountInfoWritePlatformService.addGLIMAccountInfo(accountNumber, group,
                                     command.bigDecimalValueOfParameterNamedDefaultToNullIfZero("totalLoan"), Long.valueOf(1), true,
                                     LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), applicationId,
-                                    command.bigDecimalValueOfParameterNamedDefaultToNullIfZero("totalLoan"));
+                                    BigDecimal.ZERO);
                             newLoanApplication.setGlim(glimRepository.findOneByAccountNumber(accountNumber));
                             this.loanRepositoryWrapper.save(newLoanApplication);
 
@@ -458,7 +458,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                             glimAccountInfoWritePlatformService.addGLIMAccountInfo(accountNumber, group,
                                     command.bigDecimalValueOfParameterNamedDefaultToNullIfZero("totalLoan"), Long.valueOf(1), true,
                                     LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(), applicationId,
-                                    command.bigDecimalValueOfParameterNamedDefaultToNullIfZero("totalLoan"));
+                                    BigDecimal.ZERO);
                             newLoanApplication.setGlim(glimRepository.findOneByAccountNumber(accountNumber));
                             this.loanRepositoryWrapper.save(newLoanApplication);
 
