@@ -89,15 +89,12 @@ public class LoanDisbursementIntegrationApiResource {
         final String extractedJson = extractJson(allElement);
         final CommandWrapperBuilder updateBuilder = new CommandWrapperBuilder().withJson(extractedJson);
 
-        if (Integer.valueOf(resultCode) == 200) {
-            final CommandWrapper updateWrapper = updateBuilder.updateDisbursement(loanId).build();
-            this.commandsSourceWritePlatformService.logCommandSource(updateWrapper);
+        final CommandWrapper updateWrapper = updateBuilder.updateDisbursement(loanId).build();
+        result = this.commandsSourceWritePlatformService.logCommandSource(updateWrapper);
 
+        if (Integer.valueOf(resultCode) == 200) {
             final CommandWrapper disburseWrapper = updateBuilder.disburseLoanApplication(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(disburseWrapper);
-        } else {
-            final CommandWrapper updateWrapper = updateBuilder.updateDisbursement(loanId).build();
-            result = this.commandsSourceWritePlatformService.logCommandSource(updateWrapper);
         }
 
         return this.toApiJsonSerializer.serialize(result);
@@ -110,6 +107,7 @@ public class LoanDisbursementIntegrationApiResource {
         newJsonObject.add("transactionAmount", originalJsonObject.get("transactionAmount"));
         newJsonObject.add("actualDisbursementDate", originalJsonObject.get("actualDisbursementDate"));
         newJsonObject.add("locale", originalJsonObject.get("locale"));
+        newJsonObject.add("resultCode", originalJsonObject.get("resultCode"));
         newJsonObject.add("dateFormat", originalJsonObject.get("dateFormat"));
         return newJsonObject.toString();
     }
