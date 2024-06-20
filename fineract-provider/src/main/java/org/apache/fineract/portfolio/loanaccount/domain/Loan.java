@@ -391,7 +391,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     @JoinColumn(name = "writeoff_reason_cv_id", nullable = true)
     private CodeValue writeOffReason;
 
-    @Column(name = "loan_sub_status_id", nullable = true)
+    @Column(name = "loan_sub_status_id")
     private Integer loanSubStatus;
 
     @Column(name = "is_topup", nullable = false)
@@ -6903,6 +6903,10 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         return this.loanSubStatus;
     }
 
+    public void setLoanSubStatus(Integer loanSubStatus) {
+        this.loanSubStatus = loanSubStatus;
+    }
+
     private boolean isForeclosure() {
         boolean isForeClosure = false;
         if (this.loanSubStatus != null) {
@@ -7202,4 +7206,5 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
     public Integer getLoanStatus() {
         return loanStatus;
     }
+
 }
