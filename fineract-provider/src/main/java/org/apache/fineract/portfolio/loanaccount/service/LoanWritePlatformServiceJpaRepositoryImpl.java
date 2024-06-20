@@ -616,7 +616,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Override
     @Transactional
     public CommandProcessingResult updateDisbursement(Long loanId, JsonCommand command) {
+        final String resultCode = command.stringValueOfParameterNamed("resultCode");
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        if (Integer.valueOf(resultCode) != 200) {
+            loan.setLoanStatus(null);
+        }
         loan.handleRejectDisbursementRequest();
         this.saveLoanWithDataIntegrityViolationChecks(loan);
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(loan.getId())
