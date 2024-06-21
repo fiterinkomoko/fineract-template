@@ -29,6 +29,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+
 @Service
 @RequiredArgsConstructor
 @CommandType(entity = "LOAN", action = "UPDATEDISBURSEMENT")
@@ -40,6 +42,7 @@ public class UpdateDisbursementCommandHandler implements NewCommandSourceHandler
     // This should not run inside a Transactional to avoid missing a loan account communication from middle.
     // When Middle ware sends a failure or pass message once and if' It's missed then this loan will be in a pending
     // Disbursement Status
+    @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
         try {
