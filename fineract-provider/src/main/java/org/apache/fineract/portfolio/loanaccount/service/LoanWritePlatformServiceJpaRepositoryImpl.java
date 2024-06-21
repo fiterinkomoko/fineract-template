@@ -554,8 +554,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             // auto create standing instruction
             createStandingInstruction(loan);
 
-            GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(loan.getGlimId()).orElseThrow();
-            updateGlimActualPrincipal(parentLoan);
+            if(loan.getLoanType().equals(AccountType.GLIM.getValue())){
+                GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(loan.getGlimId()).orElseThrow();
+                updateGlimActualPrincipal(parentLoan);
+            }
+
             postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         }
 
@@ -953,8 +956,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 BigDecimal netDisbursalAmount = loan.getApprovedPrincipal().subtract(loanOutstanding);
                 loan.adjustNetDisbursalAmount(netDisbursalAmount);
             }
-            GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(loan.getGlimId()).orElseThrow();
-            updateGlimActualPrincipal(parentLoan);
+            if(loan.getLoanType().equals(AccountType.GLIM.getValue())) {
+                GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(loan.getGlimId()).orElseThrow();
+                updateGlimActualPrincipal(parentLoan);
+            }
             saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
             this.accountTransfersWritePlatformService.reverseAllTransactions(loanId, PortfolioAccountType.LOAN, loan);
             String noteText = null;
