@@ -28,7 +28,6 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformServic
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +37,9 @@ public class UpdateDisbursementCommandHandler implements NewCommandSourceHandler
     private final LoanWritePlatformService writePlatformService;
     private final DataIntegrityErrorHandler dataIntegrityErrorHandler;
 
-    @Transactional
+    // This should not run inside a Transactional to avoid missing a loan account communication from middle.
+    // When Middle ware sends a failure or pass message once and if' It's missed then this loan will be in a pending
+    // Disbursement Status
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
         try {
