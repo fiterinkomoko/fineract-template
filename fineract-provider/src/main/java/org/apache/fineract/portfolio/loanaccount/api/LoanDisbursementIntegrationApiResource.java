@@ -36,6 +36,8 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -43,6 +45,8 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 public class LoanDisbursementIntegrationApiResource {
+
+    private static final Logger LOG = LoggerFactory.getLogger(LoanDisbursementIntegrationApiResource.class);
 
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
@@ -85,6 +89,9 @@ public class LoanDisbursementIntegrationApiResource {
 
         final JsonElement allElement = this.fromApiJsonHelper.parse(apiRequestBodyAsJson);
         final String resultCode = allElement.getAsJsonObject().get("resultCode").getAsString();
+
+        LOG.info("Update Disbursement In API: " + loanId + " with Result Code: " + resultCode);
+
         CommandProcessingResult result = null;
         final String extractedJson = extractJson(allElement);
         final CommandWrapperBuilder updateBuilder = new CommandWrapperBuilder().withJson(extractedJson);
