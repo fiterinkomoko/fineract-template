@@ -232,6 +232,8 @@ import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.service.Repaym
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.transfer.api.TransferApiConstants;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -244,6 +246,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatformService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(LoanWritePlatformServiceJpaRepositoryImpl.class);
     private final PlatformSecurityContext context;
     private final LoanEventApiJsonValidator loanEventApiJsonValidator;
     private final LoanUpdateCommandFromApiJsonDeserializer loanUpdateCommandFromApiJsonDeserializer;
@@ -612,9 +615,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     @Override
-    @Transactional
     public CommandProcessingResult updateDisbursement(Long loanId, JsonCommand command) {
         final String resultCode = command.stringValueOfParameterNamed("resultCode");
+
+        LOG.info("Update Disbursement for Loan Id: " + loanId + " with Result Code: " + resultCode);
+
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
         if (Integer.valueOf(resultCode) != 200 || Integer.valueOf(resultCode) != 202) {
             loan.setLoanSubStatus(null);
