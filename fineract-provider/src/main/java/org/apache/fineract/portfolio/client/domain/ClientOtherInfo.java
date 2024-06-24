@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.client.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.persistence.Column;
@@ -42,9 +43,8 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
     @ManyToOne
     @JoinColumn(name = "strata_cv_id", nullable = false)
     private CodeValue strata;
-    @ManyToOne
-    @JoinColumn(name = "year_arrived_in_country_cv_id")
-    private CodeValue yearArrivedInHostCountry;
+    @Column(name = "year_arrived_in_country")
+    private LocalDate yearArrivedInHostCountry;
 
     @ManyToOne
     @JoinColumn(name = "nationality_cv_id")
@@ -91,7 +91,7 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
 
     public ClientOtherInfo() {}
 
-    public ClientOtherInfo(Client client, CodeValue strata, CodeValue yearArrivedInHostCountry, CodeValue nationality,
+    public ClientOtherInfo(Client client, CodeValue strata, LocalDate yearArrivedInHostCountry, CodeValue nationality,
             Integer numberOfChildren, Integer numberOfDependents, String nationalIdentificationNumber, String passportNumber,
             String bankAccountNumber, String bankName, String telephoneNo) {
         this.client = client;
@@ -111,7 +111,7 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
     public ClientOtherInfo(Client client, CodeValue strata, final String businessLocation, final Long taxIdentificationNumber,
             final Long incomeGeneratingActivity, final BigDecimal incomeGeneratingActivityMonthlyAmount, final String telephoneNo,
             final String coSignors, final String guarantor, final String bankAccountNumber, final String bankName,
-            final CodeValue yearArrivedInHostCountry) {
+            final LocalDate yearArrivedInHostCountry) {
         this.client = client;
         this.strata = strata;
         this.businessLocation = businessLocation;
@@ -127,8 +127,7 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
 
     }
 
-    public static ClientOtherInfo createNew(JsonCommand command, Client client, final CodeValue strata, final CodeValue nationality,
-            final CodeValue yearArrivedInHostCountry) {
+    public static ClientOtherInfo createNew(JsonCommand command, Client client, final CodeValue strata, final CodeValue nationality) {
 
         final Integer numberOfChildren = command.integerValueOfParameterNamed(ClientApiConstants.numberOfChildren);
         final Integer numberOfDependents = command.integerValueOfParameterNamed(ClientApiConstants.numberOfDependents);
@@ -138,12 +137,13 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
         final String bankAccountNumber = command.stringValueOfParameterNamed(ClientApiConstants.BANK_ACCOUNT_NUMBER);
         final String bankName = command.stringValueOfParameterNamed(ClientApiConstants.BANK_NAME);
         final String telephoneNo = command.stringValueOfParameterNamed(ClientApiConstants.telephoneNoParamName);
+        final LocalDate yearArrivedInHostCountry = command
+                .localDateValueOfParameterNamed(ClientApiConstants.yearArrivedInHostCountryParamName);
         return new ClientOtherInfo(client, strata, yearArrivedInHostCountry, nationality, numberOfChildren, numberOfDependents,
                 nationalIdentificationNumber, passportNumber, bankAccountNumber, bankName, telephoneNo);
     }
 
-    public static ClientOtherInfo createNewForEntity(JsonCommand command, Client client, final CodeValue strata,
-            final CodeValue yearArrivedInHostCountry) {
+    public static ClientOtherInfo createNewForEntity(JsonCommand command, Client client, final CodeValue strata) {
 
         final String coSignors = command.stringValueOfParameterNamedAllowingNull(ClientApiConstants.coSignors);
         final String guarantor = command.stringValueOfParameterNamedAllowingNull(ClientApiConstants.guarantor);
@@ -155,6 +155,8 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
         final String bankAccountNumber = command.stringValueOfParameterNamed(ClientApiConstants.BANK_ACCOUNT_NUMBER);
         final String bankName = command.stringValueOfParameterNamed(ClientApiConstants.BANK_NAME);
         final String telephoneNo = command.stringValueOfParameterNamedAllowingNull(ClientApiConstants.telephoneNoParamName);
+        final LocalDate yearArrivedInHostCountry = command
+                .localDateValueOfParameterNamed(ClientApiConstants.yearArrivedInHostCountryParamName);
 
         return new ClientOtherInfo(client, strata, businessLocation, taxIdentificationNumber, incomeGeneratingActivity,
                 incomeGeneratingActivityMonthlyAmount, telephoneNo, coSignors, guarantor, bankAccountNumber, bankName,
@@ -170,9 +172,12 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
             actualChanges.put(ClientApiConstants.strataIdParamName, newValue);
         }
 
-        if (command.isChangeInLongParameterNamed(ClientApiConstants.yearArrivedInHostCountry, yearArrivedInHostCountryId())) {
-            final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.yearArrivedInHostCountry);
-            actualChanges.put(ClientApiConstants.yearArrivedInHostCountry, newValue);
+        if (command.isChangeInLocalDateParameterNamed(ClientApiConstants.yearArrivedInHostCountryParamName,
+                this.yearArrivedInHostCountry)) {
+            final LocalDate yearArrivedInHostCountry = command
+                    .localDateValueOfParameterNamed(ClientApiConstants.yearArrivedInHostCountryParamName);
+            actualChanges.put(ClientApiConstants.yearArrivedInHostCountryParamName, yearArrivedInHostCountry);
+            this.yearArrivedInHostCountry = yearArrivedInHostCountry;
         }
 
         if (LegalForm.fromInt(legalFormId).isPerson()) {
@@ -288,24 +293,12 @@ public class ClientOtherInfo extends AbstractPersistableCustom {
         return nationality;
     }
 
-    private Long yearArrivedInHostCountryId() {
-        Long yearArrivedInHostCountry = null;
-        if (this.yearArrivedInHostCountry != null) {
-            yearArrivedInHostCountry = this.yearArrivedInHostCountry.getId();
-        }
-        return yearArrivedInHostCountry;
-    }
-
     public void setStrata(CodeValue strata) {
         this.strata = strata;
     }
 
     public void setNationality(CodeValue nationality) {
         this.nationality = nationality;
-    }
-
-    public void setYearArrivedInHostCountry(CodeValue yearArrivedInHostCountry) {
-        this.yearArrivedInHostCountry = yearArrivedInHostCountry;
     }
 
     public Long clientId() {
