@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.handler;
 
+import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
@@ -28,8 +29,6 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformServic
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
 
 @Service
 @RequiredArgsConstructor

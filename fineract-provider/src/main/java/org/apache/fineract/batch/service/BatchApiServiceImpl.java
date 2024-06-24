@@ -201,7 +201,6 @@ public class BatchApiServiceImpl implements BatchApiService {
             ErrorInfo e = ErrorHandler.handler(ex);
             BatchResponse errResponse = new BatchResponse();
 
-
             for (BatchResponse res : responseList) {
                 if (!res.getStatusCode().equals(200)) {
                     errResponse.setStatusCode(res.getStatusCode());
@@ -217,7 +216,6 @@ public class BatchApiServiceImpl implements BatchApiService {
         } catch (final NonTransientDataAccessException ex) {
             ErrorInfo e = ErrorHandler.handler(ex);
             BatchResponse errResponse = new BatchResponse();
-
 
             for (BatchResponse res : responseList) {
                 if (!res.getStatusCode().equals(200)) {

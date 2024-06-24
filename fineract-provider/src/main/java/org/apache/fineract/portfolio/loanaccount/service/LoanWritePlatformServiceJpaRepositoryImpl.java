@@ -346,7 +346,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 LoanStatus.APPROVED.getValue(), LoanStatus.ACTIVE.getValue()));
         List<Loan> activeChild = this.loanRepository.findLoanByGlimIdAndLoanStatus(parentLoan.getId(), loanStatuses);
         if (!CollectionUtils.isEmpty(activeChild)) {
-            BigDecimal sum = activeChild.stream().filter(Loan::isDisbursed).map(Loan::getNetDisbursalAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal sum = activeChild.stream().filter(Loan::isDisbursed).map(Loan::getNetDisbursalAmount).reduce(BigDecimal.ZERO,
+                    BigDecimal::add);
 
             parentLoan.setActualPrincipalAmount(sum);
             glimRepository.save(parentLoan);
@@ -557,7 +558,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             // auto create standing instruction
             createStandingInstruction(loan);
 
-            if(loan.getLoanType().equals(AccountType.GLIM.getValue())){
+            if (loan.getLoanType().equals(AccountType.GLIM.getValue())) {
                 GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(loan.getGlimId()).orElseThrow();
                 updateGlimActualPrincipal(parentLoan);
             }
@@ -618,6 +619,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .with(changes) //
                 .build();
     }
+
     @Transactional
     @Override
     public CommandProcessingResult updateDisbursement(Long loanId, JsonCommand command) {
@@ -961,7 +963,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 BigDecimal netDisbursalAmount = loan.getApprovedPrincipal().subtract(loanOutstanding);
                 loan.adjustNetDisbursalAmount(netDisbursalAmount);
             }
-            if(loan.getLoanType().equals(AccountType.GLIM.getValue())) {
+            if (loan.getLoanType().equals(AccountType.GLIM.getValue())) {
                 GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(loan.getGlimId()).orElseThrow();
                 updateGlimActualPrincipal(parentLoan);
             }
