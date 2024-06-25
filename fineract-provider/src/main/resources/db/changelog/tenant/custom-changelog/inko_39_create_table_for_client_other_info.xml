@@ -187,4 +187,17 @@
             <column name="description" value="null" />
         </insert>
     </changeSet>
+
+    <changeSet author="bosco@fiter.io" id="add_year_arrived_in_country_to_m_client_other_info">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="m_client_other_info" columnName="year_arrived_in_country"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_client_other_info">
+            <column name="year_arrived_in_country" type="date" >
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

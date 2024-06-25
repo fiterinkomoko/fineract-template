@@ -113,6 +113,7 @@ public class ClientApiConstants {
     public static final String withdrawalReasonIdParamName = "withdrawalReasonId";
 
     public static final String submittedOnDateParamName = "submittedOnDate";
+    public static final String yearArrivedInHostCountryParamName = "yearArrivedInHostCountry";
     public static final String savingsProductIdParamName = "savingsProductId";
     public static final String savingsAccountIdParamName = "savingsAccountId";
     public static final String dateOfBirthParamName = "dateOfBirth";
