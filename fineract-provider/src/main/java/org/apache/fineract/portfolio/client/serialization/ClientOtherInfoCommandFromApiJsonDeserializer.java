@@ -23,6 +23,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -49,7 +50,7 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
 
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final Set<String> supportedParameters = new HashSet<>(Arrays.asList("id", "clientId", "strataId", "nationalityId",
-            "numberOfChildren", "numberOfDependents", "yearArrivedInHostCountryId", "coSignorsName", "guarantor", "locale", "dateFormat",
+            "numberOfChildren", "numberOfDependents", "yearArrivedInHostCountry", "coSignorsName", "guarantor", "locale", "dateFormat",
             "businessLocation", "taxIdentificationNumber", "incomeGeneratingActivity", "incomeGeneratingActivityMonthlyAmount",
             "telephoneNo", "nationalIdentificationNumber", "passportNumber", "bankAccountNumber", "bankName"));
 
@@ -74,6 +75,9 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
                 .resource(ClientApiConstants.CLIENT_OTHER_INFO_RESOURCE_NAME);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
+        LocalDate yearArrivedInHostCountry = null;
+        yearArrivedInHostCountry = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.yearArrivedInHostCountryParamName,
+                element);
 
         baseDataValidator.reset().parameter(ClientApiConstants.legalFormIdParamName).value(legalFormId).notNull().inMinMaxRange(1, 2);
 
@@ -109,14 +113,13 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
             }
 
             CodeValueData codeValue = this.codeValueReadPlatformService.retrieveCodeValue(strataId.longValue());
-            final Integer yearArrivedInHostCountryId = this.fromApiJsonHelper
-                    .extractIntegerSansLocaleNamed(ClientApiConstants.yearArrivedInHostCountry, element);
+
             if (codeValue.getName().equalsIgnoreCase("Host Community")) {
-                baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountry).value(yearArrivedInHostCountryId)
-                        .ignoreIfNull().integerGreaterThanZero();
+                baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountryParamName).value(yearArrivedInHostCountry)
+                        .ignoreIfNull();
             } else {
-                baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountry).value(yearArrivedInHostCountryId).notNull()
-                        .integerGreaterThanZero();
+                baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountryParamName).value(yearArrivedInHostCountry)
+                        .notNull();
             }
 
             final String nationalIdentificationNumber = this.fromApiJsonHelper
@@ -171,6 +174,14 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
             final String telephoneNo = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.telephoneNoParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.telephoneNoParamName).value(telephoneNo).notBlank()
                     .notExceedingLengthOf(20);
+
+            if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.yearArrivedInHostCountryParamName, element)) {
+                yearArrivedInHostCountry = this.fromApiJsonHelper
+                        .extractLocalDateNamed(ClientApiConstants.yearArrivedInHostCountryParamName, element);
+                baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountryParamName).value(yearArrivedInHostCountry)
+                        .notNull();
+            }
+
         }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
@@ -190,6 +201,10 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(ClientApiConstants.CLIENT_OTHER_INFO_RESOURCE_NAME);
+
+        LocalDate yearArrivedInHostCountry = null;
+        yearArrivedInHostCountry = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.yearArrivedInHostCountryParamName,
+                element);
 
         boolean atLeastOneParameterPassedForUpdate = false;
         final Integer strataId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(ClientApiConstants.strataIdParamName, element);
@@ -232,17 +247,16 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
                         .integerZeroOrGreater();
             }
             CodeValueData codeValue = this.codeValueReadPlatformService.retrieveCodeValue(strataId.longValue());
-            final Integer yearArrivedInHostCountryId = this.fromApiJsonHelper
-                    .extractIntegerSansLocaleNamed(ClientApiConstants.yearArrivedInHostCountry, element);
+
             if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.yearArrivedInHostCountry, element)) {
                 atLeastOneParameterPassedForUpdate = true;
             }
             if (codeValue.getName().equalsIgnoreCase("Host Community")) {
-                baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountry).value(yearArrivedInHostCountryId)
-                        .ignoreIfNull().integerGreaterThanZero();
+                baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountryParamName).value(yearArrivedInHostCountry)
+                        .ignoreIfNull();
             } else {
-                baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountry).value(yearArrivedInHostCountryId).notNull()
-                        .integerGreaterThanZero();
+                baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountryParamName).value(yearArrivedInHostCountry)
+                        .notNull();
             }
 
             final String nationalIdentificationNumber = this.fromApiJsonHelper
@@ -301,6 +315,12 @@ public final class ClientOtherInfoCommandFromApiJsonDeserializer {
             final String telephoneNo = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.telephoneNoParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.telephoneNoParamName).value(telephoneNo).notBlank()
                     .notExceedingLengthOf(20);
+            if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.yearArrivedInHostCountryParamName, element)) {
+                yearArrivedInHostCountry = this.fromApiJsonHelper
+                        .extractLocalDateNamed(ClientApiConstants.yearArrivedInHostCountryParamName, element);
+                baseDataValidator.reset().parameter(ClientApiConstants.yearArrivedInHostCountryParamName).value(yearArrivedInHostCountry)
+                        .notNull();
+            }
         }
 
         if (!atLeastOneParameterPassedForUpdate) {

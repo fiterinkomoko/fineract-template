@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.client.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -54,7 +55,7 @@ public class ClientOtherInfoReadPlatformServiceImpl implements ClientOtherInfoRe
     private static final class ClientOtherInfoMapper implements RowMapper<ClientOtherInfoData> {
 
         public String schema() {
-            return "co.id AS id, co.client_id AS clientId, co.strata_cv_id AS strataId, co.nationality_cv_id AS nationalityId, cv.code_value as strataName, co.year_arrived_in_country_cv_id AS yearArrivedInHostCountryId,"
+            return "co.id AS id, co.client_id AS clientId, co.strata_cv_id AS strataId, co.nationality_cv_id AS nationalityId, cv.code_value as strataName, co.year_arrived_in_country AS yearArrivedInHostCountry,"
                     + "cvn.code_value AS nationalityName, cy.code_value AS yearArrivedInHostCountryName, co.number_of_children AS numberOfChildren, co.number_of_dependents AS numberOfDependents, co.co_signors as coSignors, co.guarantor as guarantor,"
                     + "co.national_identification_number AS nationalIdentificationNumber,co.passport_number AS passportNumber,co.bank_account_number AS bankAccountNumber,co.bank_name AS bankName,co.telephone_no as telephoneNumber "
                     + " FROM m_client_other_info co" + " left join m_code_value cvn on co.nationality_cv_id=cvn.id"
@@ -74,9 +75,7 @@ public class ClientOtherInfoReadPlatformServiceImpl implements ClientOtherInfoRe
             final CodeValueData strata = CodeValueData.instance(strataId, strataName);
             final Integer numberOfChildren = JdbcSupport.getInteger(rs, "numberOfChildren");
             final Integer numberOfDependents = JdbcSupport.getInteger(rs, "numberOfDependents");
-            final Long yearArrivedInHostCountryId = JdbcSupport.getLong(rs, "yearArrivedInHostCountryId");
-            final String yearArrivedInHostCountryName = rs.getString("yearArrivedInHostCountryName");
-            final CodeValueData yearArrivedInHostCountry = CodeValueData.instance(yearArrivedInHostCountryId, yearArrivedInHostCountryName);
+            final LocalDate yearArrivedInHostCountry = JdbcSupport.getLocalDate(rs, "yearArrivedInHostCountry");
             final String nationalIdentificationNumber = rs.getString("nationalIdentificationNumber");
             final String passportNumber = rs.getString("passportNumber");
             final String bankAccountNumber = rs.getString("bankAccountNumber");
@@ -130,9 +129,7 @@ public class ClientOtherInfoReadPlatformServiceImpl implements ClientOtherInfoRe
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode("COUNTRY"));
         final List<CodeValueData> strataOptions = new ArrayList<>(
                 this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.STRATA));
-        final List<CodeValueData> yearArrivedInHostCountryOptions = new ArrayList<>(
-                this.codeValueReadPlatformService.retrieveCodeValuesByCode(ClientApiConstants.YEAR_ARRIVED_IN_HOST_COUNTRY));
-        return ClientOtherInfoData.template(nationalityOptions, strataOptions, yearArrivedInHostCountryOptions);
+        return ClientOtherInfoData.template(nationalityOptions, strataOptions);
     }
 
     private static final class ClientOtherInfoEntityMapper implements RowMapper<ClientOtherInfoData> {
@@ -142,7 +139,7 @@ public class ClientOtherInfoReadPlatformServiceImpl implements ClientOtherInfoRe
                     + " co.guarantor AS guarantor, co.tax_identification_number as taxIdentificationNumber, co.business_location as businessLocation,"
                     + " co.income_generating_activity AS incomeGeneratingActivity, co.income_generating_activity_monthly_amount as incomeGeneratingActivityMonthlyAmount,"
                     + " co.telephone_no as telephoneNo, co.bank_account_number as bankAccountNumber, co.bank_name as bankName, "
-                    + " co.year_arrived_in_country_cv_id AS yearArrivedInHostCountryId, cy.code_value AS yearArrivedInHostCountryName"
+                    + " co.year_arrived_in_country AS yearArrivedInHostCountry, cy.code_value AS yearArrivedInHostCountryName"
                     + " FROM m_client_other_info co"
                     + " left join m_code_value cv on co.strata_cv_id=cv.id left join m_code_value cy on co.year_arrived_in_country_cv_id=cy.id";
         }
@@ -155,9 +152,7 @@ public class ClientOtherInfoReadPlatformServiceImpl implements ClientOtherInfoRe
             final long strataId = rs.getLong("strataId");
             final String strataName = rs.getString("strataName");
             final CodeValueData strata = CodeValueData.instance(strataId, strataName);
-            final long yearArrivedInHostCountryId = rs.getLong("yearArrivedInHostCountryId");
-            final String yearArrivedInHostCountryName = rs.getString("yearArrivedInHostCountryName");
-            final CodeValueData yearArrivedInHostCountry = CodeValueData.instance(yearArrivedInHostCountryId, yearArrivedInHostCountryName);
+            final LocalDate yearArrivedInHostCountry = JdbcSupport.getLocalDate(rs, "yearArrivedInHostCountry");
 
             final String coSignors = rs.getString("coSignorsName");
             final String guarantor = rs.getString("guarantor");
