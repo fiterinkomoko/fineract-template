@@ -388,10 +388,12 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         List<FundData> funds = fetchFunds();
         List<PaymentTypeData> paymentTypes = fetchPaymentTypes();
         List<CurrencyData> currencies = fetchCurrencies();
+        List<CodeValueData> departments = fetchCodeValuesByCodeName("Department");
+        List<CodeValueData> loanPurposes = fetchCodeValuesByCodeName("LoanPurpose");
         return new LoanWorkbookPopulator(new OfficeSheetPopulator(offices), new ClientSheetPopulator(clients, offices),
                 new GroupSheetPopulator(groups, offices), new PersonnelSheetPopulator(staff, offices),
                 new LoanProductSheetPopulator(loanproducts), new ChargeSheetPopulator(charges),
-                new ExtrasSheetPopulator(funds, paymentTypes, currencies));
+                new ExtrasSheetPopulator(funds, paymentTypes, currencies, departments, loanPurposes));
     }
 
     private List<CurrencyData> fetchCurrencies() {
@@ -438,8 +440,10 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         List<PaymentTypeData> paymentTypes = fetchPaymentTypes();
         List<CurrencyData> currencies = fetchCurrencies();
         List<LoanAccountData> loans = fetchLoanAccounts(officeId);
+        List<CodeValueData> departments = fetchCodeValuesByCodeName("Department");
+        List<CodeValueData> loanPurposes = fetchCodeValuesByCodeName("LoanPurpose");
         return new LoanRepaymentWorkbookPopulator(loans, new OfficeSheetPopulator(offices), new ClientSheetPopulator(clients, offices),
-                new ExtrasSheetPopulator(funds, paymentTypes, currencies));
+                new ExtrasSheetPopulator(funds, paymentTypes, currencies, departments, loanPurposes));
     }
 
     private List<LoanAccountData> fetchLoanAccounts(final Long officeId) {
@@ -464,8 +468,10 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         List<FundData> funds = fetchFunds();
         List<PaymentTypeData> paymentTypes = fetchPaymentTypes();
         List<CurrencyData> currencies = fetchCurrencies();
+        List<CodeValueData> departments = fetchCodeValuesByCodeName("Department");
+        List<CodeValueData> loanPurposes = fetchCodeValuesByCodeName("LoanPurpose");
         return new JournalEntriesWorkbookPopulator(new OfficeSheetPopulator(offices), new GlAccountSheetPopulator(glAccounts),
-                new ExtrasSheetPopulator(funds, paymentTypes, currencies));
+                new ExtrasSheetPopulator(funds, paymentTypes, currencies, departments, loanPurposes));
     }
 
     private List<GLAccountData> fetchGLAccounts() {
@@ -574,9 +580,11 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         List<FundData> funds = fetchFunds();
         List<PaymentTypeData> paymentTypes = fetchPaymentTypes();
         List<CurrencyData> currencies = fetchCurrencies();
+        List<CodeValueData> departments = fetchCodeValuesByCodeName("Department");
+        List<CodeValueData> loanPurposes = fetchCodeValuesByCodeName("LoanPurpose");
         List<SavingsAccountData> savingsAccounts = fetchSavingsAccounts(officeId);
         return new SavingsTransactionsWorkbookPopulator(new OfficeSheetPopulator(offices), new ClientSheetPopulator(clients, offices),
-                new ExtrasSheetPopulator(funds, paymentTypes, currencies), savingsAccounts);
+                new ExtrasSheetPopulator(funds, paymentTypes, currencies, departments, loanPurposes), savingsAccounts);
     }
 
     private WorkbookPopulator populateRecurringDepositWorkbook(Long officeId, Long staffId) {
@@ -615,8 +623,11 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         List<PaymentTypeData> paymentTypes = fetchPaymentTypes();
         List<CurrencyData> currencies = fetchCurrencies();
         List<SavingsAccountData> savingsAccounts = fetchSavingsAccounts(officeId);
+        List<CodeValueData> departments = fetchCodeValuesByCodeName("Department");
+        List<CodeValueData> loanPurposes = fetchCodeValuesByCodeName("LoanPurpose");
         return new RecurringDepositTransactionWorkbookPopulator(new OfficeSheetPopulator(offices),
-                new ClientSheetPopulator(clients, offices), new ExtrasSheetPopulator(funds, paymentTypes, currencies), savingsAccounts);
+                new ClientSheetPopulator(clients, offices),
+                new ExtrasSheetPopulator(funds, paymentTypes, currencies, departments, loanPurposes), savingsAccounts);
     }
 
     private WorkbookPopulator populateFixedDepositWorkbook(Long officeId, Long staffId) {
@@ -671,8 +682,10 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         List<PaymentTypeData> paymentTypes = fetchPaymentTypes();
         List<CurrencyData> currencies = fetchCurrencies();
         List<SavingsAccountData> savingsAccounts = fetchSavingsAccounts(officeId);
+        List<CodeValueData> departments = fetchCodeValuesByCodeName("Department");
+        List<CodeValueData> loanPurposes = fetchCodeValuesByCodeName("LoanPurpose");
         return new FixedDepositTransactionWorkbookPopulator(new OfficeSheetPopulator(offices), new ClientSheetPopulator(clients, offices),
-                new ExtrasSheetPopulator(funds, paymentTypes, currencies), savingsAccounts);
+                new ExtrasSheetPopulator(funds, paymentTypes, currencies, departments, loanPurposes), savingsAccounts);
     }
 
 }
