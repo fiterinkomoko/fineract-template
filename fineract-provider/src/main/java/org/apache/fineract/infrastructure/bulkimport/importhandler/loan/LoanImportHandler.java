@@ -350,6 +350,20 @@ public class LoanImportHandler implements ImportHandler {
         }
         String description = ImportHandlerUtils.readAsString(LoanConstants.DESCRIPTION, row);
 
+        String departmentName = ImportHandlerUtils.readAsString(LoanConstants.DEPARTMENT, row);
+        Long department = null;
+        if (departmentName != null) {
+            department = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME),
+                    departmentName);
+        }
+
+        String loanPurposeName = ImportHandlerUtils.readAsString(LoanConstants.LOAN_PURPOSE, row);
+        Long loanPurposeId = null;
+        if (loanPurposeName != null) {
+            loanPurposeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.EXTRAS_SHEET_NAME),
+                    loanPurposeName);
+        }
+
         statuses.add(status);
 
         if (loanType != null) {
@@ -363,6 +377,8 @@ public class LoanImportHandler implements ImportHandler {
                         graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, firstRepaymentOnDate, row.getRowNum(),
                         externalId, null, charges, linkAccountId, locale, dateFormat, loanCollateralManagementData);
                 loanAccountData.setDescription(description);
+                loanAccountData.setDepartmentId(department);
+                loanAccountData.setLoanPurposeId(loanPurposeId);
                 return loanAccountData;
             } else if (loanType.equals("jlg")) {
                 Long clientId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME),
@@ -374,6 +390,8 @@ public class LoanImportHandler implements ImportHandler {
                         graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, firstRepaymentOnDate, row.getRowNum(),
                         externalId, groupId, charges, linkAccountId, locale, dateFormat, null);
                 loanAccountData.setDescription(description);
+                loanAccountData.setDepartmentId(department);
+                loanAccountData.setLoanPurposeId(loanPurposeId);
                 return loanAccountData;
             } else {
                 Long groupIdforGroupLoan = ImportHandlerUtils
@@ -385,6 +403,8 @@ public class LoanImportHandler implements ImportHandler {
                         graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, firstRepaymentOnDate, row.getRowNum(),
                         externalId, linkAccountId, locale, dateFormat);
                 loanAccountData.setDescription(description);
+                loanAccountData.setDepartmentId(department);
+                loanAccountData.setLoanPurposeId(loanPurposeId);
                 return loanAccountData;
             }
         }

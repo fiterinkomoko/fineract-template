@@ -99,7 +99,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             LoanApiConstants.linkVendorAccountIdParamName, LoanApiConstants.LOAN_TERM_TO_TOP_UP, LoanApiConstants.isBnplLoanParamName,
             LoanApiConstants.requiresEquityContributionParamName, LoanApiConstants.equityContributionLoanPercentageParamName,
             LoanApiConstants.DEPARTMENT_PARAM, LoanApiConstants.DESCRIPTION_PARAM, LoanApiConstants.KIVA_ID_PARAM,
-            LoanApiConstants.loanWithAnotherInstitution, LoanApiConstants.loanWithAnotherInstitutionAmount));
+            LoanApiConstants.loanWithAnotherInstitution, LoanApiConstants.loanWithAnotherInstitutionAmount, "departmentId"));
 
     private final FromJsonHelper fromApiJsonHelper;
     private final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper;
@@ -227,9 +227,16 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             final Long fundId = this.fromApiJsonHelper.extractLongNamed(fundIdParameterName, element);
             baseDataValidator.reset().parameter(fundIdParameterName).value(fundId).ignoreIfNull().integerGreaterThanZero();
         }
-        final String departmentParameterName = "department";
-        final Integer department = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(departmentParameterName, element);
-        baseDataValidator.reset().parameter(departmentParameterName).value(department).notNull().integerGreaterThanZero();
+
+        // This Supports Department Param passed via Bulk Import
+        final Integer departmentId = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("departmentId", element);
+        if (departmentId == null) {
+            final String departmentParameterName = "department";
+            final Integer department = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(departmentParameterName, element);
+            baseDataValidator.reset().parameter(departmentParameterName).value(department).notNull().integerGreaterThanZero();
+        } else {
+            baseDataValidator.reset().parameter("departmentId").value(departmentId).notNull().integerGreaterThanZero();
+        }
 
         final String loanOfficerIdParameterName = "loanOfficerId";
         if (this.fromApiJsonHelper.parameterExists(loanOfficerIdParameterName, element)) {
