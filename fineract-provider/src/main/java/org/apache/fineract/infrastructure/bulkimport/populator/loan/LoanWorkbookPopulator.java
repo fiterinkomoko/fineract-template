@@ -170,13 +170,8 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
         DataValidationConstraint productNameConstraint = validationHelper.createFormulaListConstraint("Products");
         DataValidationConstraint loanOfficerNameConstraint = validationHelper
                 .createFormulaListConstraint("INDIRECT(CONCATENATE(\"Staff_\",$A1))");
-        DataValidationConstraint submittedDateConstraint = validationHelper.createDateConstraint(
-                DataValidationConstraint.OperatorType.BETWEEN,
-                "=IF(INDIRECT(CONCATENATE(\"START_DATE_\",$E1))>VLOOKUP($C1,$AR$2:$AT$"
-                        + (clientSheetPopulator.getClientsSize() + groupSheetPopulator.getGroupsSize() + 1)
-                        + ",3,FALSE),INDIRECT(CONCATENATE(\"START_DATE_\",$E1)),VLOOKUP($C1,$AR$2:$AT$"
-                        + (clientSheetPopulator.getClientsSize() + groupSheetPopulator.getGroupsSize() + 1) + ",3,FALSE))",
-                "=TODAY()", dateFormat);
+        DataValidationConstraint submittedDateConstraint = validationHelper
+                .createDateConstraint(DataValidationConstraint.OperatorType.BETWEEN, "01 January 1900", "=TODAY()", dateFormat);
         DataValidationConstraint approvalDateConstraint = validationHelper
                 .createDateConstraint(DataValidationConstraint.OperatorType.BETWEEN, "=$G1", "=TODAY()", dateFormat);
         DataValidationConstraint disbursedDateConstraint = validationHelper
@@ -403,7 +398,7 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
         writeString(LoanConstants.LOOKUP_CLIENT_NAME_COL, rowHeader, "Client Name");
         writeString(LoanConstants.LOOKUP_CLIENT_EXTERNAL_ID, rowHeader, "Lookup Client ExternalID");
         writeString(LoanConstants.LOOKUP_ACTIVATION_DATE_COL, rowHeader, "Client Activation Date");
-        writeString(LoanConstants.EXTERNAL_ID_COL, rowHeader, "External Id");
+        writeString(LoanConstants.EXTERNAL_ID_COL, rowHeader, "External Id*");
         writeString(LoanConstants.CHARGE_NAME_1, rowHeader, "Charge Name*");
         writeString(LoanConstants.CHARGE_AMOUNT_1, rowHeader, "Charged Amount");
         writeString(LoanConstants.CHARGE_AMOUNT_TYPE_1, rowHeader, "Charged Amount Type");
