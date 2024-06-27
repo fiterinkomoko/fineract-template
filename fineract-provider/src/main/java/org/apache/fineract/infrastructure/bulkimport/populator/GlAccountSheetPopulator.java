@@ -59,7 +59,7 @@ public class GlAccountSheetPopulator extends AbstractWorkbookPopulator {
         for (GLAccountData glAccount : allGlAccounts) {
             Row row = GlAccountSheet.createRow(rowIndex);
             writeLong(ID_COL, row, glAccount.getId());
-            writeString(ACCOUNT_NAME_COL, row, glAccount.getName().trim().replaceAll("[ )(]", "_"));
+            writeString(ACCOUNT_NAME_COL, row, glAccount.getName().trim().replaceAll("[ ',)(/%-'<=>]", "_"));
             rowIndex++;
         }
     }
