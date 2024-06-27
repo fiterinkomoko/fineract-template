@@ -85,7 +85,7 @@ public final class LoanAccountData {
     private final boolean isLoanProductLinkedToFloatingRate;
     private final Long fundId;
     private final String fundName;
-    private final Long loanPurposeId;
+    private Long loanPurposeId;
     private final String loanPurposeName;
     private final Long loanOfficerId;
     private final String loanOfficerName;
@@ -252,6 +252,7 @@ public final class LoanAccountData {
     private BigDecimal equityContributionLoanPercentage;
     private PortfolioAccountData linkedVendorAccount;
     private CodeValueData department;
+    private Long departmentId;
     private Collection<CodeValueData> departmentOptions;
     private Collection<CodeValueData> surveyLocationOptions;
     private Collection<CodeValueData> programOptions;
@@ -2255,5 +2256,17 @@ public final class LoanAccountData {
 
     public void setClientLegalForm(Integer clientLegalForm) {
         this.clientLegalForm = clientLegalForm;
+    }
+
+    public void setLoanPurposeId(Long loanPurposeId) {
+        this.loanPurposeId = loanPurposeId;
+    }
+
+    public Long getDepartmentId() {
+        return departmentId;
+    }
+
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
     }
 }
