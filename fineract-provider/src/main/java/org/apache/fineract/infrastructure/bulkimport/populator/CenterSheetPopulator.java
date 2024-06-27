@@ -75,8 +75,8 @@ public class CenterSheetPopulator extends AbstractWorkbookPopulator {
             writeString(OFFICE_NAME_COL, row, office.name());
             ArrayList<String> centersList = new ArrayList<String>();
 
-            if (officeToCenters.containsKey(office.name().trim().replaceAll("[ )(]", "_"))) {
-                centersList = officeToCenters.get(office.name().trim().replaceAll("[ )(]", "_"));
+            if (officeToCenters.containsKey(office.name().trim().replaceAll("[ ',)(/%-'<=>]", "_"))) {
+                centersList = officeToCenters.get(office.name().trim().replaceAll("[ ',)(/%-'<=>]", "_"));
                 if (!centersList.isEmpty()) {
                     for (String centerName : centersList) {
                         writeString(CENTER_NAME_COL, row, centerName);
@@ -105,7 +105,7 @@ public class CenterSheetPopulator extends AbstractWorkbookPopulator {
     private void setOfficeToCentersMap() {
         officeToCenters = new HashMap<>();
         for (CenterData center : allCenters) {
-            add(center.getOfficeName().trim().replaceAll("[ )(]", "_"), center.getName().trim());
+            add(center.getOfficeName().trim().replaceAll("[ ',)(/%-'<=>]", "_"), center.getName().trim());
         }
     }
 
