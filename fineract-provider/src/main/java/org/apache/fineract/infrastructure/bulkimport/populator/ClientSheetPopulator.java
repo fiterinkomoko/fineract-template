@@ -81,7 +81,7 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
     private void setOfficeToClientsMap() {
         officeToClients = new HashMap<>();
         for (ClientData person : allClients) {
-            addToOfficeClientMap(person.getOfficeName().trim().replaceAll("[ )(]", "_"),
+            addToOfficeClientMap(person.getOfficeName().trim().replaceAll("[ )(/%-']", "_"),
                     person.displayName().trim() + "(" + person.id() + ")");
         }
     }
@@ -114,8 +114,8 @@ public class ClientSheetPopulator extends AbstractWorkbookPopulator {
             startIndex = rowIndex + 1;
             writeString(OFFICE_NAME_COL, row, office.name());
             ArrayList<String> clientList = new ArrayList<String>();
-            if (officeToClients.containsKey(office.name().trim().replaceAll("[ )(]", "_"))) {
-                clientList = officeToClients.get(office.name().trim().replaceAll("[ )(]", "_"));
+            if (officeToClients.containsKey(office.name().trim().replaceAll("[ )(/%-']", "_"))) {
+                clientList = officeToClients.get(office.name().trim().replaceAll("[ )(/%-']", "_"));
             }
             if (!clientList.isEmpty()) {
                 for (String clientName : clientList) {
