@@ -372,9 +372,9 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
         writeString(LoanConstants.CLIENT_EXTERNAL_ID, rowHeader, "Client ExternalID");
         writeString(LoanConstants.PRODUCT_COL, rowHeader, "Product*");
         writeString(LoanConstants.LOAN_OFFICER_NAME_COL, rowHeader, "Loan Officer*");
-        writeString(LoanConstants.SUBMITTED_ON_DATE_COL, rowHeader, "Submitted On*");
-        writeString(LoanConstants.APPROVED_DATE_COL, rowHeader, "Approved On");
-        writeString(LoanConstants.DISBURSED_DATE_COL, rowHeader, "Disbursed Date");
+        writeString(LoanConstants.SUBMITTED_ON_DATE_COL, rowHeader, "Submitted On*-(DD/MMMM/YYYY eg. 30/01/2024)");
+        writeString(LoanConstants.APPROVED_DATE_COL, rowHeader, "Approved On-(DD/MMMM/YYYY eg. 30/01/2024)");
+        writeString(LoanConstants.DISBURSED_DATE_COL, rowHeader, "Disbursed Date-(DD/MMMM/YYYY eg. 30/01/2024)");
         writeString(LoanConstants.DISBURSED_PAYMENT_TYPE_COL, rowHeader, "Payment Type*");
         writeString(LoanConstants.FUND_NAME_COL, rowHeader, "Fund Name");
         writeString(LoanConstants.PRINCIPAL_COL, rowHeader, "Principal*");
