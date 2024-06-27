@@ -175,7 +175,8 @@ public class LoanAssembler {
         final Long loanOfficerId = this.fromApiJsonHelper.extractLongNamed("loanOfficerId", element);
         final Long transactionProcessingStrategyId = this.fromApiJsonHelper.extractLongNamed("transactionProcessingStrategyId", element);
         final Long loanPurposeId = this.fromApiJsonHelper.extractLongNamed("loanPurposeId", element);
-        final Long department = this.fromApiJsonHelper.extractLongNamed("department", element);
+        Long department = this.fromApiJsonHelper.extractLongNamed("department", element);
+        final Long departmentId = this.fromApiJsonHelper.extractLongNamed("departmentId", element);
         final Boolean syncDisbursementWithMeeting = this.fromApiJsonHelper.extractBooleanNamed("syncDisbursementWithMeeting", element);
         final Boolean createStandingInstructionAtDisbursement = this.fromApiJsonHelper
                 .extractBooleanNamed("createStandingInstructionAtDisbursement", element);
@@ -191,6 +192,11 @@ public class LoanAssembler {
         CodeValue loanPurpose = null;
         if (loanPurposeId != null) {
             loanPurpose = this.codeValueRepository.findOneWithNotFoundDetection(loanPurposeId);
+        }
+        // Add support of departmentId from Bulk Imports. If departmentId is provided then it will be used otherwise
+        // department will be used.
+        if (departmentId != null) {
+            department = departmentId;
         }
         CodeValue departmentCv = null;
         if (department != null) {
