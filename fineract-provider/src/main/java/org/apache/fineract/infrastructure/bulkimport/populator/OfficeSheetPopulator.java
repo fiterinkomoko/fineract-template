@@ -51,7 +51,7 @@ public class OfficeSheetPopulator extends AbstractWorkbookPopulator {
         for (OfficeData office : offices) {
             Row row = officeSheet.createRow(rowIndex);
             writeLong(ID_COL, row, office.getId());
-            writeString(OFFICE_NAME_COL, row, office.name().trim().replaceAll("[ )(/-]", "_"));
+            writeString(OFFICE_NAME_COL, row, office.name().trim().replaceAll("[ )(/%-]", "_"));
             rowIndex++;
         }
     }
