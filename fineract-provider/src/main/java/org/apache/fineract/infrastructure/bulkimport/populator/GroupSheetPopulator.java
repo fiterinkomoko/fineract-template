@@ -71,7 +71,7 @@ public class GroupSheetPopulator extends AbstractWorkbookPopulator {
     private void setOfficeToGroupsMap() {
         officeToGroups = new HashMap<>();
         for (GroupGeneralData group : groups) {
-            add(group.getOfficeName().trim().replaceAll("[ ',)(/%-'<=>]", "_"), group.getName().trim());
+            add(group.getOfficeName().trim().replaceAll("[ )(/%-]", "_"), group.getName().trim());
         }
     }
 
@@ -96,8 +96,8 @@ public class GroupSheetPopulator extends AbstractWorkbookPopulator {
             writeString(OFFICE_NAME_COL, row, office.name());
             ArrayList<String> groupsList = new ArrayList<>();
 
-            if (officeToGroups.containsKey(office.name().trim().replaceAll("[ ',)(/%-'<=>]", "_"))) {
-                groupsList = officeToGroups.get(office.name().trim().replaceAll("[ ',)(/%-'<=>]", "_"));
+            if (officeToGroups.containsKey(office.name().trim().replaceAll("[ )(/%-]", "_"))) {
+                groupsList = officeToGroups.get(office.name().trim().replaceAll("[ )(/%-]", "_"));
             }
 
             if (!groupsList.isEmpty()) {

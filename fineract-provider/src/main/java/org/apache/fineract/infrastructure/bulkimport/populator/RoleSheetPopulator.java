@@ -49,7 +49,7 @@ public class RoleSheetPopulator extends AbstractWorkbookPopulator {
         for (RoleData role : rolesList) {
             Row row = rolesSheet.createRow(rowIndex);
             writeLong(ID_COL, row, role.getId());
-            writeString(ROLE_NAME, row, role.getName().trim().replaceAll("[ ',)(/%-'<=>]", "_"));
+            writeString(ROLE_NAME, row, role.getName().trim().replaceAll("[ )(/%-]", "_"));
             rowIndex++;
         }
     }
