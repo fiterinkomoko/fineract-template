@@ -73,8 +73,8 @@ public class RecurringDepositProductSheetPopulator extends AbstractWorkbookPopul
         for (RecurringDepositProductData product : products) {
             Row row = productSheet.createRow(rowIndex++);
             writeLong(ID_COL, row, product.getId());
-            writeString(NAME_COL, row, product.getName().trim().replaceAll("[ ',)(/%-'<=>]", "_"));
-            writeString(SHORT_NAME_COL, row, product.getShortName().trim().replaceAll("[ ',)(/%-'<=>]", "_"));
+            writeString(NAME_COL, row, product.getName().trim().replaceAll("[ )(/%-]", "_"));
+            writeString(SHORT_NAME_COL, row, product.getShortName().trim().replaceAll("[ )(/%-]", "_"));
             writeBigDecimal(NOMINAL_ANNUAL_INTEREST_RATE_COL, row, product.getNominalAnnualInterestRate());
             writeString(INTEREST_COMPOUNDING_PERIOD_COL, row, product.getInterestCompoundingPeriodType().getValue());
             writeString(INTEREST_POSTING_PERIOD_COL, row, product.getInterestPostingPeriodType().getValue());
