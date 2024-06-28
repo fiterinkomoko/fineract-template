@@ -76,7 +76,7 @@ public class ExtrasSheetPopulator extends AbstractWorkbookPopulator {
                 row = extrasSheet.createRow(paymentTypeRowIndex++);
             }
             writeLong(PAYMENT_TYPE_ID_COL, row, paymentType.getId());
-            writeString(PAYMENT_TYPE_NAME_COL, row, paymentType.getName().trim().replaceAll("[ ',)(/%-'<=>]", "_"));
+            writeString(PAYMENT_TYPE_NAME_COL, row, paymentType.getName().trim().replaceAll("[ )(/%-]", "_"));
         }
         int currencyCodeRowIndex = 1;
         for (CurrencyData currencies : currencies) {
@@ -87,7 +87,7 @@ public class ExtrasSheetPopulator extends AbstractWorkbookPopulator {
                 row = extrasSheet.createRow(currencyCodeRowIndex++);
             }
 
-            writeString(CURRENCY_NAME_COL, row, currencies.getName().trim().replaceAll("[ ',)(/%-'<=>]", "_"));
+            writeString(CURRENCY_NAME_COL, row, currencies.getName().trim().replaceAll("[ )(/%-]", "_"));
             writeString(CURRENCY_CODE_COL, row, currencies.code());
         }
         int departmentRowIndex = 1;

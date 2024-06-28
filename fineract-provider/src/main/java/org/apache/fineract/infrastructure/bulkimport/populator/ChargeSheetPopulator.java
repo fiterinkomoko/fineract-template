@@ -50,7 +50,7 @@ public class ChargeSheetPopulator extends AbstractWorkbookPopulator {
         for (ChargeData charge : charges) {
             Row row = chargeSheet.createRow(rowIndex);
             writeLong(ID_COL, row, charge.getId());
-            writeString(ChargeConstants.CHARGE_NAME_COL, row, charge.getName().trim().replaceAll("[ ',)(/%-'<=>]", "_"));
+            writeString(ChargeConstants.CHARGE_NAME_COL, row, charge.getName().trim().replaceAll("[ )(/%-]", "_"));
             writeBigDecimal(ChargeConstants.CHARGE_AMOUNT_COL, row, charge.getAmount());
             writeString(ChargeConstants.CHARGE_CALCULATION_TYPE_COL, row, charge.getChargeCalculationType().getValue());
             writeString(ChargeConstants.CHARGE_TIME_TYPE_COL, row, charge.getChargeTimeType().getValue());
