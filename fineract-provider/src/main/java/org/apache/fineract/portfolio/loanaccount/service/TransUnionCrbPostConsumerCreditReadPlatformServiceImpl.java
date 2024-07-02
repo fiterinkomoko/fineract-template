@@ -60,14 +60,16 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
                     + "       country_cv.code_value                                                             AS country, "
                     + "       mc.firstname                                                                      AS surName, ");
             if (databaseTypeResolver.isMySQL()) {
-                sql.append("       DATEDIFF(NOW(), mlaa.overdue_since_date_derived)                            AS daysInArrears, ");
+                sql.append(
+                        "      COALESCE(DATEDIFF(NOW(), mlaa.overdue_since_date_derived)  ,0)                           AS daysInArrears, ");
             } else {
-                sql.append("       EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) AS daysInArrears, ");
+                sql.append(
+                        "       COALESCE(CAST(EXTRACT(DAY FROM  (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) AS INTEGER),0)  AS  daysInArrears, ");
             }
             sql.append("       mc.firstname                                                                      AS foreName1, "
                     + "       mc.middlename                                                                     AS foreName2, "
                     + "       mc.lastname                                                                       AS foreName3, "
-                    + "       l.principal_disbursed_derived                                                     AS openingBalance, "
+                    + "       l.principal_amount                                                           AS openingBalance, "
                     + "       CASE " + "           WHEN l.repayment_period_frequency_enum = 0 THEN 'DLY' "
                     + "           WHEN l.repayment_period_frequency_enum = 1 THEN 'WKY' "
                     + "           WHEN l.repayment_period_frequency_enum = 2 THEN 'MTH' "
@@ -79,7 +81,7 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
                     + "           WHEN l.repayment_period_frequency_enum = 2 THEN 'M' "
                     + "           WHEN l.repayment_period_frequency_enum = 3 THEN 'A' "
                     + "           END                                                                           AS incomeFrequency, "
-                    + "       l.principal_disbursed_derived + l.interest_charged_derived                        AS scheduledPaymentAmount, "
+                    + "       nextPaymentTbl.scheduledPaymentAmount                        AS scheduledPaymentAmount, "
                     + "       mc.mobile_no                                                                      AS mobileTelephone, "
                     + "       (l.principal_repaid_derived + l.interest_repaid_derived + l.fee_charges_repaid_derived + "
                     + "        l.penalty_charges_repaid_derived)                                                AS actualPaymentAmount, "
@@ -158,11 +160,11 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
             }
             sql.append("      ''                                                                                AS emailAddress, "
                     + "       'T'                                                                               AS residenceType, "
-                    + "       0                                                                                 AS availableCredit, "
+                    + "        l.total_outstanding_derived                           AS availableCredit, "
                     + "       0                                                                                 AS income, "
                     + "       ''                                                                                AS homeTelephone, "
                     + "       ''                                                                                AS workTelephone, "
-                    + "       l.last_modified_on_utc                                                            AS dateAccountUpdated, "
+                    + "      now()                                                          AS dateAccountUpdated, "
                     + "       r.installments_in_arrears                                                         AS installmentsInArrears "
                     + "  FROM m_loan l " + "         INNER JOIN m_client mc ON l.client_id = mc.id "
                     + "         LEFT JOIN m_client_recruitment_survey mcrs ON mc.id = mcrs.client_id "
@@ -189,6 +191,20 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
                     + "                      AND completed_derived = FALSE " + "                      AND obligations_met_on_date IS NULL "
                     + "                    GROUP BY loan_id) AS r ON l.id = r.loan_id "
                     + "         LEFT JOIN m_code_value province_cv ON ra.state_province_id = province_cv.id "
+                    + "             LEFT JOIN ( SELECT lrs.duedate                                                      AS nextPaymentDueDate, "
+                    + "                                                    lrs.loan_id, "
+                    + "                                                    IFNULL(lrs.principal_amount, 0)                                  AS scheduledPrincipalAmount, "
+                    + "                                                    IFNULL(lrs.interest_amount, 0)                                   AS scheduledInterestAmount, "
+                    + "                                                    IFNULL(lrs.fee_charges_amount, 0)                                AS scheduledFeesAmount, "
+                    + "                                                    IFNULL(lrs.principal_amount, 0) + IFNULL(lrs.interest_amount, 0) AS scheduledPaymentAmount "
+                    + "                                             FROM ( "
+                    + "                                                      SELECT lrs.*,"
+                    + "                                                                          ROW_NUMBER() OVER (PARTITION BY lrs.loan_id ORDER BY lrs.installment ASC) AS row_num "
+                    + "                                                                   FROM m_loan_repayment_schedule lrs "
+                    + "                                                                   WHERE lrs.completed_derived = false AND lrs.obligations_met_on_date IS NULL "
+                    + "                                                                   GROUP BY lrs.loan_id,lrs.installment,lrs.id ORDER BY lrs.installment ASC "
+                    + "                                                  ) lrs   WHERE lrs.row_num = 1 "
+                    + "                                         ) AS nextPaymentTbl on nextPaymentTbl.loan_id = l.id"
                     + "  WHERE l.loan_status_id IN (300, 600, 601, 700) " + "  AND l.currency_code = 'RWF' "
                     + "  AND first_payment.firstPaymentDate IS NOT NULL " + "  AND l.last_repayment_date IS NOT NULL "
                     + "  AND mc.legal_form_enum = 1 " // 1 = individual 2= entity/corporate

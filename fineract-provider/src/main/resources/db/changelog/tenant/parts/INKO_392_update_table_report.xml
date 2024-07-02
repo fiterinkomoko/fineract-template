@@ -841,5 +841,21 @@
                 splitStatements="true"
                 stripComments="true"/>
     </changeSet>
+    <changeSet author="bosco@fiter.io" id="update_Rwanda_Corporate_Credit_To_TransUnion_CRB_Report_mysql-6" context="mysql">
+        <sqlFile
+                encoding="utf8"
+                path="db/changelog/tenant/commands/update_Rwanda_Corporate_Credit_To_TransUnion_CRB_Report_mysql6.sql"
+                relativeToChangelogFile="false"
+                splitStatements="true"
+                stripComments="true"/>
+    </changeSet>
+    <changeSet author="bosco@fiter.io" id="update_Rwanda_Consumer_Credit_To_TransUnion_CRB_Report_mysql6" context="mysql">
+        <sqlFile
+                encoding="utf8"
+                path="db/changelog/tenant/commands/update_Rwanda_Consumer_Credit_To_TransUnion_CRB_Report_mysql6.sql"
+                relativeToChangelogFile="false"
+                splitStatements="true"
+                stripComments="true"/>
+    </changeSet>
 
 </databaseChangeLog>
