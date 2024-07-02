@@ -372,9 +372,9 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
         writeString(LoanConstants.CLIENT_EXTERNAL_ID, rowHeader, "Client ExternalID");
         writeString(LoanConstants.PRODUCT_COL, rowHeader, "Product*");
         writeString(LoanConstants.LOAN_OFFICER_NAME_COL, rowHeader, "Loan Officer*");
-        writeString(LoanConstants.SUBMITTED_ON_DATE_COL, rowHeader, "Submitted On*-(DD/MMMM/YYYY eg. 30/01/2024)");
-        writeString(LoanConstants.APPROVED_DATE_COL, rowHeader, "Approved On-(DD/MMMM/YYYY eg. 30/01/2024)");
-        writeString(LoanConstants.DISBURSED_DATE_COL, rowHeader, "Disbursed Date-(DD/MMMM/YYYY eg. 30/01/2024)");
+        writeString(LoanConstants.SUBMITTED_ON_DATE_COL, rowHeader, "Submitted On*-(MM/DD/YYYY eg. 03/30/2024)");
+        writeString(LoanConstants.APPROVED_DATE_COL, rowHeader, "Approved On-(MM/DD/YYYY eg. 03/30/2024)");
+        writeString(LoanConstants.DISBURSED_DATE_COL, rowHeader, "Disbursed Date-(MM/DD/YYYY eg. 03/30/2024)");
         writeString(LoanConstants.DISBURSED_PAYMENT_TYPE_COL, rowHeader, "Payment Type*");
         writeString(LoanConstants.FUND_NAME_COL, rowHeader, "Fund Name");
         writeString(LoanConstants.PRINCIPAL_COL, rowHeader, "Principal*");
@@ -538,7 +538,7 @@ public class LoanWorkbookPopulator extends AbstractWorkbookPopulator {
             Name chargeAmount = loanWorkbook.createName();
             Name chargeAmountType = loanWorkbook.createName();
 
-            String chargeName = charges.get(i).getName().trim().replaceAll("[ )(]", "_");
+            String chargeName = charges.get(i).getName().trim().replaceAll("[ )(/%-'`]", "_");
 
             chargeColName.setNameName("CHARGE_NAME_" + chargeName);
             chargeColName.setRefersToFormula(TemplatePopulateImportConstants.CHARGE_SHEET_NAME + "!$B$" + (i + 2));

@@ -142,7 +142,7 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
                 "INDIRECT(CONCATENATE(\"Account_\",SUBSTITUTE(SUBSTITUTE(SUBSTITUTE($B1,\" \",\"_\"),\"(\",\"_\"),\")\",\"_\")))");
         DataValidationConstraint paymentTypeConstraint = validationHelper.createFormulaListConstraint("PaymentTypes");
         DataValidationConstraint repaymentDateConstraint = validationHelper.createDateConstraint(
-                DataValidationConstraint.OperatorType.BETWEEN, "=VLOOKUP($D1,$T$2:$X$" + (allloans.size() + 1) + ",4,FALSE)", "=TODAY()",
+                DataValidationConstraint.OperatorType.BETWEEN, "01 January 1900", "=TODAY()",
                 dateFormat);
 
         DataValidation officeValidation = validationHelper.createValidation(officeNameConstraint, officeNameRange);
@@ -194,7 +194,9 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
                 startIndex = i + 2;
                 clientName = allloans.get(i).getClientName();
                 clientId = allloans.get(i).getClientId().toString();
+                LOG.info("Counter . . ..>> "+i+ "  "+allloans.get(i).getClientName()+"  "+allloans.get(i).getAccountNo()+"      Start>"+startIndex+"  "+endIndex);
                 if (!clientsWithActiveLoans.contains(clientName)) {
+                    LOG.info("Inside  >>"+i+ "  "+allloans.get(i).getClientName()+"  "+allloans.get(i).getAccountNo()+"              Start>"+startIndex+"  "+endIndex);
                     clientsWithActiveLoans.add(clientName);
                     clientIdsWithActiveLoans.add(clientId);
                 }
@@ -204,6 +206,10 @@ public class LoanRepaymentWorkbookPopulator extends AbstractWorkbookPopulator {
                 clientNameToBeginEndIndexes.put(clientName, new Integer[] { startIndex, endIndex });
             }
         }
+
+        LOG.info("All active loans: " + allloans.size()+"\n"+allloans.toString()+"\n");
+        LOG.info("Clients with active loans: " + clientsWithActiveLoans.size()+"\n"+clientsWithActiveLoans.toString()+"\n");
+        LOG.info("Clients IDs with active loans: " + clientIdsWithActiveLoans.size()+"\n"+clientIdsWithActiveLoans.toString()+"\n");
 
         // Account Number Named after Clients
         for (int j = 0; j < clientsWithActiveLoans.size(); j++) {

@@ -123,7 +123,7 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
                     if (row == null) {
                         row = sheet.createRow(rowIndex);
                     }
-                    writeString(nameCol, row, client.displayName().replaceAll("[ )(/%-]", "_") + "(" + client.id() + ")");
+                    writeString(nameCol, row, client.displayName().replaceAll("[ )(/%-'`]", "_") + "(" + client.id() + ")");
 
                     if (client.getActivationDate() != null) {
                         writeDate(activationDateCol, row, outputFormat.format(client.getActivationDate()), dateCellStyle, dateFormat);
@@ -142,7 +142,7 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
                     if (row == null) {
                         row = sheet.createRow(rowIndex);
                     }
-                    writeString(nameCol, row, group.getName().replaceAll("[ )(/%-]", "_"));
+                    writeString(nameCol, row, group.getName().replaceAll("[ )(/%-'`]", "_"));
 
                     if (group.getActivationDate() != null) {
                         writeDate(activationDateCol, row, outputFormat.format(group.getActivationDate()), dateCellStyle, dateFormat);
