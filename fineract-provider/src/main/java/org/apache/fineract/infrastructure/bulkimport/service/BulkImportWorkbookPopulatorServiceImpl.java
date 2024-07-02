@@ -450,10 +450,10 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
     private List<LoanAccountData> fetchLoanAccounts(final Long officeId) {
         List<LoanAccountData> loanAccounts = null;
         if (officeId == null) {
-            loanAccounts = loanReadPlatformService.retrieveAll(null).getPageItems();
+            loanAccounts = loanReadPlatformService.retrieveAllActive(null).getPageItems();
         } else {
-            SearchParameters searchParameters = SearchParameters.from(null, officeId, null, null, null, "ACTIVE");
-            loanAccounts = loanReadPlatformService.retrieveAll(searchParameters).getPageItems();
+            SearchParameters searchParameters = SearchParameters.from(null, officeId, null, null, null, null);
+            loanAccounts = loanReadPlatformService.retrieveAllActive(searchParameters).getPageItems();
         }
         return loanAccounts;
     }
