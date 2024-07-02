@@ -430,6 +430,83 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
+    public Page<LoanAccountData> retrieveAllActive(final SearchParameters searchParameters) {
+
+        final AppUser currentUser = this.context.authenticatedUser();
+
+        final String hierarchy = currentUser.getOffice().getHierarchy();
+        final String hierarchySearchString = hierarchy + "%";
+
+        final StringBuilder sqlBuilder = new StringBuilder(200);
+        sqlBuilder.append("select " + sqlGenerator.calcFoundRows() + " ");
+        sqlBuilder.append(this.loaanLoanMapper.loanSchema());
+
+        // TODO - for time being this will data scope list of loans returned to
+        // only loans that have a client associated.
+        // to support senario where loan has group_id only OR client_id will
+        // probably require a UNION query
+        // but that at present is an edge case
+        sqlBuilder.append(" join m_office o on (o.id = c.office_id or o.id = g.office_id) ");
+        sqlBuilder.append(" left join m_office transferToOffice on transferToOffice.id = c.transfer_to_office_id ");
+        sqlBuilder.append(" where ( o.hierarchy like ? or transferToOffice.hierarchy like ?) and l.loan_status_id = 300");
+
+        int arrayPos = 2;
+        List<Object> extraCriterias = new ArrayList<>();
+        extraCriterias.add(hierarchySearchString);
+        extraCriterias.add(hierarchySearchString);
+
+        if (searchParameters != null) {
+
+            String sqlQueryCriteria = searchParameters.getSqlSearch();
+            if (StringUtils.isNotBlank(sqlQueryCriteria)) {
+                SQLInjectionValidator.validateSQLInput(sqlQueryCriteria);
+                sqlQueryCriteria = sqlQueryCriteria.replace("accountNo", "l.account_no");
+                this.columnValidator.validateSqlInjection(sqlBuilder.toString(), sqlQueryCriteria);
+                sqlBuilder.append(" and (").append(sqlQueryCriteria).append(")");
+            }
+
+            if (StringUtils.isNotBlank(searchParameters.getExternalId())) {
+                sqlBuilder.append(" and l.external_id = ?");
+                extraCriterias.add(searchParameters.getExternalId());
+                arrayPos = arrayPos + 1;
+            }
+            if (searchParameters.getOfficeId() != null) {
+                sqlBuilder.append("and c.office_id =?");
+                extraCriterias.add(searchParameters.getOfficeId());
+                arrayPos = arrayPos + 1;
+            }
+
+            if (StringUtils.isNotBlank(searchParameters.getAccountNo())) {
+                sqlBuilder.append(" and l.account_no = ?");
+                extraCriterias.add(searchParameters.getAccountNo());
+                arrayPos = arrayPos + 1;
+            }
+
+            if (searchParameters.isOrderByRequested()) {
+                sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
+                this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getOrderBy());
+
+                if (searchParameters.isSortOrderProvided()) {
+                    sqlBuilder.append(' ').append(searchParameters.getSortOrder());
+                    this.columnValidator.validateSqlInjection(sqlBuilder.toString(), searchParameters.getSortOrder());
+                }
+            }
+
+            if (searchParameters.isLimited()) {
+                sqlBuilder.append(" ");
+                if (searchParameters.isOffset()) {
+                    sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit(), searchParameters.getOffset()));
+                } else {
+                    sqlBuilder.append(sqlGenerator.limit(searchParameters.getLimit()));
+                }
+            }
+        }
+        final Object[] objectArray = extraCriterias.toArray();
+        final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlBuilder.toString(), finalObjectArray, this.loaanLoanMapper);
+    }
+
+    @Override
     public LoanAccountData retrieveTemplateWithClientAndProductDetails(final Long clientId, final Long productId) {
 
         this.context.authenticatedUser();
