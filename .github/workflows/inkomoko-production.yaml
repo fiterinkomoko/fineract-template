@@ -1,0 +1,36 @@
+name: Inkomoko Fineract Build Production
+
+on:
+  push:
+    branches:
+      - inkomoko-prod
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v6
+
+      - uses: actions/checkout@v1
+      - uses: kamiazya/setup-graphviz@v1
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v1
+        with:
+          java-version: 17
+
+      - name: Build with Gradles
+        run: ./gradlew --no-daemon -q -x rat -x compileTestJava -x test -x spotlessJavaCheck -x spotlessJava clean war
+
+      - name: Deploying war file to production server
+        uses: garygrossgarten/github-action-scp@release
+        with:
+          host:  ${{ secrets.PROD_SERVER_HOST }}
+          username: ${{ secrets.PROD_SERVER_USERNAME }}
+          port: ${{ secrets.PROD_SERVER_PORT }}
+          privateKey: ${{ secrets.PROD_SERVER_SSH_KEY }}
+          local: "fineract-provider/build/libs/fineract-provider.war"
+          remote: "/home/fiter/inkomoko_deployments/fineract/fineract-provider.war"
