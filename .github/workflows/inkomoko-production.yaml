@@ -26,6 +26,7 @@ jobs:
         run: |
           sudo mkdir -p ~/.ssh
           sudo touch ~/.ssh/known_hosts
+          echo "SSH Key: ${{ secrets.PROD_SERVER_SSH_KEY }}" 
           ssh-keyscan -p ${{ secrets.PROD_SERVER_PORT }} -t rsa ${{ secrets.PROD_SERVER_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploying war file to production server
