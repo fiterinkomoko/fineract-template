@@ -32,5 +32,5 @@ jobs:
           username: ${{ secrets.PROD_SERVER_USERNAME }}
           port: ${{ secrets.PROD_SERVER_PORT }}
           privateKey: ${{ secrets.PROD_SERVER_SSH_KEY }}
-          local: "fineract-provider/build/libs/fineract-provider.war"
+          local: "fineract-war/build/libs/fineract-provider.war"
           remote: "/home/fiter/inkomoko_deployments/fineract/fineract-provider.war"
