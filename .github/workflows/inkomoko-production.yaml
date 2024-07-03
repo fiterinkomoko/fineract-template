@@ -25,28 +25,12 @@ jobs:
       - name: Build with Gradles
         run: ./gradlew --no-daemon -q -x rat -x compileTestJava -x test -x spotlessJavaCheck -x spotlessJava clean war
 
-      - name: Update known hosts
-        run: |
-          mkdir -p ~/.ssh
-          touch ~/.ssh/known_hosts
-          ssh-keyscan -p ${{ secrets.PROD_SERVER_PORT }} -t rsa ${{ secrets.PROD_SERVER_HOST }} >> ~/.ssh/known_hosts
-
-      - name: Copy file using SCP
-        run: |
-          HOST=${{ secrets.PROD_SERVER_HOST }}
-          USER=${{ secrets.PROD_SERVER_USERNAME }}
-          SOURCE_FILE=./fineract-war/build/libs/fineract-provider.war
-          DESTINATION_DIR=/home/fiter/inkomoko_deployments/fineract
-          echo "${{ secrets.PROD_SERVER_SSH_KEY }}" > key.pem
-          chmod 400 key.pem
-          scp -i key.pem -P ${{ secrets.PROD_SERVER_PORT }} -o StrictHostKeyChecking=no $SOURCE_FILE $USER@$HOST:$DESTINATION_DIR
-#
-#      - name: Deploying war file to production server
-#        uses: garygrossgarten/github-action-scp@release
-#        with:
-#          host:  ${{ secrets.PROD_SERVER_HOST }}
-#          username: ${{ secrets.PROD_SERVER_USERNAME }}
-#          port: ${{ secrets.PROD_SERVER_PORT }}
-#          privateKey: ${{ secrets.PROD_SERVER_SSH_KEY }}
-#          local: "fineract-war/build/libs/fineract-provider.war"
-#          remote: "/home/fiter/inkomoko_deployments/fineract/fineract-provider.war"
+      - name: Deploying war file to production server
+        uses: garygrossgarten/github-action-scp@release
+        with:
+          host:  ${{ secrets.PROD_SERVER_HOST }}
+          username: ${{ secrets.PROD_SERVER_USERNAME }}
+          port: ${{ secrets.PROD_SERVER_PORT }}
+          privateKey: ${{ secrets.PROD_SERVER_SSH_KEY }}
+          local: "fineract-war/build/libs/fineract-provider.war"
+          remote: "/home/fiter/inkomoko_deployments/fineract/fineract-provider.war"
