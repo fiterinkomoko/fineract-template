@@ -35,7 +35,7 @@ jobs:
         run: |
           HOST=${{ secrets.PROD_SERVER_HOST }}
           USER=${{ secrets.PROD_SERVER_USERNAME }}
-          SOURCE_FILE=/fineract-war/build/libs/fineract-provider.war
+          SOURCE_FILE=./fineract-war/build/libs/fineract-provider.war
           DESTINATION_DIR=/home/fiter/inkomoko_deployments/fineract
           echo "${{ secrets.PROD_SERVER_SSH_KEY }}" > key.pem
           chmod 400 key.pem
