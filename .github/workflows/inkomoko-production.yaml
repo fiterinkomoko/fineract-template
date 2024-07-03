@@ -24,8 +24,8 @@ jobs:
 
       - name: Update known hosts
         run: |
-          mkdir -p ~/.ssh
-          touch ~/.ssh/known_hosts
+          sudo mkdir -p ~/.ssh
+          sudo touch ~/.ssh/known_hosts
           ssh-keyscan -p ${{ secrets.PROD_SERVER_PORT }} -t rsa ${{ secrets.PROD_SERVER_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploying war file to production server
