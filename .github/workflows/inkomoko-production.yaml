@@ -24,7 +24,7 @@ jobs:
 
       - name: Update known hosts
         run: |
-          sudo mkdir -p ~/.ssh
+          mkdir -p ~/.ssh
           touch ~/.ssh/known_hosts
           ssh-keyscan -p ${{ secrets.PROD_SERVER_PORT }} -t rsa ${{ secrets.PROD_SERVER_HOST }} >> ~/.ssh/known_hosts
 
