@@ -25,6 +25,12 @@ jobs:
       - name: Build with Gradles
         run: ./gradlew --no-daemon -q -x rat -x compileTestJava -x test -x spotlessJavaCheck -x spotlessJava clean war
 
+      - name: Update known hosts
+        run: |
+          mkdir -p ~/.ssh
+          touch ~/.ssh/known_hosts
+          ssh-keyscan -p ${{ secrets.PROD_SERVER_PORT }} -t rsa ${{ secrets.PROD_SERVER_HOST }} >> ~/.ssh/known_hosts
+
       - name: Deploying war file to production server
         uses: garygrossgarten/github-action-scp@release
         with:
