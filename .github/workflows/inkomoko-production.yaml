@@ -24,9 +24,21 @@ jobs:
 
       - name: Update known hosts
         run: |
-          sudo mkdir -p ~/.ssh
-          sudo touch ~/.ssh/known_hosts
+          # Create SSH directory
+          mkdir -p ~/.ssh
+          echo "Created .ssh directory"
+
+          # Create known_hosts file
+          touch ~/.ssh/known_hosts
+          echo "Created known_hosts file"
+
+          # Update known hosts
           ssh-keyscan -p ${{ secrets.PROD_SERVER_PORT }} -t rsa ${{ secrets.PROD_SERVER_HOST }} >> ~/.ssh/known_hosts
+          echo "Added SSH key to known_hosts"
+
+          # Verify known_hosts
+          cat ~/.ssh/known_hosts
+          echo "Verified known_hosts file"
 
       - name: Deploying war file to production server
         run: |
