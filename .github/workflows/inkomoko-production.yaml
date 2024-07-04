@@ -22,6 +22,12 @@ jobs:
         with:
           java-version: 17
           
+      - name: Update known hosts
+        run: |
+          mkdir -p ~/.ssh
+          touch ~/.ssh/known_hosts
+          ssh-keyscan -p ${{ secrets.PROD_SERVER_PORT }} -t rsa ${{ secrets.PROD_SERVER_HOST }} >> ~/.ssh/known_hosts
+          
       - name: Deploying war file to production server
         run: |
           HOST=${{ secrets.PROD_SERVER_HOST }}
