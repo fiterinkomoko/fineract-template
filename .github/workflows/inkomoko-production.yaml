@@ -33,7 +33,7 @@ jobs:
           echo "Created known_hosts file"
 
           # Update known hosts
-          ssh-keyscan -p ${{ secrets.PROD_SERVER_PORT }} -t rsa ${{ secrets.PROD_SERVER_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -p ${{ secrets.PROD_SERVER_PORT }} -t rsa ${{ secrets.PROD_SERVER_HOST }} >> ~/.ssh/known_hosts || { echo 'ssh-keyscan failed'; exit 1; }
           echo "Added SSH key to known_hosts"
 
           # Verify known_hosts
