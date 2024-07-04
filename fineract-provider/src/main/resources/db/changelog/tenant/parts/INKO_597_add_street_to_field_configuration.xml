@@ -21,7 +21,7 @@
 -->
 
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.6.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
-    <changeSet author="moses@fiter.io" id="INKO_597_add_street_to_field_configuration" context="mysql">
+    <changeSet author="moses@fiter.io" id="INKO_597_add_street_to_field_configuration_1" context="mysql">
         <insert tableName="m_field_configuration">
             <column name="entity" value="ADDRESS"/>
             <column name="subentity" value="CLIENT"/>
@@ -30,5 +30,27 @@
             <column name="is_mandatory" valueBoolean="false"/>
             <column name="validation_regex" value=""/>
         </insert>
+    </changeSet>
+    <changeSet author="moses@fiter.io" id="INKO_597_add_street_to_field_configuration_2" context="mysql">
+
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_field_configuration"/>
+            <sqlCheck expectedResult="3">
+                select count(1) from m_field_configuration
+                where field in ('physicalAddressDistrict','physicalAddressSector', 'physicalAddressCell');
+            </sqlCheck>
+        </preConditions>
+        <update tableName="m_field_configuration">
+            <column name="is_mandatory" valueBoolean="false"/>
+            <where>field = 'physicalAddressDistrict'</where>
+        </update>
+        <update tableName="m_field_configuration">
+            <column name="is_mandatory" valueBoolean="false"/>
+            <where>field = 'physicalAddressSector'</where>
+        </update>
+        <update tableName="m_field_configuration">
+            <column name="is_mandatory" valueBoolean="false"/>
+            <where>field = 'physicalAddressCell'</where>
+        </update>
     </changeSet>
 </databaseChangeLog>
