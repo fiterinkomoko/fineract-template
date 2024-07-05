@@ -22,7 +22,7 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-    <changeSet author="deepika@fiter.io" id="update_stretchy_report_sql">
+    <changeSet author="deepika@fiter.io" id="update_stretchy_report_sql_2">
         <update tableName="stretchy_report">
             <column name="report_sql" value="SELECT x.* FROM m_client c, m_office o, (SELECT b.loanCycle, a.activeLoans, b.lastLoanAmount, d.activeSavings, d.totalSavings FROM (SELECT COUNT(l.id) AS activeLoans FROM m_loan l WHERE l.loan_status_id=300 AND l.client_id=${clientId}) a, (SELECT COUNT(l.id), IFNULL(l.principal_amount,0) AS 'lastLoanAmount', IFNULL(MAX(l.generic_loan_counter),0) AS loanCycle FROM m_loan l WHERE l.client_id=${clientId} AND l.disbursedon_date = (SELECT IFNULL(MAX(disbursedon_date),NOW()) FROM m_loan WHERE client_id=${clientId} AND loan_status_id IN (300, 600, 601, 700)) GROUP BY l.principal_amount) b, (SELECT COUNT(s.id) AS 'activeSavings', IFNULL(SUM(s.account_balance_derived),0) AS 'totalSavings' FROM m_savings_account s WHERE s.status_enum=300 AND s.client_id=${clientId}) d) x WHERE c.id=${clientId} AND o.id = c.office_id AND o.hierarchy LIKE CONCAT('${currentUserHierarchy}', '%')" />
             <where>report_name='ClientSummary'</where>
