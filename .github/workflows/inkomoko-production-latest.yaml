@@ -1,4 +1,4 @@
-name: Inkomoko Fineract Build Production
+name: Inkomoko Fineract Build Production latest
 
 on:
   push:
