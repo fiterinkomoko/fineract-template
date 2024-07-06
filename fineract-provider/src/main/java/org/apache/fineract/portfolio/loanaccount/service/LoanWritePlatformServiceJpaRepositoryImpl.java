@@ -1053,10 +1053,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 throw new GeneralPlatformDomainRuleException("error.msg.loan.not.in.active.status.repayment.or.waiver.is.not.allowed",
                         "Loan is not in active status so repayment or waiver is not allowed");
             }
-            if (command.integerValueOfParameterNamed("paymentTypeId") == 100 && isRecoveryRepayment != true) {
-                // Route to Waive Interest.
-                // Note This is for Data Migration Only.
-                return waiveInterestOnLoan(command.getLoanId(), command);
+            //add because pay off feature
+            if(command.integerValueOfParameterNamed("paymentTypeId") != null){
+                if (command.integerValueOfParameterNamed("paymentTypeId") == 100 && isRecoveryRepayment != true) {
+                    // Route to Waive Interest.
+                    // Note This is for Data Migration Only.
+                    return waiveInterestOnLoan(command.getLoanId(), command);
+                }
             }
 
             this.loanUtilService.validateRepaymentTransactionType(repaymentTransactionType, isPayOff);
