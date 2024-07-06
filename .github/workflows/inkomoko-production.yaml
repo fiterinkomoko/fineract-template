@@ -21,7 +21,7 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 17
-
+          
       - name: Update known hosts
         run: |
           # Create SSH directory
@@ -33,13 +33,13 @@ jobs:
           echo "Created known_hosts file"
 
           # Update known hosts
-          ssh-keyscan -p ${{ secrets.PROD_SERVER_PORT }} -t rsa ${{ secrets.PROD_SERVER_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -p ${{ secrets.PROD_SERVER_PORT }} -t rsa ${{ secrets.PROD_SERVER_HOST }} >> ~/.ssh/known_hosts || { echo 'ssh-keyscan failed'; exit 1; }
           echo "Added SSH key to known_hosts"
 
           # Verify known_hosts
           cat ~/.ssh/known_hosts
           echo "Verified known_hosts file"
-
+          
       - name: Deploying war file to production server
         run: |
           HOST=${{ secrets.PROD_SERVER_HOST }}
@@ -48,4 +48,5 @@ jobs:
           DESTINATION_DIR="/home/fiter/inkomoko_deployments/fineract/fineract-provider.war"
           echo "${{ secrets.PROD_SERVER_SSH_KEY }}" > key.pem
           chmod 400 key.pem
-          scp -i key.pem -P ${{ secrets.PROD_SERVER_PORT }} -o StrictHostKeyChecking=no $SOURCE_FILE $USER@$HOST:$DESTINATION_DIR
+          scp -i key.pem -p ${{ secrets.PROD_SERVER_PORT }} -o StrictHostKeyChecking=no $SOURCE_FILE $USER@$HOST:$DESTINATION_DIR 
+
