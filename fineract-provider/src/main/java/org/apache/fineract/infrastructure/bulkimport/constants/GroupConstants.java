@@ -42,7 +42,8 @@ public final class GroupConstants {
     public static final int GROUP_ID_COL = 14;// O
     public static final int FAILURE_COL = 15;// P
     public static final int CLIENT_NAMES_STARTING_COL = 16;// Q
-    public static final int CLIENT_NAMES_ENDING_COL = 250;// IQ
+    public static final int CLIENT_NAMES_ENDING_COL = 249;// IQ
+    public static final int REPRESENTATIVE_NAME_COL = 250;// IQ
     public static final int LOOKUP_OFFICE_NAME_COL = 251;// IR
     public static final int LOOKUP_OFFICE_OPENING_DATE_COL = 252;// IS
     public static final int LOOKUP_REPEAT_NORMAL_COL = 253;// IT

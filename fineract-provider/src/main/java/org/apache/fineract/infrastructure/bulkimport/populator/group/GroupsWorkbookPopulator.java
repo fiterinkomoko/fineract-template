@@ -87,6 +87,7 @@ public class GroupsWorkbookPopulator extends AbstractWorkbookPopulator {
         worksheet.setColumnWidth(GroupConstants.GROUP_ID_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
         worksheet.setColumnWidth(GroupConstants.FAILURE_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
         worksheet.setColumnWidth(GroupConstants.CLIENT_NAMES_STARTING_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
+        worksheet.setColumnWidth(GroupConstants.REPRESENTATIVE_NAME_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
         worksheet.setColumnWidth(GroupConstants.LOOKUP_OFFICE_NAME_COL, TemplatePopulateImportConstants.MEDIUM_COL_SIZE);
         worksheet.setColumnWidth(GroupConstants.LOOKUP_OFFICE_OPENING_DATE_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
         worksheet.setColumnWidth(GroupConstants.LOOKUP_REPEAT_NORMAL_COL, TemplatePopulateImportConstants.SMALL_COL_SIZE);
@@ -107,6 +108,7 @@ public class GroupsWorkbookPopulator extends AbstractWorkbookPopulator {
         writeString(GroupConstants.INTERVAL_COL, rowHeader, "Interval*");
         writeString(GroupConstants.REPEATS_ON_DAY_COL, rowHeader, "Repeats On*");
         writeString(GroupConstants.CLIENT_NAMES_STARTING_COL, rowHeader, "Client Names* (Enter in consecutive cells horizontally)");
+        writeString(GroupConstants.REPRESENTATIVE_NAME_COL, rowHeader, "Representative Name*");
         writeString(GroupConstants.LOOKUP_OFFICE_NAME_COL, rowHeader, "Office Name");
         writeString(GroupConstants.LOOKUP_OFFICE_OPENING_DATE_COL, rowHeader, "Opening Date");
         writeString(GroupConstants.LOOKUP_REPEAT_NORMAL_COL, rowHeader, "Repeat Normal Range");
@@ -160,6 +162,8 @@ public class GroupsWorkbookPopulator extends AbstractWorkbookPopulator {
                 GroupConstants.INTERVAL_COL, GroupConstants.INTERVAL_COL);
         CellRangeAddressList repeatsOnRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
                 GroupConstants.REPEATS_ON_DAY_COL, GroupConstants.REPEATS_ON_DAY_COL);
+        CellRangeAddressList representativeOnRange = new CellRangeAddressList(1, SpreadsheetVersion.EXCEL97.getLastRowIndex(),
+                GroupConstants.REPRESENTATIVE_NAME_COL, GroupConstants.REPRESENTATIVE_NAME_COL);
 
         DataValidationHelper validationHelper = new HSSFDataValidationHelper((HSSFSheet) worksheet);
         List<OfficeData> offices = officeSheetPopulator.getOffices();
@@ -172,7 +176,7 @@ public class GroupsWorkbookPopulator extends AbstractWorkbookPopulator {
                 .createFormulaListConstraint("INDIRECT(CONCATENATE(\"Staff_\",$B1))");
         DataValidationConstraint booleanConstraint = validationHelper.createExplicitListConstraint(new String[] { "True", "False" });
         DataValidationConstraint activationDateConstraint = validationHelper.createDateConstraint(
-                DataValidationConstraint.OperatorType.BETWEEN, "=VLOOKUP($B1,$IR$2:$IS" + (offices.size() + 1) + ",2,FALSE)", "=TODAY()",
+                DataValidationConstraint.OperatorType.BETWEEN, "01 January 1900", "=TODAY()",
                 dateFormat);
         DataValidationConstraint submittedOnDateConstraint = validationHelper
                 .createDateConstraint(DataValidationConstraint.OperatorType.LESS_OR_EQUAL, "=$G1", null, dateFormat);
@@ -183,6 +187,7 @@ public class GroupsWorkbookPopulator extends AbstractWorkbookPopulator {
                         TemplatePopulateImportConstants.FREQUENCY_MONTHLY, TemplatePopulateImportConstants.FREQUENCY_YEARLY });
         DataValidationConstraint repeatsEveryConstraint = validationHelper.createFormulaListConstraint("INDIRECT($K1)");
         DataValidationConstraint repeatsOnConstraint = validationHelper.createFormulaListConstraint("INDIRECT(CONCATENATE($K1,\"_DAYS\"))");
+        DataValidationConstraint representativeNameConstraint = validationHelper.createFormulaListConstraint("ClientNames");
 
         DataValidation centerValidation = validationHelper.createValidation(centerNameConstraint, centerNameRange);
         DataValidation officeValidation = validationHelper.createValidation(officeNameConstraint, officeNameRange);
@@ -195,6 +200,7 @@ public class GroupsWorkbookPopulator extends AbstractWorkbookPopulator {
         DataValidation repeatsValidation = validationHelper.createValidation(repeatsConstraint, repeatsRange);
         DataValidation repeatsEveryValidation = validationHelper.createValidation(repeatsEveryConstraint, repeatsEveryRange);
         DataValidation repeatsOnValidation = validationHelper.createValidation(repeatsOnConstraint, repeatsOnRange);
+        DataValidation representativeValidation = validationHelper.createValidation(representativeNameConstraint, representativeOnRange);
 
         worksheet.addValidationData(centerValidation);
         worksheet.addValidationData(activeValidation);
@@ -207,6 +213,7 @@ public class GroupsWorkbookPopulator extends AbstractWorkbookPopulator {
         worksheet.addValidationData(repeatsValidation);
         worksheet.addValidationData(repeatsEveryValidation);
         worksheet.addValidationData(repeatsOnValidation);
+        worksheet.addValidationData(representativeValidation);
     }
 
     private void setNames(Sheet worksheet, List<OfficeData> offices) {
@@ -251,5 +258,10 @@ public class GroupsWorkbookPopulator extends AbstractWorkbookPopulator {
                         + officeNameToBeginEndIndexesOfCenters[0] + ":$B$" + officeNameToBeginEndIndexesOfCenters[1]);
             }
         }
+        // Create a named range for the client columns (Q to IP, indexes 16 to 249)
+        Name clientNamesRange = centerWorkbook.createName();
+        clientNamesRange.setNameName("ClientNames");
+        String clientRangeRef = TemplatePopulateImportConstants.GROUP_SHEET_NAME + "!$Q$2:$IP$2";
+        clientNamesRange.setRefersToFormula(clientRangeRef);
     }
 }
