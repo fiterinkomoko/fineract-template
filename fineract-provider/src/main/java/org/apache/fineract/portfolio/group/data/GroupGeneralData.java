@@ -125,7 +125,7 @@ public class GroupGeneralData implements Serializable {
         this.selectedRole = null;
         this.closureReasons = null;
         this.timeline = null;
-        this.representativeId=representativeId;
+        this.representativeId = representativeId;
     }
 
     public GroupGeneralData(Long id, Long officeId) {

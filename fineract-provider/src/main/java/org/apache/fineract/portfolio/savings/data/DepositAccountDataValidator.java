@@ -69,7 +69,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import io.fiter.ff4j.validators.SavingsAccountFeatureValidator;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -119,7 +118,6 @@ public class DepositAccountDataValidator {
      *
      * This is a fiter only feature, it should not be committed in the event that it this is merged upstream
      */
-    private final SavingsAccountFeatureValidator featureValidator;
 
     private final ChargeRepositoryWrapper chargeRepository;
 
@@ -129,12 +127,10 @@ public class DepositAccountDataValidator {
 
     @Autowired
     public DepositAccountDataValidator(final FromJsonHelper fromApiJsonHelper, final DepositProductDataValidator productDataValidator,
-            final SavingsAccountFeatureValidator featureValidator, ChargeRepositoryWrapper chargeRepository,
-            RecurringDepositProductRepository recurringDepositProductRepository,
+            ChargeRepositoryWrapper chargeRepository, RecurringDepositProductRepository recurringDepositProductRepository,
             FixedDepositProductRepository fixedDepositProductRepository) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.productDataValidator = productDataValidator;
-        this.featureValidator = featureValidator;
         this.chargeRepository = chargeRepository;
         this.recurringDepositProductRepository = recurringDepositProductRepository;
         this.fixedDepositProductRepository = fixedDepositProductRepository;

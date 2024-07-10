@@ -118,7 +118,7 @@ public class GroupImportHandler implements ImportHandler {
         Long officeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName);
         String staffName = ImportHandlerUtils.readAsString(GroupConstants.STAFF_NAME_COL, row);
         Long staffId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME), staffName);
-        staffId = (staffId == 0L) ? null: staffId;
+        staffId = (staffId == 0L) ? null : staffId;
         String centerName = ImportHandlerUtils.readAsString(GroupConstants.CENTER_NAME_COL, row);
         Long centerId = null;
         if (centerName != null) {
@@ -153,7 +153,7 @@ public class GroupImportHandler implements ImportHandler {
         String representativeName = ImportHandlerUtils.readAsString(GroupConstants.REPRESENTATIVE_NAME_COL, row);
         Long representativeId = null;
         if (representativeName != null) {
-             representativeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME),
+            representativeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME),
                     representativeName);
         }
 
