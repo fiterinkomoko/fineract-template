@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.configuration.domain;
 
-import io.fiter.ff4j.validators.FeatureList;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +30,6 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.useradministration.domain.Permission;
 import org.apache.fineract.useradministration.domain.PermissionRepository;
 import org.apache.fineract.useradministration.exception.PermissionNotFoundException;
-import org.ff4j.FF4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -48,16 +46,12 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     private final PlatformCacheRepository cacheTypeRepository;
     private static Map<String, GlobalConfigurationPropertyData> configurations = new HashMap<>();
 
-    private final FF4j ff4j;
-
     @Autowired
     public ConfigurationDomainServiceJpa(final PermissionRepository permissionRepository,
-            final GlobalConfigurationRepositoryWrapper globalConfigurationRepository, final PlatformCacheRepository cacheTypeRepository,
-            final FF4j ff4j) {
+            final GlobalConfigurationRepositoryWrapper globalConfigurationRepository, final PlatformCacheRepository cacheTypeRepository) {
         this.permissionRepository = permissionRepository;
         this.globalConfigurationRepository = globalConfigurationRepository;
         this.cacheTypeRepository = cacheTypeRepository;
-        this.ff4j = ff4j;
     }
 
     @Override
@@ -466,7 +460,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
 
     @Override
     public boolean isClientLevelValidationEnabled() {
-        return this.ff4j.check(FeatureList.CLIENT_LEVEL_LIMIT_VALIDATION);
+        return true;
     }
 
     @Override
