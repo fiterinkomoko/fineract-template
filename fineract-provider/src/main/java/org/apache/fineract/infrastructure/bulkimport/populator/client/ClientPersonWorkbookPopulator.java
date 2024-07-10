@@ -250,9 +250,8 @@ public class ClientPersonWorkbookPopulator extends AbstractWorkbookPopulator {
                 .createFormulaListConstraint("INDIRECT(CONCATENATE(\"Staff_\",$D1))");
         DataValidationConstraint submittedOnDateConstraint = validationHelper
                 .createDateConstraint(DataValidationConstraint.OperatorType.LESS_OR_EQUAL, "=$I1", null, dateformat);
-        DataValidationConstraint activationDateConstraint = validationHelper.createDateConstraint(
-                DataValidationConstraint.OperatorType.BETWEEN, "=VLOOKUP($D1,$AJ$2:$AK" + (offices.size() + 1) + ",2,FALSE)", "=TODAY()",
-                dateformat);
+        DataValidationConstraint activationDateConstraint = validationHelper
+                .createDateConstraint(DataValidationConstraint.OperatorType.BETWEEN, "01 January 1900", "=TODAY()", dateformat);
         DataValidationConstraint dobDateConstraint = validationHelper
                 .createDateConstraint(DataValidationConstraint.OperatorType.LESS_OR_EQUAL, "=TODAY()", null, dateformat);
         DataValidationConstraint activeConstraint = validationHelper.createExplicitListConstraint(new String[] { "True", "False" });

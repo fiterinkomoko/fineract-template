@@ -85,15 +85,15 @@ public class GroupGeneralData implements Serializable {
 
     public static GroupGeneralData importInstance(String groupName, List<ClientData> clientMembers, LocalDate activationDate,
             LocalDate submittedOnDate, Boolean active, String externalId, Long officeId, Long staffId, Long centerId, Integer rowIndex,
-            String locale, String dateFormat) {
+            String locale, String dateFormat, Long representativeId) {
 
         return new GroupGeneralData(groupName, clientMembers, activationDate, submittedOnDate, active, externalId, officeId, staffId,
-                centerId, rowIndex, locale, dateFormat);
+                centerId, rowIndex, locale, dateFormat, representativeId);
     }
 
     private GroupGeneralData(String name, List<ClientData> clientMembers, LocalDate activationDate, LocalDate submittedOnDate,
             Boolean active, String externalId, Long officeId, Long staffId, Long centerId, Integer rowIndex, String locale,
-            String dateFormat) {
+            String dateFormat, Long representativeId) {
         this.dateFormat = dateFormat;
         this.locale = locale;
         this.name = name;
@@ -125,6 +125,7 @@ public class GroupGeneralData implements Serializable {
         this.selectedRole = null;
         this.closureReasons = null;
         this.timeline = null;
+        this.representativeId = representativeId;
     }
 
     public GroupGeneralData(Long id, Long officeId) {

@@ -118,6 +118,7 @@ public class GroupImportHandler implements ImportHandler {
         Long officeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME), officeName);
         String staffName = ImportHandlerUtils.readAsString(GroupConstants.STAFF_NAME_COL, row);
         Long staffId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME), staffName);
+        staffId = (staffId == 0L) ? null : staffId;
         String centerName = ImportHandlerUtils.readAsString(GroupConstants.CENTER_NAME_COL, row);
         Long centerId = null;
         if (centerName != null) {
@@ -149,9 +150,16 @@ public class GroupImportHandler implements ImportHandler {
                 clientMembers.add(clientData);
             }
         }
+        String representativeName = ImportHandlerUtils.readAsString(GroupConstants.REPRESENTATIVE_NAME_COL, row);
+        Long representativeId = null;
+        if (representativeName != null) {
+            representativeId = ImportHandlerUtils.getIdByName(workbook.getSheet(TemplatePopulateImportConstants.CLIENT_SHEET_NAME),
+                    representativeName);
+        }
+
         statuses.add(status);
         return GroupGeneralData.importInstance(groupName, clientMembers, activationDate, submittedOnDate, active, externalId, officeId,
-                staffId, centerId, row.getRowNum(), locale, dateFormat);
+                staffId, centerId, row.getRowNum(), locale, dateFormat, representativeId);
     }
 
     private boolean containsClientId(List<ClientData> clientMembers, Long clientId) {
@@ -191,7 +199,7 @@ public class GroupImportHandler implements ImportHandler {
                 if (meetings.get(i) != null && groups.get(i).getCenterId() == null) {
                     progressLevel = importGroupMeeting(result, i, dateFormat);
                 }
-
+                successCount++;
                 statusCell.setCellValue(TemplatePopulateImportConstants.STATUS_CELL_IMPORTED);
                 statusCell.setCellStyle(ImportHandlerUtils.getCellStyle(workbook, IndexedColors.LIGHT_GREEN));
             } catch (RuntimeException ex) {
