@@ -45,7 +45,7 @@ public final class LoanFinancialRatioData {
     private BigDecimal totalAssets;
     private BigDecimal equity;
     private BigDecimal unsecuredLoans;
-    private BigDecimal assetFinancing;
+    private BigDecimal securedLoans;
     private BigDecimal totalLongTerm;
     private BigDecimal totalLiabilities;
     private BigDecimal bssDeposits;
@@ -60,13 +60,14 @@ public final class LoanFinancialRatioData {
     private BigDecimal totalIncome;
     private BigDecimal totalExpense;
     private BigDecimal netCashFlow;
+    private BigDecimal shortTermLoans;
 
     public LoanFinancialRatioData(Long id, Long loanId, BigDecimal cash, BigDecimal inventoryStock, BigDecimal receivables,
             BigDecimal chamaTontines, BigDecimal otherCurrentAssets, BigDecimal totalCurrentAssets, BigDecimal goodsBoughtOnCredit,
             BigDecimal anyOtherPendingPayables, BigDecimal totalShortTerm, BigDecimal equipmentTools, BigDecimal furniture,
             BigDecimal businessPremises, BigDecimal otherFixedAssets, BigDecimal totalFixedAssets, BigDecimal totalAssets,
-            BigDecimal equity, BigDecimal unsecuredLoans, BigDecimal assetFinancing, BigDecimal totalLongTerm, BigDecimal totalLiabilities,
-            BigDecimal bssDeposits, BigDecimal bssWithdrawals, BigDecimal bssMonthlyTurnOver) {
+            BigDecimal equity, BigDecimal unsecuredLoans, BigDecimal securedLoans, BigDecimal totalLongTerm, BigDecimal totalLiabilities,
+            BigDecimal bssDeposits, BigDecimal bssWithdrawals, BigDecimal bssMonthlyTurnOver, BigDecimal shortTermLoans) {
         this.id = id;
         this.loanId = loanId;
         this.cash = cash;
@@ -86,12 +87,13 @@ public final class LoanFinancialRatioData {
         this.totalAssets = totalAssets;
         this.equity = equity;
         this.unsecuredLoans = unsecuredLoans;
-        this.assetFinancing = assetFinancing;
+        this.securedLoans = securedLoans;
         this.totalLongTerm = totalLongTerm;
         this.totalLiabilities = totalLiabilities;
         this.bssDeposits = bssDeposits;
         this.bssWithdrawals = bssWithdrawals;
         this.bssMonthlyTurnOver = bssMonthlyTurnOver;
+        this.shortTermLoans = shortTermLoans;
 
     }
 }
