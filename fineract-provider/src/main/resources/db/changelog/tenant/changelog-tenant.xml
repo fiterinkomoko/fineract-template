@@ -136,5 +136,7 @@
     <include file="parts/INKO_488_fix_report_sql_client_summary.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO_597_add_street_to_field_configuration.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO_571_update_stretchy_report_sql_for_FullReportList.xml" relativeToChangelogFile="true" />
+    <include file="parts/INKO_517_update_name_of_report_collateral.xml" relativeToChangelogFile="true" />
+    <include file="parts/INKO-571_add_permission_for_custom_reports.xml" relativeToChangelogFile="true" />
     <includeAll path="custom-changelog" relativeToChangelogFile="true"/>
 </databaseChangeLog>
