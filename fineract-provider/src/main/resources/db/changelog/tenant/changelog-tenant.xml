@@ -139,5 +139,6 @@
     <include file="parts/INKO_517_update_name_of_report_collateral.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO-571_add_permission_for_custom_reports.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO-600_update_balancesheet_add_column.xml" relativeToChangelogFile="true"/>
+    <include file="parts/INKO-571_add_permission_for_portfolio_management_reports.xml" relativeToChangelogFile="true"/>
     <includeAll path="custom-changelog" relativeToChangelogFile="true"/>
 </databaseChangeLog>
