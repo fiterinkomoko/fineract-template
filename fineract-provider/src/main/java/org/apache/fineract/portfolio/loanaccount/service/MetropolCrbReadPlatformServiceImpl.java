@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.loanaccount.data.CrbKenyaMetropolRequestData;
 import org.apache.fineract.portfolio.loanaccount.data.MetropolAccountInfoData;
 import org.apache.fineract.portfolio.loanaccount.data.MetropolCrbCreditInfoEnchancedData;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolCrbAccountProductType;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -268,10 +269,11 @@ public class MetropolCrbReadPlatformServiceImpl implements MetropolCrbReadPlatfo
             final String overdueBalance = rs.getString("overdueBalance");
             final String overdueDate = rs.getString("overdueDate");
             final Integer productTypeId = rs.getInt("productTypeId");
+            final MetropolCrbAccountProductType accountType = MetropolCrbAccountProductType.fromCode(productTypeId);
 
             return new MetropolAccountInfoData(id, accountNumber, accountStatus, currentBalance, dateOpened, daysInArrears, delinquencyCode,
                     highestDaysInArrears, isYourAccount, lastPaymentAmount, lastPaymentDate, loadedAt, originalAmount, overdueBalance,
-                    overdueDate, productTypeId);
+                    overdueDate, productTypeId, accountType);
 
         }
     }
