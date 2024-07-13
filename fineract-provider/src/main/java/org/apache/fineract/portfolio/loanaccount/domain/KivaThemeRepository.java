@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -30,5 +31,7 @@ public interface KivaThemeRepository extends JpaRepository<KivaTheme, Long>, Jpa
     @Transactional
     @Query(value = "TRUNCATE TABLE m_kiva_themes", nativeQuery = true)
     void truncateTable();
+
+    Optional<KivaTheme> findByName(String name);
 
 }
