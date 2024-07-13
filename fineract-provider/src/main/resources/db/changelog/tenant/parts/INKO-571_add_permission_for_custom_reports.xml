@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet author="deepika@fiter.io" id="inko-571_add_report_permissions">
+        <insert tableName="m_permission">
+            <column name="grouping" value="report"/>
+            <column name="code" value="READ_Collateral Report"/>
+            <column name="entity_name" value="Collateral Report"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="report"/>
+            <column name="code" value="READ_Client Statement"/>
+            <column name="entity_name" value="Client Statement"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="report"/>
+            <column name="code" value="READ_IC Minutes"/>
+            <column name="entity_name" value="IC Minutes"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="report"/>
+            <column name="code" value="READ_Rwanda Consumer Credit To TransUnion (CRB) Report"/>
+            <column name="entity_name" value="Rwanda Consumer Credit To TransUnion (CRB) Report"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="report"/>
+            <column name="code" value="READ_Secured and Unsecured loan"/>
+            <column name="entity_name" value="Secured and Unsecured loan"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="report"/>
+            <column name="code" value="READ_Sectorial"/>
+            <column name="entity_name" value="Sectorial"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="report"/>
+            <column name="code" value="READ_Topup Loans"/>
+            <column name="entity_name" value="Topup Loans"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="report"/>
+            <column name="code" value="READ_Fees Collection Report"/>
+            <column name="entity_name" value="Fees Collection Report"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="report"/>
+            <column name="code" value="READ_Loan Product(Pentaho)"/>
+            <column name="entity_name" value="Loan Product(Pentaho)"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="report"/>
+            <column name="code" value="READ_Loans Awaiting Payment at Kiva"/>
+            <column name="entity_name" value="Loans Awaiting Payment at Kiva"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="report"/>
+            <column name="code" value="READ_Group Loans"/>
+            <column name="entity_name" value="Group Loans"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="report"/>
+            <column name="code" value="READ_Loan in arrears Table"/>
+            <column name="entity_name" value="Loan in arrears Table"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="report"/>
+            <column name="code" value="READ_Loan fully repaid Table"/>
+            <column name="entity_name" value="Loan fully repaid Table"/>
+            <column name="action_name" value="READ"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

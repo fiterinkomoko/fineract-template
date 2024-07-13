@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.HttpUrl;
@@ -52,7 +53,6 @@ import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRecruitmentSurvey;
 import org.apache.fineract.portfolio.client.domain.ClientRecruitmentSurveyRepository;
-import org.apache.fineract.portfolio.common.domain.KivaLoanDepartmentThemeTypeMapper;
 import org.apache.fineract.portfolio.loanaccount.data.KivaLoanAccount;
 import org.apache.fineract.portfolio.loanaccount.data.KivaLoanAccountSchedule;
 import org.apache.fineract.portfolio.loanaccount.data.KivaLoanAwaitingApprovalData;
@@ -111,6 +111,8 @@ public class KivaLoanServiceImpl implements KivaLoanService {
     private final KivaCurrencyRepository kivaCurrencyRepository;
     @Autowired
     private Environment env;
+
+    private static final String KIVA_DEPARTMENT_NOT_FOUND = "Loan Department not supported by kiva";
 
     @Override
     @CronTarget(jobName = JobName.POST_LOAN_ACCOUNTS_TO_KIVA)
@@ -249,8 +251,14 @@ public class KivaLoanServiceImpl implements KivaLoanService {
     }
 
     @NotNull
-    private static Integer getKivaLoanDepartmentThemeType(Loan loan) {
-        return KivaLoanDepartmentThemeTypeMapper.toInt(loan.getDepartment().label()).intValue();
+    private Integer getKivaLoanDepartmentThemeType(Loan loan) {
+
+        Optional<KivaTheme> kivaTheme = kivaThemeRepository.findByName(loan.getDepartment().label());
+        if (kivaTheme.isPresent()) {
+            return kivaTheme.get().getThemeId().intValue();
+        } else {
+            throw new LoanDueDiligenceException("validation.msg.loan.department.not.supported.by.kiva", KIVA_DEPARTMENT_NOT_FOUND);
+        }
     }
 
     private String getLoanKivaId(Loan loan) {
@@ -562,8 +570,7 @@ public class KivaLoanServiceImpl implements KivaLoanService {
         KivaTheme kivaTheme = themes.stream().filter(theme -> loan.getDepartment().label().equalsIgnoreCase(theme.getName())).findAny()
                 .orElse(null);
         if (kivaTheme == null) {
-            throw new LoanDueDiligenceException("validation.msg.loan.department.not.supported.by.kiva",
-                    "Loan Department not supported by kiva");
+            throw new LoanDueDiligenceException("validation.msg.loan.department.not.supported.by.kiva", KIVA_DEPARTMENT_NOT_FOUND);
         }
         try {
             final DocumentData documentData = this.documentReadPlatformService.retrieveKivaLoanProfileImage("loans", loan.getId());

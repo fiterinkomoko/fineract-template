@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.data;
 
 import lombok.Data;
+import org.apache.fineract.portfolio.loanaccount.domain.MetropolCrbAccountProductType;
 
 @Data
 public class MetropolAccountInfoData {
@@ -39,11 +40,12 @@ public class MetropolAccountInfoData {
     private String overdueBalance;
     private String overdueDate;
     private Integer productTypeId;
+    private MetropolCrbAccountProductType accountType;
 
     public MetropolAccountInfoData(Integer id, String accountNumber, String accountStatus, String currentBalance, String dateOpened,
             Integer daysInArrears, String delinquencyCode, Integer highestDaysInArrears, Boolean isYourAccount, String lastPaymentAmount,
             String lastPaymentDate, String loadedAt, String originalAmount, String overdueBalance, String overdueDate,
-            Integer productTypeId) {
+            Integer productTypeId, MetropolCrbAccountProductType accountType) {
         this.id = id;
         this.accountNumber = accountNumber;
         this.accountStatus = accountStatus;
@@ -60,5 +62,6 @@ public class MetropolAccountInfoData {
         this.overdueBalance = overdueBalance;
         this.overdueDate = overdueDate;
         this.productTypeId = productTypeId;
+        this.accountType = accountType;
     }
 }

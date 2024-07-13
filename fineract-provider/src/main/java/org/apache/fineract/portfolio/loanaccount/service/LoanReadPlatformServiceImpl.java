@@ -3473,10 +3473,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 + "  goods_bought_on_credit as goods_bought_on_credit, any_other_pending_payables as any_other_pending_payables, total_short_term as total_short_term, "
                 + "  equipment_tools as equipment_tools, furniture as furniture, business_premises as business_premises,  "
                 + "  other_fixed_assets as other_fixed_assets, total_fixed_assets as total_fixed_assets, total_assets as total_assets, equity as equity, "
-                + "  unsecured_loans as unsecured_loans, asset_financing as asset_financing, total_long_term as total_long_term,  "
+                + "  unsecured_loans as unsecured_loans, secured_loans as secured_loans, total_long_term as total_long_term,  "
                 + "  total_liabilities as total_liabilities, bss_deposits as bss_deposits, bss_withdrawals as bss_withdrawals, "
-                + "  bss_monthly_turn_over as bss_monthly_turn_over  " + " FROM loan_balancesheet  " + " WHERE loan_id= ? "
-                + " order by id desc limit 1 ";
+                + "  bss_monthly_turn_over as bss_monthly_turn_over, short_term_loans as short_term_loans  " + " FROM loan_balancesheet  "
+                + " WHERE loan_id= ? " + " order by id desc limit 1 ";
 
         List<LoanFinancialRatioData> data = this.jdbcTemplate.query(sql, rm, loanId);
         if (!data.isEmpty()) {
@@ -3510,17 +3510,18 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final BigDecimal total_assets = rs.getBigDecimal("total_assets");
             final BigDecimal equity = rs.getBigDecimal("equity");
             final BigDecimal unsecured_loans = rs.getBigDecimal("unsecured_loans");
-            final BigDecimal asset_financing = rs.getBigDecimal("asset_financing");
+            final BigDecimal secured_loans = rs.getBigDecimal("secured_loans");
             final BigDecimal total_long_term = rs.getBigDecimal("total_long_term");
             final BigDecimal total_liabilities = rs.getBigDecimal("total_liabilities");
             final BigDecimal bss_deposits = rs.getBigDecimal("bss_deposits");
             final BigDecimal bss_withdrawals = rs.getBigDecimal("bss_withdrawals");
             final BigDecimal bss_monthly_turn_over = rs.getBigDecimal("bss_monthly_turn_over");
+            final BigDecimal short_term_loans = rs.getBigDecimal("short_term_loans");
 
             return new LoanFinancialRatioData(id, loanId, cash, inventory_stock, receivables, chama_tontines, other_current_assets,
                     total_current_assets, goods_bought_on_credit, any_other_pending_payables, total_short_term, equipment_tools, furniture,
-                    business_premises, other_fixed_assets, total_fixed_assets, total_assets, equity, unsecured_loans, asset_financing,
-                    total_long_term, total_liabilities, bss_deposits, bss_withdrawals, bss_monthly_turn_over);
+                    business_premises, other_fixed_assets, total_fixed_assets, total_assets, equity, unsecured_loans, secured_loans,
+                    total_long_term, total_liabilities, bss_deposits, bss_withdrawals, bss_monthly_turn_over, short_term_loans);
         }
     }
 
