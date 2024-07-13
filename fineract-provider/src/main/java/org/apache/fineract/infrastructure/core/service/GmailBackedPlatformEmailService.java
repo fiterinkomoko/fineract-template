@@ -23,9 +23,11 @@ import org.apache.fineract.infrastructure.configuration.data.SMTPCredentialsData
 import org.apache.fineract.infrastructure.configuration.service.ExternalServicesPropertiesReadPlatformService;
 import org.apache.fineract.infrastructure.core.domain.EmailDetail;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
+import javax.mail.internet.MimeMessage;
 
 @Service
 public class GmailBackedPlatformEmailService implements PlatformEmailService {
@@ -40,14 +42,31 @@ public class GmailBackedPlatformEmailService implements PlatformEmailService {
     @Override
     public void sendToUserAccount(String organisationName, String contactName, String address, String username, String unencodedPassword) {
 
-        final String subject = "Welcome " + contactName + " to " + organisationName;
-        final String body = "You are receiving this email as your email account: " + address
-                + " has being used to create a user account for an organisation named [" + organisationName + "] on Mifos.\n"
-                + "You can login using the following credentials:\nusername: " + username + "\n" + "password: " + unencodedPassword + "\n"
-                + "You must change this password upon first log in using Uppercase, Lowercase, number and character.\n"
-                + "Thank you and welcome to the organisation.";
+        final String subject = "Welcome to Inkomoko Core Banking System";
 
-        final EmailDetail emailDetail = new EmailDetail(subject, body, address, contactName);
+        final StringBuilder builder = new StringBuilder(10);
+                builder.append("<html>")
+                        .append("<body>")
+                        .append("<p>Dear <strong>")
+                        .append(contactName)
+                        .append("</strong>,</p>" )
+                        .append("<p>Your CBS account has been created. Below are your access credentials:</p>" )
+                        .append("<ul><li><strong>System access link:</strong> <a href=\"https://www.cbs.inkomoko.com\">https://www.cbs.inkomoko.com</a></li>")
+                        .append("<li><strong>Username:</strong> <em>")
+                        .append(username)
+                        .append("</em></li><li><strong>Password:</strong> <em>" )
+                        .append(unencodedPassword)
+                        .append("</em></li>")
+                        .append("</ul>")
+                        .append("<p>Please log in and change your password.</p>")
+                        .append("<p><strong>Note:</strong> Your password has to include uppercase letters, lowercase letters, numbers, and special characters.</p>")
+                        .append("<p>If you have any questions, kindly reach out to our <a href=\"https://inkomoko.freshservice.com/support/tickets/new\">support team</a></p>")
+                        .append("<p>Best regards,<br>Inkomoko Team</p>")
+                        .append("</body>")
+                        .append("</html>");
+
+
+        final EmailDetail emailDetail = new EmailDetail(subject, builder.toString(), address, contactName);
         sendDefinedEmail(emailDetail);
 
     }
@@ -82,11 +101,13 @@ public class GmailBackedPlatformEmailService implements PlatformEmailService {
         props.put("mail.smtp.socketFactory.fallback", "true");
 
         try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(smtpCredentialsData.getFromEmail()); // same email address used for the authentication
-            message.setTo(emailDetails.getAddress());
-            message.setSubject(emailDetails.getSubject());
-            message.setText(emailDetails.getBody());
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(smtpCredentialsData.getFromEmail()); // same email address used for the authentication
+            helper.setTo(emailDetails.getAddress());
+            helper.setSubject(emailDetails.getSubject());
+            helper.setText(emailDetails.getBody(), true); // 'true' indicates HTML content
+
             mailSender.send(message);
 
         } catch (Exception e) {
