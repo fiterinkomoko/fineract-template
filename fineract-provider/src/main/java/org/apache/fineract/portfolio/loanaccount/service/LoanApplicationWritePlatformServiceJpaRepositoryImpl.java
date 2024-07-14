@@ -1396,6 +1396,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         final Long parentLoanId = loanId;
         GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(parentLoanId).orElseThrow();
         JsonArray approvalFormData = command.arrayOfParameterNamed("approvalFormData");
+        Long childLoansCount = this.loanRepository.findByGlimId(loanId).stream().filter(loan -> !loan.getLoanStatus().equals(LoanStatus.REJECTED.getValue()))
+                .count();
 
         JsonObject jsonObject = null;
         JsonCommand childCommand = null;
@@ -1426,7 +1428,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 count++;
                 // if all the child loans are approved, mark the parent loan as
                 // approved
-                if (count == parentLoan.getChildAccountsCount()) {
+                if (count == childLoansCount) {
                     parentLoan.setPrincipalAmount(parentPrincipalAmount);
                     parentLoan.setLoanStatus(LoanStatus.APPROVED.getValue());
                     glimRepository.save(parentLoan);
@@ -1636,7 +1638,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         // glimAccount=glimRepository.findOne(loanId);
         final Long parentLoanId = loanId;
         GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(parentLoanId).orElseThrow();
-        List<Loan> childLoans = this.loanRepository.findByGlimId(loanId);
+        List<Loan> childLoans = this.loanRepository.findByGlimId(loanId).stream().filter(loan -> !loan.getLoanStatus().equals(LoanStatus.REJECTED.getValue()))
+                .toList();
 
         CommandProcessingResult result = null;
         int count = 0;
@@ -1647,7 +1650,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 count++;
                 // if all the child loans are approved, mark the parent loan as
                 // approved
-                if (count == parentLoan.getChildAccountsCount()) {
+                if (count == childLoans.size()) {
                     parentLoan.setLoanStatus(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue());
                     glimRepository.save(parentLoan);
                 }
