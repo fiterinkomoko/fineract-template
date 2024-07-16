@@ -140,5 +140,6 @@
     <include file="parts/INKO-571_add_permission_for_custom_reports.xml" relativeToChangelogFile="true" />
     <include file="parts/INKO-600_update_balancesheet_add_column.xml" relativeToChangelogFile="true"/>
     <include file="parts/INKO-571_add_permission_for_portfolio_management_reports.xml" relativeToChangelogFile="true"/>
+    <include file="parts/CI18-347_loan_reprocess_table.xml" relativeToChangelogFile="true" />
     <includeAll path="custom-changelog" relativeToChangelogFile="true"/>
 </databaseChangeLog>
