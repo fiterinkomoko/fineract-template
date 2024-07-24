@@ -472,7 +472,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 arrayPos = arrayPos + 1;
             }
             if (searchParameters.getOfficeId() != null) {
-                sqlBuilder.append("and c.office_id =?");
+                sqlBuilder.append(" and c.office_id = ?");
                 extraCriterias.add(searchParameters.getOfficeId());
                 arrayPos = arrayPos + 1;
             }
