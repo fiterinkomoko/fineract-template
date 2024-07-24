@@ -69,5 +69,35 @@
             <column name="node_id" valueNumeric="1" />
         </insert>
     </changeSet>
+    <changeSet author="bosco@fiter.io" id="create-m_reprocess_rescheduled_migrated_loans_in_nifi_2">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_reprocess_rescheduled_migrated_loans_in_nifi"/>
+            </not>
+        </preConditions>
+        <createTable tableName="m_reprocess_rescheduled_migrated_loans_in_nifi">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="loan_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="external_id" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="submitted_on_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="loan_disbursed_on_in_cbs" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reschedule_from_date_in_cbs" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="adjusted_due_date_for_odoo" type="date">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
 
 </databaseChangeLog>
