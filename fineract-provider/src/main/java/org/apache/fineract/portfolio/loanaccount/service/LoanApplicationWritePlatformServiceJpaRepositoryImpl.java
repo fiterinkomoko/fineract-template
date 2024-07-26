@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Pattern;
 import javax.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -176,13 +177,11 @@ import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import java.util.regex.Pattern;
-import com.google.common.base.Splitter;
-
 
 @Service
 @RequiredArgsConstructor
 public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements LoanApplicationWritePlatformService {
+
     // Define the whitespace pattern
     private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s+");
 
@@ -273,7 +272,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             this.fromApiJsonDeserializer.validateForCreate(command.json(), isMeetingMandatoryForJLGLoans, loanProduct);
 
-            //validate if fund source is kive desc should be more than 150 words
+            // validate if fund source is kive desc should be more than 150 words
             final Long fundId = this.fromJsonHelper.extractLongNamed("fundId", command.parsedJson());
             if (fundId != null) {
                 FundData fundSource = this.fundReadPlatformService.retrieveFund(fundId);
@@ -281,7 +280,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     final String description = this.fromJsonHelper.extractStringNamed("description", command.parsedJson());
                     if (description != null) {
                         List<String> words = Splitter.on(WHITESPACE_PATTERN).omitEmptyStrings().splitToList(description.trim());
-                        if (words.size() < 150){
+                        if (words.size() < 150) {
                             LOG.info(words.size() + " words");
                             throw new PlatformDataIntegrityException("error.msg.loan.fundsource.kiva.desc.less.than.150",
                                     "Description should be more than 150 words for KIVA fund source", "description");
@@ -1015,14 +1014,14 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 final Long fundId = command.longValueOfParameterNamed(fundIdParamName);
                 final Fund fund = this.loanAssembler.findFundByIdIfProvided(fundId);
 
-                //validate if fund source is kive desc should be more than 150 words
+                // validate if fund source is kive desc should be more than 150 words
                 if (fundId != null) {
                     FundData fundSource = this.fundReadPlatformService.retrieveFund(fundId);
                     if (fundSource != null && fundSource.getName().equals("Kiva")) {
                         final String description = this.fromJsonHelper.extractStringNamed("description", command.parsedJson());
                         if (description != null) {
                             List<String> words = Splitter.on(WHITESPACE_PATTERN).omitEmptyStrings().splitToList(description.trim());
-                            if (words.size() < 150){
+                            if (words.size() < 150) {
                                 LOG.info(words.size() + " words");
                                 throw new PlatformDataIntegrityException("error.msg.loan.fundsource.kiva.desc.less.than.150",
                                         "Description should be more than 150 words for KIVA fund source", "description");
@@ -1437,8 +1436,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         final Long parentLoanId = loanId;
         GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(parentLoanId).orElseThrow();
         JsonArray approvalFormData = command.arrayOfParameterNamed("approvalFormData");
-        Long childLoansCount = this.loanRepository.findByGlimId(loanId).stream().filter(loan -> !loan.getLoanStatus().equals(LoanStatus.REJECTED.getValue()))
-                .count();
+        Long childLoansCount = this.loanRepository.findByGlimId(loanId).stream()
+                .filter(loan -> !loan.getLoanStatus().equals(LoanStatus.REJECTED.getValue())).count();
 
         JsonObject jsonObject = null;
         JsonCommand childCommand = null;
@@ -1679,8 +1678,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         // glimAccount=glimRepository.findOne(loanId);
         final Long parentLoanId = loanId;
         GroupLoanIndividualMonitoringAccount parentLoan = glimRepository.findById(parentLoanId).orElseThrow();
-        List<Loan> childLoans = this.loanRepository.findByGlimId(loanId).stream().filter(loan -> !loan.getLoanStatus().equals(LoanStatus.REJECTED.getValue()))
-                .toList();
+        List<Loan> childLoans = this.loanRepository.findByGlimId(loanId).stream()
+                .filter(loan -> !loan.getLoanStatus().equals(LoanStatus.REJECTED.getValue())).toList();
 
         CommandProcessingResult result = null;
         int count = 0;
