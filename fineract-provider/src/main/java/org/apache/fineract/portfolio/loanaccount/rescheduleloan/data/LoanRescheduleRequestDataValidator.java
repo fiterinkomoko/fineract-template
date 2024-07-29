@@ -168,10 +168,10 @@ public class LoanRescheduleRequestDataValidator {
         final LocalDate adjustedDueDate = this.fromJsonHelper.extractLocalDateNamed(RescheduleLoansApiConstants.adjustedDueDateParamName,
                 jsonElement);
 
-        // if (adjustedDueDate != null && rescheduleFromDate != null && adjustedDueDate.isBefore(rescheduleFromDate)) {
-        // dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName).failWithCode(
-        // "adjustedDueDate.before.rescheduleFromDate", "Adjusted due date cannot be before the reschedule from date");
-        // }
+         if (adjustedDueDate != null && rescheduleFromDate != null && adjustedDueDate.isBefore(rescheduleFromDate)) {
+         dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName).failWithCode(
+         "adjustedDueDate.before.rescheduleFromDate", "Adjusted due date cannot be before the reschedule from date");
+         }
 
         // at least one of the following must be provided => graceOnPrincipal,
         // graceOnInterest, extraTerms,
@@ -197,11 +197,10 @@ public class LoanRescheduleRequestDataValidator {
                         .failWithCode("repayment.schedule.installment.does.not.exist", "Repayment schedule installment does not exist");
             }
 
-            // if (installment != null && installment.isObligationsMet()) {
-            // dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)
-            // .failWithCode("repayment.schedule.installment.obligation.met", "Repayment schedule installment obligation
-            // met");
-            // }
+             if (installment != null && installment.isObligationsMet()) {
+             dataValidatorBuilder.reset().parameter(RescheduleLoansApiConstants.rescheduleFromDateParamName)
+             .failWithCode("repayment.schedule.installment.obligation.met", "Repayment schedule installment obligation met");
+             }
 
         }
 
@@ -297,11 +296,10 @@ public class LoanRescheduleRequestDataValidator {
                             "loan.repayment.schedule.installment.does.not.exist", "Repayment schedule installment does not exist");
                 }
 
-                // if (installment != null && installment.isObligationsMet()) {
-                // dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(
-                // "loan.repayment.schedule.installment." + "obligation.met", "Repayment schedule installment obligation
-                // met");
-                // }
+                 if (installment != null && installment.isObligationsMet()) {
+                 dataValidatorBuilder.reset().failWithCodeNoParameterAddedToErrorCode(
+                 "loan.repayment.schedule.installment." + "obligation.met", "Repayment schedule installment obligation met");
+                 }
             }
         }
 
