@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.core.service;
 
 import java.util.Properties;
+import javax.mail.internet.MimeMessage;
 import org.apache.fineract.infrastructure.configuration.data.SMTPCredentialsData;
 import org.apache.fineract.infrastructure.configuration.service.ExternalServicesPropertiesReadPlatformService;
 import org.apache.fineract.infrastructure.core.domain.EmailDetail;
@@ -26,8 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-
-import javax.mail.internet.MimeMessage;
 
 @Service
 public class GmailBackedPlatformEmailService implements PlatformEmailService {
@@ -45,26 +44,14 @@ public class GmailBackedPlatformEmailService implements PlatformEmailService {
         final String subject = "Welcome to Inkomoko Core Banking System";
 
         final StringBuilder builder = new StringBuilder(10);
-                builder.append("<html>")
-                        .append("<body>")
-                        .append("<p>Dear <strong>")
-                        .append(contactName)
-                        .append("</strong>,</p>" )
-                        .append("<p>Your CBS account has been created. Below are your access credentials:</p>" )
-                        .append("<ul><li><strong>System access link:</strong> <a href=\"https://www.cbs.inkomoko.com\">https://www.cbs.inkomoko.com</a></li>")
-                        .append("<li><strong>Username:</strong> <em>")
-                        .append(username)
-                        .append("</em></li><li><strong>Password:</strong> <em>" )
-                        .append(unencodedPassword)
-                        .append("</em></li>")
-                        .append("</ul>")
-                        .append("<p>Please log in and change your password.</p>")
-                        .append("<p><strong>Note:</strong> Your password has to include uppercase letters, lowercase letters, numbers, and special characters.</p>")
-                        .append("<p>If you have any questions, kindly reach out to our <a href=\"https://inkomoko.freshservice.com/support/tickets/new\">support team</a></p>")
-                        .append("<p>Best regards,<br>Inkomoko Team</p>")
-                        .append("</body>")
-                        .append("</html>");
-
+        builder.append("<html>").append("<body>").append("<p>Dear <strong>").append(contactName).append("</strong>,</p>")
+                .append("<p>Your CBS account has been created. Below are your access credentials:</p>")
+                .append("<ul><li><strong>System access link:</strong> <a href=\"https://www.cbs.inkomoko.com\">https://www.cbs.inkomoko.com</a></li>")
+                .append("<li><strong>Username:</strong> <em>").append(username).append("</em></li><li><strong>Password:</strong> <em>")
+                .append(unencodedPassword).append("</em></li>").append("</ul>").append("<p>Please log in and change your password.</p>")
+                .append("<p><strong>Note:</strong> Your password has to include uppercase letters, lowercase letters, numbers, and special characters.</p>")
+                .append("<p>If you have any questions, kindly reach out to our <a href=\"https://inkomoko.freshservice.com/support/tickets/new\">support team</a></p>")
+                .append("<p>Best regards,<br>Inkomoko Team</p>").append("</body>").append("</html>");
 
         final EmailDetail emailDetail = new EmailDetail(subject, builder.toString(), address, contactName);
         sendDefinedEmail(emailDetail);
