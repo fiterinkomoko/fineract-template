@@ -59,7 +59,7 @@ import org.springframework.stereotype.Service;
 public class TransUnionCrbServiceImpl implements TransUnionCrbService {
 
     private static final Logger LOG = LoggerFactory.getLogger(TransUnionCrbServiceImpl.class);
-    public static final String FORM_URL_CONTENT_TYPE = "Content-Type";
+    public static final String FORM_URL_CONTENT_TYPE = "application/json";
     private final TransUnionCrbPostConsumerCreditReadPlatformServiceImpl transUnionCrbPostConsumerCreditReadPlatformServiceImpl;
     private final TransUnionCrbPostCorporateCreditReadPlatformServiceImpl transUnionCrbPostCorporateCreditReadPlatformServiceImpl;
     private final LoanRepositoryWrapper loanRepository;
