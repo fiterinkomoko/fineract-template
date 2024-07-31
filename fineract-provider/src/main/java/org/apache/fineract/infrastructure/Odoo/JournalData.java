@@ -27,4 +27,5 @@ public class JournalData {
     private String transaction_type_unique_id;
     private String ref;
     private boolean is_reversed;
+    private String date;
 }
