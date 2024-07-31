@@ -372,6 +372,7 @@ public class OdooServiceImpl implements OdooService {
             journalData.setTransaction_type_name(LoanTransactionType.fromInt(transactionType.intValue()).name());
             journalData.setTransaction_type_unique_id(transactionType.toString());
             journalData.set_reversed(isReversed);
+            journalData.setDate(list.get(0).getTransactionDate().toString());
 
             journalEntryToOdooData.setJournal(journalData);
             journalEntryToOdooData.setAccounting_entries(accounting_entries);
