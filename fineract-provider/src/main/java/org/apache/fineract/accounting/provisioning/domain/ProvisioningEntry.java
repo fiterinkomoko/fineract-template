@@ -89,4 +89,7 @@ public class ProvisioningEntry extends AbstractPersistableCustom {
         return this.createdDate;
     }
 
+    public AppUser getCreatedBy() {
+        return createdBy;
+    }
 }
