@@ -20,6 +20,7 @@ package org.apache.fineract.accounting.provisioning.service;
 
 import com.google.gson.JsonObject;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,8 +44,12 @@ import org.apache.fineract.accounting.provisioning.serialization.ProvisioningEnt
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.hooks.event.HookEvent;
+import org.apache.fineract.infrastructure.hooks.event.HookEventSource;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -60,6 +65,7 @@ import org.apache.fineract.organisation.provisioning.service.ProvisioningCriteri
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
@@ -80,6 +86,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final ProvisioningEntriesDefinitionJsonDeserializer fromApiJsonDeserializer;
     private final FromJsonHelper fromApiJsonHelper;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public CommandProcessingResult createProvisioningJournalEntries(Long provisioningEntryId, JsonCommand command) {
@@ -142,7 +149,8 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
                 // FIXME: Do we need to throw
                 // NoProvisioningCriteriaDefinitionFound()?
             }
-            createProvsioningEntry(currentDate, addJournalEntries);
+            ProvisioningEntry requestedEntry = createProvsioningEntry(currentDate, addJournalEntries);
+            postWebHook(requestedEntry);
         } catch (ProvisioningEntryAlreadyCreatedException peace) {
             log.error("Provisioning Entry already created", peace);
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
@@ -228,5 +236,39 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
             }
         }
         return provisioningEntries.values();
+    }
+
+    public void postWebHook(ProvisioningEntry requestedEntry) {
+        AppUser currentUser = this.platformSecurityContext.authenticatedUser();
+        // Build the payload
+        JsonObject payload = new JsonObject();
+        provisioningPayLoad(requestedEntry, payload, currentUser);
+
+        FineractContext context = ThreadLocalContextUtil.getContext();
+        // Create the HookEvent
+        HookEvent hookEvent = new HookEvent(new HookEventSource("PROVISIONENTRIES", "CREATE"), payload.toString(), currentUser, context);
+        // Publish the event
+        eventPublisher.publishEvent(hookEvent);
+    }
+
+    private static void provisioningPayLoad(ProvisioningEntry requestedEntry, JsonObject payload, AppUser currentUser) {
+        payload.addProperty("createdByName", currentUser.getUsername());
+
+        JsonObject request = new JsonObject();
+        request.addProperty("createjournalentries", true);
+        request.addProperty("locale", "en");
+        request.addProperty("dateFormat", "dd MMMM yyyy");
+        request.addProperty("date", requestedEntry.getCreatedDate().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")));
+        payload.add("request", request);
+
+        payload.addProperty("createdBy", requestedEntry.getCreatedBy().getId());
+        payload.addProperty("entityName", "PROVISIONENTRIES");
+
+        JsonObject response = new JsonObject();
+        response.addProperty("resourceId", requestedEntry.getId());
+        payload.add("response", response);
+
+        payload.addProperty("createdByFullName", currentUser.getDisplayName());
+        payload.addProperty("actionName", "CREATE");
     }
 }
