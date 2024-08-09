@@ -277,6 +277,8 @@ public class KivaLoanServiceImpl implements KivaLoanService {
         requestBody.append("&client_id=" + getConfigProperty("fineract.integrations.kiva.clientId"));
         requestBody.append("&client_secret=" + getConfigProperty("fineract.integrations.kiva.clientSecret"));
 
+        LOG.info("Request Body for KIVA Authentication First :=>" + requestBody);
+
         OkHttpClient client = new OkHttpClient();
         Response response = null;
 
@@ -287,6 +289,7 @@ public class KivaLoanServiceImpl implements KivaLoanService {
         List<Throwable> exceptions = new ArrayList<>();
 
         try {
+            LOG.info("Request Body for KIVA Authentication Final one :=>" + request);
             response = client.newCall(request).execute();
             String resObject = response.body().string();
             if (response.isSuccessful()) {
