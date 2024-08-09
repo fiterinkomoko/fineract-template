@@ -251,6 +251,7 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
             LOG.info("Response from Metropol CRB: " + resObject);
             return JsonParser.parseString(resObject).getAsJsonObject();
         } else {
+            LOG.info("Response from Metropol CRB: " + response.code() + ":" + response.message() + ";" + response);
             throw new GeneralPlatformDomainRuleException("error.msg.loan.credit.info.enhanced.failed",
                     "Credit Info Enhanced failed with error: " + response.code() + ":" + response.message() + "");
         }
