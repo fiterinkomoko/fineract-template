@@ -41,6 +41,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.FormBody;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
@@ -269,27 +270,22 @@ public class KivaLoanServiceImpl implements KivaLoanService {
         HttpUrl.Builder urlBuilder = HttpUrl.parse(getConfigProperty("fineract.integrations.kiva.oAuthUrl")).newBuilder();
         String url = urlBuilder.build().toString();
 
-        StringBuilder requestBody = new StringBuilder();
-
-        requestBody.append("grant_type=" + getConfigProperty("fineract.integrations.kiva.grantType"));
-        requestBody.append("&scope=" + getConfigProperty("fineract.integrations.kiva.scope"));
-        requestBody.append("&audience=" + getConfigProperty("fineract.integrations.kiva.audience"));
-        requestBody.append("&client_id=" + getConfigProperty("fineract.integrations.kiva.clientId"));
-        requestBody.append("&client_secret=" + getConfigProperty("fineract.integrations.kiva.clientSecret"));
-
-        LOG.info("Request Body for KIVA Authentication First :=>" + requestBody);
-
         OkHttpClient client = new OkHttpClient();
         Response response = null;
 
-        RequestBody formBody = RequestBody.create(MediaType.parse(FORM_URL_ENCODED), requestBody.toString());
+        RequestBody formBody = new FormBody.Builder()
+                .add("grant_type", getConfigProperty("fineract.integrations.kiva.grantType"))
+                .add("scope", getConfigProperty("fineract.integrations.kiva.scope"))
+                .add("audience", getConfigProperty("fineract.integrations.kiva.audience"))
+                .add("client_id", getConfigProperty("fineract.integrations.kiva.clientId"))
+                .add("client_secret", getConfigProperty("fineract.integrations.kiva.clientSecret"))
+                .build();
 
         Request request = new Request.Builder().url(url).header(FORM_URL_CONTENT_TYPE, FORM_URL_ENCODED).post(formBody).build();
 
         List<Throwable> exceptions = new ArrayList<>();
 
         try {
-            LOG.info("Request Body for KIVA Authentication Final one :=>" + request);
             response = client.newCall(request).execute();
             String resObject = response.body().string();
             if (response.isSuccessful()) {
