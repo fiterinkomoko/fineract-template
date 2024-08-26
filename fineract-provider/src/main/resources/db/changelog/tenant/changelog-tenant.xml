@@ -142,5 +142,6 @@
     <include file="parts/INKO-571_add_permission_for_portfolio_management_reports.xml" relativeToChangelogFile="true"/>
     <include file="parts/CI18-347_loan_reprocess_table.xml" relativeToChangelogFile="true" />
     <include file="parts/FSI-30_update_stretchy_report_parameter_for_report.xml" relativeToChangelogFile="true" />
+    <include file="parts/FSI-46_permission_add_READ_collateral_products.xml" relativeToChangelogFile="true" />
     <includeAll path="custom-changelog" relativeToChangelogFile="true"/>
 </databaseChangeLog>
