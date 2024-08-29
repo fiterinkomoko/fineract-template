@@ -35,13 +35,13 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.FormBody;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okhttp3.FormBody;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
@@ -273,13 +273,11 @@ public class KivaLoanServiceImpl implements KivaLoanService {
         OkHttpClient client = new OkHttpClient();
         Response response = null;
 
-        RequestBody formBody = new FormBody.Builder()
-                .add("grant_type", getConfigProperty("fineract.integrations.kiva.grantType"))
+        RequestBody formBody = new FormBody.Builder().add("grant_type", getConfigProperty("fineract.integrations.kiva.grantType"))
                 .add("scope", getConfigProperty("fineract.integrations.kiva.scope"))
                 .add("audience", getConfigProperty("fineract.integrations.kiva.audience"))
                 .add("client_id", getConfigProperty("fineract.integrations.kiva.clientId"))
-                .add("client_secret", getConfigProperty("fineract.integrations.kiva.clientSecret"))
-                .build();
+                .add("client_secret", getConfigProperty("fineract.integrations.kiva.clientSecret")).build();
 
         Request request = new Request.Builder().url(url).header(FORM_URL_CONTENT_TYPE, FORM_URL_ENCODED).post(formBody).build();
 
