@@ -47,7 +47,7 @@ public class KivaLoanAwaitingApprovalReadPlatformServiceImpl implements KivaLoan
         public String schema() {
             return " mklaa.id as id, mklaa.internal_client_id AS client_id,mklaa.internal_loan_id AS loan_id, "
                     + " Coalesce(ml.principal_repaid_derived,0) AS amount " + " FROM m_kiva_loan_awaiting_approval mklaa "
-                    + " LEFT JOIN m_loan ml on mklaa.kiva_id = ml.kiva_id";
+                    + " LEFT JOIN m_loan ml on mklaa.internal_loan_id = ml.kiva_id";
         }
 
         @Override
