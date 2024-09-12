@@ -2478,7 +2478,15 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             LoanCashFlowData cashFlow) {
         LoanCashFlowProjection projection = new LoanCashFlowProjection(installment.getInstallmentNumber(), cashFlow.getId(), projectionRate,
                 amount);
-        this.loanCashFlowProjectionRepository.saveAndFlush(projection);
+        try {
+            this.loanCashFlowProjectionRepository.saveAndFlush(projection);
+        } catch (Exception e) {
+            if (e.getMessage().contains("amount")
+                    || (e.getCause() != null && e.getCause().getMessage().contains("amount"))) {
+                throw new GeneralPlatformDomainRuleException("error.msg.loan.cashflow.projection.data.cannot.be.generated",
+                        "Loan CashFlow can not be generated because LoanCashFlowProjection amount being too high. ");
+            }
+        }
     }
 
     @NotNull
