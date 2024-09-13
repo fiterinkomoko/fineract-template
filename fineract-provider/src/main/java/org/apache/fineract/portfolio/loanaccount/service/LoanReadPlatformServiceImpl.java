@@ -3228,11 +3228,15 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
     @Override
     public Collection<LoanAccountData> getAllLoansPendingDecisionEngine(Integer loanDecisionState) {
-        this.context.authenticatedUser();
+        final AppUser currentUser = this.context.authenticatedUser();
+        final String hierarchy = currentUser.getOffice().getHierarchy();
         final LoanMapper rm = new LoanMapper(sqlGenerator);
         final StringBuilder sqlBuilder = new StringBuilder(200);
 
-        final String sql = "select " + rm.loanSchema();
+        String sql = "select " + rm.loanSchema();
+        if (!hierarchy.equals(".")) {
+            sql += " join m_office o2 on o2.id = c.office_id and o2.hierarchy like '" + hierarchy + "%' ";
+        }
         sqlBuilder.append(sql);
         sqlBuilder.append(" where l.loan_status_id=100  ");
         if (loanDecisionState == 100) {
