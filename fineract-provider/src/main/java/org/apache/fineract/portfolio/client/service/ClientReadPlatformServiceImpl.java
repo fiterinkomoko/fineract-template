@@ -78,6 +78,8 @@ import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.apache.fineract.portfolio.client.domain.MonthEnum;
 import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
 import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement;
+import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagementAdditionalDetails;
+import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagementAdditionalDetailsRepository;
 import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagementRepositoryWrapper;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.fineract.portfolio.savings.data.SavingsProductData;
@@ -119,6 +121,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper;
     private final ClientBusinessOwnerReadPlatformService clientBusinessOwnerReadPlatformService;
     private final ClientBusinessDetailRepositoryWrapper clientBusinessDetailRepositoryWrapper;
+    private final ClientCollateralManagementAdditionalDetailsRepository clientCollateralManagementAdditionalDetailsRepository;
 
     private final SearchReadPlatformService searchReadPlatformService;
 
@@ -398,14 +401,17 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             // Get client collaterals
             final Collection<ClientCollateralManagement> clientCollateralManagements = this.clientCollateralManagementRepositoryWrapper
                     .getCollateralsPerClient(clientId);
+
             final Set<ClientCollateralManagementData> clientCollateralManagementDataSet = new HashSet<>();
 
             // Map to client collateral data class
             for (ClientCollateralManagement clientCollateralManagement : clientCollateralManagements) {
+                final ClientCollateralManagementAdditionalDetails additionalDetails = this.clientCollateralManagementAdditionalDetailsRepository.
+                        findByCollateralId(clientCollateralManagement);
                 BigDecimal total = clientCollateralManagement.getTotal();
                 BigDecimal totalCollateral = clientCollateralManagement.getTotalCollateral(total);
                 clientCollateralManagementDataSet
-                        .add(ClientCollateralManagementData.setCollateralValues(clientCollateralManagement, total, totalCollateral));
+                        .add(ClientCollateralManagementData.setCollateralValues(clientCollateralManagement, total, totalCollateral, additionalDetails));
             }
             final Collection<ClientBusinessDetail> clientBusinessDetails = this.clientBusinessDetailRepositoryWrapper
                     .findByClientId(clientId);
