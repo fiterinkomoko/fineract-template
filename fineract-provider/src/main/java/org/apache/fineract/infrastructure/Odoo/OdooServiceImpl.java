@@ -53,6 +53,7 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
+import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
@@ -327,7 +328,7 @@ public class OdooServiceImpl implements OdooService {
     }
 
     @Override
-    public String createJournalEntryToOddo(List<JournalEntry> list, Long loanTransactionId, Long transactionType, Boolean isReversed)
+    public String createJournalEntryToOddo(List<JournalEntry> list, Long loanTransactionId, Long transactionType, Boolean isReversed, String loanAccountNo)
             throws IOException {
 
         final Integer uid = loginToOddo();
@@ -344,8 +345,9 @@ public class OdooServiceImpl implements OdooService {
                 Integer accountId = extractGlCode(entry.getGlAccount().getGlCode());
                 Client client = entry.getClient();
                 Integer partnerId = client.getOdooCustomerId();
+                Office office = entry.getOffice();
 
-                journalEntry = new AccountingEntry(entry, accountId, partnerId);
+                journalEntry = new AccountingEntry(entry, accountId, partnerId, office);
                 accounting_entries.add(journalEntry);
                 if (partnerId == null) {
                     throw new GeneralPlatformDomainRuleException(
@@ -368,7 +370,7 @@ public class OdooServiceImpl implements OdooService {
             journalEntryToOdooData.setPassword(password);
             journalEntryToOdooData.setCbs_journal_entry_id(loanTransactionId.toString());
 
-            journalData.setRef("Journal Entry made by CBS for Loan Transaction id : " + loanTransactionId);
+            journalData.setRef("Journal Entry made by CBS for Loan Account : " + loanAccountNo);
             journalData.setTransaction_type_name(LoanTransactionType.fromInt(transactionType.intValue()).name());
             journalData.setTransaction_type_unique_id(transactionType.toString());
             journalData.set_reversed(isReversed);
@@ -425,7 +427,7 @@ public class OdooServiceImpl implements OdooService {
                     List<JournalEntry> JE = this.journalEntryRepository.findJournalEntriesByIsOddoPosted(false,
                             transaction.getLoanTransactionId());
                     postJournalEntries(errors, JE, transaction.getLoanTransactionId(), transaction.getTransactionType(),
-                            transaction.getIsReversed());
+                            transaction.getIsReversed(), transaction.getLoanAccountNo(), transaction.getOffice());
                 }
             }
 
@@ -486,12 +488,12 @@ public class OdooServiceImpl implements OdooService {
     }
 
     private void postJournalEntries(List<Throwable> errors, List<JournalEntry> journalEntryDebitCredit, Long loanTransactionId,
-            Long transactionType, Boolean isReversed) {
+            Long transactionType, Boolean isReversed, String loanAccountNo, String office) {
         if (!CollectionUtils.isEmpty(journalEntryDebitCredit)) {
             try {
 
                 if (journalEntryDebitCredit.size() > 1) {
-                    String id = createJournalEntryToOddo(journalEntryDebitCredit, loanTransactionId, transactionType, isReversed);
+                    String id = createJournalEntryToOddo(journalEntryDebitCredit, loanTransactionId, transactionType, isReversed, loanAccountNo);
                     if (id != null) {
                         for (JournalEntry je : journalEntryDebitCredit) {
                             je.setOddoPosted(true);
