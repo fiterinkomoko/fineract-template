@@ -2478,12 +2478,13 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             LoanCashFlowData cashFlow) {
         LoanCashFlowProjection projection = new LoanCashFlowProjection(installment.getInstallmentNumber(), cashFlow.getId(), projectionRate,
                 amount);
+        LOG.info("Saving CashFlow Projection :- " + projection.getProjectionRate() + " computed " + amount);
         this.loanCashFlowProjectionRepository.saveAndFlush(projection);
     }
 
     @NotNull
     private BigDecimal computeProjection(Integer projectionRate, BigDecimal amount) {
-        return amount.add(BigDecimal.valueOf(projectionRate).divide(BigDecimal.valueOf(100)).multiply(amount));
+         return amount.add(BigDecimal.valueOf(projectionRate).divide(BigDecimal.valueOf(100), 30, RoundingMode.HALF_UP).multiply(amount)).setScale(6, RoundingMode.HALF_UP);
     }
 
     @Transactional
