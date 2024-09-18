@@ -49,6 +49,9 @@ jobs:
           USER=${{ secrets.PROD_SERVER_USERNAME }}
           SOURCE_FILE=./fineract-war/build/libs/fineract-provider.war
           DESTINATION_DIR="/home/fiter/inkomoko_deployments/fineract/fineract-provider-0.0.0-${{ steps.shortened_sha.outputs.shortened_sha }}.war"
+          PENTAHO_FILE_SOURCE=./fineract-provider/pentahoReports/
+          PENTAHO_FILE_DESTINATION=/home/fiter/inkomoko_deployments/fineract/pentaho/
           echo "${{ secrets.PROD_SERVER_SSH_KEY }}" > key.pem
           chmod 400 key.pem
           scp -i key.pem -P ${{ secrets.PROD_SERVER_PORT }} -o StrictHostKeyChecking=no $SOURCE_FILE ${{ secrets.PROD_SERVER_USERNAME }}@${{ secrets.PROD_SERVER_HOST }}:$DESTINATION_DIR
+          scp -r -i key.pem -P ${{ secrets.VM_PORT_DEV }} -o StrictHostKeyChecking=no $PENTAHO_FILE_SOURCE ${{ secrets.PROD_SERVER_USERNAME }}@${{ secrets.PROD_SERVER_HOST }}:$PENTAHO_FILE_DESTINATION
