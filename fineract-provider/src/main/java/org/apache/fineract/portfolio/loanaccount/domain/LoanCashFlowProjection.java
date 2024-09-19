@@ -41,7 +41,9 @@ public class LoanCashFlowProjection extends AbstractAuditableCustom {
     @Getter
     @Column(name = "projection_rate")
     private Integer projectionRate;
-    @Column(name = "amount")
+
+
+    @Column(name = "amount", scale = 6, precision = 30)
     private BigDecimal amount;
 
     public LoanCashFlowProjection() {}
