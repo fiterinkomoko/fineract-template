@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.accounting.provisioning.data.LoanData;
 import org.apache.fineract.accounting.provisioning.data.LoanProductProvisioningEntryData;
 import org.apache.fineract.accounting.provisioning.data.ProvisioningEntryData;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -65,7 +66,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
 
         private LoanProductProvisioningEntryMapper(DatabaseSpecificSQLGenerator sqlGenerator) {
             sqlQuery = new StringBuilder().append(
-                    "select (CASE WHEN loan.loan_type_enum=1 THEN mclient.office_id ELSE mgroup.office_id END) as office_id, loan.loan_type_enum, pcd.criteria_id as criteriaid, loan.product_id,loan.currency_code,")
+                    "select (CASE WHEN loan.loan_type_enum=1 THEN mclient.office_id ELSE mgroup.office_id END) as office_id, loan.loan_type_enum, pcd.criteria_id as criteriaid, loan.product_id,loan.currency_code,loan.id as loanId,")
                     .append("GREATEST(" + sqlGenerator.dateDiff("?", "sch.duedate")
                             + ", 0) as numberofdaysoverdue,sch.duedate, pcd.category_id, pcd.provision_percentage,")
                     .append("loan.total_outstanding_derived as outstandingbalance, pcd.liability_account, pcd.expense_account from m_loan_repayment_schedule sch")
@@ -94,9 +95,10 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
             Long expenseAccountCode = rs.getLong("expense_account");
             Long criteriaId = rs.getLong("criteriaid");
             Long historyId = null;
+            Long loanAccountNo = rs.getLong("loanId");
 
             return new LoanProductProvisioningEntryData(historyId, officeId, currentcyCode, productId, categoryId, overdueDays, percentage,
-                    outstandingBalance, liabilityAccountCode, expenseAccountCode, criteriaId);
+                    outstandingBalance, liabilityAccountCode, expenseAccountCode, criteriaId, loanAccountNo);
         }
 
         public String schema() {
@@ -144,18 +146,24 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
     private static final class LoanProductProvisioningEntryRowMapper implements RowMapper<LoanProductProvisioningEntryData> {
 
         private final StringBuilder sqlQuery = new StringBuilder().append(
-                " entry.id, entry.history_id as historyId, office_id, entry.criteria_id as criteriaid, office.name as officename, product.name as productname, entry.product_id, ")
-                .append("category_id, category.category_name, liability.id as liabilityid, liability.gl_code as liabilitycode, liability.name as liabilityname, ")
+                " entry.id, entry.history_id as historyId, entry.office_id, entry.criteria_id as criteriaid, office.name as officename, product.name as productname, entry.product_id, ")
+                .append("loan.id as loanId, loan.account_no as loanAccountNo, loan.total_outstanding_derived as outstandingBalance, loan.total_outstanding_derived * pcd.provision_percentage/100 as provisioningAmount, ")
+                .append("entry.category_id, category.category_name, liability.id as liabilityid, liability.gl_code as liabilitycode, liability.name as liabilityname, ")
                 .append("expense.id as expenseid, expense.gl_code as expensecode, expense.name as expensename, entry.currency_code, entry.overdue_in_days, entry.reseve_amount from m_loanproduct_provisioning_entry entry ")
                 .append("left join m_office office ON office.id = entry.office_id ")
                 .append("left join m_product_loan product ON product.id = entry.product_id ")
                 .append("left join m_provision_category category ON category.id = entry.category_id ")
                 .append("left join acc_gl_account liability ON liability.id = entry.liability_account ")
-                .append("left join acc_gl_account expense ON expense.id = entry.expense_account ");
+                .append("left join acc_gl_account expense ON expense.id = entry.expense_account ")
+                .append("left join m_loanproduct_provisioning_entry_loans mlpel on mlpel.loanproduct_provision_entry_id = entry.id " +
+                        "left join m_loan loan on loan.id = mlpel.loan_id " +
+                        "left join m_provisioning_criteria_definition pcd ON pcd.category_id = entry.category_id ");
 
         @Override
         @SuppressWarnings("unused")
         public LoanProductProvisioningEntryData mapRow(ResultSet rs, int rowNum) throws SQLException {
+
+            Long id = rs.getLong("id");
             Long historyId = rs.getLong("historyId");
             Long officeId = rs.getLong("office_id");
             String officeName = rs.getString("officename");
@@ -173,9 +181,23 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
             Long criteriaId = rs.getLong("criteriaid");
             String liabilityAccountName = rs.getString("liabilityname");
             String expenseAccountName = rs.getString("expensename");
-            return new LoanProductProvisioningEntryData(historyId, officeId, officeName, currentcyCode, productId, productName, categoryId,
+
+            List<LoanData> loans = new ArrayList<>();
+
+            LoanProductProvisioningEntryData data = new LoanProductProvisioningEntryData(historyId, officeId, officeName, currentcyCode, productId, productName, categoryId,
                     categoryName, overdueDays, amountreserved, liabilityAccountCode, liabilityAccountglCode, liabilityAccountName,
-                    expenseAccountCode, expenseAccountglCode, expenseAccountName, criteriaId);
+                    expenseAccountCode, expenseAccountglCode, expenseAccountName, criteriaId, loans);
+
+            do {
+                Long loanId = rs.getLong("loanId");
+                String accountNo = rs.getString("loanAccountNo");
+                BigDecimal outstandingBalance= rs.getBigDecimal("outstandingBalance");
+                BigDecimal provisioningAmount =rs.getBigDecimal("provisioningAmount");
+
+                loans.add(new LoanData(id,accountNo,outstandingBalance,provisioningAmount));
+            } while (rs.next() && rs.getInt("id") == id);
+
+            return data;
         }
 
         public String getSchema() {

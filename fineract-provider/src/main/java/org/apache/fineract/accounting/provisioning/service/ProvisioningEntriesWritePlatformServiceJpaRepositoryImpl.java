@@ -62,6 +62,8 @@ import org.apache.fineract.organisation.provisioning.data.ProvisioningCriteriaDa
 import org.apache.fineract.organisation.provisioning.domain.ProvisioningCategory;
 import org.apache.fineract.organisation.provisioning.domain.ProvisioningCategoryRepository;
 import org.apache.fineract.organisation.provisioning.service.ProvisioningCriteriaReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -87,6 +89,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
     private final ProvisioningEntriesDefinitionJsonDeserializer fromApiJsonDeserializer;
     private final FromJsonHelper fromApiJsonHelper;
     private final ApplicationEventPublisher eventPublisher;
+    private final LoanRepository loanRepository;
 
     @Override
     public CommandProcessingResult createProvisioningJournalEntries(Long provisioningEntryId, JsonCommand command) {
@@ -227,11 +230,14 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
             LoanProductProvisioningEntry entry = new LoanProductProvisioningEntry(loanProduct, office, data.getCurrencyCode(),
                     provisioningCategory, data.getOverdueInDays(), amountToReserve.getAmount(), liabilityAccount, expenseAccount,
                     criteraId);
+            Loan loan = this.loanRepository.getReferenceById(data.getLoanId());
             entry.setProvisioningEntry(parent);
             if (!provisioningEntries.containsKey(entry.partialHashCode())) {
+                entry.addLoan(loan);
                 provisioningEntries.put(entry.partialHashCode(), entry);
             } else {
                 LoanProductProvisioningEntry entry1 = provisioningEntries.get(entry.partialHashCode());
+                entry1.addLoan(loan);
                 entry1.addReservedAmount(entry.getReservedAmount());
             }
         }
