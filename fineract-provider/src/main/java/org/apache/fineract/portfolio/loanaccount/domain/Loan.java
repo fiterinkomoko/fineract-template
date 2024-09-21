@@ -1408,7 +1408,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
         }
     }
 
-    private void updateLoanSummaryDerivedFields() {
+    public void updateLoanSummaryDerivedFields() {
 
         if (isNotDisbursed()) {
             this.summary.zeroFields();
