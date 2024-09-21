@@ -133,21 +133,21 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
      **/
     @Autowired
     public LoanRescheduleRequestWritePlatformServiceImpl(final CodeValueRepositoryWrapper codeValueRepositoryWrapper,
-                                                         final PlatformSecurityContext platformSecurityContext,
-                                                         final LoanRescheduleRequestDataValidator loanRescheduleRequestDataValidator,
-                                                         final LoanRescheduleRequestRepository loanRescheduleRequestRepository,
-                                                         final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
-                                                         final LoanRepaymentScheduleHistoryRepository loanRepaymentScheduleHistoryRepository,
-                                                         final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService,
-                                                         final LoanTransactionRepository loanTransactionRepository,
-                                                         final JournalEntryWritePlatformService journalEntryWritePlatformService, final LoanRepositoryWrapper loanRepositoryWrapper,
-                                                         final LoanAssembler loanAssembler, final LoanUtilService loanUtilService,
-                                                         final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
-                                                         final LoanScheduleGeneratorFactory loanScheduleFactory, final LoanSummaryWrapper loanSummaryWrapper,
-                                                         final AccountTransfersWritePlatformService accountTransfersWritePlatformService,
-                                                         final LoanAccountDomainService loanAccountDomainService,
-                                                         final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository, NoteRepository noteRepository,
-                                                         final LoanRepaymentReminderRepository loanRepaymentReminderRepository, final RoutingDataSource dataSource) {
+            final PlatformSecurityContext platformSecurityContext,
+            final LoanRescheduleRequestDataValidator loanRescheduleRequestDataValidator,
+            final LoanRescheduleRequestRepository loanRescheduleRequestRepository,
+            final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
+            final LoanRepaymentScheduleHistoryRepository loanRepaymentScheduleHistoryRepository,
+            final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService,
+            final LoanTransactionRepository loanTransactionRepository,
+            final JournalEntryWritePlatformService journalEntryWritePlatformService, final LoanRepositoryWrapper loanRepositoryWrapper,
+            final LoanAssembler loanAssembler, final LoanUtilService loanUtilService,
+            final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
+            final LoanScheduleGeneratorFactory loanScheduleFactory, final LoanSummaryWrapper loanSummaryWrapper,
+            final AccountTransfersWritePlatformService accountTransfersWritePlatformService,
+            final LoanAccountDomainService loanAccountDomainService,
+            final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository, NoteRepository noteRepository,
+            final LoanRepaymentReminderRepository loanRepaymentReminderRepository, final RoutingDataSource dataSource) {
         this.codeValueRepositoryWrapper = codeValueRepositoryWrapper;
         this.platformSecurityContext = platformSecurityContext;
         this.loanRescheduleRequestDataValidator = loanRescheduleRequestDataValidator;
@@ -540,9 +540,8 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
             loan.updateLoanSummaryDerivedFields();
 
-            //clear arrears if any, the job will rerun to update the loan arrears state
+            // clear arrears if any, the job will rerun to update the loan arrears state
             this.jdbcTemplate.update("DELETE FROM m_loan_arrears_aging WHERE loan_id = ?", loan.getId());
-
 
             // update the loan object
             saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
