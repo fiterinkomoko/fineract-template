@@ -42,6 +42,7 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.RoutingDataSource;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
@@ -91,6 +92,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -122,6 +124,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
 
     private final NoteRepository noteRepository;
     private final LoanRepaymentReminderRepository loanRepaymentReminderRepository;
+    private final JdbcTemplate jdbcTemplate;
 
     /**
      * LoanRescheduleRequestWritePlatformServiceImpl constructor
@@ -130,21 +133,21 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
      **/
     @Autowired
     public LoanRescheduleRequestWritePlatformServiceImpl(final CodeValueRepositoryWrapper codeValueRepositoryWrapper,
-            final PlatformSecurityContext platformSecurityContext,
-            final LoanRescheduleRequestDataValidator loanRescheduleRequestDataValidator,
-            final LoanRescheduleRequestRepository loanRescheduleRequestRepository,
-            final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
-            final LoanRepaymentScheduleHistoryRepository loanRepaymentScheduleHistoryRepository,
-            final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService,
-            final LoanTransactionRepository loanTransactionRepository,
-            final JournalEntryWritePlatformService journalEntryWritePlatformService, final LoanRepositoryWrapper loanRepositoryWrapper,
-            final LoanAssembler loanAssembler, final LoanUtilService loanUtilService,
-            final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
-            final LoanScheduleGeneratorFactory loanScheduleFactory, final LoanSummaryWrapper loanSummaryWrapper,
-            final AccountTransfersWritePlatformService accountTransfersWritePlatformService,
-            final LoanAccountDomainService loanAccountDomainService,
-            final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository, NoteRepository noteRepository,
-            final LoanRepaymentReminderRepository loanRepaymentReminderRepository) {
+                                                         final PlatformSecurityContext platformSecurityContext,
+                                                         final LoanRescheduleRequestDataValidator loanRescheduleRequestDataValidator,
+                                                         final LoanRescheduleRequestRepository loanRescheduleRequestRepository,
+                                                         final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
+                                                         final LoanRepaymentScheduleHistoryRepository loanRepaymentScheduleHistoryRepository,
+                                                         final LoanScheduleHistoryWritePlatformService loanScheduleHistoryWritePlatformService,
+                                                         final LoanTransactionRepository loanTransactionRepository,
+                                                         final JournalEntryWritePlatformService journalEntryWritePlatformService, final LoanRepositoryWrapper loanRepositoryWrapper,
+                                                         final LoanAssembler loanAssembler, final LoanUtilService loanUtilService,
+                                                         final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
+                                                         final LoanScheduleGeneratorFactory loanScheduleFactory, final LoanSummaryWrapper loanSummaryWrapper,
+                                                         final AccountTransfersWritePlatformService accountTransfersWritePlatformService,
+                                                         final LoanAccountDomainService loanAccountDomainService,
+                                                         final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository, NoteRepository noteRepository,
+                                                         final LoanRepaymentReminderRepository loanRepaymentReminderRepository, final RoutingDataSource dataSource) {
         this.codeValueRepositoryWrapper = codeValueRepositoryWrapper;
         this.platformSecurityContext = platformSecurityContext;
         this.loanRescheduleRequestDataValidator = loanRescheduleRequestDataValidator;
@@ -165,6 +168,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
         this.repaymentScheduleInstallmentRepository = repaymentScheduleInstallmentRepository;
         this.noteRepository = noteRepository;
         this.loanRepaymentReminderRepository = loanRepaymentReminderRepository;
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     /**
@@ -533,6 +537,12 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
             loanRescheduleRequest.approve(appUser, approvedOnDate);
 
             deleteLoanRepaymentRemindersAssociatedToThisLoanAccount(loan);
+
+            loan.updateLoanSummaryDerivedFields();
+
+            //clear arrears if any, the job will rerun to update the loan arrears state
+            this.jdbcTemplate.update("DELETE FROM m_loan_arrears_aging WHERE loan_id = ?", loan.getId());
+
 
             // update the loan object
             saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
