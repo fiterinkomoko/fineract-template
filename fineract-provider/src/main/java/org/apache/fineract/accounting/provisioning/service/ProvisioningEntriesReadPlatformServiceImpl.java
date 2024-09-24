@@ -194,7 +194,7 @@ public class ProvisioningEntriesReadPlatformServiceImpl implements ProvisioningE
                 BigDecimal outstandingBalance= rs.getBigDecimal("outstandingBalance");
                 BigDecimal provisioningAmount =rs.getBigDecimal("provisioningAmount");
 
-                loans.add(new LoanData(id,accountNo,outstandingBalance,provisioningAmount));
+                loans.add(new LoanData(loanId,accountNo,outstandingBalance,provisioningAmount));
             } while (rs.next() && rs.getInt("id") == id);
 
             return data;
