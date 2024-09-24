@@ -219,7 +219,7 @@ public class KivaLoanServiceImpl implements KivaLoanService {
         ClientRecruitmentSurvey clientRecruitmentSurvey = clientRecruitmentSurveyRepository.getByClientId(client.getId());
         String location = getClientLocation(clientRecruitmentSurvey);
 
-        KivaLoanAccount loanAccount = new KivaLoanAccount(loan.getNetDisbursalAmount(), clientKivaId, client.getFirstname(), gender,
+        KivaLoanAccount loanAccount = new KivaLoanAccount(loan.getLoanSummary().getTotalPrincipalDisbursed(), clientKivaId, client.getFirstname(), gender,
                 client.getLastname(), getLoanKivaId(loan));
         kivaLoanAccounts.add(loanAccount);
 
