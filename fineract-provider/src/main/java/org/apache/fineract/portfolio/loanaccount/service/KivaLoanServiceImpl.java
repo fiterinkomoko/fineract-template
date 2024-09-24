@@ -212,7 +212,7 @@ public class KivaLoanServiceImpl implements KivaLoanService {
         String clientKivaId = client.getKivaId();
         String base64Image = generateBase64Image(loan);
 
-        if(base64Image == null){
+        if (base64Image == null) {
             throw new LoanDueDiligenceException("validation.msg.loan.profile.image.not.uploaded", "Loan profile image not uploaded");
         }
 
