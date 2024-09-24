@@ -128,14 +128,28 @@ public class KivaLoanServiceImpl implements KivaLoanService {
 
         List<Loan> loanList = loanRepository.findLoanAccountsToBePostedToKiva();
 
+        List<Throwable> exceptions = new ArrayList<>();
+
         LOG.info("Posting this Loan Account To Kiva And Size = = > " + loanList.size());
         if (!CollectionUtils.isEmpty(loanList)) {
             for (Loan loan : loanList) {
-                String loanToKiva = loanPayloadToKivaMapper(kivaLoanAccountSchedules, kivaLoanAccounts, notPictured, loan);
-                LOG.info("Loan Account To be Sent to Kiva : =GSON = >  " + loanToKiva);
-                String loanDraftUUID = postLoanToKiva(accessToken, loanToKiva);
-                loan.setKivaUUId(loanDraftUUID);
-                loanRepository.saveAndFlush(loan);
+                try {
+                    String loanToKiva = loanPayloadToKivaMapper(kivaLoanAccountSchedules, kivaLoanAccounts, notPictured, loan);
+                    LOG.info("Loan Account To be Sent to Kiva : =GSON = >  " + loanToKiva);
+                    String loanDraftUUID = postLoanToKiva(accessToken, loanToKiva);
+                    loan.setKivaUUId(loanDraftUUID);
+                    loanRepository.saveAndFlush(loan);
+                } catch (Exception e) {
+                    log.error("Post Loan to KIVA has failed" + e);
+                    exceptions.add(e);
+                }
+            }
+            if (!CollectionUtils.isEmpty(exceptions)) {
+                try {
+                    throw new JobExecutionException(exceptions);
+                } catch (JobExecutionException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }
@@ -197,6 +211,10 @@ public class KivaLoanServiceImpl implements KivaLoanService {
         String loanPurpose = (loan.getLoanPurpose() != null) ? loan.getLoanPurpose().label() : "Not Defined";
         String clientKivaId = (client.getExternalId() != null) ? client.getExternalId() : client.getId().toString();
         String base64Image = generateBase64Image(loan);
+
+        if(base64Image == null){
+            throw new LoanDueDiligenceException("validation.msg.loan.profile.image.not.uploaded", "Loan profile image not uploaded");
+        }
 
         ClientRecruitmentSurvey clientRecruitmentSurvey = clientRecruitmentSurveyRepository.getByClientId(client.getId());
         String location = getClientLocation(clientRecruitmentSurvey);
