@@ -2484,7 +2484,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
     @NotNull
     private BigDecimal computeProjection(Integer projectionRate, BigDecimal amount) {
-         return amount.add(BigDecimal.valueOf(projectionRate).divide(BigDecimal.valueOf(100), 30, RoundingMode.HALF_UP).multiply(amount)).setScale(6, RoundingMode.HALF_UP);
+        return amount.add(BigDecimal.valueOf(projectionRate).divide(BigDecimal.valueOf(100), 30, RoundingMode.HALF_UP).multiply(amount))
+                .setScale(6, RoundingMode.HALF_UP);
     }
 
     @Transactional

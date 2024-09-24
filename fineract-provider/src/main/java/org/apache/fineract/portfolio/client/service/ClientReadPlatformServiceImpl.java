@@ -406,12 +406,12 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             // Map to client collateral data class
             for (ClientCollateralManagement clientCollateralManagement : clientCollateralManagements) {
-                final ClientCollateralManagementAdditionalDetails additionalDetails = this.clientCollateralManagementAdditionalDetailsRepository.
-                        findByCollateralId(clientCollateralManagement);
+                final ClientCollateralManagementAdditionalDetails additionalDetails = this.clientCollateralManagementAdditionalDetailsRepository
+                        .findByCollateralId(clientCollateralManagement);
                 BigDecimal total = clientCollateralManagement.getTotal();
                 BigDecimal totalCollateral = clientCollateralManagement.getTotalCollateral(total);
-                clientCollateralManagementDataSet
-                        .add(ClientCollateralManagementData.setCollateralValues(clientCollateralManagement, total, totalCollateral, additionalDetails));
+                clientCollateralManagementDataSet.add(ClientCollateralManagementData.setCollateralValues(clientCollateralManagement, total,
+                        totalCollateral, additionalDetails));
             }
             final Collection<ClientBusinessDetail> clientBusinessDetails = this.clientBusinessDetailRepositoryWrapper
                     .findByClientId(clientId);
