@@ -119,7 +119,7 @@ public class KivaLoanServiceImpl implements KivaLoanService {
     @CronTarget(jobName = JobName.POST_LOAN_ACCOUNTS_TO_KIVA)
     public void postLoanAccountsToKiva() {
         // Authenticate to KIVA
-        String accessToken = null; //authenticateToKiva();
+        String accessToken = authenticateToKiva();
 
         List<KivaLoanAccountSchedule> kivaLoanAccountSchedules = new ArrayList<>();
         List<KivaLoanAccount> kivaLoanAccounts = new ArrayList<>();
