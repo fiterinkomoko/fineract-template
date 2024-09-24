@@ -119,7 +119,7 @@ public class KivaLoanServiceImpl implements KivaLoanService {
     @CronTarget(jobName = JobName.POST_LOAN_ACCOUNTS_TO_KIVA)
     public void postLoanAccountsToKiva() {
         // Authenticate to KIVA
-        String accessToken = authenticateToKiva();
+        String accessToken = null; //authenticateToKiva();
 
         List<KivaLoanAccountSchedule> kivaLoanAccountSchedules = new ArrayList<>();
         List<KivaLoanAccount> kivaLoanAccounts = new ArrayList<>();
@@ -209,7 +209,7 @@ public class KivaLoanServiceImpl implements KivaLoanService {
         Client client = loan.getClient();
         String gender = (client.gender() != null) ? client.gender().label().toLowerCase() : "unknown";
         String loanPurpose = (loan.getLoanPurpose() != null) ? loan.getLoanPurpose().label() : "Not Defined";
-        String clientKivaId = (client.getExternalId() != null) ? client.getExternalId() : client.getId().toString();
+        String clientKivaId = client.getKivaId();
         String base64Image = generateBase64Image(loan);
 
         if(base64Image == null){
@@ -281,7 +281,7 @@ public class KivaLoanServiceImpl implements KivaLoanService {
     }
 
     private String getLoanKivaId(Loan loan) {
-        return (loan.getKivaId() != null) ? loan.getKivaId() : loan.getExternalId();
+        return loan.getKivaId();
     }
 
     private String authenticateToKiva() {
