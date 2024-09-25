@@ -65,6 +65,7 @@ import org.apache.fineract.portfolio.loanaccount.data.KivaLocationData;
 import org.apache.fineract.portfolio.loanaccount.data.KivaSupportedCurrencyData;
 import org.apache.fineract.portfolio.loanaccount.data.KivaSupportedLocationData;
 import org.apache.fineract.portfolio.loanaccount.data.KivaSupportedThemeData;
+import org.apache.fineract.portfolio.loanaccount.data.KivaLoanAccountScheduleParameters;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDetailToKivaData;
 import org.apache.fineract.portfolio.loanaccount.data.ThemeData;
 import org.apache.fineract.portfolio.loanaccount.domain.KivaCurrency;
@@ -80,6 +81,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleIns
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanDueDiligenceException;
 import org.apache.fineract.portfolio.loanaccount.serialization.KivaDateSerializerApi;
+import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -229,12 +231,18 @@ public class KivaLoanServiceImpl implements KivaLoanService {
                     scheduleInstallment.getPrincipal(loan.getCurrency()).getAmount());
             kivaLoanAccountSchedules.add(schedule);
         }
+        Date firstRepaymentDate = loan.getExpectedFirstRepaymentOnDate() != null ? Date.valueOf(loan.getExpectedFirstRepaymentOnDate()) : null;
+        KivaLoanAccountScheduleParameters scheduleParameters = new KivaLoanAccountScheduleParameters(firstRepaymentDate,
+                loan.getNumberOfRepayments(), loan.getLoanRepaymentScheduleDetail().getRepayEvery(),
+                LoanEnumerations.repaymentFrequencyType(loan.getLoanRepaymentScheduleDetail().getRepaymentPeriodFrequencyType().getValue()).getValue().toLowerCase(),
+                LoanEnumerations.interestType(loan.getLoanProductRelatedDetail().getInterestMethod().getValue()).getValue(),
+                loan.getLoanProductRelatedDetail().getAnnualNominalInterestRate().toString());
 
         // build final object
         LoanDetailToKivaData loanDetailToKivaData = new LoanDetailToKivaData(ACTIVITY_ID, Boolean.TRUE, loan.getCurrencyCode(),
                 loan.getDescription(), DESCRIPTION_LANGUAGE_ID, Date.valueOf(loan.getDisbursementDate()), " ", base64Image,
                 client.getId().toString(), generateInternalLoanId(loan.getDisbursementDate(), loan.getId()), loanPurpose, location,
-                getKivaLoanDepartmentThemeType(loan), kivaLoanAccounts, kivaLoanAccountSchedules, notPictured);
+                getKivaLoanDepartmentThemeType(loan), kivaLoanAccounts, kivaLoanAccountSchedules, notPictured, scheduleParameters);
 
         Gson gson = new GsonBuilder().registerTypeAdapter(Date.class, new KivaDateSerializerApi()).create();
 
