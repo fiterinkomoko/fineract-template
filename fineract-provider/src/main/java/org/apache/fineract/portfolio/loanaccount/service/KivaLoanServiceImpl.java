@@ -136,6 +136,8 @@ public class KivaLoanServiceImpl implements KivaLoanService {
         if (!CollectionUtils.isEmpty(loanList)) {
             for (Loan loan : loanList) {
                 try {
+                    kivaLoanAccounts.clear();
+                    kivaLoanAccountSchedules.clear();
                     String loanToKiva = loanPayloadToKivaMapper(kivaLoanAccountSchedules, kivaLoanAccounts, notPictured, loan);
                     LOG.info("Loan Account To be Sent to Kiva : =GSON = >  " + loanToKiva);
                     String loanDraftUUID = postLoanToKiva(accessToken, loanToKiva);
