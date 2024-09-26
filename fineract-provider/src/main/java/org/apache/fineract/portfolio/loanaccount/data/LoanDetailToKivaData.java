@@ -41,11 +41,13 @@ public class LoanDetailToKivaData {
     private List<KivaLoanAccount> entreps;
     private List<KivaLoanAccountSchedule> schedule;
     private List<Boolean> not_pictured;
+    private KivaLoanAccountScheduleParameters schedule_parameters;
+
 
     public LoanDetailToKivaData(Long activity_id, Boolean client_waiver_signed, String currency, String description,
             Integer description_language_id, Date disburse_time, String group_name, String image_encoded, String internal_client_id,
             String internal_loan_id, String loanuse, String location, Integer theme_type_id, List<KivaLoanAccount> entreps,
-            List<KivaLoanAccountSchedule> schedule, List<Boolean> not_pictured) {
+            List<KivaLoanAccountSchedule> schedule, List<Boolean> not_pictured, KivaLoanAccountScheduleParameters schedule_parameters) {
         this.activity_id = activity_id;
         this.client_waiver_signed = client_waiver_signed;
         this.currency = currency;
@@ -62,6 +64,7 @@ public class LoanDetailToKivaData {
         this.entreps = entreps;
         this.schedule = schedule;
         this.not_pictured = not_pictured;
+        this.schedule_parameters = schedule_parameters;
     }
 
     @Override
@@ -71,6 +74,6 @@ public class LoanDetailToKivaData {
                 + ", disburse_time=" + disburse_time + ", group_name='" + group_name + '\'' + ", image_encoded='" + image_encoded + '\''
                 + ", internal_client_id=" + internal_client_id + ", internal_loan_id=" + internal_loan_id + ", loanuse='" + loanuse + '\''
                 + ", location='" + location + '\'' + ", theme_type_id='" + theme_type_id + '\'' + ", entreps=" + entreps + ", schedule="
-                + schedule + '}';
+                + schedule + ", schedule_parameters="+ schedule_parameters + '}';
     }
 }

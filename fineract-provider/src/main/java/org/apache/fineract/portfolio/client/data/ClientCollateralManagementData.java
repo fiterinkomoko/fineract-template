@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.client.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-
 import lombok.Getter;
 import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement;
 import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagementAdditionalDetails;
@@ -45,7 +44,7 @@ public final class ClientCollateralManagementData implements Serializable {
     private final BigDecimal worthOfCollateral;
 
     private ClientCollateralManagementData(final BigDecimal quantity, final Long id, final BigDecimal pctToBase, final BigDecimal unitPrice,
-                                           final BigDecimal total, final BigDecimal totalCollateral, final String name, BigDecimal worthOfCollateral) {
+            final BigDecimal total, final BigDecimal totalCollateral, final String name, BigDecimal worthOfCollateral) {
         this.id = id;
         this.pctToBase = pctToBase;
         this.total = total;
@@ -57,8 +56,7 @@ public final class ClientCollateralManagementData implements Serializable {
     }
 
     public static ClientCollateralManagementData setCollateralValues(final ClientCollateralManagement clientCollateralManagements,
-                                                                     final BigDecimal total, final BigDecimal totalCollateral, ClientCollateralManagementAdditionalDetails
-                                                                     additionalDetails) {
+            final BigDecimal total, final BigDecimal totalCollateral, ClientCollateralManagementAdditionalDetails additionalDetails) {
         return new ClientCollateralManagementData(clientCollateralManagements.getQuantity(), clientCollateralManagements.getId(),
                 clientCollateralManagements.getCollaterals().getPctToBase(), clientCollateralManagements.getCollaterals().getBasePrice(),
                 total, totalCollateral, clientCollateralManagements.getCollaterals().getName(), additionalDetails.getWorthOfCollateral());

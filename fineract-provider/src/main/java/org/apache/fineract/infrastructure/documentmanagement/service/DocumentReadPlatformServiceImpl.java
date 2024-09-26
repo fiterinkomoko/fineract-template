@@ -18,9 +18,6 @@
  */
 package org.apache.fineract.infrastructure.documentmanagement.service;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.documentmanagement.contentrepository.ContentRepository;
@@ -33,6 +30,11 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -81,7 +83,12 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
     public DocumentData retrieveKivaLoanProfileImage(String entityType, Long entityId) {
         final DocumentMapper mapper = new DocumentMapper(false, false);
         final String sql = "select " + mapper.schema() + "  and d.is_kiva_profile_image = true order by d.id DESC limit 1";
-        return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { entityType, entityId }); // NOSONAR
+        List<DocumentData> results = this.jdbcTemplate.query(sql, mapper, new Object[] { entityType, entityId });
+        DocumentData result = null;
+        if (!results.isEmpty()) {
+            result = results.get(0);
+        }
+        return result; // NOSONAR
     }
 
     private DocumentData fetchDocumentDetails(final String entityType, final Long entityId, final Long documentId,

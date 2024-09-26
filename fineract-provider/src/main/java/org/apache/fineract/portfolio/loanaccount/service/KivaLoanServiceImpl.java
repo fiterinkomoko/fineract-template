@@ -65,6 +65,7 @@ import org.apache.fineract.portfolio.loanaccount.data.KivaLocationData;
 import org.apache.fineract.portfolio.loanaccount.data.KivaSupportedCurrencyData;
 import org.apache.fineract.portfolio.loanaccount.data.KivaSupportedLocationData;
 import org.apache.fineract.portfolio.loanaccount.data.KivaSupportedThemeData;
+import org.apache.fineract.portfolio.loanaccount.data.KivaLoanAccountScheduleParameters;
 import org.apache.fineract.portfolio.loanaccount.data.LoanDetailToKivaData;
 import org.apache.fineract.portfolio.loanaccount.data.ThemeData;
 import org.apache.fineract.portfolio.loanaccount.domain.KivaCurrency;
@@ -80,6 +81,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleIns
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanDueDiligenceException;
 import org.apache.fineract.portfolio.loanaccount.serialization.KivaDateSerializerApi;
+import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,14 +130,30 @@ public class KivaLoanServiceImpl implements KivaLoanService {
 
         List<Loan> loanList = loanRepository.findLoanAccountsToBePostedToKiva();
 
+        List<Throwable> exceptions = new ArrayList<>();
+
         LOG.info("Posting this Loan Account To Kiva And Size = = > " + loanList.size());
         if (!CollectionUtils.isEmpty(loanList)) {
             for (Loan loan : loanList) {
-                String loanToKiva = loanPayloadToKivaMapper(kivaLoanAccountSchedules, kivaLoanAccounts, notPictured, loan);
-                LOG.info("Loan Account To be Sent to Kiva : =GSON = >  " + loanToKiva);
-                String loanDraftUUID = postLoanToKiva(accessToken, loanToKiva);
-                loan.setKivaUUId(loanDraftUUID);
-                loanRepository.saveAndFlush(loan);
+                try {
+                    kivaLoanAccounts.clear();
+                    kivaLoanAccountSchedules.clear();
+                    String loanToKiva = loanPayloadToKivaMapper(kivaLoanAccountSchedules, kivaLoanAccounts, notPictured, loan);
+                    LOG.info("Loan Account To be Sent to Kiva : =GSON = >  " + loanToKiva);
+                    String loanDraftUUID = postLoanToKiva(accessToken, loanToKiva);
+                    loan.setKivaUUId(loanDraftUUID);
+                    loanRepository.saveAndFlush(loan);
+                } catch (Exception e) {
+                    log.error("Post Loan to KIVA has failed" + e);
+                    exceptions.add(e);
+                }
+            }
+            if (!CollectionUtils.isEmpty(exceptions)) {
+                try {
+                    throw new JobExecutionException(exceptions);
+                } catch (JobExecutionException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }
@@ -195,13 +213,17 @@ public class KivaLoanServiceImpl implements KivaLoanService {
         Client client = loan.getClient();
         String gender = (client.gender() != null) ? client.gender().label().toLowerCase() : "unknown";
         String loanPurpose = (loan.getLoanPurpose() != null) ? loan.getLoanPurpose().label() : "Not Defined";
-        String clientKivaId = (client.getExternalId() != null) ? client.getExternalId() : client.getId().toString();
+        String clientKivaId = client.getKivaId();
         String base64Image = generateBase64Image(loan);
+
+        if(base64Image == null){
+            throw new LoanDueDiligenceException("validation.msg.loan.profile.image.not.uploaded", "Loan profile image not uploaded");
+        }
 
         ClientRecruitmentSurvey clientRecruitmentSurvey = clientRecruitmentSurveyRepository.getByClientId(client.getId());
         String location = getClientLocation(clientRecruitmentSurvey);
 
-        KivaLoanAccount loanAccount = new KivaLoanAccount(loan.getNetDisbursalAmount(), clientKivaId, client.getFirstname(), gender,
+        KivaLoanAccount loanAccount = new KivaLoanAccount(loan.getLoanSummary().getTotalPrincipalDisbursed(), clientKivaId, client.getFirstname(), gender,
                 client.getLastname(), getLoanKivaId(loan));
         kivaLoanAccounts.add(loanAccount);
 
@@ -211,12 +233,18 @@ public class KivaLoanServiceImpl implements KivaLoanService {
                     scheduleInstallment.getPrincipal(loan.getCurrency()).getAmount());
             kivaLoanAccountSchedules.add(schedule);
         }
+        Date firstRepaymentDate = loan.getExpectedFirstRepaymentOnDate() != null ? Date.valueOf(loan.getExpectedFirstRepaymentOnDate()) : null;
+        KivaLoanAccountScheduleParameters scheduleParameters = new KivaLoanAccountScheduleParameters(firstRepaymentDate,
+                loan.getNumberOfRepayments(), loan.getLoanRepaymentScheduleDetail().getRepayEvery(),
+                LoanEnumerations.repaymentFrequencyType(loan.getLoanRepaymentScheduleDetail().getRepaymentPeriodFrequencyType().getValue()).getValue().toLowerCase(),
+                LoanEnumerations.interestType(loan.getLoanProductRelatedDetail().getInterestMethod().getValue()).getValue(),
+                loan.getLoanProductRelatedDetail().getAnnualNominalInterestRate().toString());
 
         // build final object
         LoanDetailToKivaData loanDetailToKivaData = new LoanDetailToKivaData(ACTIVITY_ID, Boolean.TRUE, loan.getCurrencyCode(),
                 loan.getDescription(), DESCRIPTION_LANGUAGE_ID, Date.valueOf(loan.getDisbursementDate()), " ", base64Image,
                 client.getId().toString(), generateInternalLoanId(loan.getDisbursementDate(), loan.getId()), loanPurpose, location,
-                getKivaLoanDepartmentThemeType(loan), kivaLoanAccounts, kivaLoanAccountSchedules, notPictured);
+                getKivaLoanDepartmentThemeType(loan), kivaLoanAccounts, kivaLoanAccountSchedules, notPictured, scheduleParameters);
 
         Gson gson = new GsonBuilder().registerTypeAdapter(Date.class, new KivaDateSerializerApi()).create();
 
@@ -263,7 +291,7 @@ public class KivaLoanServiceImpl implements KivaLoanService {
     }
 
     private String getLoanKivaId(Loan loan) {
-        return (loan.getKivaId() != null) ? loan.getKivaId() : loan.getExternalId();
+        return loan.getKivaId();
     }
 
     private String authenticateToKiva() {
