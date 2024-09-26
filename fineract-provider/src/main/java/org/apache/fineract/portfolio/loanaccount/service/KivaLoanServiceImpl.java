@@ -125,7 +125,7 @@ public class KivaLoanServiceImpl implements KivaLoanService {
 
         List<KivaLoanAccountSchedule> kivaLoanAccountSchedules = new ArrayList<>();
         List<KivaLoanAccount> kivaLoanAccounts = new ArrayList<>();
-        List<Boolean> notPictured = new ArrayList<>();
+        List<Boolean> notPictured = new ArrayList<>(); // use it when need to send group loans
         notPictured.add(Boolean.TRUE);
 
         List<Loan> loanList = loanRepository.findLoanAccountsToBePostedToKiva();

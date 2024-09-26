@@ -63,7 +63,7 @@ public class LoanDetailToKivaData {
         this.theme_type_id = theme_type_id;
         this.entreps = entreps;
         this.schedule = schedule;
-        this.not_pictured = not_pictured;
+        this.not_pictured = null; // not_pictured set when needs to send group loans;
         this.schedule_parameters = schedule_parameters;
     }
 
