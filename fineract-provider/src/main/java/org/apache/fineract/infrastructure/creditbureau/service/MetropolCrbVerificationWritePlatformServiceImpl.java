@@ -360,11 +360,11 @@ public class MetropolCrbVerificationWritePlatformServiceImpl implements Metropol
         enhancedReport.setApiCode(getStringField(jsonResponse, "api_code"));
         enhancedReport.setApiCodeDescription(getStringField(jsonResponse, "api_code_description"));
         enhancedReport.setApplicationRefNo(getStringField(jsonResponse, "application_ref_no"));
-        enhancedReport.setCreditScore(getStringField(jsonResponse, "credit_score"));
+        enhancedReport.setCreditScore(getIntegerField(jsonResponse, "credit_score").toString());
         enhancedReport.setDelinquencyCode(getStringField(jsonResponse, "delinquency_code"));
         enhancedReport.setHasError(getBooleanField(jsonResponse, "has_error"));
         enhancedReport.setHasFraud(getBooleanField(jsonResponse, "has_fraud"));
-        enhancedReport.setIdentityNumber(getStringField(jsonResponse, "id_number"));
+        enhancedReport.setIdentityNumber(getStringField(jsonResponse, "identity_number"));
         enhancedReport.setIdentityType(getStringField(jsonResponse, "identity_type"));
         enhancedReport.setIsGuarantor(getBooleanField(jsonResponse, "is_guarantor"));
         enhancedReport.setTrxId(getStringField(jsonResponse, "trx_id"));
