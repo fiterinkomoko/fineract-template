@@ -28,4 +28,5 @@ public class JournalData {
     private String ref;
     private boolean is_reversed;
     private String date;
+    private String office;
 }
