@@ -16,18 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.data;
+package org.apache.fineract.accounting.provisioning.data;
 
-import lombok.Data;
+import lombok.Getter;
 
-@Data
-public class LoanTransactionNotPostedToOdooInstanceData {
+import java.math.BigDecimal;
 
-    private final Long loanTransactionId;
-    private final Long loanId;
-    private final String loanAccountNo;
-    private final Long transactionType;
-    private final Boolean isReversed;
-    private final String office;
 
+@Getter
+public class LoanData {
+
+    private final Long id;
+    private final String accountNo;
+    private final BigDecimal outstandingBalance;
+
+    private final BigDecimal provisioningAmount;
+
+    public LoanData(Long id, String accountNo, BigDecimal outstandingBalance, BigDecimal provisioningAmount) {
+        this.id = id;
+        this.accountNo = accountNo;
+        this.outstandingBalance = outstandingBalance;
+        this.provisioningAmount = provisioningAmount;
+    }
 }

@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.Odoo;
 
 import lombok.Data;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
+import org.apache.fineract.organisation.office.domain.Office;
 
 @Data
 public class AccountingEntry {
@@ -30,13 +31,15 @@ public class AccountingEntry {
     private Long name;
     private Double credit;
     private Double debit;
+    private Long cbs_office_id;
 
     public AccountingEntry() {}
 
-    public AccountingEntry(JournalEntry journalEntry, Integer accountId, Integer partnerId) {
+    public AccountingEntry(JournalEntry journalEntry, Integer accountId, Integer partnerId, Office office) {
         this.account_id = accountId;
         this.partner_id = partnerId;
         this.name = journalEntry.getId();
+        this.cbs_office_id = office.getId();
 
         if (journalEntry.getType() == 2) {
             this.debit = journalEntry.getAmount().doubleValue();

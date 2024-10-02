@@ -19,16 +19,21 @@
 package org.apache.fineract.accounting.provisioning.domain;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.provisioning.domain.ProvisioningCategory;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 
 @Entity
@@ -71,6 +76,14 @@ public class LoanProductProvisioningEntry extends AbstractPersistableCustom {
     @JoinColumn(name = "expense_account", nullable = false)
     private GLAccount expenseAccount;
 
+    @OneToMany
+    @JoinTable(
+            name = "m_loanproduct_provisioning_entry_loans",  // The name of the join table
+            joinColumns = @JoinColumn(name = "loanproduct_provision_entry_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "loan_id", referencedColumnName = "id")  // Foreign key to Human
+    )
+    private Set<Loan> loan;
+
     protected LoanProductProvisioningEntry() {}
 
     public LoanProductProvisioningEntry(final LoanProduct loanProduct, final Office office, final String currencyCode,
@@ -85,6 +98,8 @@ public class LoanProductProvisioningEntry extends AbstractPersistableCustom {
         this.liabilityAccount = liabilityAccount;
         this.expenseAccount = expenseAccount;
         this.criteriaId = criteriaId;
+        this.loan = new HashSet<>();
+
     }
 
     public void setProvisioningEntry(ProvisioningEntry provisioningEntry) {
@@ -97,6 +112,10 @@ public class LoanProductProvisioningEntry extends AbstractPersistableCustom {
 
     public void addReservedAmount(BigDecimal value) {
         this.reservedAmount = this.reservedAmount.add(value);
+    }
+
+    public void addLoan(Loan loan){
+        this.loan.add(loan);
     }
 
     public Office getOffice() {
