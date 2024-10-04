@@ -54,6 +54,7 @@ import org.apache.fineract.accounting.producttoaccountmapping.domain.PortfolioPr
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.Odoo.OdooService;
 import org.apache.fineract.infrastructure.bulkimport.data.GlobalEntityType;
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookPopulatorService;
 import org.apache.fineract.infrastructure.bulkimport.service.BulkImportWorkbookService;
@@ -93,6 +94,7 @@ public class JournalEntriesApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final BulkImportWorkbookService bulkImportWorkbookService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
+    private final OdooService odooService;
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -277,5 +279,15 @@ public class JournalEntriesApiResource {
         final Long importDocumentId = this.bulkImportWorkbookService.importWorkbook(GlobalEntityType.GL_JOURNAL_ENTRIES.toString(),
                 uploadedInputStream, fileDetail, locale, dateFormat);
         return this.apiJsonSerializerService.serialize(importDocumentId);
+    }
+
+    @POST
+    @Path("updateOdooStatus/{transactionId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String completeOdooJournalEntriesPost(@Parameter(hidden = true) final String apiRequestBodyAsJson){
+        this.context.authenticatedUser().validateHasUpdatePermission(this.resourceNameForPermission);
+
+        return this.odooService.updateJournalEntryWithOdooStatus(apiRequestBodyAsJson);
     }
 }
