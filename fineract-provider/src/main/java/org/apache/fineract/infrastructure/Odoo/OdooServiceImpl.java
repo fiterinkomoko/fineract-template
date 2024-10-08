@@ -98,6 +98,9 @@ public class OdooServiceImpl implements OdooService {
 
     @Value("${fineract.integrations.odoo.url}")
     private String url;
+
+    @Value("${fineract.integrations.celery.url}")
+    private String celeryUrl;
     private ClientRepositoryWrapper clientRepository;
     private ConfigurationDomainService configurationDomainService;
 
@@ -416,7 +419,7 @@ public class OdooServiceImpl implements OdooService {
         OkHttpClient httpClient = new OkHttpClient();
 
         RequestBody requestBody = RequestBody.create(MediaType.parse(FORM_URL_CONTENT_TYPE), payload);
-        Request request = new Request.Builder().url(url + "/api/cbs_journal_entry").post(requestBody)
+        Request request = new Request.Builder().url(celeryUrl + "/api/cbs_journal_entry").post(requestBody)
                 .addHeader("Content-Type", "application/json").build();
 
         Response response = httpClient.newCall(request).execute();
