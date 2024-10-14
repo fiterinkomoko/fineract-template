@@ -1353,7 +1353,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
                     if (installment.getFeeChargesCharged(getCurrency()).isLessThan(fee)
                             || installment.getInterestCharged(getCurrency()).isLessThan(interest)
                             || installment.getPenaltyChargesCharged(getCurrency()).isLessThan(penality)
-                            || (getAccruedTill().isEqual(loanTransaction.getTransactionDate())
+                            || (getAccruedTill() != null && getAccruedTill().isEqual(loanTransaction.getTransactionDate())
                                     && !installment.getDueDate().isEqual(getAccruedTill()))) {
                         interest = interest.minus(loanTransaction.getInterestPortion(getCurrency()));
                         fee = fee.minus(loanTransaction.getFeeChargesPortion(getCurrency()));
