@@ -1001,7 +1001,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                                     "Topup loan amount should be greater than outstanding amount of loan to be closed.");
                         }
 
-                        if (existingLoanIdToClose != null && !existingLoanIdToClose.equals(loanIdToClose)) {
+                        if (existingLoanIdToClose == null || !existingLoanIdToClose.equals(loanIdToClose)) {
                             final LoanTopupDetails topupDetails = new LoanTopupDetails(existingLoanApplication, loanIdToClose);
                             existingLoanApplication.setTopupLoanDetails(topupDetails);
                             changes.put(LoanApiConstants.loanIdToClose, loanIdToClose);

@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+
+import com.google.gson.JsonObject;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -38,8 +40,10 @@ public interface OdooService {
 
     public void postCustomerUpdatedDetailsToOddo() throws JobExecutionException;
 
-    String createJournalEntryToOddo(List<JournalEntry> entry, Long loanTransactionId, Long transactionType, Boolean isReversed, String loanAccount)
+    JsonObject createJournalEntryToOddo(List<JournalEntry> entry, Long loanTransactionId, Long transactionType, Boolean isReversed, String loanAccount)
             throws IOException;
+
+    String updateJournalEntryWithOdooStatus(String stringRequest);
 
     void postJournalEntryToOddo() throws JobExecutionException;
 
