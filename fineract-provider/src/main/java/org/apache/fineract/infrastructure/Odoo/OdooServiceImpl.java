@@ -53,6 +53,7 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.annotation.CronTarget;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
+import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
@@ -97,6 +98,9 @@ public class OdooServiceImpl implements OdooService {
 
     @Value("${fineract.integrations.odoo.url}")
     private String url;
+
+    @Value("${fineract.integrations.celery.url}")
+    private String celeryUrl;
     private ClientRepositoryWrapper clientRepository;
     private ConfigurationDomainService configurationDomainService;
 
@@ -327,7 +331,7 @@ public class OdooServiceImpl implements OdooService {
     }
 
     @Override
-    public String createJournalEntryToOddo(List<JournalEntry> list, Long loanTransactionId, Long transactionType, Boolean isReversed)
+    public JsonObject createJournalEntryToOddo(List<JournalEntry> list, Long loanTransactionId, Long transactionType, Boolean isReversed, String loanAccountNo)
             throws IOException {
 
         final Integer uid = loginToOddo();
@@ -344,8 +348,9 @@ public class OdooServiceImpl implements OdooService {
                 Integer accountId = extractGlCode(entry.getGlAccount().getGlCode());
                 Client client = entry.getClient();
                 Integer partnerId = client.getOdooCustomerId();
+                Office office = entry.getOffice();
 
-                journalEntry = new AccountingEntry(entry, accountId, partnerId);
+                journalEntry = new AccountingEntry(entry, accountId, partnerId, office);
                 accounting_entries.add(journalEntry);
                 if (partnerId == null) {
                     throw new GeneralPlatformDomainRuleException(
@@ -368,7 +373,7 @@ public class OdooServiceImpl implements OdooService {
             journalEntryToOdooData.setPassword(password);
             journalEntryToOdooData.setCbs_journal_entry_id(loanTransactionId.toString());
 
-            journalData.setRef("Journal Entry made by CBS for Loan Transaction id : " + loanTransactionId);
+            journalData.setRef("Journal Entry made by CBS for Loan Account : " + loanAccountNo);
             journalData.setTransaction_type_name(LoanTransactionType.fromInt(transactionType.intValue()).name());
             journalData.setTransaction_type_unique_id(transactionType.toString());
             journalData.set_reversed(isReversed);
@@ -379,28 +384,52 @@ public class OdooServiceImpl implements OdooService {
             LOG.info("Journal Entry to Odoo " + journalEntryToOdooData);
             String jsonPayload = convertRequestPayloadToJson(journalEntryToOdooData);
             LOG.info("Journal Entry to Odoo JSON Payload " + jsonPayload);
-            JsonObject res = sendRequest(jsonPayload);
-            return getStringField(res, "journal_entry_no");
+            return sendRequest(jsonPayload);
         }
         return null;
+    }
+
+    @Override
+    public String updateJournalEntryWithOdooStatus(String stringRequest){
+
+        JsonObject odooRequest =  JsonParser.parseString(stringRequest).getAsJsonObject();
+        JsonObject response = new JsonObject();
+
+        String odooJournalId = getStringField(odooRequest, "journal_entry_no");
+        String transactionId = getStringField(odooRequest, "cbs_journal_entry_id");
+
+        if (odooJournalId != null) {
+            List<JournalEntry> journalEntries = this.journalEntryRepository.findJournalEntriesByLoanTransactionId("L"+transactionId);
+
+            for (JournalEntry je : journalEntries){
+                je.setOddoPosted(true);
+                je.setOdooJournalId(odooJournalId);
+            }
+        }
+
+        response.addProperty("success", true);
+        response.addProperty("message", "Successful");
+        response.addProperty( "ack", true);
+
+        return  response.toString();
+
     }
 
     private JsonObject sendRequest(String payload) throws IOException {
         OkHttpClient httpClient = new OkHttpClient();
 
         RequestBody requestBody = RequestBody.create(MediaType.parse(FORM_URL_CONTENT_TYPE), payload);
-        Request request = new Request.Builder().url(url + "/cbs/dev/journal_entry").post(requestBody)
+        Request request = new Request.Builder().url(celeryUrl + "/api/cbs_journal_entry").post(requestBody)
                 .addHeader("Content-Type", "application/json").build();
 
         Response response = httpClient.newCall(request).execute();
 
+        String resObject = response.body().string();
         if (response.isSuccessful()) {
 
-            String resObject = response.body().string();
             LOG.info("Response on Odoo Journal Entry Posting: " + resObject);
             return JsonParser.parseString(resObject).getAsJsonObject();
         } else {
-            String resObject = response.body().string();
             JsonObject js = JsonParser.parseString(resObject).getAsJsonObject();
             throw new GeneralPlatformDomainRuleException("error.msg.journal.entry.posting.to.odoo.failed",
                     " Failed to post Journal Entries to Odoo: " + response.code() + ":" + response.message() + " -Code From Odoo :-"
@@ -425,7 +454,7 @@ public class OdooServiceImpl implements OdooService {
                     List<JournalEntry> JE = this.journalEntryRepository.findJournalEntriesByIsOddoPosted(false,
                             transaction.getLoanTransactionId());
                     postJournalEntries(errors, JE, transaction.getLoanTransactionId(), transaction.getTransactionType(),
-                            transaction.getIsReversed());
+                            transaction.getIsReversed(), transaction.getLoanAccountNo(), transaction.getOffice());
                 }
             }
 
@@ -486,18 +515,27 @@ public class OdooServiceImpl implements OdooService {
     }
 
     private void postJournalEntries(List<Throwable> errors, List<JournalEntry> journalEntryDebitCredit, Long loanTransactionId,
-            Long transactionType, Boolean isReversed) {
+            Long transactionType, Boolean isReversed, String loanAccountNo, String office) {
         if (!CollectionUtils.isEmpty(journalEntryDebitCredit)) {
             try {
 
                 if (journalEntryDebitCredit.size() > 1) {
-                    String id = createJournalEntryToOddo(journalEntryDebitCredit, loanTransactionId, transactionType, isReversed);
-                    if (id != null) {
+                    JsonObject odooAck = createJournalEntryToOddo(journalEntryDebitCredit, loanTransactionId, transactionType, isReversed, loanAccountNo);
+
+                    boolean ack =  getBooleanField(odooAck,"ack");
+                    boolean success = getBooleanField (odooAck,"success");
+                    String message = getStringField(odooAck, "message");
+                    if (success) {
                         for (JournalEntry je : journalEntryDebitCredit) {
-                            je.setOddoPosted(true);
-                            je.setOdooJournalId(id);
+                            je.setOdooAck(ack);
                             this.journalEntryRepository.saveAndFlush(je);
                         }
+                    }
+                    else {
+                        Throwable throwable = new Throwable("Posting to odoo failed: "+ message);
+                        LOG.error("Error occurred while Posting Journals to Odoo with Loan Transaction Id  " + loanTransactionId + " and Type "
+                                + transactionType + message);
+                        errors.add(throwable);
                     }
                 }
             } catch (Exception e) {
@@ -542,6 +580,14 @@ public class OdooServiceImpl implements OdooService {
             return jsonObject.get(fieldName).getAsString();
         }
         return null;
+    }
+
+    public boolean getBooleanField(JsonObject jsonObject, String fieldName) {
+        if (jsonObject != null && jsonObject.has(fieldName) && jsonObject.get(fieldName).isJsonPrimitive()
+                && jsonObject.get(fieldName).getAsJsonPrimitive().isBoolean()) {
+            return jsonObject.get(fieldName).getAsBoolean();
+        }
+        return false;
     }
 
     class PostClientCreationToOdoo implements Runnable, ApplicationListener<ContextClosedEvent> {

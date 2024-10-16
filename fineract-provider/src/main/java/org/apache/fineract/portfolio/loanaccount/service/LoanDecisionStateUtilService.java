@@ -528,7 +528,7 @@ public class LoanDecisionStateUtilService {
             BigDecimal currentStageMatrixMaxAmount, Integer numberOfRepayment, Integer currentStageMatrixMinTerm,
             Integer currentStageMatrixMaxTerm, String errorMsg, String stateMsg, BigDecimal previousStageMatrixMaxAmount) {
         BigDecimal minAmount = previousStageMatrixMaxAmount.add(BigDecimal.ONE);
-        if ((dueDiligenceRecommendedAmount.compareTo(minAmount) < 0
+        if ((dueDiligenceRecommendedAmount.compareTo(minAmount) > 0
                 || dueDiligenceRecommendedAmount.compareTo(currentStageMatrixMaxAmount) <= 0)
                 && (numberOfRepayment < currentStageMatrixMinTerm || numberOfRepayment > currentStageMatrixMaxTerm)) {
             throw new GeneralPlatformDomainRuleException(errorMsg, String.format(
@@ -1032,7 +1032,7 @@ public class LoanDecisionStateUtilService {
             Integer numberOfRepayment, Integer nextStageMatrixMinTerm, Integer nextStageMatrixMaxTerm, LoanDecision loanDecision,
             LoanDecisionState nextStageIcReview) {
 
-        if ((dueDiligenceRecommendedAmount.compareTo(nextStageMatrixMaxAmount) > 0)
+        if ((dueDiligenceRecommendedAmount.compareTo(nextStageMatrixMaxAmount) <= 0)
                 && (numberOfRepayment > nextStageMatrixMinTerm && numberOfRepayment <= nextStageMatrixMaxTerm)) {
             loanDecision.setNextLoanIcReviewDecisionState(nextStageIcReview.getValue());
         } else {

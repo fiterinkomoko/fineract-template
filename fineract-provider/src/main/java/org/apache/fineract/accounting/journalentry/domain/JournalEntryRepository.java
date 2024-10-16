@@ -57,4 +57,9 @@ public interface JournalEntryRepository
     @Query("select journalEntry from JournalEntry journalEntry where journalEntry.isOddoPosted= :isOddoPosted AND journalEntry.loanTransaction.id = :loanTransaction")
     List<JournalEntry> findJournalEntriesByIsOddoPosted(@Param("isOddoPosted") boolean isOddoPosted,
             @Param("loanTransaction") Long loanTransaction);
+
+    @Query("select journalEntry from JournalEntry journalEntry where journalEntry.transactionId= :transactionId and journalEntry.reversed=false")
+    List<JournalEntry> findJournalEntriesByLoanTransactionId(@Param("transactionId") String transactionId);
+
+
 }
