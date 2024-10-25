@@ -118,17 +118,19 @@ public class DatatableReportingProcessService implements ReportingProcessService
             final GenericResultsetData result = this.readExtraDataAndReportingService.retrieveGenericResultset(reportName,
                     parameterTypeValue, reportParams, isSelfServiceUserReport, limit, offset);
 
-            LoanPortfolioData data;
-            try {
-               data = transformToLoanPortfolio(result);
+            if(reportName.equals("Portfolio Management")) {
 
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
+                LoanPortfolioData data;
+                try {
+                    data = transformToLoanPortfolio(result);
+
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+                String json = this.toApiJsonSerializer.serializeResult(data);
+
+                return Response.ok().entity(json).type(MediaType.APPLICATION_JSON).build();
             }
-            String  json = this.toApiJsonSerializer.serializePretty(prettyPrint, data);
-
-
-            return Response.ok().entity(json).type(MediaType.APPLICATION_JSON).build();
 
         }
 
@@ -199,11 +201,14 @@ public class DatatableReportingProcessService implements ReportingProcessService
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
             for (int i = 0; i < fields.length; i++) {
-                if (fields[i] == null ) { // this are for some reason not in the data
-                    continue;
-                }
+
                 Field field = fields[i];
                 field.setAccessible(true); // Access private fields
+
+                if (i >= row.size() || row.get(i) == null || row.get(i).isEmpty()) {
+                    field.set(loanDetails, null); // Set field to null if value is missing
+                    continue;
+                }
 
                 // Set the value based on the field type
                 String value = row.get(i);
