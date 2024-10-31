@@ -22,7 +22,7 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     <changeSet id="add_odoo_response_journal" author="niceta@inkomoko.com">
         <addColumn tableName="acc_gl_journal_entry">
-            <column name="odoo_response" type="VARCHAR">
+            <column name="odoo_response" type="VARCHAR(255)">
                 <constraints nullable="true" />
             </column>
         </addColumn>
