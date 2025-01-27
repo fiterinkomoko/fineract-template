@@ -60,6 +60,7 @@ public final class SearchParameters {
     private final String endDueDate;
 
     //Journal Entry
+    private final Boolean isPostedToOdoo;
 
     public static SearchParameters from(final String sqlSearch, final Long officeId, final String externalId, final String name,
             final String hierarchy, final String status) {
