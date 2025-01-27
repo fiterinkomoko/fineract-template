@@ -516,6 +516,7 @@ public class OdooServiceImpl implements OdooService {
                     .retrieveLoanTransactionWhoseJournalEntriesAreNotPostedToOdoo(fromDate, toDate, officeId, currency);
             if (!CollectionUtils.isEmpty(loanTransactionNotPostedToOdooInstanceData)) {
                 transactions = getTransactions(loanTransactionNotPostedToOdooInstanceData, errors, transactions);
+                response.addProperty("responseMessage", "Posted Entries");
             }else{
                 response.addProperty("responseMessage", "No entries to post");
             }
