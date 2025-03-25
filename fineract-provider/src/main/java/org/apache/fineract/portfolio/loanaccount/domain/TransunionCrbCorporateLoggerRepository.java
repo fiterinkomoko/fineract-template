@@ -18,17 +18,10 @@
  */
 package org.apache.fineract.portfolio.loanaccount.domain;
 
-import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
-public interface LoanTransactionRepository extends JpaRepository<LoanTransaction, Long>, JpaSpecificationExecutor<LoanTransaction> {
+public interface TransunionCrbCorporateLoggerRepository
+        extends JpaRepository<TransunionCrbCorporateLogger, Long>, JpaSpecificationExecutor<TransunionCrbCorporateLogger> {
 
-    @Query("select tx from LoanTransaction tx where tx.loan.id = :loanId AND tx.typeOf = 2 ORDER BY tx.id DESC")
-    List<LoanTransaction> findLastLoanTransaction(@Param("loanId") Long loanId);
-
-    @Query("select tx from LoanTransaction tx where tx.loan.id = :loanId AND tx.typeOf = 8 ORDER BY tx.id DESC")
-    List<LoanTransaction> findWriteOffLoanTransaction(@Param("loanId") Long loanId);
 }
