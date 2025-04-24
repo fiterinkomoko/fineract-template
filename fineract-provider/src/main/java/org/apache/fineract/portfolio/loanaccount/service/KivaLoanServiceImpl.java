@@ -169,10 +169,15 @@ public class KivaLoanServiceImpl implements KivaLoanService {
                     kivaLoanExceptions.add(kivaLoanException);
                 }
             }
-            if(!CollectionUtils.isEmpty(kivaLoanExceptions)){
-                postKivaExceptions(kivaLoanExceptions);
-                RuntimeException exception = new RuntimeException("There were " + kivaLoanExceptions.size() + " kiva exceptions");
-                exceptions.add(exception);
+            try{
+                if(!CollectionUtils.isEmpty(kivaLoanExceptions)){
+                    postKivaExceptions(kivaLoanExceptions);
+                    RuntimeException exception = new RuntimeException("There were " + kivaLoanExceptions.size() + " kiva exceptions.");
+                    exceptions.add(exception);
+                }}
+            catch (Exception e){
+                log.error("Could not post errors to external service" + e);
+                exceptions.add(e);
             }
             if (!CollectionUtils.isEmpty(exceptions)) {
                 try {
@@ -203,7 +208,7 @@ public class KivaLoanServiceImpl implements KivaLoanService {
                     .build();
                 Response response = client.newCall(request).execute();
 
-                log.info(response.body().string());
+                log.info("External log service response: "+ response.body().string());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
