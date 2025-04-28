@@ -34,6 +34,8 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+
+import liquibase.pro.packaged.S;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.FormBody;
@@ -209,6 +211,17 @@ public class KivaLoanServiceImpl implements KivaLoanService {
                 Response response = client.newCall(request).execute();
 
                 log.info("External log service response: "+ response.body().string());
+
+            if (response.isSuccessful()) {
+                String responseBody = response.body().string();
+                JsonObject jsonResponse = JsonParser.parseString(responseBody).getAsJsonObject();
+                if (!jsonResponse.get("success").getAsBoolean()){
+                    handleAPIIntegrityIssues(String.valueOf(response.code()));
+                }
+            } else {
+                log.error("Posting Error logs failed" );
+                handleAPIIntegrityIssues(String.valueOf(response.code()));
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
