@@ -1297,24 +1297,42 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom {
 
     }
 
-    public void updateLoanSchedule(final Collection<LoanRepaymentScheduleInstallment> installments) {
+    public void updateLoanSchedule(final Collection<LoanRepaymentScheduleInstallment> newInstallments) {
+        // Track existing installments
         List<LoanRepaymentScheduleInstallment> existingInstallments = new ArrayList<>(this.repaymentScheduleInstallments);
-        repaymentScheduleInstallments.clear();
-        for (final LoanRepaymentScheduleInstallment installment : installments) {
-            LoanRepaymentScheduleInstallment existingInstallment = findByInstallmentNumber(existingInstallments,
-                    installment.getInstallmentNumber());
-            if (existingInstallment != null) {
-                Set<LoanInstallmentCharge> existingCharges = existingInstallment.getInstallmentCharges();
-                installment.getInstallmentCharges().addAll(existingCharges);
-                existingCharges.forEach(c -> c.setInstallment(installment));
-                existingInstallment.getInstallmentCharges().clear();
+
+        // Step 1: Update or reuse existing installments
+        for (final LoanRepaymentScheduleInstallment newInst : newInstallments) {
+            LoanRepaymentScheduleInstallment existing = findByInstallmentNumber(existingInstallments, newInst.getInstallmentNumber());
+            if (existing != null) {
+                // Reassign charges
+                Set<LoanInstallmentCharge> existingCharges = existing.getInstallmentCharges();
+                existingCharges.forEach(c -> c.setInstallment(newInst));
+                newInst.getInstallmentCharges().addAll(existingCharges);
+
+                // Update existing fields (principal, interest, due dates, etc.)
+                existing.copyFrom(newInst);
+            } else {
+                // Brand new installment
+                addLoanRepaymentScheduleInstallment(newInst);
             }
-            addLoanRepaymentScheduleInstallment(installment);
         }
+
+        // Step 2: Remove installments that no longer exist in the new schedule
+        Iterator<LoanRepaymentScheduleInstallment> it = this.repaymentScheduleInstallments.iterator();
+        while (it.hasNext()) {
+            LoanRepaymentScheduleInstallment existing = it.next();
+            boolean stillExists = newInstallments.stream()
+                    .anyMatch(i -> i.getInstallmentNumber().equals(existing.getInstallmentNumber()));
+            if (!stillExists) {
+                it.remove(); // Hibernate will delete safely
+            }
+        }
+
+        // Step 3: Update loan summaries and accruals
         updateLoanScheduleDependentDerivedFields();
         updateLoanSummaryDerivedFields();
         applyAccurals();
-
     }
 
     private LoanRepaymentScheduleInstallment findByInstallmentNumber(Collection<LoanRepaymentScheduleInstallment> installments,
