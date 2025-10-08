@@ -30,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -61,6 +62,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanInstallmentCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentReminderRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
@@ -742,6 +744,7 @@ public class LoanRescheduleRequestWritePlatformServiceImpl implements LoanResche
         for (LoanCharge charge : loan.getLoanCharges()) {
             if (charge.isOverdueInstallmentCharge() && charge.isChargePending() && charge.getDueLocalDate().isAfter(rescheduleDate)) {
                 totalChargesOutstanding = totalChargesOutstanding.add(charge.amountOutstanding());
+                charge.markAsInactive();
             }
         }
 
