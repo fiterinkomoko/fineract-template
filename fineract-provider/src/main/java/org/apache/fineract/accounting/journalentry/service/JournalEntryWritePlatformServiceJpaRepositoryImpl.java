@@ -78,12 +78,14 @@ import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.office.domain.OrganisationCurrencyRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.portfolio.client.domain.ClientAddressRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.ClientTransaction;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
@@ -128,6 +130,10 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     private final CashBasedAccountingProcessorForClientTransactions accountingProcessorForClientTransactions;
     private final ApplicationEventPublisher eventPublisher;
     private final AfterCommitExecutor afterCommitExecutor;
+    private final ClientAddressRepositoryWrapper clientAddressRepositoryWrapper;
+
+    @Value("${app.local-ip}")
+    private String localIpAddress;
 
     @Transactional
     @Override
@@ -514,6 +520,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             final LoanTransactionEnumData paymentTypeId = loanTransactionDTO.getTransactionType();
             final Long loanId = loanDTO.getLoanId();
 
+
             if(!Arrays.asList(new Long[]{1L, 2L, 4L, 5L, 6L, 8L, 9L, 10L, 19L, 26L, 27L}).contains(paymentTypeId.id()))
                 return; // not a transaction to post
 
@@ -530,13 +537,15 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             List<JournalItemData> journalItems = new ArrayList<>();
 
             JournalData journalData = new JournalData();
-
+            String location = null;
             Client client = null;
 
             for (JournalEntry entry : journalEntries) {
 
                 String accountId = entry.getGlAccount().getGlCode();
                 client = entry.getClient();
+                location = clientAddressRepositoryWrapper.findAddressesForClient(client.getId()).stream().findFirst()
+                        .map(address -> address.getAddress().getLocation()).orElse("N/A");
 
                 journalItemData = new  JournalItemData(entry, accountId);
                 journalItems.add(journalItemData);
@@ -557,10 +566,13 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             journalData.setEntryDate(transactionDate.toString());
             journalData.setOfficeId(office.getId());
             journalData.setJournalItems(journalItems);
+            journalData.setLocation(location);
 
             AppUser currentUser = this.context.authenticatedUser();
 
             JsonObject payload = convertJournalDataToJson(journalData, currentUser);
+
+            payload.addProperty("localIp", localIpAddress);
 
             postWebHook(payload,currentUser);
 

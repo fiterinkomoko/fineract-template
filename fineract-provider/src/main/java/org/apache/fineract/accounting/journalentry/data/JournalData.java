@@ -36,5 +36,8 @@ public class JournalData {
     private String transactionTypeUniqueId;
     private Boolean isCorrection;
     private String correctionDate;
+    private String location;
+    private Long fundSource;
     private List<JournalItemData> journalItems;
+
 }

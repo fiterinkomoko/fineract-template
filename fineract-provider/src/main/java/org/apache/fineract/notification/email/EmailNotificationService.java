@@ -26,10 +26,12 @@ import org.apache.fineract.infrastructure.core.domain.EmailDetail;
 import org.apache.fineract.infrastructure.core.service.GmailBackedPlatformEmailService;
 import org.apache.fineract.portfolio.businessevent.BusinessEventListener;
 import org.apache.fineract.portfolio.businessevent.domain.loan.LoanDecisionAcceptedEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.transaction.LoanDecisionRejectEvent;
 import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDecision;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDecisionState;
+import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.AppUserRepository;
 import org.jetbrains.annotations.NotNull;
@@ -53,9 +55,11 @@ public class EmailNotificationService {
     public void addListeners() {
         businessEventNotifierService.addPostBusinessEventListener(LoanDecisionAcceptedEvent.class,
                 new EmailNotificationService.LoanDecisionAcceptedListener());
+        businessEventNotifierService.addPostBusinessEventListener(LoanDecisionRejectEvent.class,
+                new EmailNotificationService.LoanDecisionRejectListener());
     }
 
-    public void sendLoanDecisionNotification(Loan loan, LoanDecision decision) {
+    public void sendLoanDecisionAcceptedNotification(Loan loan, LoanDecision decision, Note note) {
         Integer nextStage = decision.getNextLoanIcReviewDecisionState();
         if (nextStage == null) return;
 
@@ -64,13 +68,14 @@ public class EmailNotificationService {
         if (nextApprover != null && StringUtils.isNotBlank(nextApprover.getEmail())) {
             EmailDetail emailDetail;
             if (nextStage.equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())){
-                emailDetail = getLoanOfficerEmail(loan, nextStage, nextApprover);
+                emailDetail = getLoanOfficerEmail(loan, nextStage, nextApprover, note);
             }else {
-                emailDetail = getLoanDecisionApproverEmail(loan, nextStage, nextApprover);
+                emailDetail = getLoanDecisionApproverEmail(loan, nextStage, nextApprover, note);
             }
             emailService.sendDefinedEmail(emailDetail);
         }
     }
+
 
     private AppUser getNextApprover(LoanDecision decision, Integer stage) {
         return switch (LoanDecisionState.fromInt(stage)) {
@@ -85,7 +90,7 @@ public class EmailNotificationService {
     }
 
     @NotNull
-    private EmailDetail getLoanDecisionApproverEmail(Loan loan, Integer nextStage, AppUser nextApprover) {
+    private EmailDetail getLoanDecisionApproverEmail(Loan loan, Integer nextStage, AppUser nextApprover, Note note) {
         String loanUrl = this.baseUrl + "/viewloanaccount/" + loan.getId();
         String subject = "Loan Approval Required: Stage " + LoanDecisionState.fromInt(nextStage).toString();
         String body = String.format(
@@ -107,7 +112,7 @@ public class EmailNotificationService {
     }
 
     @NotNull
-    private EmailDetail getLoanOfficerEmail(Loan loan, Integer nextStage, AppUser nextApprover) {
+    private EmailDetail getLoanOfficerEmail(Loan loan, Integer nextStage, AppUser nextApprover, Note note) {
         String loanUrl = this.baseUrl + "/viewloanaccount/" + loan.getId();
         String subject = "Loan Action Required: Stage " + LoanDecisionState.fromInt(nextStage).toString();
         String body = String.format(
@@ -127,6 +132,43 @@ public class EmailNotificationService {
         return new EmailDetail(subject,body, nextApprover.getEmail(), nextApprover.getDisplayName());
     }
 
+    private void sendLoanDecisionRejectNotification(Loan loan, LoanDecision loanDecision, Note note) {
+        Integer state = loanDecision.getNextLoanIcReviewDecisionState();
+        if (state == null) return;
+
+        AppUser approver = getNextApprover(loanDecision,state);
+
+        if (approver != null && StringUtils.isNotBlank(approver.getEmail())) {
+            EmailDetail emailDetail;
+            emailDetail = getLoanDecisionRejectEmail(loan, state, approver, note);
+            emailService.sendDefinedEmail(emailDetail);
+        }
+    }
+
+    private EmailDetail getLoanDecisionRejectEmail(Loan loan, Integer state, AppUser user, Note note) {
+        String loanUrl = this.baseUrl + "/viewloanaccount/" + loan.getId();
+        String subject = "Loan Action Returned: Stage " + LoanDecisionState.fromInt(state).toString();
+        String body = String.format(
+                """
+                        Dear %s,<br><br>
+
+                        %s for account <strong>%s</strong>, client <strong>%s</strong>, was returned to you.<br>
+                        Note: %s <br><br>
+
+                        Please <a href="%s">log in </a> to the system to review and take the next action.<br><br>
+                        
+                        Kind Regards.
+                """,
+                user.getDisplayName(),
+                LoanDecisionState.fromInt(state).toString(),
+                loan.getAccountNumber(),
+                loan.getClient().getDisplayName(),
+                note.getNote(),
+                loanUrl
+        );
+        return new EmailDetail(subject,body, user.getEmail(), user.getDisplayName());
+    }
+
 
     private class LoanDecisionAcceptedListener implements BusinessEventListener<LoanDecisionAcceptedEvent> {
 
@@ -135,7 +177,20 @@ public class EmailNotificationService {
         public void onBusinessEvent(LoanDecisionAcceptedEvent event) {
             Loan loan = event.get();
             LoanDecision loanDecision = event.getLoanDecision();
-            sendLoanDecisionNotification(loan,loanDecision);
+            Note note = event.getNote();
+            sendLoanDecisionAcceptedNotification(loan,loanDecision, note);
+        }
+    }
+
+    private class LoanDecisionRejectListener implements BusinessEventListener<LoanDecisionRejectEvent> {
+
+
+        @Override
+        public void onBusinessEvent(LoanDecisionRejectEvent event) {
+            Loan loan = event.get();
+            LoanDecision loanDecision = event.getLoanDecision();
+            Note note = event.getNote();
+            sendLoanDecisionRejectNotification(loan,loanDecision, note);
         }
     }
 }

@@ -43,7 +43,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
-import org.apache.fineract.infrastructure.DataIntegrityErrorHandler;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -108,6 +107,7 @@ import org.apache.fineract.portfolio.businessevent.domain.loan.LoanInterestRecal
 import org.apache.fineract.portfolio.businessevent.domain.loan.LoanReassignOfficerBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.LoanRejectTransferBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.LoanRemoveOfficerBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.LoanUndoApprovalBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.LoanUndoDisbursalBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.LoanUndoLastDisbursalBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.LoanWithdrawTransferBusinessEvent;
@@ -291,7 +291,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanRepaymentReminderRepository loanRepaymentReminderRepository;
     private final LoanDecisionStateUtilService loanDecisionStateUtilService;
     private final DisbursementRequestService disbursementRequestService;
-    private final DataIntegrityErrorHandler dataIntegrityErrorHandler;
+    private final LoanApplicationCommandFromApiJsonHelper fromApiJsonDeserializer;
 
     @Autowired
     private ActiveMqNotificationDomainServiceImpl activeMqNotificationDomainService;
@@ -1315,9 +1315,19 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, recalculateFrom);
 
+        // Determine if this is a post-transfer correction that should bypass transfer date validation
+        boolean bypassTransferDateValidation = false;
+        Client client = loan.client();
+        if (client != null && client.getOfficeJoiningLocalDate() != null) {
+            final LocalDate clientOfficeJoiningDate = client.getOfficeJoiningLocalDate();
+            if (transactionToAdjust.getTransactionDate().isBefore(clientOfficeJoiningDate)) {
+                bypassTransferDateValidation = true;
+            }
+        }
+
         final ChangedTransactionDetail changedTransactionDetail = loan.adjustExistingTransaction(newTransactionDetail,
                 defaultLoanLifecycleStateMachine(), transactionToAdjust, existingTransactionIds, existingReversedTransactionIds,
-                scheduleGeneratorDTO);
+                scheduleGeneratorDTO, bypassTransferDateValidation);
 
         if (newTransactionDetail.isGreaterThanZero(loan.getPrincpal().getCurrency())) {
             if (paymentDetail != null) {
@@ -1342,16 +1352,21 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         final String noteText = command.stringValueOfParameterNamed("note");
-        if (StringUtils.isNotBlank(noteText)) {
-            changes.put("note", noteText);
+        String enhancedNoteText = noteText;
+        if (bypassTransferDateValidation){
+            enhancedNoteText = "[POST-CLIENT-TRANSFER-CORRECTION] Performed By "+ currentUser.getDisplayName()  + " : "+(noteText != null ? noteText : "Post-transfer adjustment");
+
+        }
+        if (StringUtils.isNotBlank(enhancedNoteText)) {
+            changes.put("note", enhancedNoteText);
             Note note = null;
             /**
              * If a new transaction is not created, associate note with the transaction to be adjusted
              **/
             if (newTransactionDetail.isGreaterThanZero(loan.getPrincpal().getCurrency())) {
-                note = Note.loanTransactionNote(loan, newTransactionDetail, noteText);
+                note = Note.loanTransactionNote(loan, newTransactionDetail, enhancedNoteText);
             } else {
-                note = Note.loanTransactionNote(loan, transactionToAdjust, noteText);
+                note = Note.loanTransactionNote(loan, transactionToAdjust, enhancedNoteText);
             }
             this.noteRepository.save(note);
         }
@@ -1418,8 +1433,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
             }
         }
-        final LoanTransaction waiveInterestTransaction = LoanTransaction.waiver(loan.getOffice(), loan, transactionAmountAsMoney,
-                transactionDate, interestComponent, unrecognizedIncome, txnExternalId);
+        final LoanTransaction waiveInterestTransaction = LoanTransaction.waiver(loan.getOffice(), loan, interestComponent,
+                transactionDate, transactionAmountAsMoney, unrecognizedIncome, txnExternalId);
         businessEventNotifierService.notifyPreBusinessEvent(new LoanWaiveInterestBusinessEvent(waiveInterestTransaction));
         LocalDate recalculateFrom = null;
         if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
@@ -3638,20 +3653,72 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Override
     @Transactional
-    public CommandProcessingResult disburseRequestLoan(Long loanId, JsonCommand command) {
+    public CommandProcessingResult disbursePreApproval(Long loanId, JsonCommand command) {
         final Loan loan = this.loanAssembler.assembleFrom(loanId);
-        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed(LoanApiConstants.principalDisbursedParameterName);
-        if (transactionAmount.compareTo(loan.getApprovedPrincipal()) > 0) {
-            final String errorMsg = "Loan can't be disbursed, disburse amount is exceeding approved amount ";
-            throw new LoanDisbursalException(errorMsg, "disburse.amount.must.be.less.than.approved.amount", transactionAmount,
-                    loan.getApprovedPrincipal());
-        }
-        this.disbursementRequestService.disburseRequestLoan(loan, command);
-        loan.handleDisbursementRequest();
+        // TODO: validate for pre approval
+        loan.handleDisbursementPreApprovalRequest();
         this.saveLoanWithDataIntegrityViolationChecks(loan);
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(loan.getId())
                 .withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId()).withGroupId(loan.getGroupId()).withLoanId(loanId)
                 .build();
+    }
+    @Override
+    @Transactional
+    public CommandProcessingResult disburseRequestLoan(Long loanId, JsonCommand command) {
+        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        if(!loan.isMultiDisburmentLoan()){
+            if (loan.getDisbursementDetails().get(0).getPaymentType().isCashPayment())
+                return disburseLoan(loanId, command, false, false);
+
+            this.disbursementRequestService.disburseRequestLoan(loan, command);
+            loan.handleDisbursementRequest();
+            this.saveLoanWithDataIntegrityViolationChecks(loan);
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(loan.getId())
+                    .withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId()).withGroupId(loan.getGroupId()).withLoanId(loanId)
+                    .build();
+        }
+        else {
+            final String errorMsg = "Loan can't be disbursed, is multi-disbursement loan ";
+            throw new LoanDisbursalException(errorMsg, "cannot.auto.disburse.multi.disbursement.loan",
+                    loan.getApprovedPrincipal());
+        }
+
+    }
+
+    @Override
+    @Transactional
+    public CommandProcessingResult rejectDisbursement(final Long loanId, final JsonCommand command) {
+
+        this.fromApiJsonDeserializer.validateForUndo(command.json());
+
+        final Loan loan = this.loanAssembler.assembleFrom(loanId);
+        checkClientOrGroupActive(loan);
+
+        loan.setLoanSubStatus(null);
+
+        final Map<String, Object> changes = loan.undoApproval(defaultLoanLifecycleStateMachine());
+        if (!changes.isEmpty()) {
+
+            final String noteText = command.stringValueOfParameterNamed("note");
+            if (StringUtils.isNotBlank(noteText)) {
+                final Note note = Note.loanNote(loan, noteText);
+                this.noteRepository.save(note);
+            }
+
+            saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
+            businessEventNotifierService.notifyPostBusinessEvent(new LoanUndoApprovalBusinessEvent(loan));
+        }
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(loan.getId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .with(changes) //
+                .build();
+
     }
 
     private void validateIsMultiDisbursalLoanAndDisbursedMoreThanOneTranche(Loan loan) {
