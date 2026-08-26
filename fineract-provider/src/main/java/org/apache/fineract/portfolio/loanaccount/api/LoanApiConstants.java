@@ -26,6 +26,13 @@ public interface LoanApiConstants {
     String disbursementDateParameterName = "expectedDisbursementDate";
     String disbursementPrincipalParameterName = "principal";
     String disbursementNetDisbursalAmountParameterName = "netDisbursalAmount";
+    String paymentToParameterName = "paymentTo";
+    String beneficiaryNameParameterName = "beneficiaryName";
+    String disbursementTypeParameterName = "disbursementType";
+    String fxRateParameterName = "fxRate";
+    String usdAmountParameterName = "usdAmount";
+    String fxSourceParameterName = "fxSource";
+    String fxTimestampParameterName = "fxTimestamp";
     String updatedDisbursementDateParameterName = "updatedExpectedDisbursementDate";
     String updatedDisbursementPrincipalParameterName = "updatedPrincipal";
     String disbursementIdParameterName = "id";
@@ -152,6 +159,8 @@ public interface LoanApiConstants {
     // fore closure constants
     String transactionDateParamName = "transactionDate";
     String noteParamName = "note";
+    String expectedResidualAmountParamName = "expectedResidualAmount";
+    String reasonParamName = "reason";
 
     String canUseForTopup = "canUseForTopup";
     String clientActiveLoanOptions = "clientActiveLoanOptions";

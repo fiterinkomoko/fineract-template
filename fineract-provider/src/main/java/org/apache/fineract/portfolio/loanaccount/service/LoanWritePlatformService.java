@@ -34,6 +34,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface LoanWritePlatformService {
 
@@ -54,6 +55,8 @@ public interface LoanWritePlatformService {
     Map<String, Object> makeLoanBulkRepayment(CollectionSheetBulkRepaymentCommand bulkRepaymentCommand);
 
     CommandProcessingResult adjustLoanTransaction(Long loanId, Long transactionId, JsonCommand command, Boolean isUndoForeClosure);
+
+    CommandProcessingResult reverseLoanRecoveryPayment(Long loanId, Long transactionId, JsonCommand command);
 
     CommandProcessingResult waiveInterestOnLoan(Long loanId, JsonCommand command);
 
@@ -110,6 +113,10 @@ public interface LoanWritePlatformService {
 
     void applyOverdueChargesForLoan(Long loanId, Collection<OverdueLoanScheduleData> overdueLoanScheduleDatas);
 
+    void syncDailyLateFeesForLoan(Long loanId, LocalDate effectiveDate);
+
+    void rebuildAndSyncDailyLateFeesForLoan(Long loanId, LocalDate rebuildFromDate, LocalDate effectiveDate);
+
     void recalculateInterest(long loanId);
 
     CommandProcessingResult undoLastLoanDisbursal(Long loanId, JsonCommand command);
@@ -128,5 +135,15 @@ public interface LoanWritePlatformService {
 
     CommandProcessingResult payOffLoan(Long loanId, JsonCommand command);
 
+    @Transactional
+    CommandProcessingResult disbursePreApproval(Long loanId, JsonCommand command);
+
     CommandProcessingResult disburseRequestLoan(Long loanId, JsonCommand command);
+
+    @Transactional
+    CommandProcessingResult rejectDisbursement(Long loanId, JsonCommand command);
+
+    CommandProcessingResult editDisbursementCharge(Long loanId, Long transactionId, JsonCommand command);
+
+    CommandProcessingResult adjustLoanDisbursementCharge(Long loanId, Long loanChargeId, JsonCommand command);
 }

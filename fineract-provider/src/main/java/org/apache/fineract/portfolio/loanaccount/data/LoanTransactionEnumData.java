@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.portfolio.loanaccount.data;
 
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+
 /**
  * Immutable data object represent loan status enumerations.
  */
@@ -183,4 +185,10 @@ public class LoanTransactionEnumData {
         return this.creditBalanceRefund;
     }
 
+    public boolean isDisbursementChargeAdjustment() {
+        return Long.valueOf(LoanTransactionType.DISBURSEMENT_CHARGE_ADJUSTMENT.getValue()).equals(this.id);
+    }
+    public boolean isDepositRedraw() {
+        return LoanTransactionType.DEPOSIT_REDRAW.getValue().equals(this.id);
+    }
 }

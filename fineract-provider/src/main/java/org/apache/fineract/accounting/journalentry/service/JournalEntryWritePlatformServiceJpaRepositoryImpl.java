@@ -55,6 +55,7 @@ import org.apache.fineract.accounting.journalentry.exception.JournalEntryRuntime
 import org.apache.fineract.accounting.journalentry.serialization.JournalEntryCommandFromApiJsonDeserializer;
 import org.apache.fineract.accounting.producttoaccountmapping.domain.PortfolioProductType;
 import org.apache.fineract.accounting.provisioning.domain.LoanProductProvisioningEntry;
+import org.apache.fineract.accounting.provisioning.domain.ProvisioningClassificationType;
 import org.apache.fineract.accounting.provisioning.domain.ProvisioningEntry;
 import org.apache.fineract.accounting.rule.domain.AccountingRule;
 import org.apache.fineract.accounting.rule.domain.AccountingRuleRepository;
@@ -78,12 +79,14 @@ import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.office.domain.OrganisationCurrencyRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.portfolio.client.domain.ClientAddressRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.ClientTransaction;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
@@ -128,6 +131,10 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     private final CashBasedAccountingProcessorForClientTransactions accountingProcessorForClientTransactions;
     private final ApplicationEventPublisher eventPublisher;
     private final AfterCommitExecutor afterCommitExecutor;
+    private final ClientAddressRepositoryWrapper clientAddressRepositoryWrapper;
+
+    @Value("${app.local-ip}")
+    private String localIpAddress;
 
     @Transactional
     @Override
@@ -435,6 +442,10 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             expenseMap.clear();
             List<LoanProductProvisioningEntry> entries = officeMap.get(key);
             for (LoanProductProvisioningEntry entry : entries) {
+                if (entry.getClassificationType() != ProvisioningClassificationType.PROVISION_BUCKET
+                        || entry.getLiabilityAccount() == null || entry.getExpenseAccount() == null) {
+                    continue;
+                }
                 if (liabilityMap.containsKey(entry.getLiabilityAccount())) {
                     BigDecimal amount = liabilityMap.get(entry.getLiabilityAccount());
                     amount = amount.add(entry.getReservedAmount());
@@ -453,8 +464,10 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                     expenseMap.put(entry.getExpenseAccount(), amount);
                 }
             }
-            createJournalEntry(provisioningEntry.getCreatedDate(), provisioningEntry.getId(), key.office, key.currency, liabilityMap,
-                    expenseMap);
+            if (!liabilityMap.isEmpty() || !expenseMap.isEmpty()) {
+                createJournalEntry(provisioningEntry.getCreatedDate(), provisioningEntry.getId(), key.office, key.currency, liabilityMap,
+                        expenseMap);
+            }
         }
         return "P" + provisioningEntry.getId();
     }
@@ -513,6 +526,8 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             final Office office = this.helper.getOfficeById(loanTransactionDTO.getOfficeId());
             final LoanTransactionEnumData paymentTypeId = loanTransactionDTO.getTransactionType();
             final Long loanId = loanDTO.getLoanId();
+            Long fundSource = loanDTO.getFundId();
+
 
             if(!Arrays.asList(new Long[]{1L, 2L, 4L, 5L, 6L, 8L, 9L, 10L, 19L, 26L, 27L}).contains(paymentTypeId.id()))
                 return; // not a transaction to post
@@ -530,13 +545,15 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             List<JournalItemData> journalItems = new ArrayList<>();
 
             JournalData journalData = new JournalData();
-
+            String location = null;
             Client client = null;
 
             for (JournalEntry entry : journalEntries) {
 
                 String accountId = entry.getGlAccount().getGlCode();
                 client = entry.getClient();
+                location = clientAddressRepositoryWrapper.findAddressesForClient(client.getId()).stream().findFirst()
+                        .map(address -> address.getAddress().getLocation()).orElse("N/A");
 
                 journalItemData = new  JournalItemData(entry, accountId);
                 journalItems.add(journalItemData);
@@ -557,10 +574,17 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             journalData.setEntryDate(transactionDate.toString());
             journalData.setOfficeId(office.getId());
             journalData.setJournalItems(journalItems);
+            journalData.setLocation(location);
+
+            if (fundSource != null) {
+                journalData.setFundSource(fundSource);
+            }
 
             AppUser currentUser = this.context.authenticatedUser();
 
             JsonObject payload = convertJournalDataToJson(journalData, currentUser);
+
+            payload.addProperty("localIp", localIpAddress);
 
             postWebHook(payload,currentUser);
 
@@ -599,7 +623,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         // Publish the event
         eventPublisher.publishEvent(hookEvent);
 
-        log.info("Posted transaction to odoo");
+        log.info("Posted transaction to odoo: {}",payload.toString());
     }
 
     @Transactional

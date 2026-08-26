@@ -20,9 +20,11 @@ package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.useradministration.data.AppUserData;
 
 /**
@@ -33,6 +35,9 @@ public class LoanApprovalData {
     private final LocalDate approvalDate;
     private final BigDecimal approvalAmount;
     private final BigDecimal netDisbursalAmount;
+    private final BigDecimal fxRate;
+    private final LocalDateTime fxTimestamp;
+    private final String fxSource;
 
     // import fields
     private LocalDate approvedOnDate;
@@ -45,6 +50,14 @@ public class LoanApprovalData {
     private Collection<AppUserData> approverOptions;
     private CurrencyData currency;
     private LoanDecisionData loanDecisionData;
+    private Collection<PaymentTypeData> paymentTypeOptions;
+    private Boolean nextApproverRequired;
+    private Integer predictedNextStage;
+    private BigDecimal maxRecommendedAmount;
+    private BigDecimal dueDiligenceRecommendedAmount;
+    private Integer dueDiligenceTermFrequency;
+    private Integer dueDiligenceTermFrequencyType;
+    private Boolean ideaClient;
 
     public static LoanApprovalData importInstance(LocalDate approvedOnDate, Integer rowIndex, String locale, String dateFormat) {
         return new LoanApprovalData(approvedOnDate, rowIndex, locale, dateFormat);
@@ -59,12 +72,20 @@ public class LoanApprovalData {
         this.approvalAmount = null;
         this.approvalDate = null;
         this.netDisbursalAmount = null;
+        this.fxRate = null;
+        this.fxTimestamp = null;
+        this.fxSource = null;
     }
 
-    public LoanApprovalData(final BigDecimal approvalAmount, final LocalDate approvalDate, final BigDecimal netDisbursalAmount) {
+    public LoanApprovalData(final BigDecimal approvalAmount, final LocalDate approvalDate, final BigDecimal netDisbursalAmount,
+            final Collection<PaymentTypeData> paymentOptions, final BigDecimal fxRate, final LocalDateTime fxTimestamp, final String fxSource) {
         this.approvalDate = approvalDate;
         this.approvalAmount = approvalAmount;
         this.netDisbursalAmount = netDisbursalAmount;
+        this.paymentTypeOptions = paymentOptions;
+        this.fxRate = fxRate;
+        this.fxTimestamp = fxTimestamp;
+        this.fxSource = fxSource;
     }
 
     public LoanApprovalData(BigDecimal approvalAmount, LocalDate approvalDate, BigDecimal netDisbursalAmount,
@@ -76,6 +97,10 @@ public class LoanApprovalData {
         this.approverOptions = approverOptions;
         this.currency = currency;
         this.loanDecisionData = loanDecisionData;
+        this.paymentTypeOptions = null;
+        this.fxRate = null;
+        this.fxTimestamp = null;
+        this.fxSource = null;
     }
 
     public LocalDate getApprovalDate() {
@@ -90,8 +115,96 @@ public class LoanApprovalData {
         return this.netDisbursalAmount;
     }
 
+    public BigDecimal getFxRate() {
+        return this.fxRate;
+    }
+
+    public LocalDateTime getFxTimestamp() {
+        return this.fxTimestamp;
+    }
+
+    public String getFxSource() {
+        return this.fxSource;
+    }
+
+    public Collection<PaymentTypeData> getPaymentTypeOptions() {
+        return this.paymentTypeOptions;
+    }
+
     public void setApproverOptionsOptions(Collection<AppUserData> approvers) {
         this.approverOptions = approvers;
+    }
+
+    public Collection<AppUserData> getApproverOptions() {
+        return this.approverOptions;
+    }
+
+    public Collection<EnumOptionData> getTermFrequencyTypeOptions() {
+        return this.termFrequencyTypeOptions;
+    }
+
+    public CurrencyData getCurrency() {
+        return this.currency;
+    }
+
+    public LoanDecisionData getLoanDecisionData() {
+        return this.loanDecisionData;
+    }
+
+    public Boolean getNextApproverRequired() {
+        return this.nextApproverRequired;
+    }
+
+    public void setNextApproverRequired(Boolean nextApproverRequired) {
+        this.nextApproverRequired = nextApproverRequired;
+    }
+
+    public Integer getPredictedNextStage() {
+        return this.predictedNextStage;
+    }
+
+    public void setPredictedNextStage(Integer predictedNextStage) {
+        this.predictedNextStage = predictedNextStage;
+    }
+
+    public BigDecimal getMaxRecommendedAmount() {
+        return this.maxRecommendedAmount;
+    }
+
+    public void setMaxRecommendedAmount(BigDecimal maxRecommendedAmount) {
+        this.maxRecommendedAmount = maxRecommendedAmount;
+    }
+
+    public BigDecimal getDueDiligenceRecommendedAmount() {
+        return this.dueDiligenceRecommendedAmount;
+    }
+
+    public void setDueDiligenceRecommendedAmount(BigDecimal dueDiligenceRecommendedAmount) {
+        this.dueDiligenceRecommendedAmount = dueDiligenceRecommendedAmount;
+    }
+
+    public Integer getDueDiligenceTermFrequency() {
+        return this.dueDiligenceTermFrequency;
+    }
+
+    public void setDueDiligenceTermFrequency(Integer dueDiligenceTermFrequency) {
+        this.dueDiligenceTermFrequency = dueDiligenceTermFrequency;
+    }
+
+    public Integer getDueDiligenceTermFrequencyType() {
+        return this.dueDiligenceTermFrequencyType;
+    }
+
+    public void setDueDiligenceTermFrequencyType(Integer dueDiligenceTermFrequencyType) {
+        this.dueDiligenceTermFrequencyType = dueDiligenceTermFrequencyType;
+    }
+
+    public Boolean getIdeaClient() {
+        return this.ideaClient;
+    }
+
+    public void setIdeaClient(Boolean ideaClient) {
+        this.ideaClient = ideaClient;
     }
 
 }

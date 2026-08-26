@@ -23,6 +23,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+
+import lombok.Setter;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
@@ -61,6 +63,7 @@ public class LoanTransactionData {
     private final LocalDate submittedOnDate;
     private final boolean manuallyReversed;
     private final LocalDate possibleNextRepaymentDate;
+    private LocalDate writeOffOnDate;
 
     private Collection<LoanChargePaidByData> loanChargePaidByList;
 
@@ -77,13 +80,59 @@ public class LoanTransactionData {
     private String locale;
     private BigDecimal transactionAmount;
     private LocalDate transactionDate;
+
+    @Setter
     private Long paymentTypeId;
+
+    @Setter
     private String accountNumber;
+
+    @Setter
     private Integer checkNumber;
+
+    @Setter
     private Integer routingCode;
+
+    @Setter
     private Integer receiptNumber;
+
+    @Setter
     private Integer bankNumber;
+
     private transient Long accountId;
+
+    @Setter
+    private String clientAccountNumber;
+
+    @Setter
+    private String clientBankName;
+
+    @Setter
+    private String clientPhoneNumber;
+
+    @Setter
+    private Integer paymentTo;
+
+    @Setter
+    private String beneficiaryName;
+
+    @Setter
+    private String disbursementType;
+
+    @Setter
+    private BigDecimal fxRate;
+
+    @Setter
+    private BigDecimal usdAmount;
+
+    @Setter
+    private String fxSource;
+
+    @Setter
+    private LocalDateTime fxTimestamp;
+
+    @Setter
+    private String mfiCode;
 
     private Long loanId;
     private String loanExternalId;
@@ -91,6 +140,39 @@ public class LoanTransactionData {
     private List<LoanRepaymentScheduleInstallmentData> loanRepaymentScheduleInstallments;
 
     private final LocalDateTime createdDate;
+
+    @Setter
+    private String createdByUsername;
+
+    @Setter
+    private Long originalTransactionId;
+
+    @Setter
+    private Boolean reversalTransaction;
+
+    // Reflects m_loan_transaction.is_reversed (a transaction reversed e.g. by undo-disbursal, which does
+    // not set manually_adjusted_or_reversed). Exposed so clients can distinguish a reversed transaction
+    // from a live one; without it a reversed disbursement is indistinguishable from the active one.
+    @Setter
+    private Boolean reversed;
+
+    @Setter
+    private LocalDate correctionDate;
+
+    @Setter
+    private Boolean correctionAllowed;
+
+    @Setter
+    private Boolean correctionDateRequired;
+
+    @Setter
+    private LocalDate latestClosedAccountingDate;
+
+    @Setter
+    private LocalDate earliestCorrectionDate;
+
+    @Setter
+    private LocalDate latestCorrectionDate;
 
     private Boolean isLoanDisbursementRequestEnabled;
 
@@ -202,14 +284,27 @@ public class LoanTransactionData {
 
     public static LoanTransactionData templateOnTop(final LoanTransactionData loanTransactionData,
             final Collection<PaymentTypeData> paymentTypeOptions) {
-        return new LoanTransactionData(loanTransactionData.id, loanTransactionData.officeId, loanTransactionData.officeName,
+        LoanTransactionData templateOnTop = new LoanTransactionData(loanTransactionData.id, loanTransactionData.officeId,
+                loanTransactionData.officeName,
                 loanTransactionData.type, loanTransactionData.paymentDetailData, loanTransactionData.currency, loanTransactionData.date,
                 loanTransactionData.amount, loanTransactionData.netDisbursalAmount, loanTransactionData.principalPortion,
                 loanTransactionData.interestPortion, loanTransactionData.feeChargesPortion, loanTransactionData.penaltyChargesPortion,
                 loanTransactionData.overpaymentPortion, loanTransactionData.unrecognizedIncomePortion, paymentTypeOptions,
                 loanTransactionData.externalId, loanTransactionData.transfer, loanTransactionData.fixedEmiAmount,
                 loanTransactionData.outstandingLoanBalance, loanTransactionData.manuallyReversed, loanTransactionData.createdDate);
-
+        templateOnTop.writeOffOnDate = loanTransactionData.writeOffOnDate;
+        templateOnTop.loanId = loanTransactionData.loanId;
+        templateOnTop.loanExternalId = loanTransactionData.loanExternalId;
+        templateOnTop.createdByUsername = loanTransactionData.createdByUsername;
+        templateOnTop.originalTransactionId = loanTransactionData.originalTransactionId;
+        templateOnTop.reversalTransaction = loanTransactionData.reversalTransaction;
+        templateOnTop.correctionDate = loanTransactionData.correctionDate;
+        templateOnTop.correctionAllowed = loanTransactionData.correctionAllowed;
+        templateOnTop.correctionDateRequired = loanTransactionData.correctionDateRequired;
+        templateOnTop.latestClosedAccountingDate = loanTransactionData.latestClosedAccountingDate;
+        templateOnTop.earliestCorrectionDate = loanTransactionData.earliestCorrectionDate;
+        templateOnTop.latestCorrectionDate = loanTransactionData.latestCorrectionDate;
+        return templateOnTop;
     }
 
     public LoanTransactionData(final Long id, final Long officeId, final String officeName, final LoanTransactionEnumData transactionType,
@@ -266,7 +361,7 @@ public class LoanTransactionData {
         this.netDisbursalAmount = netDisbursalAmount;
         this.principalPortion = principalPortion;
         this.interestPortion = interestPortion;
-        this.feeChargesPortion = feeChargesPortion;
+        this.feeChargesPortion = displayFeeChargesPortion(transactionType, feeChargesPortion);
         this.penaltyChargesPortion = penaltyChargesPortion;
         this.unrecognizedIncomePortion = unrecognizedIncomePortion;
         this.paymentTypeOptions = paymentTypeOptions;
@@ -293,16 +388,14 @@ public class LoanTransactionData {
     public static LoanTransactionData loanTransactionDataForDisbursalTemplate(final LoanTransactionEnumData transactionType,
             final LocalDate expectedDisbursedOnLocalDateForTemplate, final BigDecimal disburseAmountForTemplate,
             final BigDecimal netDisbursalAmount, final Collection<PaymentTypeData> paymentOptions, final BigDecimal retriveLastEmiAmount,
-            final LocalDate possibleNextRepaymentDate, final LocalDateTime createdDate) {
+            final LocalDate possibleNextRepaymentDate, final LocalDateTime createdDate,
+            final BigDecimal principalPortion,final BigDecimal interestPortion,final BigDecimal feeChargesPortion ) {
         final Long id = null;
         final Long officeId = null;
         final String officeName = null;
         final PaymentDetailData paymentDetailData = null;
         final CurrencyData currency = null;
         final BigDecimal unrecognizedIncomePortion = null;
-        final BigDecimal principalPortion = null;
-        final BigDecimal interestPortion = null;
-        final BigDecimal feeChargesPortion = null;
         final BigDecimal penaltyChargesPortion = null;
         final BigDecimal overpaymentPortion = null;
         final String externalId = null;
@@ -336,7 +429,7 @@ public class LoanTransactionData {
         this.netDisbursalAmount = netDisbursalAmount;
         this.principalPortion = principalPortion;
         this.interestPortion = interestPortion;
-        this.feeChargesPortion = feeChargesPortion;
+        this.feeChargesPortion = displayFeeChargesPortion(transactionType, feeChargesPortion);
         this.penaltyChargesPortion = penaltyChargesPortion;
         this.unrecognizedIncomePortion = unrecognizedIncomePortion;
         this.paymentTypeOptions = paymentOptions;
@@ -349,6 +442,14 @@ public class LoanTransactionData {
         this.manuallyReversed = manuallyReversed;
         this.possibleNextRepaymentDate = possibleNextRepaymentDate;
         this.createdDate = createdDate;
+    }
+
+    private static BigDecimal displayFeeChargesPortion(final LoanTransactionEnumData transactionType,
+            final BigDecimal feeChargesPortion) {
+        if (transactionType != null && transactionType.isDisbursementChargeAdjustment() && feeChargesPortion != null) {
+            return feeChargesPortion.abs();
+        }
+        return feeChargesPortion;
     }
 
     public LocalDate dateOf() {
@@ -377,6 +478,10 @@ public class LoanTransactionData {
 
     public void setWriteOffReasonOptions(Collection<CodeValueData> writeOffReasonOptions) {
         this.writeOffReasonOptions = writeOffReasonOptions;
+    }
+
+    public void setWriteOffOnDate(final LocalDate writeOffOnDate) {
+        this.writeOffOnDate = writeOffOnDate;
     }
 
     public Collection<LoanChargePaidByData> getLoanChargePaidByList() {

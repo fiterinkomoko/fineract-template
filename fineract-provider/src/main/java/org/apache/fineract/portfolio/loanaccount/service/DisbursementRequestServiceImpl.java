@@ -19,14 +19,19 @@
 
 package org.apache.fineract.portfolio.loanaccount.service;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.util.Set;
-import java.util.UUID;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Collection;
 import lombok.RequiredArgsConstructor;
 import okhttp3.Credentials;
 import okhttp3.MediaType;
@@ -34,18 +39,31 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.apache.fineract.accounting.glaccount.data.GLAccountData;
+import org.apache.fineract.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
+import org.apache.fineract.accounting.producttoaccountmapping.service.ProductToGLAccountMappingReadPlatformService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
+import org.apache.fineract.portfolio.client.domain.ClientAddressRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.ClientOtherInfo;
 import org.apache.fineract.portfolio.client.domain.ClientOtherInfoRepository;
 import org.apache.fineract.portfolio.client.exception.ClientOtherInfoNotFoundException;
+import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementRequestData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanDueDiligenceInfo;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanDueDiligenceInfoRepository;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanDisbursementRequestException;
+import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
+import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadPlatformService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,13 +74,24 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class DisbursementRequestServiceImpl implements DisbursementRequestService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TransUnionCrbServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DisbursementRequestServiceImpl.class);
 
     private final ClientOtherInfoRepository clientOtherInfoRepository;
 
     private final PaymentTypeReadPlatformService paymentTypeReadPlatformService;
 
     private final NoteRepository noteRepository;
+
+    private final ClientAddressRepositoryWrapper clientAddressRepositoryWrapper;
+
+    private final LoanProductReadPlatformService loanProductReadPlatformService;
+
+    final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService;
+
+    private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
+
+    private final LoanDueDiligenceInfoRepository loanDueDiligenceInfoRepository;
+
     private OkHttpClient client = new OkHttpClient();
     private Gson gson = new Gson();
     @Autowired
@@ -126,14 +155,88 @@ public class DisbursementRequestServiceImpl implements DisbursementRequestServic
 
         Long paymentTypeId = command.longValueOfParameterNamed("paymentTypeId");
         final PaymentTypeData paymentTypes = this.paymentTypeReadPlatformService.retrieveOne(paymentTypeId);
-        String uniqueId = UUID.randomUUID().toString() + "-" + System.currentTimeMillis();
-        final String requestId = "cbs_" + loan.getId() + "_" + uniqueId;
+        LoanDisbursementDetails disbursementDetail = null;
+        if (loan.getDisbursementDetails() != null && !loan.getDisbursementDetails().isEmpty()) {
+            disbursementDetail = loan.getDisbursementDetails().iterator().next();
+        }
+
+        // Deterministic idempotency key: same disbursement event => same requestId on retries
+        final String disbursementDetailIdPart = (disbursementDetail != null && disbursementDetail.getId() != null)
+                ? disbursementDetail.getId().toString()
+                : "0";
+        final String requestId = "cbs_disb_" + loan.getId() + "_" + disbursementDetailIdPart;
+        final String loanOfficer = loan.getLoanOfficer().emailAddress();
+        final String clientName = loan.getClient().getDisplayName();
+        final String narration = "Loan Disbursement for Loan Account No: " + loan.getAccountNumber() + "  Client " + clientName;
+        final String location = clientAddressRepositoryWrapper.findAddressesForClient(loan.getClient().getId()).stream().findFirst()
+                .map(address -> address.getAddress().getLocation()).orElse("N/A");
+
+        LoanProductData loanProductData=  this.loanProductReadPlatformService.retrieveLoanProduct(loan.getLoanProduct().getId());
+
+        Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings = null;
+
+        if (loanProductData.hasAccountingEnabled()) {
+            paymentChannelToFundSourceMappings = this.accountMappingReadPlatformService
+                    .fetchPaymentTypeToFundSourceMappingsForLoanProduct(loan.getLoanProduct().getId());
+        }
+
+        GLAccountData fundSource = null;
+
+        if (paymentChannelToFundSourceMappings != null) {
+            for (PaymentTypeToGLAccountMapper m : paymentChannelToFundSourceMappings) {
+                if (m.getPaymentType().getId().equals(paymentTypes.getId())) {
+                    fundSource = m.getFundSourceAccount();
+                    break;
+                }
+            }
+        }
+
+        String glCode = null;
+        if (fundSource != null) {
+            glCode = Iterables.get(Splitter.on('-').split(fundSource.getGlCode()), 0);
+        }
+
+        if (disbursementDetail == null) {
+            throw new LoanDisbursementRequestException("Missing disbursement details for this loan",
+                    "integration.disbursementRequest.missingDisbursementDetails");
+        }
+
+        refreshVendorFxForDisbursementDate(loan, disbursementDetail, command);
+
         DisbursementRequestData disbursementRequestData = new DisbursementRequestData(requestId, loan.getAccountNumber(),
-                totalPrincipalToBeDisbursed, loan.getPrincpal().getCurrencyCode(), paymentTypes.getName(), clientOtherInfo.getTelephoneNo(),
-                clientOtherInfo.getBankAccountNumber(), clientOtherInfo.getBankName(), "CBS", paymentTypeId);
+                totalPrincipalToBeDisbursed, loan.getPrincpal().getCurrencyCode(), paymentTypes.getName(), paymentTypes.getId(), disbursementDetail.getClientPhoneNumber(),
+                disbursementDetail.getClientAccountNumber(), disbursementDetail.getClientBankName(), "CBS", paymentTypeId);
+        disbursementRequestData.setLoanId(loan.getId());
+
+        if (disbursementDetail.getPaymentToType().equals(LoanDisbursementDetails.PaymentToType.CLIENT)) {
+            disbursementRequestData.setBeneficiaryName(clientName);
+        } else if (disbursementDetail.getPaymentToType().equals(LoanDisbursementDetails.PaymentToType.SUPPLIER)){
+            disbursementRequestData.setBeneficiaryName(disbursementDetail.getBeneficiaryName());
+        }
+        disbursementRequestData.setDisbursementType(disbursementDetail.getDisbursementType());
+        disbursementRequestData.setFxRate(disbursementDetail.getFxRate());
+        disbursementRequestData.setUsdAmount(disbursementDetail.getUsdAmount());
+        disbursementRequestData.setFxSource(disbursementDetail.getFxSource());
+        if (disbursementDetail.getFxTimestamp() != null) {
+            disbursementRequestData.setFxTimestamp(disbursementDetail.getFxTimestamp().toString());
+        }
+
+        disbursementRequestData.setNarration(narration);
+        disbursementRequestData.setNotifier(loanOfficer);
+        disbursementRequestData.setLocation(location);
+        disbursementRequestData.setGlCode(glCode);
+        disbursementRequestData.setTransactionType("DISBURSEMENT");
 
         MediaType JSON = MediaType.get("application/json; charset=utf-8");
-        String requestJson = gson.toJson(disbursementRequestData);
+        logDisbursementRequestPayload(loan, requestId, disbursementDetail, disbursementRequestData);
+        String requestJson;
+        try {
+            requestJson = gson.toJson(disbursementRequestData);
+        } catch (RuntimeException e) {
+            LOG.error("Failed to serialize Inkomoko disbursement payload for loanId={}, requestId={}, payloadClass={}", loan.getId(),
+                    requestId, disbursementRequestData.getClass().getName(), e);
+            throw e;
+        }
 
         RequestBody body = RequestBody.create(requestJson, JSON);
         Request request = new Request.Builder().url(getConfigProperty("fineract.integrations.inkomoko.rest.initiate.disbursement"))
@@ -160,9 +263,85 @@ public class DisbursementRequestServiceImpl implements DisbursementRequestServic
         }
     }
 
-    private static BigDecimal getDisbursementChargeAmount(Loan loan) {
+    private void refreshVendorFxForDisbursementDate(final Loan loan, final LoanDisbursementDetails disbursementDetail,
+            final JsonCommand command) {
+        if (!LoanDisbursementDetails.DisbursementType.VENDOR.name().equals(disbursementDetail.getDisbursementType())) {
+            return;
+        }
+
+        final boolean isSouthSudanSsp = isSouthSudanLoan(loan) && "SSP".equalsIgnoreCase(loan.getPrincpal().getCurrencyCode());
+        if (!isSouthSudanSsp) {
+            return;
+        }
+
+        final LocalDate disbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
+        if (disbursementDate == null) {
+            return;
+        }
+
+        final BigDecimal manualFxRate = command.bigDecimalValueOfParameterNamed(LoanApiConstants.fxRateParameterName);
+        final BigDecimal fxRate;
+        final LocalDateTime fxTimestamp;
+        final String fxSource;
+
+        if (manualFxRate != null) {
+            fxRate = manualFxRate;
+            fxTimestamp = DateUtils.getLocalDateTimeOfTenant();
+            fxSource = "MANUAL_ENTRY";
+        } else {
+            fxRate = this.readWriteNonCoreDataService.getFxRateForDate("Fx_rate", loan.getOfficeId(), disbursementDate);
+            fxTimestamp = this.readWriteNonCoreDataService.getFxTimestampForDate("Fx_rate", loan.getOfficeId(), disbursementDate);
+            fxSource = "CBS_DAILY_RATE";
+        }
+
+        if (fxRate == null || fxRate.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new LoanDisbursementRequestException("FX rate is required for vendor disbursement on " + disbursementDate,
+                    "validation.msg.loanapproval.fxRate.required");
+        }
+
+        disbursementDetail.setFxRate(fxRate);
+        disbursementDetail.setFxTimestamp(fxTimestamp);
+        disbursementDetail.setFxSource(fxSource);
+        disbursementDetail.setUsdAmount(loan.getPrincpal().getAmount().divide(fxRate, 6, RoundingMode.HALF_UP));
+    }
+
+    private boolean isSouthSudanLoan(final Loan loan) {
+        final LoanDueDiligenceInfo loanDueDiligenceInfo = this.loanDueDiligenceInfoRepository.findLoanDueDiligenceInfoByLoanId(loan.getId());
+        if (loanDueDiligenceInfo != null && loanDueDiligenceInfo.getCountry() != null
+                && StringUtils.isNotBlank(loanDueDiligenceInfo.getCountry().label())) {
+            return "SOUTH SUDAN".equalsIgnoreCase(StringUtils.normalizeSpace(loanDueDiligenceInfo.getCountry().label()));
+        }
+        return "SSP".equalsIgnoreCase(loan.getPrincpal().getCurrencyCode());
+    }
+
+    private void logDisbursementRequestPayload(Loan loan, String requestId, LoanDisbursementDetails disbursementDetail,
+            DisbursementRequestData disbursementRequestData) {
+        Object sourceFxTimestamp = disbursementDetail.getFxTimestamp();
+        LOG.info("Preparing Inkomoko disbursement payload loanId={}, requestId={}, disbursementDetailId={}, sourceFxTimestampType={}, "
+                + "sourceFxTimestampValue={}, payloadFxTimestampType={}, payloadFxTimestampValue={}", loan.getId(), requestId,
+                disbursementDetail.getId(), typeName(sourceFxTimestamp), sourceFxTimestamp, typeName(disbursementRequestData.getFxTimestamp()),
+                disbursementRequestData.getFxTimestamp());
+
+        for (Field field : DisbursementRequestData.class.getDeclaredFields()) {
+            try {
+                field.setAccessible(true);
+                Object value = field.get(disbursementRequestData);
+                LOG.info("Inkomoko disbursement payload field loanId={}, requestId={}, field={}, declaredType={}, valueType={}, value={}",
+                        loan.getId(), requestId, field.getName(), field.getType().getName(), typeName(value), value);
+            } catch (IllegalAccessException e) {
+                LOG.warn("Unable to inspect Inkomoko disbursement payload field loanId={}, requestId={}, field={}", loan.getId(), requestId,
+                        field.getName(), e);
+            }
+        }
+    }
+
+    private String typeName(Object value) {
+        return value == null ? "null" : value.getClass().getName();
+    }
+
+    public static BigDecimal getDisbursementChargeAmount(Loan loan) {
         BigDecimal chargeAmount = BigDecimal.ZERO;
-        final Set<LoanCharge> loanCharges = loan.charges();
+        final Collection<LoanCharge> loanCharges = loan.getLoanCharges();
 
         for (final LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isDueAtDisbursement() && loanCharge.isChargePending()) {

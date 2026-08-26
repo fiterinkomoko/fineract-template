@@ -59,7 +59,10 @@ public enum LoanTransactionType {
     GOODWILL_CREDIT(23, "loanTransactionType.goodwillCredit"), //
     BNPL_VENDOR_TRANSFER(24, "loanTransactionType.bnplVendorTransfer"), WITHDRAWAL_REDRAW(26, "loanTransactionType.withdrawalRedraw"),
 
-    DEPOSIT_REDRAW(27, "loanTransactionType.depositRedraw"), PAY_OFF(28, "loanTransactionType.payOff");
+    DEPOSIT_REDRAW(27, "loanTransactionType.depositRedraw"), PAY_OFF(28, "loanTransactionType.payOff"),
+    DISBURSEMENT_CHARGE_ADJUSTMENT(29, "loanTransactionType.disbursementChargeAdjustment");
+
+
 
     private final Integer value;
     private final String code;
@@ -166,6 +169,9 @@ public enum LoanTransactionType {
             case 28:
                 loanTransactionType = LoanTransactionType.PAY_OFF;
             break;
+            case 29:
+                loanTransactionType = LoanTransactionType.DISBURSEMENT_CHARGE_ADJUSTMENT;
+                break;
             default:
                 loanTransactionType = LoanTransactionType.INVALID;
             break;
@@ -235,5 +241,17 @@ public enum LoanTransactionType {
 
     public boolean isPayOff() {
         return this.value.equals(LoanTransactionType.PAY_OFF.getValue());
+    }
+
+    public boolean isDisbursementChargeAdjustment() {
+        return this.value.equals(DISBURSEMENT_CHARGE_ADJUSTMENT.getValue());
+    }
+
+    public boolean isDepositRedraw() {
+        return this.value.equals(DEPOSIT_REDRAW.getValue());
+    }
+
+    public boolean isWithdrawalRedraw() {
+        return this.value.equals(WITHDRAWAL_REDRAW.getValue());
     }
 }
