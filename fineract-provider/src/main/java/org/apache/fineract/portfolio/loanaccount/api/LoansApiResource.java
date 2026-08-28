@@ -55,7 +55,11 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+
+import java.time.LocalDate;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.accounting.journalentry.api.DateParam;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -159,6 +163,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+@Slf4j
 @Path("/loans")
 @Component
 @Scope("singleton")
@@ -236,7 +241,8 @@ public class LoansApiResource {
             LoanApiConstants.EMI_AMOUNT_VARIATIONS_PARAMNAME, LoanApiConstants.COLLECTION_PARAMNAME, LoanApiConstants.DEPARTMENT_PARAM,
             "departmentOptions", "loanDecisionState", "loanDueDiligenceData", LoanApiConstants.linkedVendorAccountAssociateParamName));
 
-    private final Set<String> loanApprovalDataParameters = new HashSet<>(Arrays.asList("approvalDate", "approvalAmount"));
+    private final Set<String> loanApprovalDataParameters = new HashSet<>(
+            Arrays.asList("approvalDate", "approvalAmount", "netDisbursalAmount", "paymentTypeOptions", "currency", "fxRate", "fxTimestamp", "fxSource"));
     final Set<String> glimAccountsDataParameters = new HashSet<>(Arrays.asList("glimId", "groupId", "clientId", "parentLoanAccountNo",
             "parentPrincipalAmount", "childLoanAccountNo", "childPrincipalAmount", "clientName"));
 
@@ -374,19 +380,27 @@ public class LoansApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveApprovalTemplate(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @QueryParam("templateType") @Parameter(description = "templateType") final String templateType,
+            @QueryParam("approvingLevelNumber") @Parameter(description = "approvingLevelNumber") final Integer approvingLevelNumber,
+            @QueryParam("dateFormat") @Parameter(description = "dateFormat") final String dateFormat,
+            @QueryParam("disbursementDate") @Parameter(description = "disbursementDate") final DateParam disbursementDateParam,
+            @QueryParam("locale") @Parameter(description = "locale") final String locale,
             @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         LoanApprovalData loanApprovalTemplate = null;
+        LocalDate disbursementDate = null;
+        if (disbursementDateParam != null) {
+            disbursementDate = disbursementDateParam.getDate("disbursementDate", dateFormat, locale);
+        }
 
         if (templateType == null) {
             final String errorMsg = "Loan template type must be provided";
             throw new LoanTemplateTypeRequiredException(errorMsg);
         } else if (templateType.equals("approval")) {
-            loanApprovalTemplate = this.loanReadPlatformService.retrieveApprovalTemplate(loanId);
+            loanApprovalTemplate = this.loanReadPlatformService.retrieveApprovalTemplate(loanId, true, disbursementDate);
         } else if (templateType.equals("icreview")) {
-            loanApprovalTemplate = this.loanReadPlatformService.retrieveICReviewTemplate(loanId);
+            loanApprovalTemplate = this.loanReadPlatformService.retrieveICReviewTemplate(loanId, approvingLevelNumber);
         }
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -558,6 +572,7 @@ public class LoansApiResource {
             @QueryParam("exclude") @Parameter(in = ParameterIn.QUERY, name = "exclude", description = "Optional Loan object relation list to be filtered in the response", required = false, example = "guarantors,futureSchedule") final String exclude,
             @QueryParam("fields") @Parameter(in = ParameterIn.QUERY, name = "fields", description = "Optional Loan attribute list to be in the response", required = false, example = "id,principal,annualInterestRate") final String fields,
             @Context final UriInfo uriInfo) {
+        log.info("retrieveLoan called with loanId: {}", loanId);
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         LoanAccountData loanBasicDetails = this.loanReadPlatformService.retrieveOne(loanId);
@@ -840,8 +855,9 @@ public class LoansApiResource {
                 repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
                 interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers, loanPurposeOptions,
                 loanCollateralOptions, calendarOptions, notes, accountLinkingOptions, linkedAccount, disbursementData, emiAmountVariations,
-                overdueCharges, paidInAdvanceTemplate, interestRatesPeriods, clientActiveLoanOptions, rates, isRatesEnabled,
-                collectionData);
+                overdueCharges, paidInAdvanceTemplate, interestRatesPeriods, clientActiveLoanOptions, rates,
+                loanBasicDetails.getEnableThirdPartyDisbursement(), loanBasicDetails.getThirdPartyDisbursementProviderOptions(),
+                isRatesEnabled, collectionData);
         loanAccount.setLinkedVendorAccount(linkedVendorAccount);
         loanAccount.setVendorClientOptions(vendorClientOptions);
         loanAccount.setVendorSavingsAccountOptions(vendorSavingsAccountOptions);
@@ -1002,11 +1018,16 @@ public class LoansApiResource {
         } else if (is(commandParam, "disburseToSavings")) {
             final CommandWrapper commandRequest = builder.disburseLoanToSavingsApplication(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "disbursementRequest")) {
+        } else if (is(commandParam, "disbursementpreapprovalrequest")) {
+            final CommandWrapper commandRequest = builder.disbursePreApprovalRequestLoanApplication(loanId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        }else if (is(commandParam, "disbursementapproval")) {
             final CommandWrapper commandRequest = builder.disburseRequestLoanApplication(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        }
-
+        } else if (is(commandParam, "rejectdisbursement")) {
+            final CommandWrapper commandRequest = builder.rejectDisbursement(loanId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+         }
         if (is(commandParam, "undoapproval")) {
             final CommandWrapper commandRequest = builder.undoLoanApplicationApproval(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);

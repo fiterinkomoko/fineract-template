@@ -234,6 +234,86 @@ Feature: Create loan stapes
     Then match $ contains { resourceId: '#notnull' }
 
   @ignore
+  @icReviewTemplateWithApprovingLevel
+  Scenario: IC Review template returns nextApproverRequired for approving level
+    Given configure ssl = true
+    Given path 'loans', loanId, 'template'
+    And param templateType = 'icreview'
+    And param approvingLevelNumber = approvingLevelNumber
+    And header Accept = 'application/json'
+    And header Authorization = authToken
+    And header fineract-platform-tenantid = tenantId
+    When method GET
+    Then status 200
+    Then match response.nextApproverRequired == expectedNextApproverRequired
+    * def checkPredicted = expectedPredictedNextStage == null || response.predictedNextStage == expectedPredictedNextStage
+    * match checkPredicted == true
+
+  @ignore
+  @icReviewDecisionDynamicAcceptWithoutNextApprover
+  Scenario: Dynamic IC Review Decision Accept without next approver when routing to contract
+    Given configure ssl = true
+    * def loansData = read('classpath:templates/loansDecision.json')
+    Given path 'loans/decision/icReviewDecision/level',levelNumber,loanId
+    And header Accept = 'application/json'
+    And header Authorization = authToken
+    And header fineract-platform-tenantid = tenantId
+    And request loansData.icReview
+    When method POST
+    Then status 200
+    Then match $ contains { resourceId: '#notnull' }
+
+  @ignore
+  @icReviewDecisionDynamicAcceptWithNextApprover
+  Scenario: Dynamic IC Review Decision Accept with next approver when routing to next IC level
+    Given configure ssl = true
+    * def loansData = read('classpath:templates/loansDecision.json')
+    Given path 'loans/decision/icReviewDecision/level',levelNumber,loanId
+    And header Accept = 'application/json'
+    And header Authorization = authToken
+    And header fineract-platform-tenantid = tenantId
+    And request loansData.icReviewWithNextApprover
+    When method POST
+    Then status 200
+    Then match $ contains { resourceId: '#notnull' }
+
+  @ignore
+  @icReviewDecisionDynamicAcceptStage
+  Scenario: Dynamic IC Review Decision Accept Stage
+    Given configure ssl = true
+    * def loansData = read('classpath:templates/loansDecision.json')
+    Given path 'loans/decision/icReviewDecision/level',levelNumber,loanId
+    And header Accept = 'application/json'
+    And header Authorization = authToken
+    And header fineract-platform-tenantid = tenantId
+    And request loansData.icReview
+    When method POST
+    Then status 200
+    Then match $ contains { resourceId: '#notnull' }
+
+  @ignore
+  @icReviewDecisionDynamicRejectStage
+  Scenario: Dynamic IC Review Decision Reject Stage
+    Given configure ssl = true
+    * def rejectPayload =
+    """
+    {
+      "rejectedOnDate": "#(rejectedOnDate)",
+      "dateFormat": "#(format)",
+      "locale": "en",
+      "note": "#(faker.lorem().characters(70))"
+    }
+    """
+    Given path 'loans/decision/icReviewDecision/level',levelNumber,'reject',loanId
+    And header Accept = 'application/json'
+    And header Authorization = authToken
+    And header fineract-platform-tenantid = tenantId
+    And request rejectPayload
+    When method POST
+    Then status 200
+    Then match $ contains { resourceId: '#notnull' }
+
+  @ignore
   @prepareAndSignContractStage
   Scenario: Prepare And Sign Contract   Stage
     Given configure ssl = true

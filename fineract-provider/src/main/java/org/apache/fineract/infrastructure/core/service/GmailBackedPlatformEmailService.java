@@ -95,8 +95,22 @@ public class GmailBackedPlatformEmailService implements PlatformEmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setFrom(smtpCredentialsData.getFromEmail()); // same email address used for the authentication
             helper.setTo(emailDetails.getAddress());
+            if (emailDetails.getCc() != null && !emailDetails.getCc().trim().isEmpty()) {
+                helper.setCc(emailDetails.getCc().split("\\s*,\\s*"));
+            }
+            if (emailDetails.getBcc() != null && !emailDetails.getBcc().trim().isEmpty()) {
+                helper.setBcc(emailDetails.getBcc().split("\\s*,\\s*"));
+            }
             helper.setSubject(emailDetails.getSubject());
             helper.setText(emailDetails.getBody(), true); // 'true' indicates HTML content
+
+            if (emailDetails.getAttachment() != null && emailDetails.getAttachment().length > 0) {
+                helper.addAttachment(
+                        emailDetails.getAttachmentName(),
+                        new javax.mail.util.ByteArrayDataSource(emailDetails.getAttachment(), emailDetails.getAttachmentMimeType())
+                );
+            }
+
 
             mailSender.send(message);
 

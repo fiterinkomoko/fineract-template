@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collection;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -45,20 +46,46 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
         return this.jdbcTemplate.query(sql, mapper, new Object[] {});
     }
 
+    @Override
+    public Collection<TransUnionRwandaConsumerCreditData> retrieveAllConsumerCreditsPage(long lastLoanId, int pageSize) {
+        final ConsumerCreditMapper mapper = new ConsumerCreditMapper();
+
+        final String sql = mapper.schema() + " AND l.id > ? order by l.id limit ?";
+
+        return this.jdbcTemplate.query(
+                sql,
+                mapper,
+                lastLoanId,
+                pageSize
+        );
+    }
+
     private final class ConsumerCreditMapper implements RowMapper<TransUnionRwandaConsumerCreditData> {
 
         public String schema() {
             final StringBuilder sql = new StringBuilder();
+            final String addressTypePriorityExpression = "CASE "
+                    + "WHEN UPPER(address_type_cv.code_value) IN ('CURRENT ADDRESS', 'PRIMARY', 'PRIMARY ADDRESS') THEN 0 "
+                    + "WHEN UPPER(address_type_cv.code_value) IN ('HOME', 'RESIDENTIAL', 'RESIDENTIAL ADDRESS') THEN 1 "
+                    + "WHEN UPPER(address_type_cv.code_value) = 'BUSINESS' THEN 2 "
+                    + "ELSE 3 END";
 
-            sql.append("  WITH RankedAddresses AS ( " + "    SELECT client_id, " + "           address_id, "
-                    + "           ROW_NUMBER() OVER (PARTITION BY client_id ORDER BY address_id DESC) AS row_num "
-                    + "    FROM m_client_address " + "  ) "
+            sql.append("  WITH RankedAddresses AS ( " + "    SELECT ca.client_id, " + "           ca.address_id, "
+                    + "           address_type_cv.code_value AS addressType, "
+                    + "           ROW_NUMBER() OVER (PARTITION BY ca.client_id "
+                    + "                              ORDER BY CASE WHEN ca.is_active = true THEN 0 ELSE 1 END, "
+                    + "                                       " + addressTypePriorityExpression + ", "
+                    + "                                       ca.address_id DESC) AS row_num "
+                    + "    FROM m_client_address ca "
+                    + "         LEFT JOIN m_code_value address_type_cv ON ca.address_type_id = address_type_cv.id " + "  ) "
                     + "  SELECT l.id                                                                              AS loanId, "
                     + "       l.account_no                                                                      AS accountNumber, "
                     + "       l.loan_status_id                                                                  AS loanStatus, "
                     + "       l.currency_code                                                                   AS currencyType, "
+                    + "       ranked_address.address_id                                                         AS selectedAddressId, "
+                    + "       ranked_address.addressType                                                        AS selectedAddressType, "
                     + "       country_cv.code_value                                                             AS country, "
-                    + "       mc.firstname                                                                      AS surName, ");
+                    + "       mc.lastname                                                                       AS surName, ");
             if (databaseTypeResolver.isMySQL()) {
                 sql.append(
                         "      COALESCE(DATEDIFF(NOW(), mlaa.overdue_since_date_derived)  ,0)                           AS daysInArrears, ");
@@ -111,7 +138,7 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
                     + "       l.number_of_repayments                                                            AS termsDuration, "
                     + "       l.last_repayment_date                                                             AS lastPaymentDate, "
                     + "       mc.date_of_birth                                                                  AS dateOfBirth, "
-                    + "       l.maturedon_date                                                                  AS finalPaymentDate, "
+                    + "       l.expected_maturedon_date                                                         AS finalPaymentDate, "
                     + "       mlaa.principal_overdue_derived                                                    AS amountPastDue, "
                     + "       40                                                                                AS category, "
                     + "       'Other personal service activities n.e.c.'                                        AS sectorOfActivity, "
@@ -119,13 +146,18 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
                     + "       ra.physical_address_district                                                      AS physicalAddressDistrict, "
                     + "       ''                                                                                AS groupName, ");
             if (databaseTypeResolver.isMySQL()) {
-                sql.append(" CASE " + "    WHEN DATEDIFF(NOW(), mlaa.overdue_since_date_derived) <= 90   THEN 'C' "
-                        + "    WHEN l.loan_status_id IN(600,601,700) THEN 'C' " + "    ELSE 'D' "
+                sql.append(" CASE "
+                        + "    WHEN mlaa.overdue_since_date_derived IS NULL THEN 'C' "
+                        + "    WHEN DATEDIFF(NOW(), mlaa.overdue_since_date_derived) < 90   THEN 'C' "
+                        + "    WHEN l.loan_status_id IN(600,601,700) THEN 'C' "
+                        + "    ELSE 'D' "
                         + "    END        AS currentBalanceIndicator, ");
             } else {
                 sql.append(" CASE "
-                        + "    WHEN EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP))  <= 90   THEN 'C' "
-                        + "    WHEN l.loan_status_id IN(600,601,700) THEN 'C' " + "    ELSE 'D' "
+                        + "    WHEN mlaa.overdue_since_date_derived IS NULL THEN 'C' "
+                        + "    WHEN EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP))  < 90   THEN 'C' "
+                        + "    WHEN l.loan_status_id IN(600,601,700) THEN 'C' "
+                        + "    ELSE 'D' "
                         + "    END        AS currentBalanceIndicator, ");
             }
 
@@ -167,8 +199,6 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
                     + "      now()                                                          AS dateAccountUpdated, "
                     + "       r.installments_in_arrears                                                         AS installmentsInArrears "
                     + "  FROM m_loan l " + "         INNER JOIN m_client mc ON l.client_id = mc.id "
-                    + "         LEFT JOIN m_client_recruitment_survey mcrs ON mc.id = mcrs.client_id "
-                    + "         LEFT JOIN m_code_value country_cv ON mcrs.country_cv_id = country_cv.id "
                     + "         LEFT JOIN m_loan_arrears_aging mlaa ON l.id = mlaa.loan_id "
                     + "         LEFT JOIN m_client_other_info info ON mc.id = info.client_id "
                     + "         LEFT JOIN m_code_value nationality_cv ON info.nationality_cv_id = nationality_cv.id "
@@ -176,16 +206,36 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
                     + "         LEFT JOIN m_client_other_info other_info ON mc.id = other_info.client_id "
                     + "         LEFT JOIN m_code_value marital_cv ON ad_info.marital_status = marital_cv.id "
                     + "         LEFT JOIN m_code_value gender_cv ON mc.gender_cv_id = gender_cv.id "
-                    + "         LEFT JOIN m_code_value title_cv ON ad_info.title = title_cv.id " + " " + "         LEFT JOIN ( "
-                    + "    SELECT loan_id, " + "           transaction_date AS firstPaymentDate " + "    FROM ( "
-                    + "             SELECT loan_id, " + "                    transaction_date, "
-                    + "                    ROW_NUMBER() OVER (PARTITION BY loan_id ORDER BY transaction_date) AS row_num "
-                    + "             FROM m_loan_transaction " + "             WHERE transaction_type_enum = 2 "
-                    + "         ) ranked_transactions " + "    WHERE row_num = 1 " + " ) AS first_payment ON l.id = first_payment.loan_id "
-                    + "         LEFT JOIN ( " + "    SELECT client_id, " + "           MAX(address_id) AS last_address_id "
-                    + "    FROM m_client_address " + "    GROUP BY client_id "
-                    + " ) AS last_client_address ON mc.id = last_client_address.client_id "
-                    + "         LEFT JOIN m_address ra ON last_client_address.last_address_id = ra.id "
+                    + "         LEFT JOIN m_code_value title_cv ON ad_info.title = title_cv.id " + " " + "         LEFT JOIN (\n" +
+                    "    SELECT\n" +
+                    "        x.loan_id,\n" +
+                    "        COALESCE(x.first_txn_date, x.first_sched_due_date) AS firstPaymentDate\n" +
+                    "    FROM (\n" +
+                    "        SELECT\n" +
+                    "            l.id AS loan_id,\n" +
+                    "            (\n" +
+                    "                SELECT MIN(t.transaction_date)\n" +
+                    "                FROM m_loan_transaction t\n" +
+                    "                WHERE t.loan_id = l.id\n" +
+                    "                  AND t.transaction_type_enum = 2\n" +
+                    "            ) AS first_txn_date,\n" +
+                    "            (\n" +
+                    "                SELECT MIN(rs.duedate)\n" +
+                    "                FROM m_loan_repayment_schedule rs\n" +
+                    "                WHERE rs.loan_id = l.id\n" +
+                    "                  AND (IFNULL(rs.principal_amount, 0)\n" +
+                    "                     + IFNULL(rs.interest_amount, 0)\n" +
+                    "                     + IFNULL(rs.fee_charges_amount, 0)\n" +
+                    "                     + IFNULL(rs.penalty_charges_amount, 0)) > 0\n" +
+                    "            ) AS first_sched_due_date\n" +
+                    "        FROM m_loan l\n" +
+                    "    ) x\n" +
+                    ") AS first_payment\n" +
+                    "  ON l.id = first_payment.loan_id "
+                    + "         LEFT JOIN RankedAddresses ranked_address ON mc.id = ranked_address.client_id "
+                    + "                                                   AND ranked_address.row_num = 1 "
+                    + "         LEFT JOIN m_address ra ON ranked_address.address_id = ra.id "
+                    + "         LEFT JOIN m_code_value country_cv ON ra.country_id = country_cv.id "
                     + "         LEFT JOIN (SELECT loan_id, " + "                           COUNT(*) AS installments_in_arrears "
                     + "                    FROM m_loan_repayment_schedule " + "                    WHERE duedate <= CURRENT_DATE "
                     + "                      AND completed_derived = FALSE " + "                      AND obligations_met_on_date IS NULL "
@@ -206,7 +256,6 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
                     + "                                                  ) lrs   WHERE lrs.row_num = 1 "
                     + "                                         ) AS nextPaymentTbl on nextPaymentTbl.loan_id = l.id"
                     + "  WHERE l.loan_status_id IN (300, 600, 601, 700) " + "  AND l.currency_code = 'RWF' "
-                    + "  AND first_payment.firstPaymentDate IS NOT NULL " + "  AND l.last_repayment_date IS NOT NULL "
                     + "  AND mc.legal_form_enum = 1 " // 1 = individual 2= entity/corporate
                     + "  AND (l.stop_consumer_credit_upload_to_trans_union IS NULL OR l.stop_consumer_credit_upload_to_trans_union = false) ");
             return sql.toString();
@@ -219,6 +268,9 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
             final String accountNumber = rs.getString("accountNumber");
             final Integer loanStatus = rs.getInt("loanStatus");
             final String currencyType = rs.getString("currencyType");
+            final Number selectedAddressIdValue = (Number) rs.getObject("selectedAddressId");
+            final Long selectedAddressId = selectedAddressIdValue != null ? selectedAddressIdValue.longValue() : null;
+            final String selectedAddressType = rs.getString("selectedAddressType");
             final String country = rs.getString("country");
             final String surName = rs.getString("surName");
             final Integer daysInArrears = rs.getInt("daysInArrears");
@@ -284,6 +336,8 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
             final LocalDate dateAccountUpdated = JdbcSupport.getLocalDate(rs, "dateAccountUpdated");
 
             TransUnionRwandaConsumerCreditData trans = new TransUnionRwandaConsumerCreditData();
+            trans.setSelectedAddressId(selectedAddressId);
+            trans.setSelectedAddressType(selectedAddressType);
             trans.setLoanId(loanId);
             trans.setLoanStatus(loanStatus);
             trans.setCurrencyType(currencyType);
@@ -347,4 +401,6 @@ public class TransUnionCrbPostConsumerCreditReadPlatformServiceImpl implements T
 
         }
     }
+
+
 }

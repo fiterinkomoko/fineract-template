@@ -53,6 +53,7 @@ import org.apache.fineract.portfolio.loanproduct.data.TransactionProcessingStrat
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductConfigurableAttributes;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductValueConditionType;
 import org.apache.fineract.portfolio.note.data.NoteData;
+import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.rate.data.RateData;
 import org.apache.fineract.useradministration.data.AppUserData;
 import org.springframework.util.CollectionUtils;
@@ -252,6 +253,9 @@ public final class LoanAccountData {
     private Collection<PortfolioAccountData> vendorSavingsAccountOptions;
     private Boolean isBnplLoan;
     private Boolean requiresEquityContribution;
+    private Boolean enableThirdPartyDisbursement;
+    private String thirdPartyDisbursementProvider;
+    private Collection<String> thirdPartyDisbursementProviderOptions;
     private BigDecimal equityContributionLoanPercentage;
     private PortfolioAccountData linkedVendorAccount;
     private CodeValueData department;
@@ -272,6 +276,10 @@ public final class LoanAccountData {
     private Double allowableDscr;
     private BigDecimal loanWithAnotherInstitutionAmount;
     private Integer clientLegalForm;
+    private String clientUid;
+    private LocalDate expectedDisburseDate;
+    private BigDecimal expectedNetDisbursalAmount;
+    private PaymentTypeData paymentType;
 
     public static LoanAccountData importInstanceIndividual(EnumOptionData loanTypeEnumOption, Long clientId, Long productId,
             Long loanOfficerId, LocalDate submittedOnDate, Long fundId, BigDecimal principal, Integer numberOfRepayments,
@@ -622,6 +630,8 @@ public final class LoanAccountData {
         final BigDecimal topupAmount = null;
         final boolean isEqualAmortization = false;
         final List<RateData> rates = null;
+        final Boolean enableThirdPartyDisbursement = null;
+        final Collection<String> thirdPartyDisbursementProviderOptions = null;
         final Boolean isRatesEnabled = false;
         final BigDecimal fixedPrincipalPercentagePerInstallment = null;
         final CollectionData delinquent = CollectionData.template();
@@ -645,8 +655,8 @@ public final class LoanAccountData {
                 inArrears, graceOnArrearsAgeing, overdueCharges, isNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled,
                 interestRecalculationData, originalSchedule, createStandingInstructionAtDisbursement, paidInAdvance, interestRatesPeriods,
                 isVariableInstallmentsAllowed, minimumGap, maximumGap, subStatus, canUseForTopup, clientActiveLoanOptions, isTopup,
-                closureLoanId, closureLoanAccountNo, topupAmount, isEqualAmortization, rates, isRatesEnabled,
-                fixedPrincipalPercentagePerInstallment, delinquent);
+                closureLoanId, closureLoanAccountNo, topupAmount, isEqualAmortization, rates, enableThirdPartyDisbursement,
+                thirdPartyDisbursementProviderOptions, isRatesEnabled, fixedPrincipalPercentagePerInstallment, delinquent);
     }
 
     /**
@@ -768,6 +778,8 @@ public final class LoanAccountData {
         final BigDecimal topupAmount = null;
         final boolean isEqualAmortization = false;
         final List<RateData> rates = null;
+        final Boolean enableThirdPartyDisbursement = null;
+        final Collection<String> thirdPartyDisbursementProviderOptions = null;
         final Boolean isRatesEnabled = false;
         final BigDecimal fixedPrincipalPercentagePerInstallment = null;
         final CollectionData delinquent = CollectionData.template();
@@ -791,8 +803,8 @@ public final class LoanAccountData {
                 overdueCharges, isNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled, interestRecalculationData,
                 originalSchedule, createStandingInstructionAtDisbursement, paidInAdvance, interestRatesPeriods,
                 isVariableInstallmentsAllowed, minimumGap, maximumGap, subStatus, canUseForTopup, clientActiveLoanOptions, isTopup,
-                closureLoanId, closureLoanAccountNo, topupAmount, isEqualAmortization, rates, isRatesEnabled,
-                fixedPrincipalPercentagePerInstallment, delinquent);
+                closureLoanId, closureLoanAccountNo, topupAmount, isEqualAmortization, rates, enableThirdPartyDisbursement,
+                thirdPartyDisbursementProviderOptions, isRatesEnabled, fixedPrincipalPercentagePerInstallment, delinquent);
     }
 
     public static LoanAccountData populateClientDefaults(final LoanAccountData acc, final LoanAccountData clientAcc) {
@@ -822,9 +834,11 @@ public final class LoanAccountData {
                 acc.isInterestRecalculationEnabled, acc.interestRecalculationData, acc.originalSchedule,
                 acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods, acc.isVariableInstallmentsAllowed,
                 acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, acc.clientActiveLoanOptions, acc.isTopup,
-                acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.isRatesEnabled,
-                acc.fixedPrincipalPercentagePerInstallment, acc.delinquent);
+                acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.enableThirdPartyDisbursement,
+                acc.thirdPartyDisbursementProviderOptions, acc.isRatesEnabled, acc.fixedPrincipalPercentagePerInstallment, acc.delinquent);
         loanAccountData.setBnplLoan(acc.isBnplLoan);
+        loanAccountData.setEnableThirdPartyDisbursement(acc.enableThirdPartyDisbursement);
+        loanAccountData.setThirdPartyDisbursementProvider(acc.thirdPartyDisbursementProvider);
         loanAccountData.setRequiresEquityContribution(acc.requiresEquityContribution);
         loanAccountData.setEquityContributionLoanPercentage(acc.equityContributionLoanPercentage);
         loanAccountData.setVendorClientOptions(clientAcc.vendorClientOptions);
@@ -965,6 +979,8 @@ public final class LoanAccountData {
         final BigDecimal topupAmount = null;
         final boolean isEqualAmortization = false;
         final List<RateData> rates = null;
+        final Boolean enableThirdPartyDisbursement = null;
+        final Collection<String> thirdPartyDisbursementProviderOptions = null;
         final Boolean isRatesEnabled = false;
         final BigDecimal fixedPrincipalPercentagePerInstallment = null;
         final CollectionData delinquent = CollectionData.template();
@@ -988,8 +1004,8 @@ public final class LoanAccountData {
                 overdueCharges, isNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled, interestRecalculationData,
                 originalSchedule, createStandingInstructionAtDisbursement, paidInAdvance, interestRatesPeriods,
                 isVariableInstallmentsAllowed, minimumGap, maximumGap, subStatus, canUseForTopup, clientActiveLoanOptions, isTopup,
-                closureLoanId, closureLoanAccountNo, topupAmount, isEqualAmortization, rates, isRatesEnabled,
-                fixedPrincipalPercentagePerInstallment, delinquent);
+                closureLoanId, closureLoanAccountNo, topupAmount, isEqualAmortization, rates, enableThirdPartyDisbursement,
+                thirdPartyDisbursementProviderOptions, isRatesEnabled, fixedPrincipalPercentagePerInstallment, delinquent);
     }
 
     public static LoanAccountData populateGroupDefaults(final LoanAccountData acc, final LoanAccountData groupAcc) {
@@ -1019,8 +1035,8 @@ public final class LoanAccountData {
                 acc.isInterestRecalculationEnabled, acc.interestRecalculationData, acc.originalSchedule,
                 acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods, acc.isVariableInstallmentsAllowed,
                 acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, acc.clientActiveLoanOptions, acc.isTopup,
-                acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.isRatesEnabled,
-                acc.fixedPrincipalPercentagePerInstallment, acc.delinquent);
+                acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.enableThirdPartyDisbursement,
+                acc.thirdPartyDisbursementProviderOptions, acc.isRatesEnabled, acc.fixedPrincipalPercentagePerInstallment, acc.delinquent);
 
         loanAccountData.setDepartment(acc.department);
         loanAccountData.setDepartmentOptions(acc.departmentOptions);
@@ -1164,6 +1180,8 @@ public final class LoanAccountData {
         final String closureLoanAccountNo = null;
         final BigDecimal topupAmount = null;
         final List<RateData> rates = null;
+        final Boolean enableThirdPartyDisbursement = null;
+        final Collection<String> thirdPartyDisbursementProviderOptions = null;
         final Boolean isRatesEnabled = false;
         final CollectionData delinquent = CollectionData.template();
 
@@ -1191,8 +1209,8 @@ public final class LoanAccountData {
                 originalSchedule, createStandingInstructionAtDisbursement, paidInAdvance, interestRatesPeriods,
                 product.isVariableInstallmentsAllowed(), product.getMinimumGapBetweenInstallments(),
                 product.getMaximumGapBetweenInstallments(), subStatus, canUseForTopup, clientActiveLoanOptions, isTopup, closureLoanId,
-                closureLoanAccountNo, topupAmount, product.isEqualAmortization(), rates, isRatesEnabled,
-                product.getFixedPrincipalPercentagePerInstallment(), delinquent);
+                closureLoanAccountNo, topupAmount, product.isEqualAmortization(), rates, enableThirdPartyDisbursement,
+                thirdPartyDisbursementProviderOptions, isRatesEnabled, product.getFixedPrincipalPercentagePerInstallment(), delinquent);
     }
 
     public static LoanAccountData populateLoanProductDefaults(final LoanAccountData acc, final LoanProductData product) {
@@ -1261,7 +1279,8 @@ public final class LoanAccountData {
                 acc.originalSchedule, acc.createStandingInstructionAtDisbursement, paidInAdvance, acc.interestRatesPeriods,
                 product.isVariableInstallmentsAllowed(), product.getMinimumGapBetweenInstallments(),
                 product.getMaximumGapBetweenInstallments(), acc.subStatus, acc.canUseForTopup, acc.clientActiveLoanOptions, acc.isTopup,
-                acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, product.isEqualAmortization(), acc.rates, acc.isRatesEnabled,
+                acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, product.isEqualAmortization(), acc.rates,
+                product.getEnableThirdPartyDisbursement(), product.getThirdPartyDisbursementProviderOptions(), acc.isRatesEnabled,
                 product.getFixedPrincipalPercentagePerInstallment(), delinquent);
     }
 
@@ -1293,7 +1312,9 @@ public final class LoanAccountData {
             final LoanInterestRecalculationData interestRecalculationData, final Boolean createStandingInstructionAtDisbursement,
             final Boolean isVariableInstallmentsAllowed, Integer minimumGap, Integer maximumGap, final EnumOptionData subStatus,
             final boolean canUseForTopup, final boolean isTopup, final Long closureLoanId, final String closureLoanAccountNo,
-            final BigDecimal topupAmount, final boolean isEqualAmortization, final BigDecimal fixedPrincipalPercentagePerInstallment) {
+            final BigDecimal topupAmount, final boolean isEqualAmortization, final List<RateData> rates,
+            final Boolean enableThirdPartyDisbursement, final Collection<String> thirdPartyDisbursementProviderOptions,
+            final Boolean isRatesEnabled, final BigDecimal fixedPrincipalPercentagePerInstallment) {
 
         final LoanScheduleData repaymentSchedule = null;
         final Collection<LoanTransactionData> transactions = null;
@@ -1330,8 +1351,6 @@ public final class LoanAccountData {
         final PaidInAdvanceData paidInAdvance = null;
         final Collection<InterestRatePeriodData> interestRatesPeriods = null;
         final Collection<LoanAccountSummaryData> clientActiveLoanOptions = null;
-        final List<RateData> rates = null;
-        final Boolean isRatesEnabled = false;
         final CollectionData delinquent = CollectionData.template();
 
         return new LoanAccountData(id, accountNo, status, externalId, clientId, clientAccountNo, clientName, clientOfficeId, group,
@@ -1353,7 +1372,8 @@ public final class LoanAccountData {
                 isNPA, daysInMonthType, daysInYearType, isInterestRecalculationEnabled, interestRecalculationData, originalSchedule,
                 createStandingInstructionAtDisbursement, paidInAdvance, interestRatesPeriods, isVariableInstallmentsAllowed, minimumGap,
                 maximumGap, subStatus, canUseForTopup, clientActiveLoanOptions, isTopup, closureLoanId, closureLoanAccountNo, topupAmount,
-                isEqualAmortization, rates, isRatesEnabled, fixedPrincipalPercentagePerInstallment, delinquent);
+                isEqualAmortization, rates, enableThirdPartyDisbursement, thirdPartyDisbursementProviderOptions, isRatesEnabled,
+                fixedPrincipalPercentagePerInstallment, delinquent);
     }
 
     /*
@@ -1376,8 +1396,9 @@ public final class LoanAccountData {
             final PortfolioAccountData linkedAccount, final Collection<DisbursementData> disbursementDetails,
             final Collection<LoanTermVariationsData> emiAmountVariations, final Collection<ChargeData> overdueCharges,
             final PaidInAdvanceData paidInAdvance, Collection<InterestRatePeriodData> interestRatesPeriods,
-            final Collection<LoanAccountSummaryData> clientActiveLoanOptions, final List<RateData> rates, final Boolean isRatesEnabled,
-            final CollectionData delinquent) {
+            final Collection<LoanAccountSummaryData> clientActiveLoanOptions, final List<RateData> rates,
+            final Boolean enableThirdPartyDisbursement, final Collection<String> thirdPartyDisbursementProviderOptions,
+            final Boolean isRatesEnabled, final CollectionData delinquent) {
         LoanProductConfigurableAttributes loanProductConfigurableAttributes = null;
         if (acc.product != null) {
             loanProductConfigurableAttributes = acc.product.getloanProductConfigurableAttributes();
@@ -1406,9 +1427,11 @@ public final class LoanAccountData {
                 acc.isInterestRecalculationEnabled, acc.interestRecalculationData, acc.originalSchedule,
                 acc.createStandingInstructionAtDisbursement, paidInAdvance, interestRatesPeriods, acc.isVariableInstallmentsAllowed,
                 acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, clientActiveLoanOptions, acc.isTopup, acc.closureLoanId,
-                acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, rates, isRatesEnabled,
-                acc.fixedPrincipalPercentagePerInstallment, delinquent);
+                acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, rates, enableThirdPartyDisbursement,
+                thirdPartyDisbursementProviderOptions, isRatesEnabled, acc.fixedPrincipalPercentagePerInstallment, delinquent);
         loanAccountData.setBnplLoan(acc.isBnplLoan);
+        loanAccountData.setEnableThirdPartyDisbursement(enableThirdPartyDisbursement);
+        loanAccountData.setThirdPartyDisbursementProvider(acc.thirdPartyDisbursementProvider);
         loanAccountData.setRequiresEquityContribution(acc.requiresEquityContribution);
         loanAccountData.setEquityContributionLoanPercentage(acc.equityContributionLoanPercentage);
         loanAccountData.setDepartment(acc.department);
@@ -1439,8 +1462,11 @@ public final class LoanAccountData {
                 acc.interestTypeOptions, acc.interestCalculationPeriodTypeOptions, acc.fundOptions, acc.chargeOptions, null,
                 allowedLoanOfficers, acc.loanPurposeOptions, acc.loanCollateralOptions, calendarOptions, acc.notes, accountLinkingOptions,
                 acc.linkedAccount, acc.disbursementDetails, acc.emiAmountVariations, acc.overdueCharges, acc.paidInAdvance,
-                acc.interestRatesPeriods, acc.clientActiveLoanOptions, acc.rates, isRatesEnabled, acc.delinquent);
+                acc.interestRatesPeriods, acc.clientActiveLoanOptions, acc.rates, acc.enableThirdPartyDisbursement,
+                acc.thirdPartyDisbursementProviderOptions, isRatesEnabled, acc.delinquent);
         loanAccountData.setBnplLoan(acc.isBnplLoan);
+        loanAccountData.setEnableThirdPartyDisbursement(acc.enableThirdPartyDisbursement);
+        loanAccountData.setThirdPartyDisbursementProvider(acc.thirdPartyDisbursementProvider);
         loanAccountData.setRequiresEquityContribution(acc.requiresEquityContribution);
         loanAccountData.setEquityContributionLoanPercentage(acc.equityContributionLoanPercentage);
         loanAccountData.setVendorClientOptions(acc.vendorClientOptions);
@@ -1487,9 +1513,11 @@ public final class LoanAccountData {
                 acc.isInterestRecalculationEnabled, acc.interestRecalculationData, acc.originalSchedule,
                 acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods, acc.isVariableInstallmentsAllowed,
                 acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, acc.clientActiveLoanOptions, acc.isTopup,
-                acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.isRatesEnabled,
-                acc.fixedPrincipalPercentagePerInstallment, acc.delinquent);
+                acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.enableThirdPartyDisbursement,
+                acc.thirdPartyDisbursementProviderOptions, acc.isRatesEnabled, acc.fixedPrincipalPercentagePerInstallment, acc.delinquent);
         loanAccountData.setBnplLoan(acc.isBnplLoan);
+        loanAccountData.setEnableThirdPartyDisbursement(acc.enableThirdPartyDisbursement);
+        loanAccountData.setThirdPartyDisbursementProvider(acc.thirdPartyDisbursementProvider);
         loanAccountData.setRequiresEquityContribution(acc.requiresEquityContribution);
         loanAccountData.setEquityContributionLoanPercentage(acc.equityContributionLoanPercentage);
         loanAccountData.setVendorClientOptions(acc.vendorClientOptions);
@@ -1572,8 +1600,8 @@ public final class LoanAccountData {
                 acc.isInterestRecalculationEnabled, acc.interestRecalculationData, acc.originalSchedule,
                 acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods, acc.isVariableInstallmentsAllowed,
                 acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, acc.clientActiveLoanOptions, acc.isTopup,
-                acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.isRatesEnabled,
-                acc.fixedPrincipalPercentagePerInstallment, acc.delinquent);
+                acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.enableThirdPartyDisbursement,
+                acc.thirdPartyDisbursementProviderOptions, acc.isRatesEnabled, acc.fixedPrincipalPercentagePerInstallment, acc.delinquent);
         loanAccountData.setDepartment(acc.department);
         loanAccountData.setDepartmentOptions(acc.departmentOptions);
         return loanAccountData;
@@ -1609,9 +1637,11 @@ public final class LoanAccountData {
                 acc.isInterestRecalculationEnabled, interestRecalculationData, acc.originalSchedule,
                 acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods, acc.isVariableInstallmentsAllowed,
                 acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, acc.clientActiveLoanOptions, acc.isTopup,
-                acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.isRatesEnabled,
-                acc.fixedPrincipalPercentagePerInstallment, acc.delinquent);
+                acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.enableThirdPartyDisbursement,
+                acc.thirdPartyDisbursementProviderOptions, acc.isRatesEnabled, acc.fixedPrincipalPercentagePerInstallment, acc.delinquent);
         loanAccountData.setBnplLoan(acc.isBnplLoan);
+        loanAccountData.setEnableThirdPartyDisbursement(acc.enableThirdPartyDisbursement);
+        loanAccountData.setThirdPartyDisbursementProvider(acc.thirdPartyDisbursementProvider);
         loanAccountData.setRequiresEquityContribution(acc.requiresEquityContribution);
         loanAccountData.setEquityContributionLoanPercentage(acc.equityContributionLoanPercentage);
         loanAccountData.setDepartment(acc.department);
@@ -1655,9 +1685,11 @@ public final class LoanAccountData {
                 acc.isInterestRecalculationEnabled, acc.interestRecalculationData, acc.originalSchedule,
                 acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods, acc.isVariableInstallmentsAllowed,
                 acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, acc.clientActiveLoanOptions, acc.isTopup,
-                acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.isRatesEnabled,
-                acc.fixedPrincipalPercentagePerInstallment, acc.delinquent);
+                acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.enableThirdPartyDisbursement,
+                acc.thirdPartyDisbursementProviderOptions, acc.isRatesEnabled, acc.fixedPrincipalPercentagePerInstallment, acc.delinquent);
         loanAccountData.setBnplLoan(acc.isBnplLoan);
+        loanAccountData.setEnableThirdPartyDisbursement(acc.enableThirdPartyDisbursement);
+        loanAccountData.setThirdPartyDisbursementProvider(acc.thirdPartyDisbursementProvider);
         loanAccountData.setRequiresEquityContribution(acc.requiresEquityContribution);
         loanAccountData.setEquityContributionLoanPercentage(acc.equityContributionLoanPercentage);
         loanAccountData.setDepartment(acc.department);
@@ -1702,8 +1734,8 @@ public final class LoanAccountData {
                 acc.isInterestRecalculationEnabled, acc.interestRecalculationData, originalSchedule,
                 acc.createStandingInstructionAtDisbursement, acc.paidInAdvance, acc.interestRatesPeriods, acc.isVariableInstallmentsAllowed,
                 acc.minimumGap, acc.maximumGap, acc.subStatus, acc.canUseForTopup, acc.clientActiveLoanOptions, acc.isTopup,
-                acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.isRatesEnabled,
-                acc.fixedPrincipalPercentagePerInstallment, acc.delinquent);
+                acc.closureLoanId, acc.closureLoanAccountNo, acc.topupAmount, acc.isEqualAmortization, acc.rates, acc.enableThirdPartyDisbursement,
+                acc.thirdPartyDisbursementProviderOptions, acc.isRatesEnabled, acc.fixedPrincipalPercentagePerInstallment, acc.delinquent);
     }
 
     private LoanAccountData(final Long id, //
@@ -1756,6 +1788,7 @@ public final class LoanAccountData {
             final Integer minimumGap, final Integer maximumGap, final EnumOptionData subStatus, final Boolean canUseForTopup,
             final Collection<LoanAccountSummaryData> clientActiveLoanOptions, final boolean isTopup, final Long closureLoanId,
             final String closureLoanAccountNo, final BigDecimal topupAmount, final boolean isEqualAmortization, final List<RateData> rates,
+            final Boolean enableThirdPartyDisbursement, final Collection<String> thirdPartyDisbursementProviderOptions,
             final Boolean isRatesEnabled, final BigDecimal fixedPrincipalPercentagePerInstallment, final CollectionData delinquent) {
 
         this.id = id;
@@ -1942,6 +1975,8 @@ public final class LoanAccountData {
         this.topupAmount = topupAmount;
         this.isEqualAmortization = isEqualAmortization;
         this.rates = rates;
+        this.enableThirdPartyDisbursement = enableThirdPartyDisbursement;
+        this.thirdPartyDisbursementProviderOptions = thirdPartyDisbursementProviderOptions;
         this.fixedPrincipalPercentagePerInstallment = fixedPrincipalPercentagePerInstallment;
         this.delinquent = delinquent;
     }
@@ -2149,6 +2184,30 @@ public final class LoanAccountData {
         this.isBnplLoan = isBnplLoan;
     }
 
+    public Boolean getEnableThirdPartyDisbursement() {
+        return enableThirdPartyDisbursement;
+    }
+
+    public void setEnableThirdPartyDisbursement(final Boolean enableThirdPartyDisbursement) {
+        this.enableThirdPartyDisbursement = enableThirdPartyDisbursement;
+    }
+
+    public String getThirdPartyDisbursementProvider() {
+        return this.thirdPartyDisbursementProvider;
+    }
+
+    public void setThirdPartyDisbursementProvider(final String thirdPartyDisbursementProvider) {
+        this.thirdPartyDisbursementProvider = thirdPartyDisbursementProvider;
+    }
+
+    public Collection<String> getThirdPartyDisbursementProviderOptions() {
+        return this.thirdPartyDisbursementProviderOptions;
+    }
+
+    public void setThirdPartyDisbursementProviderOptions(final Collection<String> thirdPartyDisbursementProviderOptions) {
+        this.thirdPartyDisbursementProviderOptions = thirdPartyDisbursementProviderOptions;
+    }
+
     public Boolean getRequiresEquityContribution() {
         return requiresEquityContribution;
     }
@@ -2280,4 +2339,21 @@ public final class LoanAccountData {
     public EnumOptionData getloanDecisionState(){
        return this.loanDecisionState;
     }
+
+    public void setClientUid(String clientUid) {
+        this.clientUid = clientUid;
+    }
+
+    public void setExpectedDisburseDate(LocalDate expectedDisburseDate) {
+        this.expectedDisburseDate = expectedDisburseDate;
+    }
+
+    public void setExpectedNetDisbursalAmount(BigDecimal expectedNetDisbursalAmount) {
+        this.expectedNetDisbursalAmount = expectedNetDisbursalAmount;
+    }
+
+    public void setPaymentType(PaymentTypeData paymentType) {
+        this.paymentType = paymentType;
+    }
+
 }

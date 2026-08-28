@@ -26,6 +26,8 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -63,6 +65,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
+import org.apache.fineract.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
 import org.apache.fineract.infrastructure.entityaccess.FineractEntityAccessConstants;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelation;
@@ -82,6 +85,7 @@ import org.apache.fineract.portfolio.account.service.AccountAssociationsReadPlat
 import org.apache.fineract.portfolio.accountdetails.domain.AccountType;
 import org.apache.fineract.portfolio.businessevent.domain.loan.LoanApprovedBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.LoanCreatedBusinessEvent;
+import org.apache.fineract.portfolio.businessevent.domain.loan.LoanDecisionAcceptedEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.LoanRejectedBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.domain.loan.LoanUndoApprovalBusinessEvent;
 import org.apache.fineract.portfolio.businessevent.service.BusinessEventNotifierService;
@@ -115,6 +119,7 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanCashFlowProjectionData
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanFinancialRatioData;
 import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
+import org.apache.fineract.portfolio.loanaccount.data.SupplierDisbursementSnapshot;
 import org.apache.fineract.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount;
@@ -130,6 +135,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanDecision;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDecisionRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDecisionState;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanDisbursementDetails;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanDueDiligenceInfo;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanDueDiligenceInfoRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
@@ -140,6 +147,10 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummaryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTopupDetails;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanDecisionLevel;
+import org.apache.fineract.portfolio.loanaccount.domain.IcReviewLevelConfig;
+import org.apache.fineract.portfolio.loanaccount.domain.IcReviewLevelConfigRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanDecisionLevelRepository;
 import org.apache.fineract.portfolio.loanaccount.exception.GLIMLoanCannotBeApprovedException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationDateException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
@@ -164,6 +175,8 @@ import org.apache.fineract.portfolio.loanproduct.serialization.LoanProductDataVa
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.apache.fineract.portfolio.note.domain.Note;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
+import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepositoryWrapper;
 import org.apache.fineract.portfolio.rate.service.RateAssembler;
 import org.apache.fineract.portfolio.savings.data.GroupSavingsIndividualMonitoringAccountData;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
@@ -178,6 +191,8 @@ import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+
+import static org.apache.fineract.portfolio.loanaccount.service.DisbursementRequestServiceImpl.getDisbursementChargeAmount;
 
 @Service
 @RequiredArgsConstructor
@@ -196,6 +211,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final NoteRepository noteRepository;
     private final LoanScheduleCalculationPlatformService calculationPlatformService;
+    private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
     private final LoanAssembler loanAssembler;
     private final ClientRepositoryWrapper clientRepository;
     private final LoanProductRepository loanProductRepository;
@@ -239,6 +255,14 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final LoanCashFlowProjectionRepository loanCashFlowProjectionRepository;
     private final OdooService odooService;
     private final FundReadPlatformService fundReadPlatformService;
+    private final PaymentTypeRepositoryWrapper paymentTypeRepository;
+    private final ThirdPartySupplierDisbursementGuard thirdPartySupplierDisbursementGuard;
+    private final SupplierDisbursementAuditService supplierDisbursementAuditService;
+    private final DynamicIcReviewLevelHelper dynamicIcReviewLevelHelper;
+    private final IcReviewLevelConfigRepository icReviewLevelConfigRepository;
+    private final LoanDecisionLevelRepository loanDecisionLevelRepository;
+    private final LoanDueDiligenceInfoRepository loanDueDiligenceInfoRepository;
+    private final ClientBankDetailsResolver clientBankDetailsResolver;
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
         final List<LoanStatus> allowedLoanStatuses = Arrays.asList(LoanStatus.values());
@@ -813,6 +837,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             LoanProduct loanProductForValidations = newLoanProduct == null ? existingLoanApplication.loanProduct() : newLoanProduct;
 
             this.fromApiJsonDeserializer.validateForModify(command.json(), loanProductForValidations, existingLoanApplication);
+
+            this.thirdPartySupplierDisbursementGuard.assertThirdPartyDisbursementProviderChangeAllowed(existingLoanApplication, command,
+                    currentUser);
 
             checkClientOrGroupActive(existingLoanApplication);
 
@@ -1526,9 +1553,33 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         final AppUser currentUser = getAppUserIfPresent();
         LocalDate expectedDisbursementDate = null;
 
-        this.loanApplicationTransitionApiJsonValidator.validateApproval(command.json());
-
         final Loan loan = retrieveLoanBy(loanId);
+        final JsonArray disbursementDataArray = command.arrayOfParameterNamed(LoanApiConstants.disbursementDataParameterName);
+        if (!loan.loanProduct().isMultiDisburseLoan() && disbursementDataArray != null && disbursementDataArray.size() > 1) {
+            throw new PlatformApiDataValidationException("validation.msg.loanapproval.single.disbursement.detail.only",
+                    "A loan product that does not allow multiple disbursements can have only one disbursement detail.",
+                    List.of(ApiParameterError.parameterError("validation.msg.loanapproval.single.disbursement.detail.only",
+                            "Only one disbursement detail is allowed for this loan product.",
+                            LoanApiConstants.disbursementDataParameterName, disbursementDataArray.size())));
+        }
+        final boolean paymentTypeProvidedBySingleDetail = !loan.loanProduct().isMultiDisburseLoan()
+                && disbursementDataArray != null && disbursementDataArray.size() == 1
+                && disbursementDataArray.get(0).isJsonObject()
+                && disbursementDataArray.get(0).getAsJsonObject().has("paymentTypeId");
+        final boolean requirePaymentTypeId = !loan.loanProduct().isMultiDisburseLoan() && !paymentTypeProvidedBySingleDetail
+                && !this.thirdPartySupplierDisbursementGuard.isThirdPartyDisbursementProduct(loan);
+        this.loanApplicationTransitionApiJsonValidator.validateApproval(command.json(), requirePaymentTypeId);
+
+        this.thirdPartySupplierDisbursementGuard.assertManualRecipientEditAllowed(loan, command, currentUser);
+
+        final Long paymentTypeId = command.longValueOfParameterNamed("paymentTypeId");
+        PaymentType paymentType = null;
+        if (paymentTypeId != null) {
+            paymentType = this.paymentTypeRepository.findOneWithNotFoundDetection(paymentTypeId);
+        }
+        if (requirePaymentTypeId) {
+            validatePaymentDetails(loan, command, paymentType);
+        }
 
         final Boolean isExtendLoanLifeCycleConfig = this.loanDecisionStateUtilService.isExtendLoanLifeCycleConfig();
 
@@ -1540,8 +1591,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         this.validateActiveLoanCount(loan.getClientId());
         this.loanDecisionStateUtilService.validateLoanAccountWithExtraLoanDecisionStagesConfiguredGlobally(loan, command);
-
-        final JsonArray disbursementDataArray = command.arrayOfParameterNamed(LoanApiConstants.disbursementDataParameterName);
 
         expectedDisbursementDate = command.localDateValueOfParameterNamed(LoanApiConstants.disbursementDateParameterName);
         if (expectedDisbursementDate == null) {
@@ -1614,6 +1663,11 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 defaultLoanLifecycleStateMachine(), isBnplEquityContributionLoan, amountToDisburseForBnplEquityContributionLoan,
                 isExtendLoanLifeCycleConfig);
 
+        if (disbursementDataArray != null
+                && this.thirdPartySupplierDisbursementGuard.allowsManualRecipientEdit(loan, currentUser)) {
+            updateDisbursementPaymentDetails(loan, command, disbursementDataArray);
+        }
+
         entityDatatableChecksWritePlatformService.runTheCheckForProduct(loanId, EntityTables.LOAN.getName(),
                 StatusEnum.APPROVE.getCode().longValue(), EntityTables.LOAN.getForeignKeyColumnNameOnDatatable(), loan.productId());
 
@@ -1654,12 +1708,166 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 loan.adjustNetDisbursalAmount(netDisbursalAmount);
             }
 
+            if (!loan.loanProduct().isMultiDisburseLoan()) {
+                if (this.thirdPartySupplierDisbursementGuard.allowsManualRecipientEdit(loan, currentUser)) {
+
+                final String mfiCode = command.stringValueOfParameterNamed(LoanApiConstants.mfiCodeParameterName);
+                final String clientPhoneNumber = command.stringValueOfParameterNamed("clientPhoneNumber");
+                final String clientBankName = command.stringValueOfParameterNamed("clientBankName");
+                final String clientAccountNumber = command.stringValueOfParameterNamed("clientAccountNumber");
+                final Integer paymentTo = command.integerValueOfParameterNamed("paymentTo");
+                final String beneficiaryName = command.stringValueOfParameterNamed(LoanApiConstants.beneficiaryNameParameterName);
+                final ClientBankDetailsResolver.ResolvedClientPaymentDetails resolvedClientPaymentDetails = this.clientBankDetailsResolver
+                        .resolve(loan.getClientId(), paymentTo, clientPhoneNumber, clientAccountNumber, clientBankName);
+                final String disbursementTypeRaw = command.stringValueOfParameterNamed(LoanApiConstants.disbursementTypeParameterName);
+                String disbursementType = StringUtils.upperCase(StringUtils.trimToNull(disbursementTypeRaw));
+
+                if (disbursementType == null && paymentTo != null) {
+                    LoanDisbursementDetails.DisbursementType derivedType = LoanDisbursementDetails.DisbursementType.fromPaymentTo(paymentTo);
+                    if (derivedType != null) {
+                        disbursementType = derivedType.name();
+                    }
+                }
+                BigDecimal fxRate = null;
+                BigDecimal usdAmount = null;
+                String fxSource = null;
+                final boolean isSouthSudanSsp = isSouthSudanLoan(loan) && "SSP".equalsIgnoreCase(loan.getPrincpal().getCurrencyCode());
+                LocalDateTime fxTimestamp = null;
+                Integer normalizedPaymentTo = paymentTo;
+                final List<ApiParameterError> validationErrors = new ArrayList<>();
+
+                if (isSouthSudanSsp) {
+                    if (StringUtils.isBlank(disbursementType)) {
+                        validationErrors.add(ApiParameterError.parameterError("validation.msg.loanapproval.disbursementType.required",
+                                "Disbursement type is mandatory for South Sudan loans.",
+                                LoanApiConstants.disbursementTypeParameterName, disbursementTypeRaw));
+                    } else if (!LoanDisbursementDetails.DisbursementType.CLIENT.name().equals(disbursementType)
+                            && !LoanDisbursementDetails.DisbursementType.VENDOR.name().equals(disbursementType)) {
+                        validationErrors.add(ApiParameterError.parameterError("validation.msg.loanapproval.disbursementType.invalid",
+                                "Disbursement type must be either CLIENT or VENDOR for South Sudan loans.",
+                                LoanApiConstants.disbursementTypeParameterName, disbursementTypeRaw));
+                    }
+                }
+
+                final boolean isVendorDisbursement = LoanDisbursementDetails.DisbursementType.VENDOR.name().equals(disbursementType)
+                        || Objects.equals(paymentTo, LoanDisbursementDetails.PaymentToType.SUPPLIER.getValue());
+
+                if (isSouthSudanSsp && LoanDisbursementDetails.DisbursementType.VENDOR.name().equals(disbursementType)) {
+                    normalizedPaymentTo = LoanDisbursementDetails.PaymentToType.SUPPLIER.getValue();
+                    
+                    BigDecimal fetchedFxRate = this.readWriteNonCoreDataService.getFxRateForDate("Fx_rate", loan.getOfficeId(),
+                            expectedDisbursementDate);
+                    LocalDateTime fetchedFxTimestamp = this.readWriteNonCoreDataService.getFxTimestampForDate("Fx_rate", loan.getOfficeId(),
+                            expectedDisbursementDate);
+                    
+                    // FX Rate Handling: Prefer backend fetched rate, but allow manual override from API
+                    final BigDecimal manualFxRate = command.bigDecimalValueOfParameterNamed(LoanApiConstants.fxRateParameterName);
+                    if (manualFxRate != null) {
+                        fxRate = manualFxRate;
+                        fxTimestamp = DateUtils.getLocalDateTimeOfTenant(); // Use current time for manual override
+                        fxSource = "MANUAL_ENTRY";
+                    } else {
+                        fxRate = fetchedFxRate;
+                        fxTimestamp = fetchedFxTimestamp;
+                        fxSource = "CBS_DAILY_RATE";
+                    }
+
+                    if (fxRate != null && fxRate.compareTo(BigDecimal.ZERO) > 0) {
+                        usdAmount = loan.getPrincpal().getAmount().divide(fxRate, 6, RoundingMode.HALF_UP);
+                    } else {
+                        validationErrors.add(ApiParameterError.parameterError("validation.msg.loanapproval.fxRate.required",
+                                "FX rate is required for South Sudan vendor disbursement on " + expectedDisbursementDate
+                                        + ". Please ensure a CBS daily rate exists for that date or provide it manually.",
+                                LoanApiConstants.fxRateParameterName, fxRate));
+                    }
+                    if (fxTimestamp == null) {
+                        validationErrors.add(ApiParameterError.parameterError("validation.msg.loanapproval.fxTimestamp.required",
+                                "FX timestamp is required for South Sudan vendor disbursement.",
+                                LoanApiConstants.fxTimestampParameterName, fxTimestamp));
+                    }
+                } else {
+                    normalizedPaymentTo = paymentTo;
+                    if (isSouthSudanSsp && LoanDisbursementDetails.DisbursementType.CLIENT.name().equals(disbursementType)) {
+                        normalizedPaymentTo = LoanDisbursementDetails.PaymentToType.CLIENT.getValue();
+                    }
+                }
+
+                if (!validationErrors.isEmpty()) {
+                    throw new PlatformApiDataValidationException("validation.msg.loanapproval.disbursement.details.invalid",
+                            "Validation errors exist for South Sudan disbursement fields.", validationErrors);
+                }
+
+                // Enforce payment details validation (e.g., vendor details)
+                if (paymentType != null) {
+                    validatePaymentDetails(loan, command, paymentType);
+                }
+
+                BigDecimal totalDisbursementCharge = getDisbursementChargeAmount(loan);
+                BigDecimal netDisbursementAmount = loan.getPrincpal().getAmount().subtract(totalDisbursementCharge);
+
+                // ------------------------------
+                // 1. FIND EXISTING DETAIL
+                // ------------------------------
+
+                LoanDisbursementDetails disbursementDetail = loan.getDisbursementDetails()
+                        .stream()
+                        .findFirst()
+                        .orElse(null);
+                final SupplierDisbursementSnapshot recipientSnapshotBeforeUpdate = SupplierDisbursementSnapshot.from(disbursementDetail);
+
+                // ------------------------------
+                // 2. IF NOT FOUND, CREATE A NEW ONE
+                // ------------------------------
+                if (disbursementDetail == null) {
+                    disbursementDetail = new LoanDisbursementDetails(
+                            expectedDisbursementDate,
+                            null, // actual disbursement date (will be filled later)
+                            loan.getProposedPrincipal(),
+                            netDisbursementAmount
+                    );
+
+                    disbursementDetail.updateLoan(loan);
+                    loan.getDisbursementDetails().add(disbursementDetail);
+                }
+
+                // ------------------------------
+                // 3. UPDATE PROPERTIES (ALWAYS)
+                // ------------------------------
+                disbursementDetail.setPaymentType(paymentType);
+                disbursementDetail.setClientAccountNumber(resolvedClientPaymentDetails.getClientAccountNumber());
+                disbursementDetail.setClientPhoneNumber(resolvedClientPaymentDetails.getClientPhoneNumber());
+                disbursementDetail.setClientBankName(resolvedClientPaymentDetails.getClientBankName());
+                disbursementDetail.setExpectedDisbursementDate(expectedDisbursementDate);
+                disbursementDetail.setPaymentTo(normalizedPaymentTo);
+                disbursementDetail.setBeneficiaryName(beneficiaryName);
+                disbursementDetail.setDisbursementType(StringUtils.isNotBlank(disbursementType) ? disbursementType
+                        : (isVendorDisbursement ? LoanDisbursementDetails.DisbursementType.VENDOR.name()
+                                : LoanDisbursementDetails.DisbursementType.CLIENT.name()));
+                disbursementDetail.setFxRate(fxRate);
+                disbursementDetail.setUsdAmount(usdAmount);
+                disbursementDetail.setFxSource(fxSource);
+                disbursementDetail.setFxTimestamp(fxTimestamp);
+                disbursementDetail.applyMfiCodeIfProvided(mfiCode);
+
+                if (this.thirdPartySupplierDisbursementGuard.isThirdPartyDisbursementProduct(loan)) {
+                    this.supplierDisbursementAuditService.recordChange(loan, disbursementDetail, recipientSnapshotBeforeUpdate,
+                            SupplierDisbursementSnapshot.from(disbursementDetail), SupplierDisbursementAuditService.CHANGE_SOURCE_MANUAL_OVERRIDE,
+                            currentUser);
+                }
+
+                } else if (this.thirdPartySupplierDisbursementGuard.isThirdPartyDisbursementProduct(loan)) {
+                    // Create placeholder detail so partner instruction can attach supplier payout fields.
+                    ensureThirdPartyDisbursementDetailPlaceholder(loan, expectedDisbursementDate);
+                }
+
+            }
+
             saveAndFlushLoanWithDataIntegrityViolationChecks(loan);
 
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
                 final Note note = Note.loanNote(loan, noteText);
-                changes.put("note", noteText);
+                changes.put("note", "Loan Approval: " +noteText);
                 this.noteRepository.save(note);
             }
 
@@ -1675,6 +1883,184 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 .withLoanId(loanId) //
                 .with(changes) //
                 .build();
+    }
+
+    private void ensureThirdPartyDisbursementDetailPlaceholder(final Loan loan, final LocalDate expectedDisbursementDate) {
+        if (loan.getDisbursementDetails() != null && !loan.getDisbursementDetails().isEmpty()) {
+            return;
+        }
+        final BigDecimal totalDisbursementCharge = getDisbursementChargeAmount(loan);
+        final BigDecimal principal = loan.getApprovedPrincipal() != null ? loan.getApprovedPrincipal() : loan.getProposedPrincipal();
+        final BigDecimal netDisbursementAmount = principal.subtract(totalDisbursementCharge);
+        final LocalDate expectedDate = expectedDisbursementDate != null ? expectedDisbursementDate
+                : loan.getExpectedDisbursedOnLocalDate();
+        final LoanDisbursementDetails disbursementDetail = new LoanDisbursementDetails(expectedDate, null, principal,
+                netDisbursementAmount);
+        disbursementDetail.updateLoan(loan);
+        loan.getDisbursementDetails().add(disbursementDetail);
+    }
+
+    private void updateDisbursementPaymentDetails(final Loan loan, final JsonCommand parentCommand,
+            final JsonArray disbursementDataArray) {
+        if (disbursementDataArray == null) {
+            return;
+        }
+
+        for (JsonElement element : disbursementDataArray) {
+            final JsonObject trancheJson = element.getAsJsonObject().deepCopy();
+            final JsonObject parentJson = parentCommand.parsedJson().getAsJsonObject();
+            inheritJsonProperty(parentJson, trancheJson, "dateFormat");
+            inheritJsonProperty(parentJson, trancheJson, "locale");
+            final JsonCommand trancheCommand = JsonCommand.fromExistingCommand(parentCommand, trancheJson);
+            final Long disbursementId = trancheCommand.longValueOfParameterNamed("id");
+            final LocalDate expectedDate = trancheCommand
+                    .localDateValueOfParameterNamed(LoanApiConstants.disbursementDateParameterName);
+            final LoanDisbursementDetails detail = disbursementId == null
+                    ? loan.getDisbursementDetails().stream().filter(candidate -> Objects.equals(candidate.expectedDisbursementDate(), expectedDate))
+                            .findFirst().orElse(null)
+                    : loan.fetchLoanDisbursementsById(disbursementId);
+
+            if (detail == null) {
+                throw new PlatformApiDataValidationException("validation.msg.loanapproval.disbursement.detail.not.found",
+                        "The supplied tranche does not identify a loan disbursement detail.",
+                        List.of(ApiParameterError.parameterError("validation.msg.loanapproval.disbursement.detail.not.found",
+                                "The supplied tranche does not identify a loan disbursement detail.", "id", disbursementId)));
+            }
+
+            final Long tranchePaymentTypeId = trancheCommand.longValueOfParameterNamed("paymentTypeId");
+            if (tranchePaymentTypeId == null) {
+                throw new PlatformApiDataValidationException("validation.msg.loanapproval.paymentTypeId.required",
+                        "Payment type is required for every tranche.",
+                        List.of(ApiParameterError.parameterError("validation.msg.loanapproval.paymentTypeId.required",
+                                "Payment type is required for every tranche.", "paymentTypeId", null)));
+            }
+            final PaymentType tranchePaymentType = this.paymentTypeRepository.findOneWithNotFoundDetection(tranchePaymentTypeId);
+            validatePaymentDetails(loan, trancheCommand, tranchePaymentType);
+
+            final Integer paymentTo = trancheCommand.integerValueOfParameterNamed(LoanApiConstants.paymentToParameterName);
+            final String disbursementTypeRaw = trancheCommand
+                    .stringValueOfParameterNamed(LoanApiConstants.disbursementTypeParameterName);
+            String disbursementType = StringUtils.upperCase(StringUtils.trimToNull(disbursementTypeRaw));
+            if (disbursementType == null && paymentTo != null) {
+                final LoanDisbursementDetails.DisbursementType derived = LoanDisbursementDetails.DisbursementType.fromPaymentTo(paymentTo);
+                disbursementType = derived == null ? null : derived.name();
+            }
+
+            detail.setPaymentType(tranchePaymentType);
+            detail.setPaymentTo(paymentTo);
+            detail.setDisbursementType(disbursementType);
+            detail.setBeneficiaryName(trancheCommand.stringValueOfParameterNamed(LoanApiConstants.beneficiaryNameParameterName));
+            final ClientBankDetailsResolver.ResolvedClientPaymentDetails resolvedTrancheDetails = resolveClientPaymentDetails(loan,
+                    trancheCommand, paymentTo);
+            detail.setClientPhoneNumber(resolvedTrancheDetails.getClientPhoneNumber());
+            detail.setClientAccountNumber(resolvedTrancheDetails.getClientAccountNumber());
+            detail.setClientBankName(resolvedTrancheDetails.getClientBankName());
+            detail.applyMfiCodeIfProvided(trancheCommand.stringValueOfParameterNamed(LoanApiConstants.mfiCodeParameterName));
+
+            if (isSouthSudanLoan(loan) && "SSP".equalsIgnoreCase(loan.getPrincpal().getCurrencyCode())
+                    && LoanDisbursementDetails.DisbursementType.VENDOR.name().equals(disbursementType)) {
+                BigDecimal fxRate = trancheCommand.bigDecimalValueOfParameterNamed(LoanApiConstants.fxRateParameterName);
+                LocalDateTime fxTimestamp;
+                String fxSource;
+                if (fxRate == null) {
+                    fxRate = this.readWriteNonCoreDataService.getFxRateForDate("Fx_rate", loan.getOfficeId(), expectedDate);
+                    fxTimestamp = this.readWriteNonCoreDataService.getFxTimestampForDate("Fx_rate", loan.getOfficeId(), expectedDate);
+                    fxSource = "CBS_DAILY_RATE";
+                } else {
+                    fxTimestamp = DateUtils.getLocalDateTimeOfTenant();
+                    fxSource = "MANUAL_ENTRY";
+                }
+                if (fxRate == null || fxRate.compareTo(BigDecimal.ZERO) <= 0) {
+                    throw new PlatformApiDataValidationException("validation.msg.loanapproval.fxRate.required",
+                            "FX rate is required for a South Sudan vendor tranche.",
+                            List.of(ApiParameterError.parameterError("validation.msg.loanapproval.fxRate.required",
+                                    "FX rate is required for a South Sudan vendor tranche.", LoanApiConstants.fxRateParameterName, fxRate)));
+                }
+                detail.setFxRate(fxRate);
+                detail.setUsdAmount(detail.principal().divide(fxRate, 6, RoundingMode.HALF_UP));
+                detail.setFxSource(fxSource);
+                detail.setFxTimestamp(fxTimestamp);
+            } else {
+                detail.setFxRate(null);
+                detail.setUsdAmount(null);
+                detail.setFxSource(null);
+                detail.setFxTimestamp(null);
+            }
+        }
+    }
+
+    private void inheritJsonProperty(final JsonObject parent, final JsonObject child, final String propertyName) {
+        if (!child.has(propertyName) && parent.has(propertyName)) {
+            child.add(propertyName, parent.get(propertyName));
+        }
+    }
+
+    private ClientBankDetailsResolver.ResolvedClientPaymentDetails resolveClientPaymentDetails(final Loan loan, final JsonCommand command,
+            final Integer paymentTo) {
+        return this.clientBankDetailsResolver.resolve(loan == null ? null : loan.getClientId(), paymentTo,
+                command.stringValueOfParameterNamed("clientPhoneNumber"), command.stringValueOfParameterNamed("clientAccountNumber"),
+                command.stringValueOfParameterNamed("clientBankName"));
+    }
+
+    private void validatePaymentDetails(Loan loan, JsonCommand command, PaymentType paymentType) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+
+        final boolean isCash = paymentType.isCashPayment(); // assuming this flag exists
+        final boolean isMobileMoney = paymentType.isMobileMoney();
+
+        final Integer paymentTo = command.integerValueOfParameterNamed(LoanApiConstants.paymentToParameterName);
+        final ClientBankDetailsResolver.ResolvedClientPaymentDetails resolved = resolveClientPaymentDetails(loan, command, paymentTo);
+        final String clientPhoneNumber = resolved.getClientPhoneNumber();
+        final String clientBankName = resolved.getClientBankName();
+        final String clientAccountNumber = resolved.getClientAccountNumber();
+        final String beneficiaryName = command.stringValueOfParameterNamed(LoanApiConstants.beneficiaryNameParameterName);
+
+        if (!isCash && isMobileMoney) {
+            if (StringUtils.isBlank(clientPhoneNumber)) {
+                dataValidationErrors.add(ApiParameterError.parameterError(
+                        "validation.msg.loanapproval.clientPhoneNumber.required",
+                        "Client phone number must be provided for mobile money payment type.",
+                        "clientPhoneNumber", clientPhoneNumber));
+            }
+        }
+
+        if (!isCash && !isMobileMoney) {
+
+            boolean missingBankDetails = StringUtils.isBlank(clientAccountNumber)
+                    || StringUtils.isBlank(clientBankName);
+
+            if (missingBankDetails) {
+                dataValidationErrors.add(ApiParameterError.parameterError(
+                        "validation.msg.loanapproval.bank.details.required",
+                        "Bank details must be provided for non-cash, non-mobile-money payment type.",
+                        "clientPhoneNumber,clientBankName,clientAccountNumber", null));
+            }
+        }
+
+        if (!isCash && Objects.equals(paymentTo, LoanDisbursementDetails.PaymentToType.SUPPLIER.getValue())
+                && StringUtils.isBlank(beneficiaryName)) {
+            dataValidationErrors.add(ApiParameterError.parameterError(
+                    "validation.msg.loanapproval.beneficiaryName.required",
+                    "Beneficiary name must be provided when payment is to supplier.",
+                    LoanApiConstants.beneficiaryNameParameterName, beneficiaryName));
+        }
+
+        // Throw if any validation errors exist
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(
+                    "validation.msg.loanapproval.payment.details.invalid",
+                    "Validation errors exist for payment type and related fields.",
+                    dataValidationErrors);
+        }
+    }
+
+    private boolean isSouthSudanLoan(final Loan loan) {
+        final LoanDueDiligenceInfo loanDueDiligenceInfo = this.loanDueDiligenceInfoRepository.findLoanDueDiligenceInfoByLoanId(loan.getId());
+        if (loanDueDiligenceInfo != null && loanDueDiligenceInfo.getCountry() != null
+                && StringUtils.isNotBlank(loanDueDiligenceInfo.getCountry().label())) {
+            return "SOUTH SUDAN".equalsIgnoreCase(StringUtils.normalizeSpace(loanDueDiligenceInfo.getCountry().label()));
+        }
+        return "SSP".equalsIgnoreCase(loan.getPrincpal().getCurrencyCode());
     }
 
     private void validateActiveLoanCount(Long clientId) {
@@ -1819,27 +2205,18 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         if ((isExtendLoanLifeCycleConfig && loan.isSubmittedAndPendingApproval() && loan.getLoanDecisionState() != null
                 && loanDecisionStateUtilService.isLoanAccountInICReview(LoanDecisionState.fromInt(loan.getLoanDecisionState())))) {
 
-            // intercept the reject module and transition the loan to other stages
-            switch (LoanDecisionState.fromInt(loan.getLoanDecisionState())) {
-                case DUE_DILIGENCE:
-                    changes = rejectLoanAccountForIcReviewLevelOne(command, currentUser, loan, changes);
-                break;
-                case IC_REVIEW_LEVEL_ONE:
-                    changes = rejectLoanAccountForIcReviewLevelTwo(command, currentUser, loan, changes);
-                break;
-                case IC_REVIEW_LEVEL_TWO:
-                    changes = rejectLoanAccountForIcReviewLevelThree(command, currentUser, loan, changes);
-                break;
-                case IC_REVIEW_LEVEL_THREE:
-                    changes = rejectLoanAccountForIcReviewLevelFour(command, currentUser, loan, changes);
-                break;
-                case IC_REVIEW_LEVEL_FOUR:
-                    changes = rejectLoanAccountForIcReviewLevelFive(command, currentUser, loan);
+            // Dynamic IC Review Level rejection handling
+            LoanDecisionState currentState = LoanDecisionState.fromInt(loan.getLoanDecisionState());
 
-                break;
-                default:
-                    changes = rejectLoanAccountParentStatus(command, currentUser, loan);
-                break;
+            // Use dynamic helper to determine the next level for rejection
+            if (currentState == LoanDecisionState.DUE_DILIGENCE) {
+                // Rejecting from Due Diligence goes to IC Review Level One
+                changes = rejectLoanAccountForIcReviewLevelOne(command, currentUser, loan, changes);
+            } else if (loanDecisionStateUtilService.isLoanAccountInICReview(currentState)) {
+                // For IC review levels, use dynamic rejection handling
+                changes = rejectLoanAccountForIcReviewDynamic(command, currentUser, loan, currentState, changes);
+            } else {
+                changes = rejectLoanAccountParentStatus(command, currentUser, loan);
             }
         } else {
             changes = rejectLoanAccountParentStatus(command, currentUser, loan);
@@ -1863,8 +2240,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     }
 
     @NotNull
-    private Map<String, Object> rejectLoanAccountForIcReviewLevelFive(JsonCommand command, AppUser currentUser, Loan loan) {
-        Map<String, Object> changes;
+    private Map<String, Object> rejectLoanAccountForIcReviewLevelFive(JsonCommand command, AppUser currentUser, Loan loan,
+            Map<String, Object> changes) {
         final LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
         LocalDate rejectedOnDate = command.localDateValueOfParameterNamed("rejectedOnDate");
 
@@ -1888,6 +2265,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         loanDecisionStateUtilService.validateLoanAccountToComplyToApprovalMatrixStage(loan, approvalMatrix, isLoanFirstCycle,
                 isLoanUnsecure, LoanDecisionState.IC_REVIEW_LEVEL_FIVE, dueDiligenceRecommendedAmount);
+        // Determine the next stage based on loan approval matrix - this will check if Level 6+ exists
+        loanDecisionStateUtilService.determineTheNextDecisionStage(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
+                LoanDecisionState.IC_REVIEW_LEVEL_FIVE, dueDiligenceRecommendedAmount);
 
         LoanDecision loanDecisionObj = loanDecisionAssembler.assembleIcReviewDecisionLevelFiveFrom(command, currentUser, loanDecision,
                 Boolean.TRUE, rejectedOnDate, null, null, null);
@@ -1897,13 +2277,20 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         loanObj.setLoanDecisionState(LoanDecisionState.IC_REVIEW_LEVEL_FIVE.getValue());
         this.loanRepositoryWrapper.saveAndFlush(loanObj);
 
+        Note note = null;
         if (StringUtils.isNotBlank(loanDecisionObj.getIcReviewDecisionLevelFiveNote())) {
-            final Note note = Note.loanNote(loanObj,
+            note = Note.loanNote(loanObj,
                     "Reject IC Review-Decision Level Five : " + loanDecisionObj.getIcReviewDecisionLevelFiveNote());
-            this.noteRepository.save(note);
+            this.noteRepository.saveAndFlush(note);
         }
-        // By Default Completely Reject this Loan Account since this is a last stage of IC Review
-        changes = rejectLoanAccountParentStatus(command, currentUser, loan);
+
+        // If the next state is outside the IC Review (PREPARE_AND_SIGN_CONTRACT), then reject the loan account completely
+        // Otherwise, if Level 6+ exists, just notify the business event
+        if (loanDecisionObj.getNextLoanIcReviewDecisionState().equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())) {
+            changes = rejectLoanAccountParentStatus(command, currentUser, loan);
+        } else {
+            this.businessEventNotifierService.notifyPostBusinessEvent(new LoanDecisionAcceptedEvent(loanObj, loanDecisionObj, note));
+        }
         return changes;
     }
 
@@ -1944,14 +2331,18 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         loanObj.setLoanDecisionState(LoanDecisionState.IC_REVIEW_LEVEL_FOUR.getValue());
         this.loanRepositoryWrapper.saveAndFlush(loanObj);
 
+        Note note = null;
         if (StringUtils.isNotBlank(loanDecisionObj.getIcReviewDecisionLevelFourNote())) {
-            final Note note = Note.loanNote(loanObj,
+            note = Note.loanNote(loanObj,
                     "Reject IC Review-Decision Level Four : " + loanDecisionObj.getIcReviewDecisionLevelFourNote());
-            this.noteRepository.save(note);
+            this.noteRepository.saveAndFlush(note);
         }
+
         // If the next state is outside the IC Review, then reject the loan account completely
         if (loanDecisionObj.getNextLoanIcReviewDecisionState().equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())) {
             changes = rejectLoanAccountParentStatus(command, currentUser, loan);
+        }else {
+            this.businessEventNotifierService.notifyPostBusinessEvent(new LoanDecisionAcceptedEvent(loanObj, loanDecisionObj, note));
         }
         return changes;
     }
@@ -1993,14 +2384,18 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         loanObj.setLoanDecisionState(LoanDecisionState.IC_REVIEW_LEVEL_THREE.getValue());
         this.loanRepositoryWrapper.saveAndFlush(loanObj);
 
-        if (StringUtils.isNotBlank(loanDecisionObj.getIcReviewDecisionLevelThreeNote())) {
-            final Note note = Note.loanNote(loanObj,
+        Note note = null;
+        if (StringUtils.isNotBlank(loanDecisionObj.getIcReviewDecisionLevelThreeNote())) {note = Note.loanNote(loanObj,
                     "Reject IC Review-Decision Level Three : " + loanDecisionObj.getIcReviewDecisionLevelThreeNote());
-            this.noteRepository.save(note);
+            this.noteRepository.saveAndFlush(note);
         }
+
         // If the next state is outside the IC Review, then reject the loan account completely
         if (loanDecisionObj.getNextLoanIcReviewDecisionState().equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())) {
             changes = rejectLoanAccountParentStatus(command, currentUser, loan);
+        }
+        else {
+            this.businessEventNotifierService.notifyPostBusinessEvent(new LoanDecisionAcceptedEvent(loanObj, loanDecisionObj, note));
         }
         return changes;
     }
@@ -2043,14 +2438,18 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         loanObj.setLoanDecisionState(LoanDecisionState.IC_REVIEW_LEVEL_TWO.getValue());
         this.loanRepositoryWrapper.saveAndFlush(loanObj);
 
+        Note note = null;
         if (StringUtils.isNotBlank(loanDecisionObj.getIcReviewDecisionLevelTwoNote())) {
-            final Note note = Note.loanNote(loanObj,
+            note = Note.loanNote(loanObj,
                     "Reject IC Review-Decision Level Two : " + loanDecisionObj.getIcReviewDecisionLevelTwoNote());
-            this.noteRepository.save(note);
+            this.noteRepository.saveAndFlush(note);
         }
+
         // If the next state is outside the IC Review, then reject the loan account completely
         if (loanDecisionObj.getNextLoanIcReviewDecisionState().equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())) {
             changes = rejectLoanAccountParentStatus(command, currentUser, loan);
+        }else {
+            this.businessEventNotifierService.notifyPostBusinessEvent(new LoanDecisionAcceptedEvent(loanObj, loanDecisionObj, note));
         }
         return changes;
     }
@@ -2089,15 +2488,181 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         Loan loanObj = loan;
         loanObj.setLoanDecisionState(LoanDecisionState.IC_REVIEW_LEVEL_ONE.getValue());
         this.loanRepositoryWrapper.saveAndFlush(loanObj);
-
+        Note note = null;
         if (StringUtils.isNotBlank(loanDecisionObj.getIcReviewDecisionLevelOneNote())) {
-            final Note note = Note.loanNote(loanObj,
+            note = Note.loanNote(loanObj,
                     "Reject IC Review-Decision Level One : " + loanDecisionObj.getIcReviewDecisionLevelOneNote());
-            this.noteRepository.save(note);
+            this.noteRepository.saveAndFlush(note);
         }
+
         // If the next state is outside the IC Review, then reject the loan account completely
         if (loanDecisionObj.getNextLoanIcReviewDecisionState().equals(LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue())) {
             changes = rejectLoanAccountParentStatus(command, currentUser, loan);
+        }else {
+            this.businessEventNotifierService.notifyPostBusinessEvent(new LoanDecisionAcceptedEvent(loanObj, loanDecisionObj, note));
+        }
+        return changes;
+    }
+
+    /**
+     * Dynamic IC Review Rejection - supports unlimited levels
+     * This method handles rejection for any IC review level (1, 2, 3, 4, 5, 6, 7, ...)
+     * When rejecting from level N, the loan goes back to level N-1 (or to parent status if level 1)
+     *
+     * IMPORTANT: The routing is based on the NEXT (pending) level, not the current (completed) state.
+     * - State 1200 (DUE_DILIGENCE) = Due diligence completed, Level 1 is PENDING
+     * - State 1400 (IC_REVIEW_LEVEL_ONE) = Level 1 completed, Level 2 is PENDING
+     * - State 1500 (IC_REVIEW_LEVEL_TWO) = Level 2 completed, Level 3 is PENDING
+     *
+     * The rejection handler for Level N validates that the loan is at state N-1 (previous level completed).
+     */
+    @NotNull
+    private Map<String, Object> rejectLoanAccountForIcReviewDynamic(JsonCommand command, AppUser currentUser, Loan loan,
+                                                                     LoanDecisionState currentState, Map<String, Object> changes) {
+        // Get the loan decision to determine the NEXT (pending) level
+        LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
+
+        if (loanDecision == null) {
+            // No loan decision found, reject completely
+            return rejectLoanAccountParentStatus(command, currentUser, loan);
+        }
+
+        // Use the NEXT level (pending level) for routing, not the current state (completed level)
+        // The nextLoanIcReviewDecisionState tells us which level is currently pending for review
+        Integer nextStateValue = loanDecision.getNextLoanIcReviewDecisionState();
+        Integer pendingLevelNumber = null;
+
+        if (nextStateValue != null) {
+            pendingLevelNumber = dynamicIcReviewLevelHelper.getIcReviewLevelNumber(nextStateValue);
+        }
+
+        // Fallback: if no next state or not an IC level, use current state + 1
+        if (pendingLevelNumber == null) {
+            Integer currentLevelNumber = dynamicIcReviewLevelHelper.getIcReviewLevelNumber(currentState.getValue());
+            if (currentLevelNumber != null) {
+                pendingLevelNumber = currentLevelNumber + 1;
+            } else {
+                // Not an IC review level, reject completely
+                return rejectLoanAccountParentStatus(command, currentUser, loan);
+            }
+        }
+
+        // For levels 1-5, use existing methods for backward compatibility
+        if (pendingLevelNumber >= 1 && pendingLevelNumber <= 5) {
+            return switch (pendingLevelNumber) {
+                case 1 -> rejectLoanAccountForIcReviewLevelOne(command, currentUser, loan, changes);
+                case 2 -> rejectLoanAccountForIcReviewLevelTwo(command, currentUser, loan, changes);
+                case 3 -> rejectLoanAccountForIcReviewLevelThree(command, currentUser, loan, changes);
+                case 4 -> rejectLoanAccountForIcReviewLevelFour(command, currentUser, loan, changes);
+                case 5 -> rejectLoanAccountForIcReviewLevelFive(command, currentUser, loan, changes);
+                default -> throw new IllegalStateException("Unexpected level: " + pendingLevelNumber);
+            };
+        }
+
+        // For levels 6+, implement dynamic reject logic
+        return rejectLoanAccountForDynamicIcReviewLevel(command, currentUser, loan, pendingLevelNumber, changes);
+    }
+
+    /**
+     * Reject loan from dynamic IC review level (levels 6+)
+     * Moves the loan back to the previous level
+     */
+    @NotNull
+    private Map<String, Object> rejectLoanAccountForDynamicIcReviewLevel(JsonCommand command, AppUser currentUser,
+                                                                          Loan loan, Integer currentLevel,
+                                                                          Map<String, Object> changes) {
+        LoanDecision loanDecision = this.loanDecisionRepository.findLoanDecisionByLoanId(loan.getId());
+
+        if (loanDecision == null) {
+            throw new PlatformDataIntegrityException("error.msg.loan.decision.not.found",
+                    "Loan decision not found for loan: " + loan.getId());
+        }
+
+        // Update dynamic level record with rejection - query database directly to avoid lazy-loading issues
+        LoanDecisionLevel decisionLevel = loanDecisionLevelRepository
+                .findByLoanDecisionIdAndLevelNumber(loanDecision.getId(), currentLevel);
+
+        if (decisionLevel == null) {
+            decisionLevel = new LoanDecisionLevel();
+            decisionLevel.setLoanDecision(loanDecision);
+            decisionLevel.setLevelNumber(currentLevel);
+            // Try to get the IC review level config
+            IcReviewLevelConfig levelConfig = this.icReviewLevelConfigRepository.findByLevelNumberAndActive(currentLevel);
+            if (levelConfig != null) {
+                decisionLevel.setIcReviewLevel(levelConfig);
+            }
+        }
+
+        decisionLevel.setIsRejected(Boolean.TRUE);
+        decisionLevel.setIsSigned(Boolean.FALSE);
+        decisionLevel.setDecisionBy(currentUser);
+        decisionLevel.setDecisionOn(LocalDate.now(ZoneId.systemDefault()));
+        decisionLevel.setNote(command.stringValueOfParameterNamed("note"));
+        loanDecisionLevelRepository.save(decisionLevel);
+
+        // If the next stage is outside the IC Review (PREPARE_AND_SIGN_CONTRACT), then reject the loan account completely
+        // This handles the case where the loan was at its final IC stage and got rejected
+
+        // Determine the next stage for the level being rejected to see if it's the final stage
+        LoanApprovalMatrix approvalMatrix = this.loanApprovalMatrixRepository.findLoanApprovalMatrixByCurrency(loan.getCurrencyCode());
+
+        if (approvalMatrix == null) {
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.approval.matrix.with.this.currency.does.not.exist.",
+                    String.format("Loan Approval Matrix with Currency [ %s ] doesn't exist. Approval matrix is expected to continue ",
+                            loan.getCurrencyCode()));
+        }
+
+        List<Loan> loanIndividualCounter = loanDecisionStateUtilService.getLoanCounter(loan);
+        Boolean isLoanFirstCycle = loanDecisionStateUtilService.isLoanFirstCycle(loanIndividualCounter);
+        Boolean isLoanUnsecure = loanDecisionStateUtilService.isLoanUnSecure(loan);
+        final BigDecimal dueDiligenceRecommendedAmount = loanDecision.getDueDiligenceRecommendedAmount();
+
+        // We update the nextLoanIcReviewDecisionState based on the approval matrix
+        loanDecisionStateUtilService.determineTheNextDecisionStage(loan, loanDecision, approvalMatrix, isLoanFirstCycle, isLoanUnsecure,
+                currentLevel, dueDiligenceRecommendedAmount);
+
+        // Update loan and decision state to current level (matches level 1-5 behavior where rejection moves forward)
+        // For levels 6+, the decision state value is usually 1800 + (level - 5)
+        Integer currentStateValue = null;
+        if (currentLevel <= 5) {
+            currentStateValue = LoanDecisionState.fromInt(1300 + (currentLevel * 100)).getValue();
+        } else {
+            currentStateValue = 1800 + (currentLevel - 5);
+        }
+
+        // Try to get the actual state value from config if available
+        IcReviewLevelConfig levelConfig = this.icReviewLevelConfigRepository.findByLevelNumberAndActive(currentLevel);
+        if (levelConfig != null) {
+            currentStateValue = levelConfig.getDecisionStateValue();
+        }
+
+        loan.setLoanDecisionState(currentStateValue);
+        loanDecision.setLoanDecisionState(currentStateValue);
+
+        // Save changes
+        this.loanDecisionRepository.saveAndFlush(loanDecision);
+        this.loanRepositoryWrapper.saveAndFlush(loan);
+
+        // Add note
+        final String noteText = command.stringValueOfParameterNamed("note");
+        Note note = null;
+        if (StringUtils.isNotBlank(noteText)) {
+            note = Note.loanNote(loan, "IC Review Level " + currentLevel + " Rejected: " + noteText);
+            this.noteRepository.save(note);
+        }
+
+        changes.put("loanDecisionState", currentStateValue);
+        changes.put("nextLoanIcReviewDecisionState", loanDecision.getNextLoanIcReviewDecisionState());
+        changes.put("rejectedLevel", currentLevel);
+
+        LOG.info("Loan {} rejected from IC Review Level {}, next state is {}",
+                loan.getId(), currentLevel, loanDecision.getNextLoanIcReviewDecisionState());
+
+        if (LoanDecisionState.PREPARE_AND_SIGN_CONTRACT.getValue().equals(loanDecision.getNextLoanIcReviewDecisionState())) {
+            LOG.info("Loan {} rejected in its final IC Review Level {}, rejecting to parent status", loan.getId(), currentLevel);
+            changes = rejectLoanAccountParentStatus(command, currentUser, loan);
+        } else {
+            this.businessEventNotifierService.notifyPostBusinessEvent(new LoanDecisionAcceptedEvent(loan, loanDecision, note));
         }
         return changes;
     }
@@ -2110,7 +2675,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final String noteText = command.stringValueOfParameterNamed("note");
             this.loanRepositoryWrapper.saveAndFlush(loan);
             if (StringUtils.isNotBlank(noteText)) {
-                final Note note = Note.loanNote(loan, noteText);
+                final Note note = Note.loanNote(loan, "Loan Rejected: " + noteText);
                 this.noteRepository.save(note);
             }
         }
@@ -2346,11 +2911,20 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Override
     public CommandProcessingResult generateCashFlow(Long loanId, JsonCommand command) {
         final Loan loan = retrieveLoanBy(loanId);
+        final AppUser currentUser = getAppUserIfPresent();
 
-        if (loan.getLoanDecisionState() == null || !loan.status().isSubmittedAndPendingApproval()
-                || !loan.getLoanDecisionState().equals(LoanDecisionState.REVIEW_APPLICATION.getValue())) {
+        // Validate that loan is in Review Application or Due Diligence stage.
+        // Cashflows must be generated BEFORE accepting Due Diligence (loan is in REVIEW_APPLICATION at that point),
+        // and can also be regenerated WHILE the loan is still in Due Diligence (before advancing to IC Review).
+        final boolean isInReviewApplication = loan.getLoanDecisionState() != null
+                && loan.getLoanDecisionState().equals(LoanDecisionState.REVIEW_APPLICATION.getValue());
+        final boolean isInDueDiligence = loan.getLoanDecisionState() != null
+                && loan.getLoanDecisionState().equals(LoanDecisionState.DUE_DILIGENCE.getValue());
+        if (!loan.status().isSubmittedAndPendingApproval() || (!isInReviewApplication && !isInDueDiligence)) {
+            LOG.warn("Cashflow generation/regeneration blocked for loan {} - Loan must be in Review Application or Due Diligence stage. Current state: {}, User: {}",
+                    loanId, loan.getLoanDecisionState(), currentUser != null ? currentUser.getUsername() : "unknown");
             throw new GeneralPlatformDomainRuleException("error.msg.loan.not.in.due.diligence.stage.so.cashflow.cannot.be.generated",
-                    "Loan is not in Due Diligence Stage so CashFlow cannot be generated");
+                    "Cashflows can only be generated or regenerated while the loan is in Due diligence stage.");
         }
         List<LoanCashFlowData> loanCashFlowDataList = this.loanReadPlatformService.retrieveCashFlow(loanId);
         if (CollectionUtils.isEmpty(loanCashFlowDataList)) {
@@ -2367,12 +2941,11 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         }
         List<LoanCashFlowProjectionData> cashFlowProjectionList = this.loanReadPlatformService.retrieveCashFlowProjection(loanId);
 
+        // Determine if this is a generation or regeneration for logging purposes
+        final boolean isRegeneration = !CollectionUtils.isEmpty(cashFlowProjectionList);
         final Integer cashFlowType = command.integerValueOfParameterNamed("cashFlowType");
-        if (cashFlowType == null && !CollectionUtils.isEmpty(cashFlowProjectionList)) {
-            throw new GeneralPlatformDomainRuleException(
-                    "error.msg.loan.cashflow.projection.data.is.already.available.so.cashflow.cannot.be.regenerated",
-                    "Loan CashFlow Projection data is already Generated so CashFlow cannot be regenerated");
-        }
+
+        // Allow regeneration while in Due Diligence stage - removed the previous restriction that blocked regeneration
 
         if (cashFlowType != null) {
             this.fromApiJsonDeserializer.validateCashFlowProjectionUpdate(command.json());
@@ -2472,6 +3045,18 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             // incomeProjectionRate = projectionRate;
             // expenseProjectionRate = projectionRate;
         }
+        // Create audit note for cashflow generation/regeneration (satisfies §4.4 Audit/Logging requirement)
+        final String actionType = isRegeneration ? "REGENERATION" : "GENERATION";
+        final String noteText = String.format("Cashflow %s completed successfully. User: %s, Date/Time: %s",
+                actionType, currentUser != null ? currentUser.getUsername() : "unknown",
+                java.time.LocalDateTime.now(ZoneId.systemDefault()));
+        final Note note = Note.loanNote(loan, noteText);
+        this.noteRepository.save(note);
+
+        LOG.info("Cashflow {} completed successfully for loan {} by user {} at {}",
+                actionType, loanId, currentUser != null ? currentUser.getUsername() : "unknown",
+                java.time.LocalDateTime.now(ZoneId.systemDefault()));
+
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(loan.getId()) //
@@ -2484,11 +3069,19 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Override
     public CommandProcessingResult generateFinancialRatios(Long loanId, JsonCommand command) {
         final Loan loan = retrieveLoanBy(loanId);
+        final AppUser currentUser = getAppUserIfPresent();
 
-        if (loan.getLoanDecisionState() == null || !loan.status().isSubmittedAndPendingApproval()
-                || !loan.getLoanDecisionState().equals(LoanDecisionState.REVIEW_APPLICATION.getValue())) {
-            throw new GeneralPlatformDomainRuleException("error.msg.loan.not.in.due.diligence.stage.so.cashflow.cannot.be.generated",
-                    "Loan is not in Due Diligence Stage so CashFlow cannot be generated");
+        // Validate that loan is in Review Application or Due Diligence stage
+        // (Financial ratios are generated as part of Due Diligence work, same as cashflows)
+        final boolean isFinRatioInReviewApp = loan.getLoanDecisionState() != null
+                && loan.getLoanDecisionState().equals(LoanDecisionState.REVIEW_APPLICATION.getValue());
+        final boolean isFinRatioInDueDiligence = loan.getLoanDecisionState() != null
+                && loan.getLoanDecisionState().equals(LoanDecisionState.DUE_DILIGENCE.getValue());
+        if (!loan.status().isSubmittedAndPendingApproval() || (!isFinRatioInReviewApp && !isFinRatioInDueDiligence)) {
+            LOG.warn("Financial ratio generation blocked for loan {} - Loan must be in Review Application or Due Diligence stage. Current state: {}, User: {}",
+                    loanId, loan.getLoanDecisionState(), currentUser != null ? currentUser.getUsername() : "unknown");
+            throw new GeneralPlatformDomainRuleException("error.msg.loan.not.in.due.diligence.stage.so.financial.ratios.cannot.be.generated",
+                    "Financial ratios can only be generated while the loan is in Due Diligence stage.");
         }
         LoanFinancialRatioData financialRatioData = this.loanReadPlatformService.retrieveLoanFinancialRatioData(loanId);
 
@@ -2516,7 +3109,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     }
 
     @Transactional
-    private CommandProcessingResult approveLoanApplicationAssociatedToGLIM(final Long loanId, final JsonCommand command) {
+    public CommandProcessingResult approveLoanApplicationAssociatedToGLIM(final Long loanId, final JsonCommand command) {
         final Loan loan = retrieveLoanBy(loanId);
         if (loan.status().isRejected()) {
             return new CommandProcessingResultBuilder() //

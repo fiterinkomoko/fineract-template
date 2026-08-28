@@ -61,8 +61,10 @@ public class LoanTransactionHelper {
     private static final String REJECT_LOAN_COMMAND = "reject";
     private static final String UNDO_LAST_DISBURSE_LOAN_COMMAND = "undolastdisbursal";
     private static final String WRITE_OFF_LOAN_COMMAND = "writeoff";
+    private static final String PARTIAL_WRITE_OFF_LOAN_COMMAND = "partialwriteoff";
     private static final String WAIVE_INTEREST_COMMAND = "waiveinterest";
     private static final String MAKE_REPAYMENT_COMMAND = "repayment";
+    private static final String REVERSE_RECOVERY_PAYMENT_COMMAND = "reverseRecoveryPayment";
     private static final String UNDO = "undo";
     private static final String CREDIT_BALANCE_REFUND_COMMAND = "creditBalanceRefund";
     private static final String WITHDRAW_LOAN_APPLICATION_COMMAND = "withdrawnByApplicant";
@@ -334,6 +336,11 @@ public class LoanTransactionHelper {
         return performLoanTransaction(createLoanTransactionURL(WRITE_OFF_LOAN_COMMAND, loanID), getWriteOffBodyAsJSON(date));
     }
 
+    public HashMap partialWriteOffLoan(final Integer loanID, final String partialWriteOffJson) {
+        LOG.info("--------------------------------- PARTIAL WRITE OFF LOAN -------------------------------");
+        return performLoanTransaction(createLoanTransactionURL(PARTIAL_WRITE_OFF_LOAN_COMMAND, loanID), partialWriteOffJson);
+    }
+
     public HashMap waiveInterest(final String date, final String amountToBeWaived, final Integer loanID) {
         return performLoanTransaction(createLoanTransactionURL(WAIVE_INTEREST_COMMAND, loanID), getWaiveBodyAsJSON(date, amountToBeWaived));
     }
@@ -354,6 +361,18 @@ public class LoanTransactionHelper {
             final Integer loanID, String jsonAttributeToGetback) {
         return performLoanTransaction(createLoanTransactionURL(repaymentTypeCommand, loanID), getRepaymentBodyAsJSON(date, amountToBePaid),
                 jsonAttributeToGetback);
+    }
+
+    public Object makeRepaymentTypePayment(final String repaymentTypeCommand, final String date, final Float amountToBePaid,
+            final Integer loanID, final Integer originalTransactionId, final String correctionDate, String jsonAttributeToGetback) {
+        return performLoanTransaction(createLoanTransactionURL(repaymentTypeCommand, loanID),
+                getRepaymentBodyAsJSON(date, amountToBePaid, originalTransactionId, correctionDate), jsonAttributeToGetback);
+    }
+
+    public Object reverseRecoveryPayment(final Integer loanId, final Integer transactionId, final String date, final String correctionDate,
+            final String responseAttribute) {
+        return performLoanTransaction(createLoanTransactionURL(REVERSE_RECOVERY_PAYMENT_COMMAND, loanId, transactionId),
+                getReverseRecoveryPaymentBodyAsJSON(date, correctionDate), responseAttribute);
     }
 
     public HashMap makeRepayment(final String date, final Float amountToBePaid, final Integer loanID) {
@@ -438,6 +457,13 @@ public class LoanTransactionHelper {
                 + Utils.TENANT_IDENTIFIER;
         final HashMap response = Utils.performServerPost(requestSpec, responseSpec, CHARGES_URL, json, "");
         return (Integer) response.get("resourceId");
+    }
+
+    public HashMap adjustDisbursementCharge(final Integer loanId, final Integer loanChargeId, final String json) {
+        LOG.info("--------------------------------- ADJUST DISBURSEMENT CHARGE (INSURANCE) --------------------------------");
+        final String CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/charges/" + loanChargeId + "?command=adjust&"
+                + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerPost(requestSpec, responseSpec, CHARGES_URL, json, "");
     }
 
     public ArrayList<HashMap> getLoanTransactionDetails(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -550,12 +576,35 @@ public class LoanTransactionHelper {
     }
 
     private String getRepaymentBodyAsJSON(final String transactionDate, final Float transactionAmount) {
+        return getRepaymentBodyAsJSON(transactionDate, transactionAmount, null, null);
+    }
+
+    private String getRepaymentBodyAsJSON(final String transactionDate, final Float transactionAmount,
+            final Integer originalTransactionId, final String correctionDate) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("transactionDate", transactionDate);
         map.put("transactionAmount", transactionAmount.toString());
         map.put("note", "Repayment Made!!!");
+        if (originalTransactionId != null) {
+            map.put("originalTransactionId", originalTransactionId.toString());
+        }
+        if (correctionDate != null) {
+            map.put("correctionDate", correctionDate);
+        }
+        return new Gson().toJson(map);
+    }
+
+    private String getReverseRecoveryPaymentBodyAsJSON(final String transactionDate, final String correctionDate) {
+        final HashMap<String, String> map = new HashMap<>();
+        map.put("locale", "en");
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("transactionDate", transactionDate);
+        map.put("note", "Recovery payment reversed!!!");
+        if (correctionDate != null) {
+            map.put("correctionDate", correctionDate);
+        }
         return new Gson().toJson(map);
     }
 

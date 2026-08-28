@@ -57,7 +57,9 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
 
             if (correctionRequired) {
                 loanTransactionDTO.setCorrection(true);
-                loanTransactionDTO.setCorrectionDate(DateUtils.getStartOfCurrentMonth()); // first day of current month
+                if (loanTransactionDTO.getCorrectionDate() == null) {
+                    loanTransactionDTO.setCorrectionDate(DateUtils.getStartOfCurrentMonth());
+                }
             }
 
             /** Handle Disbursements and reversals of disbursements **/
@@ -101,6 +103,37 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
                             paymentTypeId, loanId, transactionId, transactionDate, principalAmount, loanTransactionDTO.isReversed(), loanTransactionDTO.isCorrection(), loanTransactionDTO.getCorrectionDate());
 
                 }
+            }
+            /***
+             * Partial write off - handle all components (principal, interest, fees, penalties)
+             * Debit losses written off and credit Loan Portfolio for each component
+             **/
+            else if (loanTransactionDTO.getTransactionType().isPartialWriteOff()) {
+                final BigDecimal principalAmount = loanTransactionDTO.getPrincipal();
+                final BigDecimal interestAmount = loanTransactionDTO.getInterest();
+                final BigDecimal feeChargesAmount = loanTransactionDTO.getFees();
+                final BigDecimal penaltyChargesAmount = loanTransactionDTO.getPenalties();
+                
+                // Aggregate total write-off amount for single journal entry
+                BigDecimal totalWriteOffAmount = BigDecimal.ZERO;
+                if (principalAmount != null && principalAmount.compareTo(BigDecimal.ZERO) > 0) {
+                    totalWriteOffAmount = totalWriteOffAmount.add(principalAmount);
+                }
+                if (interestAmount != null && interestAmount.compareTo(BigDecimal.ZERO) > 0) {
+                    totalWriteOffAmount = totalWriteOffAmount.add(interestAmount);
+                }
+                if (feeChargesAmount != null && feeChargesAmount.compareTo(BigDecimal.ZERO) > 0) {
+                    totalWriteOffAmount = totalWriteOffAmount.add(feeChargesAmount);
+                }
+                if (penaltyChargesAmount != null && penaltyChargesAmount.compareTo(BigDecimal.ZERO) > 0) {
+                    totalWriteOffAmount = totalWriteOffAmount.add(penaltyChargesAmount);
+                }
+                
+                if (totalWriteOffAmount.compareTo(BigDecimal.ZERO) > 0) {
+                    this.helper.createCashBasedJournalEntriesAndReversalsForLoan(office, currencyCode,
+                            CashAccountsForLoan.LOSSES_WRITTEN_OFF.getValue(), CashAccountsForLoan.LOAN_PORTFOLIO.getValue(), loanProductId,
+                            paymentTypeId, loanId, transactionId, transactionDate, totalWriteOffAmount, loanTransactionDTO.isReversed(), loanTransactionDTO.isCorrection(), loanTransactionDTO.getCorrectionDate());
+                }
             } else if (loanTransactionDTO.getTransactionType().isInitiateTransfer()
                     || loanTransactionDTO.getTransactionType().isApproveTransfer()
                     || loanTransactionDTO.getTransactionType().isWithdrawTransfer()) {
@@ -109,6 +142,14 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
             /** Logic for Refunds of Active Loans **/
             else if (loanTransactionDTO.getTransactionType().isRefundForActiveLoans()) {
                 createJournalEntriesForRefundForActiveLoan(loanDTO, loanTransactionDTO, office);
+            }
+
+            else if (loanTransactionDTO.getTransactionType().isDisbursementChargeAdjustment()) {
+                // journal entries are posted directly in LoanWritePlatformServiceJpaRepositoryImpl
+            }
+
+            else if (loanTransactionDTO.getTransactionType().isDepositRedraw()) {
+                // journal entries are posted directly in LoanWritePlatformServiceJpaRepositoryImpl
             }
         }
     }

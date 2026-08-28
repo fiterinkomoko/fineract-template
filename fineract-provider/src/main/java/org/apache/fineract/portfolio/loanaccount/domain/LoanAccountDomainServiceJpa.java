@@ -133,7 +133,8 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final PaymentDetail paymentDetail, final String noteText, final String txnExternalId, final boolean isRecoveryRepayment,
             boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto, Boolean isHolidayValidationDone) {
         return makeRepayment(repaymentTransactionType, loan, builderResult, transactionDate, transactionAmount, paymentDetail, noteText,
-                txnExternalId, isRecoveryRepayment, isAccountTransfer, holidayDetailDto, isHolidayValidationDone, false);
+                txnExternalId, isRecoveryRepayment, isAccountTransfer, holidayDetailDto, isHolidayValidationDone, false, null, null,
+                false);
     }
 
     @Transactional
@@ -176,6 +177,12 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         var loanRedrawAccount = loanRedrawAccountOptional.get();
         loanRedrawAccount.withdraw(transactionAmount, user, DateUtils.getLocalDateTimeOfTenant());
         loanRedrawAccountRepository.saveAndFlush(loanRedrawAccount);
+        
+        // Add the transaction to the loan
+        loan.addLoanTransaction(withdrawFromRedraw);
+        // Update loan summary and status
+        loan.updateLoanSummarAndStatus();
+        
         saveLoanTransactionWithDataIntegrityViolationChecks(withdrawFromRedraw);
         this.loanRepositoryWrapper.saveAndFlush(loan);
 
@@ -195,6 +202,19 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             final PaymentDetail paymentDetail, final String noteText, final String txnExternalId, final boolean isRecoveryRepayment,
             boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto, Boolean isHolidayValidationDone,
             final boolean isLoanToLoanTransfer) {
+        return makeRepayment(repaymentTransactionType, loan, builderResult, transactionDate, transactionAmount, paymentDetail, noteText,
+                txnExternalId, isRecoveryRepayment, isAccountTransfer, holidayDetailDto, isHolidayValidationDone, isLoanToLoanTransfer,
+                null, null, false);
+    }
+
+    @Transactional
+    @Override
+    public LoanTransaction makeRepayment(final LoanTransactionType repaymentTransactionType, final Loan loan,
+            final CommandProcessingResultBuilder builderResult, final LocalDate transactionDate, final BigDecimal transactionAmount,
+            final PaymentDetail paymentDetail, final String noteText, final String txnExternalId, final boolean isRecoveryRepayment,
+            boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto, Boolean isHolidayValidationDone,
+            final boolean isLoanToLoanTransfer, final Long originalTransactionId, final LocalDate correctionDate,
+            final boolean bypassLastTransactionDateValidation) {
         AppUser currentUser = getAppUserIfPresent();
         checkClientOrGroupActive(loan);
 
@@ -222,6 +242,11 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             newRepaymentTransaction = LoanTransaction.repaymentType(repaymentTransactionType, loan.getOffice(), repaymentAmount,
                     paymentDetail, transactionDate, txnExternalId);
         }
+        newRepaymentTransaction.setOriginalTransactionId(originalTransactionId);
+        newRepaymentTransaction.setCorrectionDate(correctionDate);
+        if (originalTransactionId != null) {
+            newRepaymentTransaction.manuallyAdjustedOrReversed();
+        }
 
         LocalDate recalculateFrom = null;
         if (loan.repaymentScheduleDetail().isInterestRecalculationEnabled()) {
@@ -232,9 +257,16 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         final ChangedTransactionDetail changedTransactionDetail = loan.makeRepayment(newRepaymentTransaction,
                 defaultLoanLifecycleStateMachine(), existingTransactionIds, existingReversedTransactionIds, isRecoveryRepayment,
-                scheduleGeneratorDTO, isHolidayValidationDone);
+                scheduleGeneratorDTO, isHolidayValidationDone, bypassLastTransactionDateValidation);
 
         saveLoanTransactionWithDataIntegrityViolationChecks(newRepaymentTransaction);
+
+        // CGLT-658: record any future unaccrued interest cancelled by this settlement as its own audit transaction.
+        final LoanTransaction futureInterestCancellation = loan.reconcileFutureInterestCancellation(newRepaymentTransaction,
+                transactionDate);
+        if (futureInterestCancellation != null) {
+            saveLoanTransactionWithDataIntegrityViolationChecks(futureInterestCancellation);
+        }
 
         /***
          * TODO Vishwas Batch save is giving me a HibernateOptimisticLockingFailureException, looping and saving for the

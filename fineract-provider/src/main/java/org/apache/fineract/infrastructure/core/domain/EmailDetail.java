@@ -18,12 +18,32 @@
  */
 package org.apache.fineract.infrastructure.core.domain;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
 public class EmailDetail {
 
     private final String subject;
     private final String body;
     private final String address;
     private final String contactName;
+
+    /**
+     * -- SETTER --
+     *  Sets comma-separated carbon-copy recipients.
+     */
+    // Optional fields
+    @Setter
+    private String cc;
+    @Setter
+    private String bcc;
+    @Setter
+    private byte[] attachment;
+    @Setter
+    private String attachmentName;
+    @Setter
+    private String attachmentMimeType = "application/pdf";
 
     public EmailDetail(final String subject, final String body, final String address, final String contactName) {
         this.subject = subject;
@@ -32,19 +52,4 @@ public class EmailDetail {
         this.contactName = contactName;
     }
 
-    public String getSubject() {
-        return subject;
-    }
-
-    public String getBody() {
-        return body;
-    }
-
-    public String getContactName() {
-        return this.contactName;
-    }
-
-    public String getAddress() {
-        return this.address;
-    }
 }

@@ -372,6 +372,10 @@ public final class LoanEnumerations {
                 optionData = new LoanTransactionEnumData(LoanTransactionType.WRITEOFF.getValue().longValue(),
                         LoanTransactionType.WRITEOFF.getCode(), "Close (as written-off)");
             break;
+            case PARTIAL_WRITEOFF:
+                optionData = new LoanTransactionEnumData(LoanTransactionType.PARTIAL_WRITEOFF.getValue().longValue(),
+                        LoanTransactionType.PARTIAL_WRITEOFF.getCode(), "Partial Write-off");
+            break;
             case RECOVERY_REPAYMENT:
                 optionData = new LoanTransactionEnumData(LoanTransactionType.RECOVERY_REPAYMENT.getValue().longValue(),
                         LoanTransactionType.RECOVERY_REPAYMENT.getCode(), "Repayment (after write-off)");
@@ -453,6 +457,16 @@ public final class LoanEnumerations {
             case PAY_OFF:
                 optionData = new LoanTransactionEnumData(LoanTransactionType.PAY_OFF.getValue().longValue(),
                         LoanTransactionType.PAY_OFF.getCode(), "Payoff");
+            break;
+            case DISBURSEMENT_CHARGE_ADJUSTMENT:
+                optionData = new LoanTransactionEnumData(
+                        LoanTransactionType.DISBURSEMENT_CHARGE_ADJUSTMENT.getValue().longValue(),
+                        LoanTransactionType.DISBURSEMENT_CHARGE_ADJUSTMENT.getCode(),
+                        "Disbursement Charge Adjustment");
+            break;
+            case FUTURE_INTEREST_CANCELLATION:
+                optionData = new LoanTransactionEnumData(LoanTransactionType.FUTURE_INTEREST_CANCELLATION.getValue().longValue(),
+                        LoanTransactionType.FUTURE_INTEREST_CANCELLATION.getCode(), "Future Interest Cancellation");
             break;
         }
         return optionData;
@@ -630,6 +644,14 @@ public final class LoanEnumerations {
                 optionData = new EnumOptionData(LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getValue().longValue(),
                         LoanTermVariationType.INTEREST_RATE_FROM_INSTALLMENT.getCode(), "interestRateForInstallment");
             break;
+            case REPAYMENT_FREQUENCY:
+                optionData = new EnumOptionData(LoanTermVariationType.REPAYMENT_FREQUENCY.getValue().longValue(),
+                        LoanTermVariationType.REPAYMENT_FREQUENCY.getCode(), "repaymentFrequency");
+            break;
+            case REPAYMENT_EVERY:
+                optionData = new EnumOptionData(LoanTermVariationType.REPAYMENT_EVERY.getValue().longValue(),
+                        LoanTermVariationType.REPAYMENT_EVERY.getCode(), "repaymentEvery");
+            break;
             default:
                 optionData = new EnumOptionData(LoanTermVariationType.INVALID.getValue().longValue(),
                         LoanTermVariationType.INVALID.getCode(), "Invalid");
@@ -801,7 +823,46 @@ public final class LoanEnumerations {
     }
 
     public static EnumOptionData loanDecisionState(final Integer statusId) {
+        if (statusId == null) {
+            return loanDecisionState(LoanDecisionState.INVALID);
+        }
+
+        // Handle dynamic IC review levels (6+): values 1801-1899
+        // These cannot be properly represented by the enum, so we create EnumOptionData directly
+        if (statusId > 1800 && statusId < 1900) {
+            // Calculate the level number: 1801 = level 6, 1802 = level 7, etc.
+            int levelNumber = 5 + (statusId - 1800);
+            String levelWord = convertNumberToWord(levelNumber);
+            String code = "loanDecisionStateType.submitted.and.ic.level." + levelWord.toLowerCase() + ".Pending";
+            String displayName = "IC_REVIEW_LEVEL_" + levelWord;
+            return new EnumOptionData(statusId.longValue(), code, displayName);
+        }
+
         return loanDecisionState(LoanDecisionState.fromInt(statusId));
+    }
+
+    /**
+     * Convert a number to its word representation for dynamic IC levels.
+     * Supports levels 6-99.
+     */
+    private static String convertNumberToWord(int number) {
+        String[] units = {"", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE", "TEN",
+                "ELEVEN", "TWELVE", "THIRTEEN", "FOURTEEN", "FIFTEEN", "SIXTEEN", "SEVENTEEN", "EIGHTEEN", "NINETEEN"};
+        String[] tens = {"", "", "TWENTY", "THIRTY", "FORTY", "FIFTY", "SIXTY", "SEVENTY", "EIGHTY", "NINETY"};
+
+        if (number < 20) {
+            return units[number];
+        } else if (number < 100) {
+            int tenPart = number / 10;
+            int unitPart = number % 10;
+            if (unitPart == 0) {
+                return tens[tenPart];
+            } else {
+                return tens[tenPart] + "_" + units[unitPart];
+            }
+        }
+        // For numbers >= 100, just return the number as string
+        return String.valueOf(number);
     }
 
     public static EnumOptionData loanDecisionState(final LoanDecisionState decisionState) {

@@ -40,6 +40,9 @@ public class CodeValue extends AbstractPersistableCustom {
     @Column(name = "code_value", length = 100)
     private String label;
 
+    @Column(name = "external_code", length = 100)
+    private String externalCode;
+
     @Column(name = "order_position")
     private int position;
 
@@ -56,19 +59,20 @@ public class CodeValue extends AbstractPersistableCustom {
     @Column(name = "is_mandatory")
     private boolean mandatory;
 
-    public static CodeValue createNew(final Code code, final String label, final int position, final String description,
+    public static CodeValue createNew(final Code code, final String label, final String externalCode, final int position, final String description,
             final boolean isActive, final boolean mandatory) {
-        return new CodeValue(code, label, position, description, isActive, mandatory);
+        return new CodeValue(code, label, externalCode,position, description, isActive, mandatory);
     }
 
     protected CodeValue() {
         //
     }
 
-    private CodeValue(final Code code, final String label, final int position, final String description, final boolean isActive,
+    private CodeValue(final Code code, final String label,String externalCode, final int position, final String description, final boolean isActive,
             final boolean mandatory) {
         this.code = code;
         this.label = StringUtils.defaultIfEmpty(label, null);
+        this.externalCode = StringUtils.defaultIfEmpty(externalCode, null);
         this.position = position;
         this.description = description;
         this.isActive = isActive;
@@ -83,12 +87,17 @@ public class CodeValue extends AbstractPersistableCustom {
         return this.position;
     }
 
+    public boolean isActive() {
+        return this.isActive;
+    }
+
     public static CodeValue fromJson(final Code code, final JsonCommand command) {
 
         final String label = command.stringValueOfParameterNamed(CodevalueJSONinputParams.NAME.getValue());
         Integer position = command.integerValueSansLocaleOfParameterNamed(CodevalueJSONinputParams.POSITION.getValue());
         String description = command.stringValueOfParameterNamed(CodevalueJSONinputParams.DESCRIPTION.getValue());
         Boolean isActiveObj = command.booleanObjectValueOfParameterNamed(CodevalueJSONinputParams.IS_ACTIVE.getValue());
+        String externalCode = command.stringValueOfParameterNamed(CodevalueJSONinputParams.EXTERNAL_CODE.getValue());
         boolean isActive = true;
         if (isActiveObj != null) {
             isActive = isActiveObj;
@@ -99,7 +108,7 @@ public class CodeValue extends AbstractPersistableCustom {
 
         Boolean mandatory = command.booleanPrimitiveValueOfParameterNamed(CodevalueJSONinputParams.IS_MANDATORY.getValue());
 
-        return new CodeValue(code, label, position, description, isActive, mandatory);
+        return new CodeValue(code, label,externalCode, position, description, isActive, mandatory);
     }
 
     public Map<String, Object> update(final JsonCommand command) {
@@ -111,6 +120,13 @@ public class CodeValue extends AbstractPersistableCustom {
             final String newValue = command.stringValueOfParameterNamed(labelParamName);
             actualChanges.put(labelParamName, newValue);
             this.label = StringUtils.defaultIfEmpty(newValue, null);
+        }
+
+        final String externalCodeParamName = CodevalueJSONinputParams.EXTERNAL_CODE.getValue();
+        if (command.isChangeInStringParameterNamed(externalCodeParamName, this.externalCode)) {
+            final String newValue = command.stringValueOfParameterNamed(externalCodeParamName);
+            actualChanges.put(externalCodeParamName, newValue);
+            this.externalCode = StringUtils.defaultIfEmpty(newValue, null);
         }
 
         final String decriptionParamName = CodevalueJSONinputParams.DESCRIPTION.getValue();
@@ -138,6 +154,6 @@ public class CodeValue extends AbstractPersistableCustom {
     }
 
     public CodeValueData toData() {
-        return CodeValueData.instance(getId(), this.label, this.position, this.isActive, this.mandatory);
+        return CodeValueData.instance(getId(), this.label, this.externalCode, this.position, this.isActive, this.mandatory);
     }
 }

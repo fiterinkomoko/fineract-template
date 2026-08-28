@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collection;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -45,28 +46,51 @@ public class TransUnionCrbPostCorporateCreditReadPlatformServiceImpl implements 
         return this.jdbcTemplate.query(sql, mapper, new Object[] {});
     }
 
+    @Override
+    public Collection<TransUnionRwandaCorporateCreditData> retrieveAllCorporateCreditsPage(long lastLoanId, int pageSize) {
+        final CorporateCreditMapper mapper = new CorporateCreditMapper();
+
+        final String sql = mapper.schema() + " AND l.id > ? order by l.id limit ?";
+
+        return this.jdbcTemplate.query(
+                sql,
+                mapper,
+                lastLoanId,
+                pageSize
+        );
+    }
+
     private final class CorporateCreditMapper implements RowMapper<TransUnionRwandaCorporateCreditData> {
 
         public String schema() {
             final StringBuilder sql = new StringBuilder();
+            final String daysInArrearsExpression = daysInArrearsExpression();
+            final String addressTypePriorityExpression = "CASE "
+                    + "WHEN UPPER(address_type_cv.code_value) IN ('CURRENT ADDRESS', 'PRIMARY', 'PRIMARY ADDRESS') THEN 0 "
+                    + "WHEN UPPER(address_type_cv.code_value) IN ('HOME', 'RESIDENTIAL', 'RESIDENTIAL ADDRESS') THEN 1 "
+                    + "WHEN UPPER(address_type_cv.code_value) = 'BUSINESS' THEN 2 "
+                    + "ELSE 3 END";
 
-            sql.append(" WITH RankedAddresses AS ( " + "    SELECT client_id, " + "           address_id, "
-                    + "           ROW_NUMBER() OVER (PARTITION BY client_id ORDER BY address_id DESC) AS row_num "
-                    + "    FROM m_client_address " + " ) "
+            sql.append(" WITH RankedAddresses AS ( " + "    SELECT ca.client_id, " + "           ca.address_id, "
+                    + "           address_type_cv.code_value AS addressType, "
+                    + "           ROW_NUMBER() OVER (PARTITION BY ca.client_id "
+                    + "                              ORDER BY CASE WHEN ca.is_active = true THEN 0 ELSE 1 END, "
+                    + "                                       " + addressTypePriorityExpression + ", "
+                    + "                                       ca.address_id DESC) AS row_num "
+                    + "    FROM m_client_address ca "
+                    + "         LEFT JOIN m_code_value address_type_cv ON ca.address_type_id = address_type_cv.id " + " ) "
                     + " SELECT l.id                                                                              AS loanId, "
                     + "       l.account_no                                                                      AS accountNumber, "
                     + "       l.loan_status_id                                                                  AS loanStatus, "
                     + "       l.currency_code                                                                   AS currencyType, "
+                    + "       ranked_address.address_id                                                         AS selectedAddressId, "
+                    + "       ranked_address.addressType                                                        AS selectedAddressType, "
                     + "       country_cv.code_value                                                             AS country, "
                     + "       mc.fullname                                                                      AS institution, "
-                    + "       mc.fullname                                                                      AS tradingName,");
-            if (databaseTypeResolver.isMySQL()) {
-                sql.append(
-                        "      COALESCE(DATEDIFF(NOW(), mlaa.overdue_since_date_derived)  ,0)                           AS daysInArrears, ");
-            } else {
-                sql.append(
-                        "       COALESCE(CAST(EXTRACT(DAY FROM  (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) AS INTEGER),0)  AS  daysInArrears, ");
-            }
+                    + "       mc.fullname                                                                      AS tradingName, "
+                    + "       ")
+                    .append(daysInArrearsExpression)
+                    .append("                                                                           AS daysInArrears, ");
             sql.append("  l.principal_amount                                                    AS openingBalance, " + "       CASE "
                     + "           WHEN l.repayment_period_frequency_enum = 0 THEN 'DLY' "
                     + "           WHEN l.repayment_period_frequency_enum = 1 THEN 'WKY' "
@@ -98,52 +122,24 @@ public class TransUnionCrbPostCorporateCreditReadPlatformServiceImpl implements 
                     + "       l.number_of_repayments                                                            AS termsDuration, "
                     + "       l.last_repayment_date                                                             AS lastPaymentDate, "
                     + "       mc.date_of_birth                                                                  AS companyRegistrationDate, "
-                    + "       l.maturedon_date                                                                  AS finalPaymentDate, "
+                    + "       l.expected_maturedon_date                                                                  AS finalPaymentDate, "
                     + "       mlaa.principal_overdue_derived                                                    AS amountPastDue, "
                     + "       40                                                                                AS category, "
-                    + "       'Other personal service activities n.e.c.'                                        AS sectorOfActivity, "
+                    + "       business_line_cv.external_code                                                    AS sectorOfActivity, "
                     + "       'I'                                                                               AS accountType, "
                     + "       ra.physical_address_district                                                      AS physicalAddressDistrict, "
-                    + "       ''                                                                                AS groupName, ");
-            if (databaseTypeResolver.isMySQL()) {
-                sql.append(" CASE " + "    WHEN DATEDIFF(NOW(), mlaa.overdue_since_date_derived) <= 90   THEN 'C' "
-                        + "    WHEN l.loan_status_id IN(600,601,700) THEN 'C' " + "    ELSE 'D' "
-                        + "    END        AS currentBalanceIndicator, ");
-            } else {
-                sql.append(" CASE "
-                        + "    WHEN EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP))  <= 90   THEN 'C' "
-                        + "    WHEN l.loan_status_id IN(600,601,700) THEN 'C' " + "    ELSE 'D' "
-                        + "    END        AS currentBalanceIndicator, ");
-            }
+                    + "       ''                                                                                AS groupName, "
+                    + "       ")
+                    .append(currentBalanceIndicatorExpression(daysInArrearsExpression))
+                    .append("        AS currentBalanceIndicator, ");
             sql.append("       ra.physical_address_sector                                                        AS physicalAddressSector, "
                     + "       0                                                                                 AS numberOfJointLoanParticipants, "
                     + "       ra.physical_address_cell                                                          AS physicalAddressCell, "
                     + "       ra.address_line_1                                                                 AS physicalAddressLine1, "
-                    + "       13                                                                                AS nature, ");
-
-            if (databaseTypeResolver.isMySQL()) {
-                sql.append("       CASE " + "           WHEN mlaa.overdue_since_date_derived IS NULL OR "
-                        + "                DATEDIFF(NOW(), mlaa.overdue_since_date_derived) < 30 THEN 1 "
-                        + "           WHEN DATEDIFF(NOW(), mlaa.overdue_since_date_derived) BETWEEN 31 AND 90 " + "               THEN 2 "
-                        + "          WHEN DATEDIFF(NOW(), mlaa.overdue_since_date_derived) BETWEEN 91 AND 180 " + "               THEN 3 "
-                        + "            WHEN DATEDIFF(NOW(), mlaa.overdue_since_date_derived) BETWEEN 181 AND 365 "
-                        + "               THEN 4 " + "           WHEN DATEDIFF(NOW(), mlaa.overdue_since_date_derived) BETWEEN 366 AND 719 "
-                        + "               THEN 5 " + "           WHEN DATEDIFF(NOW(), mlaa.overdue_since_date_derived) > 720 THEN 6 "
-                        + "          END                                                                                            AS classification, ");
-            } else {
-                sql.append("       CASE " + "           WHEN mlaa.overdue_since_date_derived IS NULL OR "
-                        + "                EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) < 30 THEN 1 "
-                        + "           WHEN EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) BETWEEN 31 AND 90 "
-                        + "               THEN 2 "
-                        + "          WHEN EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) BETWEEN 91 AND 180 "
-                        + "               THEN 3 "
-                        + "            WHEN EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) BETWEEN 181 AND 365 "
-                        + "               THEN 4 "
-                        + "           WHEN EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) BETWEEN 366 AND 719 "
-                        + "               THEN 5 "
-                        + "           WHEN EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) > 720 THEN 6 "
-                        + "          END                                                                                            AS classification, ");
-            }
+                    + "       13                                                                                AS nature, "
+                    + "       ")
+                    .append(classificationExpression(daysInArrearsExpression))
+                    .append("                                                                                            AS classification, ");
 
             sql.append("      ''                                                                                AS emailAddress, "
                     + "       'T'                                                                               AS residenceType, "
@@ -152,28 +148,46 @@ public class TransUnionCrbPostCorporateCreditReadPlatformServiceImpl implements 
                     + "      now()                                                             AS dateAccountUpdated, "
                     + "       r.installments_in_arrears                                                         AS installmentsInArrears, "
                     + "       mcnp.incorp_no                                                                    AS companyRegNo, "
-                    + "       business_line_cv.code_value                                                       AS industry, "
+                    + "       business_line_cv.external_code                                                       AS industry, "
                     + "       other_info.tax_identification_number                                              AS taxNo "
                     + " FROM m_loan l " + "         INNER JOIN m_product_loan mpl ON l.product_id = mpl.id "
                     + "         INNER JOIN m_client mc ON l.client_id = mc.id "
                     + "         INNER JOIN m_client_non_person mcnp on mc.id = mcnp.client_id "
-                    + "         LEFT JOIN m_client_recruitment_survey mcrs ON mc.id = mcrs.client_id "
-                    + "         LEFT JOIN m_code_value country_cv ON mcrs.country_cv_id = country_cv.id "
                     + "         LEFT JOIN m_loan_arrears_aging mlaa ON l.id = mlaa.loan_id "
                     + "         LEFT JOIN m_client_other_info info ON mc.id = info.client_id "
                     + "         LEFT JOIN m_code_value nationality_cv ON info.nationality_cv_id = nationality_cv.id "
                     + "         LEFT JOIN m_code_value business_line_cv ON mcnp.main_business_line_cv_id = business_line_cv.id "
                     + "         LEFT JOIN m_client_additional_info ad_info ON mc.id = ad_info.client_id "
-                    + "         LEFT JOIN m_client_other_info other_info ON mc.id = other_info.client_id " + "         LEFT JOIN ( "
-                    + "    SELECT loan_id, " + "           transaction_date AS firstPaymentDate " + "    FROM ( "
-                    + "             SELECT loan_id, " + "                    transaction_date, "
-                    + "                    ROW_NUMBER() OVER (PARTITION BY loan_id ORDER BY transaction_date) AS row_num "
-                    + "             FROM m_loan_transaction " + "             WHERE transaction_type_enum = 2 "
-                    + "         ) ranked_transactions " + "    WHERE row_num = 1 " + " ) AS first_payment ON l.id = first_payment.loan_id "
-                    + "         LEFT JOIN ( " + "    SELECT client_id, " + "           MAX(address_id) AS last_address_id "
-                    + "    FROM m_client_address " + "    GROUP BY client_id "
-                    + " ) AS last_client_address ON mc.id = last_client_address.client_id "
-                    + "         LEFT JOIN m_address ra ON last_client_address.last_address_id = ra.id "
+                    + "         LEFT JOIN m_client_other_info other_info ON mc.id = other_info.client_id " + "         LEFT JOIN (\n" +
+                    "    SELECT\n" +
+                    "        x.loan_id,\n" +
+                    "        COALESCE(x.first_txn_date, x.first_sched_due_date) AS firstPaymentDate\n" +
+                    "    FROM (\n" +
+                    "        SELECT\n" +
+                    "            l.id AS loan_id,\n" +
+                    "            (\n" +
+                    "                SELECT MIN(t.transaction_date)\n" +
+                    "                FROM m_loan_transaction t\n" +
+                    "                WHERE t.loan_id = l.id\n" +
+                    "                  AND t.transaction_type_enum = 2\n" +
+                    "            ) AS first_txn_date,\n" +
+                    "            (\n" +
+                    "                SELECT MIN(rs.duedate)\n" +
+                    "                FROM m_loan_repayment_schedule rs\n" +
+                    "                WHERE rs.loan_id = l.id\n" +
+                    "                  AND (IFNULL(rs.principal_amount, 0)\n" +
+                    "                     + IFNULL(rs.interest_amount, 0)\n" +
+                    "                     + IFNULL(rs.fee_charges_amount, 0)\n" +
+                    "                     + IFNULL(rs.penalty_charges_amount, 0)) > 0\n" +
+                    "            ) AS first_sched_due_date\n" +
+                    "        FROM m_loan l\n" +
+                    "    ) x\n" +
+                    ") AS first_payment\n" +
+                    "  ON l.id = first_payment.loan_id "
+                    + "         LEFT JOIN RankedAddresses ranked_address ON mc.id = ranked_address.client_id "
+                    + "                                                   AND ranked_address.row_num = 1 "
+                    + "         LEFT JOIN m_address ra ON ranked_address.address_id = ra.id "
+                    + "         LEFT JOIN m_code_value country_cv ON ra.country_id = country_cv.id "
                     + "         LEFT JOIN (SELECT loan_id, " + "                           COUNT(*) AS installments_in_arrears "
                     + "                    FROM m_loan_repayment_schedule " + "                    WHERE duedate <= CURRENT_DATE "
                     + "                      AND completed_derived = FALSE " + "                      AND obligations_met_on_date IS NULL "
@@ -193,10 +207,35 @@ public class TransUnionCrbPostCorporateCreditReadPlatformServiceImpl implements 
                     + "                                                  ) lrs    WHERE lrs.row_num = 1 "
                     + "                                         ) AS nextPaymentTbl on nextPaymentTbl.loan_id = l.id"
                     + " WHERE l.loan_status_id IN (300, 600, 601, 700) " + "  AND l.currency_code = 'RWF' "
-                    + "  AND mc.legal_form_enum = 2 " + "  AND first_payment.firstPaymentDate IS NOT NULL "
-                    + "  AND l.last_repayment_date IS NOT NULL "
+                    + "  AND mc.legal_form_enum = 2  "
                     + "  AND (l.stop_consumer_credit_upload_to_trans_union IS NULL OR l.stop_consumer_credit_upload_to_trans_union = false) ");
             return sql.toString();
+        }
+
+        private String daysInArrearsExpression() {
+            if (databaseTypeResolver.isMySQL()) {
+                return "COALESCE(DATEDIFF(NOW(), mlaa.overdue_since_date_derived), 0)";
+            }
+            return "COALESCE(CAST(EXTRACT(DAY FROM (now()::TIMESTAMP - mlaa.overdue_since_date_derived::TIMESTAMP)) AS INTEGER), 0)";
+        }
+
+        private String currentBalanceIndicatorExpression(String daysInArrearsExpression) {
+            return "CASE "
+                    + "    WHEN l.loan_status_id IN(600,601,700) THEN 'C' "
+                    + "    WHEN " + daysInArrearsExpression + " > 90 THEN 'D' "
+                    + "    ELSE 'C' "
+                    + "    END";
+        }
+
+        private String classificationExpression(String daysInArrearsExpression) {
+            return "CASE "
+                    + "           WHEN " + daysInArrearsExpression + " < 30 THEN 1 "
+                    + "           WHEN " + daysInArrearsExpression + " BETWEEN 31 AND 90 THEN 2 "
+                    + "           WHEN " + daysInArrearsExpression + " BETWEEN 91 AND 180 THEN 3 "
+                    + "           WHEN " + daysInArrearsExpression + " BETWEEN 181 AND 365 THEN 4 "
+                    + "           WHEN " + daysInArrearsExpression + " BETWEEN 366 AND 719 THEN 5 "
+                    + "           WHEN " + daysInArrearsExpression + " > 720 THEN 6 "
+                    + "          END";
         }
 
         @Override
@@ -206,6 +245,9 @@ public class TransUnionCrbPostCorporateCreditReadPlatformServiceImpl implements 
             final String accountNumber = rs.getString("accountNumber");
             final Integer loanStatus = rs.getInt("loanStatus");
             final String currencyType = rs.getString("currencyType");
+            final Number selectedAddressIdValue = (Number) rs.getObject("selectedAddressId");
+            final Long selectedAddressId = selectedAddressIdValue != null ? selectedAddressIdValue.longValue() : null;
+            final String selectedAddressType = rs.getString("selectedAddressType");
             final String institution = rs.getString("institution");
             final String tradingName = rs.getString("tradingName");
 
@@ -265,6 +307,8 @@ public class TransUnionCrbPostCorporateCreditReadPlatformServiceImpl implements 
             final LocalDate dateAccountUpdated = JdbcSupport.getLocalDate(rs, "dateAccountUpdated");
 
             TransUnionRwandaCorporateCreditData trans = new TransUnionRwandaCorporateCreditData();
+            trans.setSelectedAddressId(selectedAddressId);
+            trans.setSelectedAddressType(selectedAddressType);
             trans.setLoanId(loanId);
             trans.setLoanStatus(loanStatus);
             trans.setInstitution(institution);
@@ -322,4 +366,5 @@ public class TransUnionCrbPostCorporateCreditReadPlatformServiceImpl implements 
 
         }
     }
+
 }

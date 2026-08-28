@@ -20,6 +20,7 @@ package org.apache.fineract.accounting.journalentry.data;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Data
@@ -36,5 +37,19 @@ public class JournalData {
     private String transactionTypeUniqueId;
     private Boolean isCorrection;
     private String correctionDate;
+    private String location;
+    private Long fundSource;
+    private String department;
+    private Boolean budgetReviewRequired;
+    private String disbursementType;
+    private BigDecimal fxRate;
+    private BigDecimal usdAmount;
+    private String fxSource;
+    private String fxTimestamp;
+    private String loanId;
+    private String currencyCode;
+    private String externalId;
+    private String beneficiaryName;
     private List<JournalItemData> journalItems;
+
 }

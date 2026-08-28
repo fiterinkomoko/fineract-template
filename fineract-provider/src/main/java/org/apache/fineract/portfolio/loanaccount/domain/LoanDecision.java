@@ -20,14 +20,20 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableCustom;
 import org.apache.fineract.useradministration.domain.AppUser;
 
@@ -110,6 +116,9 @@ public class LoanDecision extends AbstractAuditableCustom {
 
     @Column(name = "next_loan_ic_review_decision_state")
     private Integer nextLoanIcReviewDecisionState;
+    @Column(name = "previous_loan_ic_review_decision_state")
+    private Integer previousLoanIcReviewDecisionState;
+
 
     // IC review Decision Level Two
     @Column(name = "ic_review_decision_level_two_note")
@@ -199,6 +208,16 @@ public class LoanDecision extends AbstractAuditableCustom {
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "prepare_and_sign_contract_by")
     private AppUser prepareAndSignContractBy;
+
+    /**
+     * Dynamic IC Review Levels - relationship to the new m_loan_decision_level table.
+     * This allows for unlimited IC review levels beyond the hardcoded 5 levels above.
+     * The hardcoded fields above are kept for backward compatibility.
+     */
+    @OneToMany(mappedBy = "loanDecision", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<LoanDecisionLevel> decisionLevels = new ArrayList<>();
 
     public LoanDecision() {}
 

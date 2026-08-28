@@ -20,18 +20,84 @@ package org.apache.fineract.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.portfolio.supplier.domain.Supplier;
+
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
+import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "m_loan_disbursement_detail")
 public class LoanDisbursementDetails extends AbstractPersistableCustom {
+
+    @Getter
+    public enum PaymentToType {
+        CLIENT(1), SUPPLIER(2);
+
+        private final int value;
+
+        PaymentToType(int value) {
+            this.value = value;
+        }
+
+        public static PaymentToType fromInt(Integer value) {
+            if (value == null || value == 1) return CLIENT;
+            if (value == 2) return SUPPLIER;
+            throw new IllegalArgumentException("Invalid paymentTo value: " + value);
+        }
+    }
+
+    @Getter
+    public enum DisbursementType {
+        CLIENT(1),
+        VENDOR(2);
+        private final int value;
+        DisbursementType(int value) {
+            this.value = value;
+        }
+        public static DisbursementType fromPaymentTo(Integer paymentTo) {
+            if (paymentTo == null) {
+                return null;
+            }
+            for (DisbursementType type : values()) {
+                if (type.value == paymentTo) {
+                    return type;
+                }
+            }
+            return null;
+        }
+    }
+
+    @Column(name = "payment_to", nullable = false)
+    private Integer paymentTo = 1; // 1=Client (default), 2=Supplier
+
+    public Integer getPaymentTo() {
+        return paymentTo == null ? 1 : paymentTo;
+    }
+
+    public void setPaymentTo(Integer paymentTo) {
+        if (paymentTo == null || (paymentTo != 1 && paymentTo != 2)) {
+            this.paymentTo = 1;
+        } else {
+            this.paymentTo = paymentTo;
+        }
+    }
+
+    public PaymentToType getPaymentToType() {
+        return PaymentToType.fromInt(getPaymentTo());
+    }
 
     @ManyToOne
     @JoinColumn(name = "loan_id", nullable = false)
@@ -46,8 +112,70 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom {
     @Column(name = "principal", scale = 6, precision = 19, nullable = false)
     private BigDecimal principal;
 
+    @Setter
+    @Getter
     @Column(name = "net_disbursal_amount", scale = 6, precision = 19)
     private BigDecimal netDisbursalAmount;
+
+    @ManyToOne
+    @JoinColumn(name = "payment_type_id")
+    private PaymentType paymentType;
+
+    @Column(name = "account_number", length = 100)
+    private String accountNumber;
+
+    @Column(name = "check_number", length = 100)
+    private String checkNumber;
+
+    @Column(name = "routing_code", length = 100)
+    private String routingCode;
+
+    @Column(name = "receipt_number", length = 100)
+    private String receiptNumber;
+
+    @Column(name = "bank_number", length = 100)
+    private String bankNumber;
+
+    @Column(name = "client_phone_number", length = 50)
+    private String clientPhoneNumber;
+
+    @Column(name = "client_account_number", length = 150)
+    private String clientAccountNumber;
+
+    @Column(name = "client_bank_name", length = 150)
+    private String clientBankName;
+
+    @Column(name = "beneficiary_name", length = 150)
+    private String beneficiaryName;
+
+    @Column(name = "disbursement_type", length = 20)
+    private String disbursementType;
+
+    @Column(name = "fx_rate", scale = 6, precision = 19)
+    private BigDecimal fxRate;
+
+    @Column(name = "usd_amount", scale = 6, precision = 19)
+    private BigDecimal usdAmount;
+
+    @Column(name = "fx_source", length = 100)
+    private String fxSource;
+
+    @Column(name = "fx_timestamp")
+    private LocalDateTime fxTimestamp;
+
+
+    @Column(name = "mfi_code", length = 100)
+    private String mfiCode;
+
+    @Column(name = "budget_location", length = 255)
+    private String budgetLocation;
+
+    @Column(name = "budget_review_required")
+    private Boolean budgetReviewRequired;
+
+    @ManyToOne
+    @JoinColumn(name = "supplier_id")
+    private Supplier supplier;
 
     protected LoanDisbursementDetails() {
 
@@ -63,6 +191,12 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom {
 
     public void updateLoan(final Loan loan) {
         this.loan = loan;
+    }
+
+    public void applyMfiCodeIfProvided(final String mfiCode) {
+        if (StringUtils.isNotBlank(mfiCode)) {
+            this.mfiCode = mfiCode.trim();
+        }
     }
 
     @Override
@@ -127,14 +261,6 @@ public class LoanDisbursementDetails extends AbstractPersistableCustom {
 
     public void updateActualDisbursementDate(LocalDate actualDisbursementDate) {
         this.actualDisbursementDate = actualDisbursementDate;
-    }
-
-    public BigDecimal getNetDisbursalAmount() {
-        return this.netDisbursalAmount;
-    }
-
-    public void setNetDisbursalAmount(BigDecimal netDisbursalAmount) {
-        this.netDisbursalAmount = netDisbursalAmount;
     }
 
     public void updateExpectedDisbursementDateAndAmount(LocalDate expectedDisbursementDate, BigDecimal principal) {

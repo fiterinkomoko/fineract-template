@@ -41,6 +41,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     public static final String ENABLE_BUSINESS_DATE = "enable_business_date";
     public static final String ENABLE_AUTOMATIC_COB_DATE_ADJUSTMENT = "enable_automatic_cob_date_adjustment";
     public static final String ENFORCE_OVERDUE_LOANS_FOR_MIN_BALANCE = "enforce_loan_overdue_amount_min_balance_check";
+    public static final String POST_TRANSFER_CORRECTIONS_ENABLED = "post-transfer-corrections-enabled";
     private final PermissionRepository permissionRepository;
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
     private final PlatformCacheRepository cacheTypeRepository;
@@ -501,6 +502,33 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     public boolean isCorrectionsInClosedPeriodsAllowed() {
         final String propertyName = "corrections-in-closed-period";
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
+        return property.isEnabled();
+    }
+
+    /** A disabled row switches the trigger off entirely, rather than meaning "threshold of zero". */
+    @Override
+    public Long retrieveHistoricalPenaltyWaiverApprovalAmountThreshold() {
+        return enabledConfigurationValue("historical-penalty-waiver-approval-amount-threshold");
+    }
+
+    @Override
+    public Long retrieveHistoricalPenaltyWaiverApprovalAgeDays() {
+        return enabledConfigurationValue("historical-penalty-waiver-approval-age-days");
+    }
+
+    @Override
+    public Long retrieveHistoricalPenaltyWaiverEscalationHours() {
+        return enabledConfigurationValue("historical-penalty-waiver-escalation-hours");
+    }
+
+    private Long enabledConfigurationValue(final String propertyName) {
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(propertyName);
+        return property.isEnabled() ? property.getValue() : null;
+    }
+
+    @Override
+    public boolean isPostTransferCorrectionsEnabled() {
+        final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(POST_TRANSFER_CORRECTIONS_ENABLED);
         return property.isEnabled();
     }
 }
